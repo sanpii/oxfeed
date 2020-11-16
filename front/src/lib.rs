@@ -7,6 +7,7 @@ use yew::services::console::ConsoleService as console;
 
 #[derive(serde::Deserialize, Clone)]
 struct Source {
+    source_id: String,
     title: String,
 }
 
@@ -70,13 +71,16 @@ pub fn run_app() {
 }
 
 pub(crate) fn fetch<T: yew::Component>(
+    method: &str,
     link: &yew::ComponentLink<T>,
     url: &str,
 ) -> Result<yew::services::fetch::FetchTask, Box<dyn std::error::Error>>
 where
     <T as yew::Component>::Message: std::convert::From<yew::format::Text>,
 {
-    let request = yew::services::fetch::Request::get(&format!("{}{}", env!("API_URL"), url))
+    let request = yew::services::fetch::Request::builder()
+        .method(method)
+        .uri(&format!("{}{}", env!("API_URL"), url))
         .body(yew::format::Nothing)?;
 
     let callback = link.callback(
@@ -89,3 +93,21 @@ where
 
     Ok(fetch_task)
 }
+
+macro_rules! decl_fetch {
+    ($method:ident) => {
+        pub(crate) fn $method<T: yew::Component>(
+            link: &yew::ComponentLink<T>,
+            url: &str,
+        ) -> Result<yew::services::fetch::FetchTask, Box<dyn std::error::Error>>
+        where
+            <T as yew::Component>::Message: std::convert::From<yew::format::Text>,
+        {
+            fetch(stringify!($method), link, url)
+        }
+
+    }
+}
+
+decl_fetch!(get);
+decl_fetch!(delete);

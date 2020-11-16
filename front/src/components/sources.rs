@@ -1,6 +1,7 @@
 pub(crate) enum Message {
     Error(String),
     Update(Vec<crate::Source>),
+    NeedUpdate,
 }
 
 impl From<yew::format::Text> for Message {
@@ -17,6 +18,7 @@ impl From<yew::format::Text> for Message {
 
 pub(crate) struct Component {
     fetch_task: Option<yew::services::fetch::FetchTask>,
+    link: yew::ComponentLink<Self>,
     sources: Vec<crate::Source>,
 }
 
@@ -26,10 +28,11 @@ impl yew::Component for Component {
 
     fn create(_: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         let sources = Vec::new();
-        let fetch_task = crate::fetch(&link, "/sources/").ok();
+        let fetch_task = crate::get(&link, "/sources/").ok();
 
         Self {
             fetch_task,
+            link,
             sources,
         }
     }
@@ -38,6 +41,7 @@ impl yew::Component for Component {
         match msg {
             Self::Message::Update(sources) => self.sources = sources,
             Self::Message::Error(error) => crate::console::error(&error.to_string()),
+            Self::Message::NeedUpdate => self.fetch_task = crate::get(&self.link, "/sources/").ok(),
         };
 
         true
