@@ -45,11 +45,15 @@ impl yew::Component for Component {
 
     fn view(&self) -> yew::Html {
         yew::html! {
-            for self.sources.iter().map(|source| {
-                yew::html! {
-                    <crate::components::Source value=source />
-                }
-            })
+            <ul class="list-group">
+            {
+                for self.sources.iter().map(|source| {
+                    yew::html! {
+                        <li class="list-group-item"><crate::components::Source value=source /></li>
+                    }
+                })
+            }
+            </ul>
         }
     }
 

@@ -1,3 +1,5 @@
+#![recursion_limit="512"]
+
 mod components;
 
 use components::*;
@@ -32,13 +34,27 @@ impl yew::Component for Model {
         use yew_router::router::Router;
 
         yew::html! {
-            <Router<Route, ()>
-                render = yew_router::router::Router::render(|switch: Route| {
-                    match switch {
-                        Route::Sources => yew::html!{<Sources />},
-                    }
-                })
-            />
+            <>
+                <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+                    <Header />
+                </nav>
+                <div class="container-fluid">
+                    <div class="row">
+                        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                            <Sidebar />
+                        </nav>
+                        <main class="col-md-9 ml-sm-auto col-lg-10">
+                            <Router<Route, ()>
+                                render = yew_router::router::Router::render(|switch: Route| {
+                                    match switch {
+                                        Route::Sources => yew::html!{<Sources />},
+                                    }
+                                })
+                            />
+                        </main>
+                    </div>
+                </div>
+            </>
         }
     }
 
