@@ -1,7 +1,8 @@
 #[derive(Debug, elephantry::Entity, serde::Serialize)]
 pub struct Entity {
     pub source_id: Option<uuid::Uuid>,
-    pub title: String,
+    pub title: Option<String>,
+    pub icon: Option<String>,
     pub tags: Vec<String>,
     pub url: String,
 }
@@ -29,6 +30,6 @@ impl elephantry::Structure for Structure {
     }
 
     fn columns() -> &'static [&'static str] {
-        &["source_id", "title", "tags", "url"]
+        &["source_id", "title", "icon", "tags", "url"]
     }
 }

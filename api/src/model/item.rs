@@ -1,13 +1,12 @@
 #[derive(elephantry::Entity)]
 pub struct Entity {
-    pub entry_id: String,
-    pub source_id: String,
+    pub entry_id: Option<String>,
+    pub source_id: uuid::Uuid,
     pub link: String,
     pub title: String,
-    pub content: String,
-    pub icon: Option<String>,
-    pub read_at: Option<String>,
-    pub created_at: String,
+    pub content: Option<String>,
+    pub read: bool,
+    pub published: Option<chrono::DateTime<chrono::offset::Utc>>,
 }
 
 pub struct Model;
@@ -39,9 +38,8 @@ impl elephantry::Structure for Structure {
             "link",
             "title",
             "content",
-            "icon",
-            "read_at",
-            "created_at",
+            "read",
+            "published",
         ]
     }
 }

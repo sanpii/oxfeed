@@ -11,7 +11,8 @@ impl Into<crate::model::source::Entity> for Source {
         crate::model::source::Entity {
             url: self.url.clone(),
             source_id: self.source_id.clone(),
-            title: String::new(),
+            title: None,
+            icon: None,
             tags: self.tags.clone(),
         }
     }
