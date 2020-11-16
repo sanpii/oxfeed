@@ -24,4 +24,5 @@ path = "bin/update.rs"
 [workspace]
 members = [
     "api",
+    "front",
 ]
