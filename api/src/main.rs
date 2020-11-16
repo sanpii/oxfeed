@@ -18,11 +18,14 @@ async fn main() -> std::io::Result<()> {
     let bind = format!("{}:{}", ip, port);
 
     actix_web::HttpServer::new(move || {
+        let cors = actix_cors::Cors::permissive();
+
         let elephantry =
             elephantry::Pool::new(&database_url).expect("Unable to connect to postgresql");
 
         actix_web::App::new()
             .data(elephantry)
+            .wrap(cors)
             .service(services::source::scope())
     })
     .bind(&bind)?
