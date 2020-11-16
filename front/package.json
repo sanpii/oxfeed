@@ -1,0 +1,6 @@
+{
+    "name": "oxfeed",
+    "dependencies": {
+        "bootstrap": "^4.0"
+    }
+}
