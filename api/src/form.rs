@@ -10,10 +10,10 @@ impl Into<crate::model::source::Entity> for Source {
     fn into(self) -> crate::model::source::Entity {
         crate::model::source::Entity {
             url: self.url.clone(),
-            source_id: self.source_id.clone(),
+            source_id: self.source_id,
             title: None,
             icon: None,
-            tags: self.tags.clone(),
+            tags: self.tags,
         }
     }
 }
