@@ -5,10 +5,19 @@ mod components;
 use components::*;
 use yew::services::console::ConsoleService as console;
 
-#[derive(serde::Deserialize, Clone)]
+#[derive(Clone, serde::Deserialize, serde::Serialize)]
 struct Source {
     source_id: String,
-    title: String,
+    title: Option<String>,
+    url: String,
+}
+
+impl Into<Result<std::string::String, anyhow::Error>> for &Source {
+    fn into(self) -> Result<std::string::String, anyhow::Error> {
+        let json = serde_json::to_string(self)?;
+
+        Ok(json)
+    }
 }
 
 struct Model;
@@ -70,22 +79,30 @@ pub fn run_app() {
     yew::App::<Model>::new().mount_to_body();
 }
 
-pub(crate) fn fetch<T: yew::Component>(
+pub(crate) fn fetch<B, C>(
     method: &str,
-    link: &yew::ComponentLink<T>,
+    link: &yew::ComponentLink<C>,
     url: &str,
+    body: B,
+    message: <C as yew::Component>::Message,
 ) -> Result<yew::services::fetch::FetchTask, Box<dyn std::error::Error>>
 where
-    <T as yew::Component>::Message: std::convert::From<yew::format::Text>,
+    B: Into<Result<String, anyhow::Error>>,
+    C: yew::Component,
+    <C as yew::Component>::Message: std::convert::TryFrom<yew::format::Text> + Clone,
 {
     let request = yew::services::fetch::Request::builder()
         .method(method)
         .uri(&format!("{}{}", env!("API_URL"), url))
-        .body(yew::format::Nothing)?;
+        .header("Content-Type", "application/json")
+        .body(body)?;
 
     let callback = link.callback(
-        |response: yew::services::fetch::Response<yew::format::Text>| {
-            <T as yew::Component>::Message::from(response.into_body())
+        move |response: yew::services::fetch::Response<yew::format::Text>| {
+            use std::convert::TryFrom;
+
+            <C as yew::Component>::Message::try_from(response.into_body())
+                .unwrap_or_else(|_| message.clone())
         },
     );
 
@@ -96,18 +113,22 @@ where
 
 macro_rules! decl_fetch {
     ($method:ident) => {
-        pub(crate) fn $method<T: yew::Component>(
-            link: &yew::ComponentLink<T>,
+        pub(crate) fn $method<B, C>(
+            link: &yew::ComponentLink<C>,
             url: &str,
+            body: B,
+            message: <C as yew::Component>::Message,
         ) -> Result<yew::services::fetch::FetchTask, Box<dyn std::error::Error>>
         where
-            <T as yew::Component>::Message: std::convert::From<yew::format::Text>,
+            B: Into<Result<String, anyhow::Error>>,
+            C: yew::Component,
+            <C as yew::Component>::Message: std::convert::TryFrom<yew::format::Text> + Clone,
         {
-            fetch(stringify!($method), link, url)
+            fetch(stringify!($method), link, url, body, message)
         }
-
-    }
+    };
 }
 
 decl_fetch!(get);
 decl_fetch!(delete);
+decl_fetch!(put);

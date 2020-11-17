@@ -1,12 +1,25 @@
+#[derive(Clone)]
 pub(crate) enum Message {
+    Cancel,
     Delete,
-    Update,
+    Deleted,
+    Edit(crate::Source),
+    Save,
+    Saved,
+    UpdateUrl(String),
 }
 
-impl From<yew::format::Text> for Message {
-    fn from(_: yew::format::Text) -> Self {
-        Self::Update
+impl std::convert::TryFrom<yew::format::Text> for Message {
+    type Error = ();
+
+    fn try_from(_: yew::format::Text) -> Result<Self, Self::Error> {
+        Err(())
     }
+}
+
+enum Scene {
+    Edit(crate::Source),
+    View,
 }
 
 #[derive(yew::Properties, Clone)]
@@ -15,6 +28,7 @@ pub(crate) struct Properties {
 }
 
 pub(crate) struct Component {
+    scene: Scene,
     fetch_task: Option<yew::services::fetch::FetchTask>,
     link: yew::ComponentLink<Self>,
     source: crate::Source,
@@ -22,7 +36,11 @@ pub(crate) struct Component {
 
 impl Component {
     fn delete(&mut self) {
-        self.fetch_task = crate::delete(&self.link, &format!("/sources/{}", self.source.source_id)).ok();
+        self.fetch_task = crate::delete(&self.link, &format!("/sources/{}", self.source.source_id), yew::format::Nothing, Message::Deleted).ok();
+    }
+
+    fn update(&mut self) {
+        self.fetch_task = crate::put(&self.link, &format!("/sources/{}", self.source.source_id), &self.source, Message::Saved).ok();
     }
 }
 
@@ -32,6 +50,7 @@ impl yew::Component for Component {
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         Self {
+            scene: Scene::View,
             fetch_task: None,
             link,
             source: props.value,
@@ -39,37 +58,112 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
-        match msg {
-            Self::Message::Delete => if yew::services::dialog::DialogService::confirm(&format!("Would you like delete '{}' source?", self.source.title)) {
-                self.delete();
-                return true;
-            },
-            Self::Message::Update => {
-                let parent = self.link.get_parent().unwrap();
-                let sources = parent.clone().downcast::<super::Sources>();
+        match self.scene {
+            Scene::View => match msg {
+                Self::Message::Delete => {
+                    let name = self.source.title.as_ref().unwrap_or(&self.source.url);
+                    let message = format!("Would you like delete '{}' source?", name);
 
-                sources.send_message(super::sources::Message::NeedUpdate);
+                    if yew::services::dialog::DialogService::confirm(&message) {
+                        self.delete();
+                    }
+                },
+                Self::Message::Deleted => {
+                    let parent = self.link.get_parent().unwrap();
+                    let sources = parent.clone().downcast::<super::Sources>();
+
+                    sources.send_message(super::sources::Message::NeedUpdate);
+                },
+                Self::Message::Edit(source) => {
+                    self.scene = Scene::Edit(source);
+                    return true;
+                },
+                _ => unreachable!(),
             },
-        };
+            Scene::Edit(ref mut source) => match msg {
+                Self::Message::Cancel => {
+                    self.scene = Scene::View;
+                    return true;
+                },
+                Self::Message::Save => {
+                    self.source = source.clone();
+                    self.update();
+                    return true;
+                },
+                Self::Message::Saved => {
+                    self.scene = Scene::View;
+                    return true;
+                },
+                Self::Message::UpdateUrl(url) => {
+                    source.url = url;
+                },
+                _ => unreachable!(),
+            }
+        }
 
         false
     }
 
     fn view(&self) -> yew::Html {
-        yew::html! {
-            <>
-                { &self.source.title }
+        match &self.scene {
+            Scene::Edit(source) => yew::html! {
+                <form>
+                    <div class="from-group">
+                        <label for="url">{ "Feed URL" }</label>
+                        <input
+                            class="form-control"
+                            name="url"
+                            required=true
+                            value={ &source.url }
+                            oninput=self.link.callback(|e: yew::InputData| Message::UpdateUrl(e.value))
+                        />
+                    </div>
 
-                <div class="btn-group float-right">
-                    <button
-                        class="btn btn-danger"
-                        title="Delete"
-                        onclick=self.link.callback(|_| Message::Delete)
+                    <a
+                        class=("btn", "btn-primary")
+                        title="Edit"
+                        onclick=self.link.callback(|_| Message::Save)
                     >
-                        <super::Svg icon="trash" size=24 />
-                    </button>
-                </div>
-            </>
+                        <super::Svg icon="check" size=24 />
+                        { "Save" }
+                    </a>
+
+                    <a
+                        class=("btn", "btn-danger")
+                        title="Cancel"
+                        onclick=self.link.callback(|_| Message::Cancel)
+                    >
+                        <super::Svg icon="x" size=24 />
+                        { "Cancel" }
+                    </a>
+                </form>
+            },
+            Scene::View => {
+                let source = self.source.clone();
+
+                yew::html! {
+                    <>
+                        { source.title.as_ref().unwrap_or(&source.url) }
+
+                        <div class=("btn-group", "float-right")>
+                            <button
+                                class=("btn", "btn-primary")
+                                title="Edit"
+                                onclick=self.link.callback(move |_| Message::Edit(source.clone()))
+                            >
+                                <super::Svg icon="pencil-square" size=24 />
+                            </button>
+                            <button
+                                class=("btn", "btn-danger")
+                                title="Delete"
+                                onclick=self.link.callback(|_| Message::Delete)
+                            >
+                                <super::Svg icon="trash" size=24 />
+                            </button>
+                        </div>
+                    </>
+                }
+            },
         }
     }
 
