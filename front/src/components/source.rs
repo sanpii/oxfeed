@@ -3,10 +3,9 @@ pub(crate) enum Message {
     Cancel,
     Delete,
     Deleted,
-    Edit(crate::Source),
-    Save,
+    Edit,
+    Save(crate::Source),
     Saved,
-    UpdateUrl(String),
 }
 
 impl std::convert::TryFrom<yew::format::Text> for Message {
@@ -18,7 +17,7 @@ impl std::convert::TryFrom<yew::format::Text> for Message {
 }
 
 enum Scene {
-    Edit(crate::Source),
+    Edit,
     View,
 }
 
@@ -36,11 +35,11 @@ pub(crate) struct Component {
 
 impl Component {
     fn delete(&mut self) {
-        self.fetch_task = crate::delete(&self.link, &format!("/sources/{}", self.source.source_id), yew::format::Nothing, Message::Deleted).ok();
+        self.fetch_task = crate::delete(&self.link, &format!("/sources/{}", self.source.source_id.as_ref().unwrap()), yew::format::Nothing, Message::Deleted).ok();
     }
 
     fn update(&mut self) {
-        self.fetch_task = crate::put(&self.link, &format!("/sources/{}", self.source.source_id), &self.source, Message::Saved).ok();
+        self.fetch_task = crate::put(&self.link, &format!("/sources/{}", self.source.source_id.as_ref().unwrap()), &self.source, Message::Saved).ok();
     }
 }
 
@@ -74,18 +73,18 @@ impl yew::Component for Component {
 
                     sources.send_message(super::sources::Message::NeedUpdate);
                 },
-                Self::Message::Edit(source) => {
-                    self.scene = Scene::Edit(source);
+                Self::Message::Edit => {
+                    self.scene = Scene::Edit;
                     return true;
                 },
                 _ => unreachable!(),
             },
-            Scene::Edit(ref mut source) => match msg {
+            Scene::Edit => match msg {
                 Self::Message::Cancel => {
                     self.scene = Scene::View;
                     return true;
                 },
-                Self::Message::Save => {
+                Self::Message::Save(source) => {
                     self.source = source.clone();
                     self.update();
                     return true;
@@ -93,9 +92,6 @@ impl yew::Component for Component {
                 Self::Message::Saved => {
                     self.scene = Scene::View;
                     return true;
-                },
-                Self::Message::UpdateUrl(url) => {
-                    source.url = url;
                 },
                 _ => unreachable!(),
             }
@@ -106,37 +102,12 @@ impl yew::Component for Component {
 
     fn view(&self) -> yew::Html {
         match &self.scene {
-            Scene::Edit(source) => yew::html! {
-                <form>
-                    <div class="from-group">
-                        <label for="url">{ "Feed URL" }</label>
-                        <input
-                            class="form-control"
-                            name="url"
-                            required=true
-                            value={ &source.url }
-                            oninput=self.link.callback(|e: yew::InputData| Message::UpdateUrl(e.value))
-                        />
-                    </div>
-
-                    <a
-                        class=("btn", "btn-primary")
-                        title="Edit"
-                        onclick=self.link.callback(|_| Message::Save)
-                    >
-                        <super::Svg icon="check" size=24 />
-                        { "Save" }
-                    </a>
-
-                    <a
-                        class=("btn", "btn-danger")
-                        title="Cancel"
-                        onclick=self.link.callback(|_| Message::Cancel)
-                    >
-                        <super::Svg icon="x" size=24 />
-                        { "Cancel" }
-                    </a>
-                </form>
+            Scene::Edit => yew::html! {
+                <super::Form
+                    source=self.source.clone()
+                    oncancel=self.link.callback(|_| Message::Cancel)
+                    onsubmit=self.link.callback(|source| Message::Save(source))
+                />
             },
             Scene::View => {
                 let source = self.source.clone();
@@ -149,7 +120,7 @@ impl yew::Component for Component {
                             <button
                                 class=("btn", "btn-primary")
                                 title="Edit"
-                                onclick=self.link.callback(move |_| Message::Edit(source.clone()))
+                                onclick=self.link.callback(move |_| Message::Edit)
                             >
                                 <super::Svg icon="pencil-square" size=24 />
                             </button>

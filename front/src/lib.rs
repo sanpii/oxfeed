@@ -3,11 +3,10 @@
 mod components;
 
 use components::*;
-use yew::services::console::ConsoleService as console;
 
-#[derive(Clone, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, Debug, Default, serde::Deserialize, serde::Serialize)]
 struct Source {
-    source_id: String,
+    source_id: Option<String>,
     title: Option<String>,
     url: String,
 }
@@ -75,6 +74,13 @@ impl yew::Component for Model {
 
 #[wasm_bindgen::prelude::wasm_bindgen(start)]
 pub fn run_app() {
+    let level = if cfg!(debug_assertions) {
+        log::Level::Debug
+    } else {
+        log::Level::Warn
+    };
+
+    wasm_logger::init(wasm_logger::Config::new(level));
     yew::initialize();
     yew::App::<Model>::new().mount_to_body();
 }
@@ -129,6 +135,7 @@ macro_rules! decl_fetch {
     };
 }
 
-decl_fetch!(get);
 decl_fetch!(delete);
+decl_fetch!(get);
+decl_fetch!(post);
 decl_fetch!(put);

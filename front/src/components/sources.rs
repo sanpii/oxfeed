@@ -1,5 +1,8 @@
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub(crate) enum Message {
+    Add,
+    Cancel,
+    Create(crate::Source),
     Error(String),
     Update(Vec<crate::Source>),
     NeedUpdate,
@@ -10,22 +13,37 @@ impl std::convert::TryFrom<yew::format::Text> for Message {
     type Error = ();
 
     fn try_from(response: yew::format::Text) -> Result<Self, ()> {
-        let message = match response {
-            Ok(data) => match serde_json::from_str(&data) {
-                Ok(sources) => Self::Update(sources),
-                Err(err) => Self::Error(err.to_string()),
-            },
-            Err(err) => Self::Error(err.to_string()),
+        let data = match response {
+            Ok(data) => data,
+            Err(err) => return Ok(Self::Error(err.to_string())),
+        };
+
+        let message = match serde_json::from_str(&data) {
+            Ok(sources) => Self::Update(sources),
+            Err(_) => Self::NeedUpdate,
         };
 
         Ok(message)
     }
 }
 
+#[derive(Debug)]
+enum Scene {
+    Add,
+    View,
+}
+
 pub(crate) struct Component {
     fetch_task: Option<yew::services::fetch::FetchTask>,
     link: yew::ComponentLink<Self>,
+    scene: Scene,
     sources: Vec<crate::Source>,
+}
+
+impl Component {
+    fn create(&mut self, source: &crate::Source) {
+        self.fetch_task = crate::post(&self.link, "/sources/", source, Message::Nothing).ok();
+    }
 }
 
 impl yew::Component for Component {
@@ -39,32 +57,75 @@ impl yew::Component for Component {
         Self {
             fetch_task,
             link,
+            scene: Scene::View,
             sources,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
-        match msg {
-            Self::Message::Update(sources) => self.sources = sources,
-            Self::Message::Error(error) => crate::console::error(&error),
-            Self::Message::NeedUpdate => self.fetch_task = crate::get(&self.link, "/sources/", yew::format::Nothing, Message::Nothing).ok(),
-            Self::Message::Nothing => (),
+        log::debug!("<Sources /> {:?} => {:?}", self.scene, msg);
+
+        if let Self::Message::Error(error) = msg {
+            log::error!("{:?}", error);
+            return true;
+        }
+
+        match &self.scene {
+            Scene::View => match msg {
+                Self::Message::Add => self.scene = Scene::Add,
+                Self::Message::Update(ref sources) => self.sources = sources.clone(),
+                _ => (),
+            },
+            Scene::Add => match msg {
+                Self::Message::Cancel => self.scene = Scene::View,
+                Self::Message::Create(ref source) => self.create(source),
+                _ => (),
+            },
         };
+
+        if matches!(msg, Self::Message::NeedUpdate) {
+            self.scene = Scene::View;
+            self.fetch_task = crate::get(&self.link, "/sources/", yew::format::Nothing, Message::Nothing).ok();
+            return false;
+        }
 
         true
     }
 
     fn view(&self) -> yew::Html {
+        let add = match &self.scene {
+            Scene::View => yew::html! {
+                <a
+                    class=("btn", "btn-primary")
+                    title="Add"
+                    onclick=self.link.callback(|_| Message::Add)
+                >
+                    <super::Svg icon="plus" size=24 />
+                    { "Add" }
+                </a>
+            },
+            Scene::Add => yew::html! {
+                <super::Form
+                    source=crate::Source::default()
+                    oncancel=self.link.callback(|_| Message::Cancel)
+                    onsubmit=self.link.callback(|source| Message::Create(source))
+                />
+            },
+        };
+
         yew::html! {
-            <ul class="list-group">
-            {
-                for self.sources.iter().map(|source| {
-                    yew::html! {
-                        <li class="list-group-item"><crate::components::Source value=source /></li>
-                    }
-                })
-            }
-            </ul>
+            <>
+                { add }
+                <ul class="list-group">
+                {
+                    for self.sources.iter().map(|source| {
+                        yew::html! {
+                            <li class="list-group-item"><crate::components::Source value=source /></li>
+                        }
+                    })
+                }
+                </ul>
+            </>
         }
     }
 
