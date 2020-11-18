@@ -14,7 +14,8 @@ impl yew::Component for Component {
 
     fn view(&self) -> yew::Html {
         let links = [
-            ("/sources", "Sources"),
+            ("book", "/unread", "Unread"),
+            ("diagram-3", "/sources", "Sources"),
         ];
         let router = yew_router::service::RouteService::<()>::new();
         let current_url = router.get_path();
@@ -25,10 +26,11 @@ impl yew::Component for Component {
                 for links.iter().map(|link| yew::html! {
                     <li class="nav-item">
                         <a
-                            href={ link.0 }
-                            class=if link.0 == current_url { "nav-link active" } else { "nav-link" }
+                            href={ link.1 }
+                            class=if link.1 == current_url { "nav-link active" } else { "nav-link" }
                         >
-                            { link.1 }
+                            <super::Svg icon=link.0 size=16 />
+                            { link.2 }
                         </a>
                     </li>
                 })

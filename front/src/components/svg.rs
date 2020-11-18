@@ -15,7 +15,7 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, _: Self::Message) -> yew::ShouldRender {
-        true
+        false
     }
 
     fn view(&self) -> yew::Html {

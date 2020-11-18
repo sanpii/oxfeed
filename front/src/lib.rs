@@ -19,12 +19,23 @@ impl Into<Result<std::string::String, anyhow::Error>> for &Source {
     }
 }
 
+#[derive(Clone, Debug, PartialEq, serde::Deserialize)]
+struct Item {
+    icon: Option<String>,
+    link: String,
+    title: String,
+    published: chrono::DateTime<chrono::Utc>,
+    source: String,
+}
+
 struct Model;
 
 #[derive(yew_router::Switch, Clone)]
 enum Route {
     #[to = "/sources"]
     Sources,
+    #[to = "/unread"]
+    Unread,
 }
 
 impl yew::Component for Model {
@@ -57,6 +68,7 @@ impl yew::Component for Model {
                                 render = yew_router::router::Router::render(|switch: Route| {
                                     match switch {
                                         Route::Sources => yew::html!{<Sources />},
+                                        Route::Unread => yew::html!{<Unread />},
                                     }
                                 })
                             />
@@ -74,13 +86,15 @@ impl yew::Component for Model {
 
 #[wasm_bindgen::prelude::wasm_bindgen(start)]
 pub fn run_app() {
+    /*
     let level = if cfg!(debug_assertions) {
         log::Level::Debug
     } else {
         log::Level::Warn
     };
+    */
 
-    wasm_logger::init(wasm_logger::Config::new(level));
+    wasm_logger::init(wasm_logger::Config::new(log::Level::Debug));
     yew::initialize();
     yew::App::<Model>::new().mount_to_body();
 }

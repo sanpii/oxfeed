@@ -120,7 +120,7 @@ impl yew::Component for Component {
                 {
                     for self.sources.iter().map(|source| {
                         yew::html! {
-                            <li class="list-group-item"><crate::components::Source value=source /></li>
+                            <li class="list-group-item"><super::Source value=source /></li>
                         }
                     })
                 }
