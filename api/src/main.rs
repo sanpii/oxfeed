@@ -26,6 +26,7 @@ async fn main() -> std::io::Result<()> {
         actix_web::App::new()
             .data(elephantry)
             .wrap(cors)
+            .service(services::item::scope())
             .service(services::source::scope())
     })
     .bind(&bind)?

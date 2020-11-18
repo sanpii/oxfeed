@@ -1,4 +1,13 @@
-#[derive(elephantry::Entity)]
+#[derive(elephantry::Entity, serde::Serialize)]
+pub struct Item {
+    pub link: String,
+    pub published: chrono::DateTime<chrono::offset::Utc>,
+    pub title: String,
+    pub source: String,
+    pub icon: Option<String>,
+}
+
+#[derive(elephantry::Entity, serde::Serialize)]
 pub struct Entity {
     pub entry_id: Option<String>,
     pub source_id: uuid::Uuid,
@@ -9,14 +18,32 @@ pub struct Entity {
     pub published: Option<chrono::DateTime<chrono::offset::Utc>>,
 }
 
-pub struct Model;
+pub struct Model<'a> {
+    connection: &'a elephantry::Connection,
+}
 
-impl elephantry::Model<'_> for Model {
+impl<'a> Model<'a> {
+    pub fn unread(&self) -> elephantry::Result<elephantry::Rows<Item>> {
+        let query = r#"
+select item.link, item.published, item.title, source.title as source, source.icon as icon
+    from item
+    join source using (source_id)
+    where read = $*
+    order by published desc
+        "#;
+
+        self.connection.query::<Item>(&query, &[&false])
+    }
+}
+
+impl<'a> elephantry::Model<'a> for Model<'a> {
     type Entity = Entity;
     type Structure = Structure;
 
-    fn new(_: &elephantry::Connection) -> Self {
-        Self {}
+    fn new(connection: &'a elephantry::Connection) -> Self {
+        Self {
+            connection,
+        }
     }
 }
 
