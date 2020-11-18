@@ -23,7 +23,9 @@ async fn create(
     elephantry: Data<elephantry::Pool>,
     data: Json<crate::form::Source>,
 ) -> crate::Result {
-    let source = elephantry.insert_one::<Model>(&data.into_inner().into())?;
+    use std::convert::TryInto;
+
+    let source = elephantry.insert_one::<Model>(&data.into_inner().try_into()?)?;
     let response = actix_web::HttpResponse::Ok().json(source);
 
     Ok(response)
@@ -68,9 +70,11 @@ async fn update(
     data: Json<crate::form::Source>,
     path: Path<uuid::Uuid>,
 ) -> crate::Result {
+    use std::convert::TryInto;
+
     let source_id = Some(path.into_inner());
     let pk = elephantry::pk!(source_id);
-    let source = elephantry.update_one::<Model>(&pk, &data.into_inner().into())?;
+    let source = elephantry.update_one::<Model>(&pk, &data.into_inner().try_into()?)?;
 
     let response = match source {
         Some(source) => actix_web::HttpResponse::Ok().json(source),

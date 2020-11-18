@@ -4,7 +4,6 @@ create table source (
     source_id uuid primary key default uuid_generate_v4(),
     url text not null unique,
     title text,
-    icon text,
     tags text[] not null,
     type text
 );

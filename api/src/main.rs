@@ -3,7 +3,7 @@ mod form;
 mod model;
 mod services;
 
-use errors::Result;
+use errors::*;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

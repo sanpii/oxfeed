@@ -16,6 +16,7 @@ pub struct Entity {
     pub content: Option<String>,
     pub read: bool,
     pub published: Option<chrono::DateTime<chrono::offset::Utc>>,
+    pub icon: Option<String>,
 }
 
 pub struct Model<'a> {
@@ -25,7 +26,8 @@ pub struct Model<'a> {
 impl<'a> Model<'a> {
     pub fn unread(&self) -> elephantry::Result<elephantry::Rows<Item>> {
         let query = r#"
-select item.link, item.published, item.title, source.title as source, source.icon as icon
+select item.link, item.published, item.title, item.icon,
+        source.title as source
     from item
     join source using (source_id)
     where read = $*
@@ -67,6 +69,7 @@ impl elephantry::Structure for Structure {
             "content",
             "read",
             "published",
+            "icon",
         ]
     }
 }

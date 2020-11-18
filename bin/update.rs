@@ -21,12 +21,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let contents = attohttpc::get(&source.url).send()?.text()?;
         let feed = feed_rs::parser::parse(contents.as_bytes())?;
 
-        source.title = feed.title.map(|x| x.content);
-        source.icon = feed.icon.map(|x| x.uri);
-        let source_id = source.source_id.unwrap();
-        let pk = elephantry::pk!(source_id);
-        elephantry.update_one::<oxfeed_api::model::source::Model>(&pk, &source)?;
-
         for entry in feed.entries {
             let item = oxfeed_api::model::item::Entity {
                 entry_id: None,
