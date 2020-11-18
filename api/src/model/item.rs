@@ -11,6 +11,7 @@ pub struct Item {
 pub struct Entity {
     pub entry_id: Option<String>,
     pub source_id: uuid::Uuid,
+    pub id: String,
     pub link: String,
     pub title: String,
     pub content: Option<String>,
@@ -64,6 +65,7 @@ impl elephantry::Structure for Structure {
         &[
             "entry_id",
             "source_id",
+            "id",
             "link",
             "title",
             "content",
