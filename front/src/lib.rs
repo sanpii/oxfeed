@@ -21,6 +21,7 @@ impl Into<Result<std::string::String, anyhow::Error>> for &Source {
 
 #[derive(Clone, Debug, PartialEq, serde::Deserialize)]
 struct Item {
+    item_id: String,
     icon: Option<String>,
     link: String,
     title: String,
@@ -144,7 +145,7 @@ macro_rules! decl_fetch {
             C: yew::Component,
             <C as yew::Component>::Message: std::convert::TryFrom<yew::format::Text> + Clone,
         {
-            fetch(stringify!($method), link, url, body, message)
+            fetch(&stringify!($method).to_uppercase(), link, url, body)
         }
     };
 }

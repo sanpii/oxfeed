@@ -1,5 +1,6 @@
 #[derive(elephantry::Entity, serde::Serialize)]
 pub struct Item {
+    pub item_id: uuid::Uuid,
     pub link: String,
     pub published: chrono::DateTime<chrono::offset::Utc>,
     pub title: String,
@@ -9,7 +10,7 @@ pub struct Item {
 
 #[derive(elephantry::Entity, serde::Serialize)]
 pub struct Entity {
-    pub entry_id: Option<String>,
+    pub item_id: Option<String>,
     pub source_id: uuid::Uuid,
     pub id: String,
     pub link: String,
@@ -27,7 +28,7 @@ pub struct Model<'a> {
 impl<'a> Model<'a> {
     pub fn unread(&self) -> elephantry::Result<elephantry::Rows<Item>> {
         let query = r#"
-select item.link, item.published, item.title, item.icon,
+select item.item_id, item.link, item.published, item.title, item.icon,
         source.title as source
     from item
     join source using (source_id)
@@ -58,12 +59,12 @@ impl elephantry::Structure for Structure {
     }
 
     fn primary_key() -> &'static [&'static str] {
-        &["entry_id"]
+        &["item_id"]
     }
 
     fn columns() -> &'static [&'static str] {
         &[
-            "entry_id",
+            "item_id",
             "source_id",
             "id",
             "link",

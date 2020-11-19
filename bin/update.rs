@@ -35,10 +35,10 @@ fn main() -> Result<()> {
                 log::info!("Adding '{}'", title);
 
                 let item = oxfeed_api::model::item::Entity {
-                    entry_id: None,
+                    item_id: None,
                     id: entry.id,
                     icon: icon(&entry.links),
-                    content: entry.content.map(|x| x.body).flatten(),
+                    content: entry.summary.map(|x| x.content),
                     title,
                     published: entry.published,
                     read: false,

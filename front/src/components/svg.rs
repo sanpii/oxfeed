@@ -1,4 +1,4 @@
-#[derive(yew::Properties, Clone)]
+#[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     pub icon: String,
     pub size: u32,
@@ -34,8 +34,12 @@ impl yew::Component for Component {
         yew::virtual_dom::VNode::VRef(span.into())
     }
 
-    fn change(&mut self, _: Self::Properties) -> yew::ShouldRender {
-        false
+    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
+        let should_render = self.0 != props;
+
+        self.0 = props;
+
+        should_render
     }
 }
 
