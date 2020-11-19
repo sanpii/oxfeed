@@ -12,6 +12,7 @@ create table item (
     entry_id uuid primary key default uuid_generate_v4(),
     source_id uuid references source(source_id) not null,
     id text not null,
+    icon text,
     link text not null unique,
     title text not null,
     content text,

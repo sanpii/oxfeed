@@ -1,7 +1,9 @@
 use oxfeed_api::model::item::Model as ItemModel;
 use oxfeed_api::model::source::Model as SourceModel;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+
+fn main() -> Result<()> {
     env_logger::init();
 
     let instance = single_instance::SingleInstance::new("oxfeed").unwrap();
@@ -28,12 +30,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let exist = elephantry.exist_where::<ItemModel>("id = $* and source_id = $*", &[&entry.id, &source.source_id])?;
 
             if !exist {
+                let title = entry.title.map(|x| x.content).unwrap_or_else(|| "<no title>".to_string());
+
+                log::info!("Adding '{}'", title);
+
                 let item = oxfeed_api::model::item::Entity {
                     entry_id: None,
                     id: entry.id,
-                    icon: None,
+                    icon: icon(&entry.links),
                     content: entry.content.map(|x| x.body).flatten(),
-                    title: entry.title.map(|x| x.content).unwrap_or_default(),
+                    title,
                     published: entry.published,
                     read: false,
                     source_id: source.source_id.unwrap(),
@@ -45,4 +51,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     Ok(())
+}
+
+fn icon(links: &[feed_rs::model::Link]) -> Option<String> {
+    let selector = scraper::Selector::parse("link[rel=\"icon\"]").unwrap();
+
+    for link in links {
+        let contents = match attohttpc::get(&link.href).send() {
+            Ok(contents) => contents.text().unwrap_or_default(),
+            Err(_) => continue,
+        };
+
+        let html = scraper::Html::parse_document(&contents);
+        match html.select(&selector).next() {
+            Some(icon) => return icon.value().attr("href").map(|x| x.to_string()),
+            None => continue,
+        }
+    }
+
+    None
 }
