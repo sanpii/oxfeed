@@ -28,6 +28,7 @@ struct Item {
     published: chrono::DateTime<chrono::Utc>,
     source: String,
     read: bool,
+    favorite: bool,
 }
 
 impl Into<Result<std::string::String, anyhow::Error>> for &Item {

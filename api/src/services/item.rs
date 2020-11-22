@@ -48,11 +48,15 @@ async fn patch(
         data.insert(k.clone(), v);
     }
 
-    let source = elephantry.update_by_pk::<Model>(&elephantry::pk!(item_id), &data)?;
+    let response = if !data.is_empty() {
+        let source = elephantry.update_by_pk::<Model>(&elephantry::pk!(item_id), &data)?;
 
-    let response = match source {
-        Some(source) => actix_web::HttpResponse::Ok().json(source),
-        None => actix_web::HttpResponse::NotFound().finish(),
+        match source {
+            Some(source) => actix_web::HttpResponse::Ok().json(source),
+            None => actix_web::HttpResponse::NotFound().finish(),
+        }
+    } else {
+        actix_web::HttpResponse::NoContent().finish()
     };
 
     Ok(response)

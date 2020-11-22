@@ -4,6 +4,7 @@ pub(crate) enum Message {
     Error(String),
     ToggleContent,
     ToggleRead,
+    ToggleFavorite,
     Update(crate::Item),
     UpdateRead,
 }
@@ -90,10 +91,15 @@ impl yew::Component for Component {
                     self.fetch_task = crate::get(&self.link, &format!("/items/{}/content", self.item.item_id), yew::format::Nothing).ok();
                 }
             },
-            Self::Message::ToggleRead => {
+            Self::Message::ToggleFavorite | Self::Message::ToggleRead => {
                 let url = format!("/items/{}", self.item.item_id);
+                let (key, value) = match msg {
+                    Self::Message::ToggleFavorite => ("favorite", !self.item.favorite),
+                    Self::Message::ToggleRead => ("read", !self.item.read),
+                    _ => unreachable!(),
+                };
                 let json = serde_json::json!({
-                    "read": !self.item.read,
+                    key: value,
                 });
 
                 self.fetch_task = crate::patch(&self.link, &url, yew::format::Json(&json)).ok();
@@ -141,6 +147,8 @@ impl yew::Component for Component {
                                     inline=true
                                     read=self.item.read
                                     on_read=self.link.callback(|_| Self::Message::ToggleRead)
+                                    favorite=self.item.favorite
+                                    on_favorite=self.link.callback(|_| Self::Message::ToggleFavorite)
                                 />
                             }
                         } else {
@@ -158,6 +166,8 @@ impl yew::Component for Component {
                                 <super::Actions
                                     read=self.item.read
                                     on_read=self.link.callback(|_| Self::Message::ToggleRead)
+                                    favorite=self.item.favorite
+                                    on_favorite=self.link.callback(|_| Self::Message::ToggleFavorite)
                                 />
                             </>
                         }

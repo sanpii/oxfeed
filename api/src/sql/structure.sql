@@ -17,6 +17,7 @@ create table item (
     title text not null,
     content text,
     read bool default false,
+    favorite bool default false,
     published timestamptz not null default now(),
 
     unique(source_id, id)

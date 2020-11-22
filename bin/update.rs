@@ -44,6 +44,7 @@ fn main() -> Result<()> {
                     read: false,
                     source_id: source.source_id.unwrap(),
                     link: entry.links[0].href.clone(),
+                    favorite: false,
                 };
                 elephantry.insert_one::<ItemModel>(&item)?;
             }
