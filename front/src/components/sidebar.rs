@@ -15,6 +15,7 @@ impl yew::Component for Component {
     fn view(&self) -> yew::Html {
         let links = [
             ("book", "/unread", "Unread"),
+            ("star", "/favorites", "Favorites"),
             ("diagram-3", "/sources", "Sources"),
         ];
         let router = yew_router::service::RouteService::<()>::new();

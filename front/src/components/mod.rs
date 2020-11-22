@@ -1,5 +1,6 @@
 mod actions;
 mod header;
+mod favorites;
 mod form;
 mod item;
 mod items;
@@ -10,8 +11,9 @@ mod svg;
 mod unread;
 
 pub(crate) use actions::Component as Actions;
-pub(crate) use header::Component as Header;
+pub(crate) use favorites::Component as Favorites;
 pub(crate) use form::Component as Form;
+pub(crate) use header::Component as Header;
 pub(crate) use item::Component as Item;
 pub(crate) use items::Component as Items;
 pub(crate) use sidebar::Component as Sidebar;

@@ -5,8 +5,18 @@ use actix_web::web::{Data, Json, Path};
 pub(crate) fn scope() -> actix_web::Scope {
     actix_web::web::scope("/items")
         .service(content)
+        .service(favorites)
         .service(patch)
         .service(unread)
+}
+
+#[actix_web::get("/favorites")]
+async fn favorites(elephantry: Data<elephantry::Pool>) -> crate::Result {
+    let model = elephantry.model::<Model>();
+    let items = model.favorites()?.collect::<Vec<_>>();
+    let response = actix_web::HttpResponse::Ok().json(items);
+
+    Ok(response)
 }
 
 #[actix_web::get("/unread")]

@@ -55,10 +55,10 @@ impl yew::Component for Component {
             yew::html! {
                 <div class=("actions", "inline")>
                     <span onclick=self.link.callback(|_| Self::Message::ToggleRead) title=read_label>
-                        <super::Svg icon=eye size=16 />
+                        <super::Svg icon=eye size=24 />
                     </span>
                     <span onclick=self.link.callback(|_| Self::Message::ToggleFavorite) title=favorite_label>
-                        <super::Svg icon=star size=16 />
+                        <super::Svg icon=star size=24 />
                     </span>
                 </div>
             }
@@ -69,7 +69,7 @@ impl yew::Component for Component {
                         <super::Svg icon=eye size=24 />
                         { read_label }
                     </button>
-                    <button class=("btn", "btn-outline-secondary") onclick=self.link.callback(|_| Self::Message::ToggleFavorite)>
+                    <button class=("btn", "btn-outline-warning") onclick=self.link.callback(|_| Self::Message::ToggleFavorite)>
                         <super::Svg icon=star size=24 />
                         { favorite_label }
                     </button>

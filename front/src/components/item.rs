@@ -155,6 +155,17 @@ impl yew::Component for Component {
                             "".into()
                         }
                     }
+                    {
+                        if self.scene == Scene::Hidden && self.item.favorite {
+                            yew::html! {
+                                <div class="favorite">
+                                    <super::Svg icon="star-fill" size=24 />
+                                </div>
+                            }
+                        } else {
+                            "".into()
+                        }
+                    }
                 </div>
                 {
                     if self.scene == Scene::Expanded {

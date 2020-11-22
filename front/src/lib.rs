@@ -43,6 +43,8 @@ struct Model;
 
 #[derive(yew_router::Switch, Clone)]
 enum Route {
+    #[to = "/favorites"]
+    Favorites,
     #[to = "/sources"]
     Sources,
     #[to = "/unread"]
@@ -78,6 +80,7 @@ impl yew::Component for Model {
                             <Router<Route, ()>
                                 render = yew_router::router::Router::render(|switch: Route| {
                                     match switch {
+                                        Route::Favorites => yew::html!{<Favorites />},
                                         Route::Sources => yew::html!{<Sources />},
                                         Route::Unread => yew::html!{<Unread />},
                                     }
