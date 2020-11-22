@@ -8,6 +8,16 @@ pub(crate) fn scope() -> actix_web::Scope {
         .service(favorites)
         .service(patch)
         .service(unread)
+        .service(all)
+}
+
+#[actix_web::get("/")]
+async fn all(elephantry: Data<elephantry::Pool>) -> crate::Result {
+    let model = elephantry.model::<Model>();
+    let items = model.all()?.collect::<Vec<_>>();
+    let response = actix_web::HttpResponse::Ok().json(items);
+
+    Ok(response)
 }
 
 #[actix_web::get("/favorites")]

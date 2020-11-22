@@ -29,6 +29,18 @@ pub struct Model<'a> {
 }
 
 impl<'a> Model<'a> {
+    pub fn all(&self) -> elephantry::Result<elephantry::Rows<Item>> {
+        let query = r#"
+select item.item_id, item.link, item.published, item.title, item.icon,
+        item.read, item.favorite, source.title as source
+    from item
+    join source using (source_id)
+    order by published desc
+        "#;
+
+        self.connection.query::<Item>(&query, &[])
+    }
+
     pub fn favorites(&self) -> elephantry::Result<elephantry::Rows<Item>> {
         let query = r#"
 select item.item_id, item.link, item.published, item.title, item.icon,

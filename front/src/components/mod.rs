@@ -1,4 +1,5 @@
 mod actions;
+mod all;
 mod header;
 mod favorites;
 mod form;
@@ -11,6 +12,7 @@ mod svg;
 mod unread;
 
 pub(crate) use actions::Component as Actions;
+pub(crate) use all::Component as All;
 pub(crate) use favorites::Component as Favorites;
 pub(crate) use form::Component as Form;
 pub(crate) use header::Component as Header;

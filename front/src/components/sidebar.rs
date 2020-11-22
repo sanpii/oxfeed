@@ -14,6 +14,7 @@ impl yew::Component for Component {
 
     fn view(&self) -> yew::Html {
         let links = [
+            ("collection", "/", "All"),
             ("book", "/unread", "Unread"),
             ("star", "/favorites", "Favorites"),
             ("diagram-3", "/sources", "Sources"),
