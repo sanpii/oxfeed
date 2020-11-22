@@ -13,26 +13,22 @@ pub(crate) fn scope() -> actix_web::Scope {
 
 #[actix_web::get("/")]
 async fn all(elephantry: Data<elephantry::Pool>) -> crate::Result {
-    let model = elephantry.model::<Model>();
-    let items = model.all()?.collect::<Vec<_>>();
-    let response = actix_web::HttpResponse::Ok().json(items);
-
-    Ok(response)
+    fetch(&elephantry, "true")
 }
 
 #[actix_web::get("/favorites")]
 async fn favorites(elephantry: Data<elephantry::Pool>) -> crate::Result {
-    let model = elephantry.model::<Model>();
-    let items = model.favorites()?.collect::<Vec<_>>();
-    let response = actix_web::HttpResponse::Ok().json(items);
-
-    Ok(response)
+    fetch(&elephantry, "favorite")
 }
 
 #[actix_web::get("/unread")]
 async fn unread(elephantry: Data<elephantry::Pool>) -> crate::Result {
+    fetch(&elephantry, "not read")
+}
+
+fn fetch(elephantry: &elephantry::Pool, filter: &str) -> crate::Result {
     let model = elephantry.model::<Model>();
-    let items = model.unread()?.collect::<Vec<_>>();
+    let items = model.all(filter)?.collect::<Vec<_>>();
     let response = actix_web::HttpResponse::Ok().json(items);
 
     Ok(response)

@@ -29,42 +29,17 @@ pub struct Model<'a> {
 }
 
 impl<'a> Model<'a> {
-    pub fn all(&self) -> elephantry::Result<elephantry::Rows<Item>> {
-        let query = r#"
+    pub fn all(&self, filter: &str) -> elephantry::Result<elephantry::Rows<Item>> {
+        let query = format!(r#"
 select item.item_id, item.link, item.published, item.title, item.icon,
         item.read, item.favorite, source.title as source
     from item
     join source using (source_id)
+    where {}
     order by published desc
-        "#;
+        "#, filter);
 
         self.connection.query::<Item>(&query, &[])
-    }
-
-    pub fn favorites(&self) -> elephantry::Result<elephantry::Rows<Item>> {
-        let query = r#"
-select item.item_id, item.link, item.published, item.title, item.icon,
-        item.read, item.favorite, source.title as source
-    from item
-    join source using (source_id)
-    where favorite = $*
-    order by published desc
-        "#;
-
-        self.connection.query::<Item>(&query, &[&true])
-    }
-
-    pub fn unread(&self) -> elephantry::Result<elephantry::Rows<Item>> {
-        let query = r#"
-select item.item_id, item.link, item.published, item.title, item.icon,
-        item.read, item.favorite, source.title as source
-    from item
-    join source using (source_id)
-    where read = $*
-    order by published desc
-        "#;
-
-        self.connection.query::<Item>(&query, &[&false])
     }
 }
 
