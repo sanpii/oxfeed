@@ -6,11 +6,12 @@ pub struct Item {
     pub title: String,
     pub source: String,
     pub icon: Option<String>,
+    pub read: bool,
 }
 
 #[derive(elephantry::Entity, serde::Serialize)]
 pub struct Entity {
-    pub item_id: Option<String>,
+    pub item_id: Option<uuid::Uuid>,
     pub source_id: uuid::Uuid,
     pub id: String,
     pub link: String,
@@ -28,7 +29,7 @@ pub struct Model<'a> {
 impl<'a> Model<'a> {
     pub fn unread(&self) -> elephantry::Result<elephantry::Rows<Item>> {
         let query = r#"
-select item.item_id, item.link, item.published, item.title, item.icon,
+select item.item_id, item.link, item.published, item.title, item.icon, item.read,
         source.title as source
     from item
     join source using (source_id)

@@ -2,14 +2,13 @@
 pub(crate) enum Message {
     Error(String),
     NeedUpdate,
-    Nothing,
     Update(Vec<crate::Item>),
 }
 
-impl std::convert::TryFrom<yew::format::Text> for Message {
+impl std::convert::TryFrom<(http::Method, yew::format::Text)> for Message {
     type Error = ();
 
-    fn try_from(response: yew::format::Text) -> Result<Self, ()> {
+    fn try_from((_, response): (http::Method, yew::format::Text)) -> Result<Self, ()> {
         let data = match response {
             Ok(data) => data,
             Err(err) => return Ok(Self::Error(err.to_string())),
@@ -36,7 +35,7 @@ impl yew::Component for Component {
 
     fn create(_: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         let items = Vec::new();
-        let fetch_task = crate::get(&link, "/items/unread", yew::format::Nothing, Message::Nothing).ok();
+        let fetch_task = crate::get(&link, "/items/unread", yew::format::Nothing).ok();
 
         Self {
             fetch_task,
@@ -49,10 +48,9 @@ impl yew::Component for Component {
         match msg {
             Self::Message::Error(error) => log::error!("{:?}", error),
             Self::Message::NeedUpdate => {
-                self.fetch_task = crate::get(&self.link, "/items/unread", yew::format::Nothing, Message::Nothing).ok();
+                self.fetch_task = crate::get(&self.link, "/items/unread", yew::format::Nothing).ok();
                 return false;
             },
-            Self::Message::Nothing => return false,
             Self::Message::Update(ref items) => self.items = items.clone(),
         }
 
@@ -61,7 +59,10 @@ impl yew::Component for Component {
 
     fn view(&self) -> yew::Html {
         yew::html! {
-            <super::Items value=self.items.clone() />
+            <super::Items
+                value=self.items.clone()
+                on_update=self.link.callback(|_| Self::Message::NeedUpdate)
+            />
         }
     }
 

@@ -1,10 +1,12 @@
+use std::collections::HashMap;
 use crate::model::item::Model;
-use actix_web::web::{Data, Path};
+use actix_web::web::{Data, Json, Path};
 
 pub(crate) fn scope() -> actix_web::Scope {
     actix_web::web::scope("/items")
-        .service(unread)
         .service(content)
+        .service(patch)
+        .service(unread)
 }
 
 #[actix_web::get("/unread")]
@@ -19,9 +21,37 @@ async fn unread(elephantry: Data<elephantry::Pool>) -> crate::Result {
 #[actix_web::get("/{item_id}/content")]
 async fn content(elephantry: Data<elephantry::Pool>, path: Path<uuid::Uuid>) -> crate::Result {
     let item_id = Some(path.into_inner());
-    let content = elephantry.query::<String>("select content from item where item_id = $*", &[&item_id])?.next();
+    let content = elephantry.query::<Option<String>>("select content from item where item_id = $*", &[&item_id])?.next();
     let response = match content {
-        Some(content) => actix_web::HttpResponse::Ok().body(&content),
+        Some(content) => actix_web::HttpResponse::Ok().body(&content.unwrap_or_default()),
+        None => actix_web::HttpResponse::NotFound().finish(),
+    };
+
+    Ok(response)
+}
+
+#[actix_web::patch("/{item_id}")]
+async fn patch(
+    elephantry: Data<elephantry::Pool>,
+    path: Path<uuid::Uuid>,
+    json: Json<serde_json::Value>,
+) -> crate::Result {
+    let item_id = path.into_inner();
+    let mut data = HashMap::new();
+
+    for (k, v) in json.as_object().unwrap() {
+        let v = match v {
+            serde_json::Value::Bool(v) => v as &dyn elephantry::ToSql,
+            serde_json::Value::String(v) => v as &dyn elephantry::ToSql,
+            _ => todo!(),
+        };
+        data.insert(k.clone(), v);
+    }
+
+    let source = elephantry.update_by_pk::<Model>(&elephantry::pk!(item_id), &data)?;
+
+    let response = match source {
+        Some(source) => actix_web::HttpResponse::Ok().json(source),
         None => actix_web::HttpResponse::NotFound().finish(),
     };
 

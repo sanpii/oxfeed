@@ -19,9 +19,7 @@ impl yew::Component for Component {
     }
 
     fn view(&self) -> yew::Html {
-        let window = web_sys::window().expect("no global `window` exists");
-        let document = window.document().expect("should have a document on window");
-        let span = document.create_element("span").unwrap();
+        let span = yew::utils::document().create_element("span").unwrap();
 
         let svg = format!(r#"
         <svg width={size} height={size} fill="currentColor">
@@ -42,4 +40,3 @@ impl yew::Component for Component {
         should_render
     }
 }
-

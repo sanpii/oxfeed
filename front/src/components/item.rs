@@ -1,21 +1,30 @@
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) enum Message {
     Content(String),
     Error(String),
-    Nothing,
-    Toggle,
+    ToggleContent,
+    ToggleRead,
+    Update(crate::Item),
+    UpdateRead,
 }
 
-impl std::convert::TryFrom<yew::format::Text> for Message {
+impl std::convert::TryFrom<(http::Method, yew::format::Text)> for Message {
     type Error = ();
 
-    fn try_from(response: yew::format::Text) -> Result<Self, ()> {
+    fn try_from((method, response): (http::Method, yew::format::Text)) -> Result<Self, ()> {
         let data = match response {
             Ok(data) => data,
             Err(err) => return Ok(Self::Error(err.to_string())),
         };
 
-        Ok(Message::Content(data))
+        let message = match method {
+            http::Method::GET => Message::Content(data),
+            http::Method::PATCH => Message::UpdateRead,
+            http::Method::POST => Message::Update(serde_json::from_str(&data).map_err(|_| ())?),
+            _ => return Err(()),
+        };
+
+        Ok(message)
     }
 }
 
@@ -39,14 +48,17 @@ impl std::ops::Not for Scene {
 #[derive(Clone, yew::Properties)]
 pub(crate) struct Properties {
     pub value: crate::Item,
+    #[prop_or_default]
+    pub on_read: yew::Callback<crate::Item>,
 }
 
 pub(crate) struct Component {
+    content: Option<String>,
     fetch_task: Option<yew::services::fetch::FetchTask>,
-    item: crate::Item,
     link: yew::ComponentLink<Self>,
     scene: Scene,
-    content: Option<String>,
+    item: crate::Item,
+    on_read: yew::Callback<crate::Item>,
 }
 
 impl yew::Component for Component {
@@ -55,26 +67,43 @@ impl yew::Component for Component {
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         Self {
-            fetch_task: None,
-            link,
-            item: props.value,
-            scene: Scene::Hidden,
             content: None,
+            fetch_task: None,
+            item: props.value,
+            link,
+            on_read: props.on_read,
+            scene: Scene::Hidden,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Content(content) => self.content = Some(content),
+            Self::Message::Content(content) => {
+                self.fetch_task = None;
+                self.content = Some(content);
+            },
             Self::Message::Error(error) => log::error!("{}", error),
-            Self::Message::Nothing => return false,
-            Self::Message::Toggle => {
+            Self::Message::ToggleContent => {
                 self.scene = !self.scene;
 
                 if self.scene == Scene::Expanded && self.content.is_none() {
-                    self.fetch_task = crate::get(&self.link, &format!("/items/{}/content", self.item.item_id), yew::format::Nothing, Message::Nothing).ok();
+                    self.fetch_task = crate::get(&self.link, &format!("/items/{}/content", self.item.item_id), yew::format::Nothing).ok();
                 }
-            }
+            },
+            Self::Message::ToggleRead => {
+                let url = format!("/items/{}", self.item.item_id);
+                let json = serde_json::json!({
+                    "read": !self.item.read,
+                });
+
+                self.fetch_task = crate::patch(&self.link, &url, yew::format::Json(&json)).ok();
+            },
+            Self::Message::UpdateRead => {
+                self.item.read = !self.item.read;
+
+                self.on_read.emit(self.item.clone());
+            },
+            Self::Message::Update(item) => self.item = item,
         }
 
         true
@@ -90,9 +119,7 @@ impl yew::Component for Component {
             Scene::Hidden => "caret-up",
         };
 
-        let window = web_sys::window().expect("no global `window` exists");
-        let document = window.document().expect("should have a document on window");
-        let content = document.create_element("div").unwrap();
+        let content = yew::utils::document().create_element("div").unwrap();
         content.set_inner_html(&self.content.as_ref().unwrap_or(&"Loading...".to_string()));
 
         yew::html! {
@@ -102,13 +129,38 @@ impl yew::Component for Component {
                 <span class="text-muted">{ " · " }{ &self.item.source }</span>
                 <div class="float-right">
                     <span class="text-muted">{ &published_ago }</span>
-                    <span onclick=self.link.callback(|_| Message::Toggle)>
+                    <span onclick=self.link.callback(|_| Message::ToggleContent)>
                         <super::Svg icon=caret size=24 />
                     </span>
                 </div>
+                <div class="float-right">
+                    {
+                        if self.scene == Scene::Hidden {
+                            yew::html! {
+                                <super::Actions
+                                    inline=true
+                                    read=self.item.read
+                                    on_read=self.link.callback(|_| Self::Message::ToggleRead)
+                                />
+                            }
+                        } else {
+                            "".into()
+                        }
+                    }
+                </div>
                 {
                     if self.scene == Scene::Expanded {
-                        yew::virtual_dom::VNode::VRef(content.into())
+                        yew::html! {
+                            <>
+                                { yew::virtual_dom::VNode::VRef(content.into()) }
+
+                                <hr />
+                                <super::Actions
+                                    read=self.item.read
+                                    on_read=self.link.callback(|_| Self::Message::ToggleRead)
+                                />
+                            </>
+                        }
                     } else {
                         "".into()
                     }
@@ -117,7 +169,12 @@ impl yew::Component for Component {
         }
     }
 
-    fn change(&mut self, _: Self::Properties) -> yew::ShouldRender {
-        false
+    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
+        let should_render = self.item != props.value;
+
+        self.item = props.value;
+        self.on_read = props.on_read;
+
+        should_render
     }
 }

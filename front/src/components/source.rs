@@ -8,11 +8,17 @@ pub(crate) enum Message {
     Saved,
 }
 
-impl std::convert::TryFrom<yew::format::Text> for Message {
+impl std::convert::TryFrom<(http::Method, yew::format::Text)> for Message {
     type Error = ();
 
-    fn try_from(_: yew::format::Text) -> Result<Self, Self::Error> {
-        Err(())
+    fn try_from((method, _): (http::Method, yew::format::Text)) -> Result<Self, Self::Error> {
+        let message = match method {
+            http::Method::DELETE => Self::Deleted,
+            http::Method::PUT => Self::Saved,
+            _ => return Err(()),
+        };
+
+        Ok(message)
     }
 }
 
@@ -35,11 +41,11 @@ pub(crate) struct Component {
 
 impl Component {
     fn delete(&mut self) {
-        self.fetch_task = crate::delete(&self.link, &format!("/sources/{}", self.source.source_id.as_ref().unwrap()), yew::format::Nothing, Message::Deleted).ok();
+        self.fetch_task = crate::delete(&self.link, &format!("/sources/{}", self.source.source_id.as_ref().unwrap()), yew::format::Nothing).ok();
     }
 
     fn update(&mut self) {
-        self.fetch_task = crate::put(&self.link, &format!("/sources/{}", self.source.source_id.as_ref().unwrap()), &self.source, Message::Saved).ok();
+        self.fetch_task = crate::put(&self.link, &format!("/sources/{}", self.source.source_id.as_ref().unwrap()), &self.source).ok();
     }
 }
 

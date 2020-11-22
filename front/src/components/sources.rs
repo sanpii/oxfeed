@@ -6,13 +6,12 @@ pub(crate) enum Message {
     Error(String),
     Update(Vec<crate::Source>),
     NeedUpdate,
-    Nothing,
 }
 
-impl std::convert::TryFrom<yew::format::Text> for Message {
+impl std::convert::TryFrom<(http::Method, yew::format::Text)> for Message {
     type Error = ();
 
-    fn try_from(response: yew::format::Text) -> Result<Self, ()> {
+    fn try_from((_, response): (http::Method, yew::format::Text)) -> Result<Self, ()> {
         let data = match response {
             Ok(data) => data,
             Err(err) => return Ok(Self::Error(err.to_string())),
@@ -42,7 +41,7 @@ pub(crate) struct Component {
 
 impl Component {
     fn create(&mut self, source: &crate::Source) {
-        self.fetch_task = crate::post(&self.link, "/sources/", source, Message::Nothing).ok();
+        self.fetch_task = crate::post(&self.link, "/sources/", source).ok();
     }
 }
 
@@ -52,7 +51,7 @@ impl yew::Component for Component {
 
     fn create(_: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         let sources = Vec::new();
-        let fetch_task = crate::get(&link, "/sources/", yew::format::Nothing, Message::Nothing).ok();
+        let fetch_task = crate::get(&link, "/sources/", yew::format::Nothing).ok();
 
         Self {
             fetch_task,
@@ -85,7 +84,7 @@ impl yew::Component for Component {
 
         if matches!(msg, Self::Message::NeedUpdate) {
             self.scene = Scene::View;
-            self.fetch_task = crate::get(&self.link, "/sources/", yew::format::Nothing, Message::Nothing).ok();
+            self.fetch_task = crate::get(&self.link, "/sources/", yew::format::Nothing).ok();
             return false;
         }
 

@@ -19,7 +19,7 @@ impl Into<Result<std::string::String, anyhow::Error>> for &Source {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, serde::Deserialize)]
+#[derive(Clone, Debug, PartialEq, serde::Deserialize, serde::Serialize)]
 struct Item {
     item_id: String,
     icon: Option<String>,
@@ -27,6 +27,15 @@ struct Item {
     title: String,
     published: chrono::DateTime<chrono::Utc>,
     source: String,
+    read: bool,
+}
+
+impl Into<Result<std::string::String, anyhow::Error>> for &Item {
+    fn into(self) -> Result<std::string::String, anyhow::Error> {
+        let json = serde_json::to_string(self)?;
+
+        Ok(json)
+    }
 }
 
 struct Model;
@@ -105,12 +114,11 @@ pub(crate) fn fetch<B, C>(
     link: &yew::ComponentLink<C>,
     url: &str,
     body: B,
-    message: <C as yew::Component>::Message,
 ) -> Result<yew::services::fetch::FetchTask, Box<dyn std::error::Error>>
 where
     B: Into<Result<String, anyhow::Error>>,
     C: yew::Component,
-    <C as yew::Component>::Message: std::convert::TryFrom<yew::format::Text> + Clone,
+    <C as yew::Component>::Message: std::convert::TryFrom<(http::Method, yew::format::Text)> + Clone,
 {
     let request = yew::services::fetch::Request::builder()
         .method(method)
@@ -118,12 +126,16 @@ where
         .header("Content-Type", "application/json")
         .body(body)?;
 
-    let callback = link.callback(
+    let method = request.method().clone();
+
+    let callback = link.batch_callback(
         move |response: yew::services::fetch::Response<yew::format::Text>| {
             use std::convert::TryFrom;
 
-            <C as yew::Component>::Message::try_from(response.into_body())
-                .unwrap_or_else(|_| message.clone())
+            match <C as yew::Component>::Message::try_from((method.clone(), response.into_body())) {
+                Ok(message) => vec![message],
+                Err(_) => Vec::new(),
+            }
         },
     );
 
@@ -138,12 +150,11 @@ macro_rules! decl_fetch {
             link: &yew::ComponentLink<C>,
             url: &str,
             body: B,
-            message: <C as yew::Component>::Message,
         ) -> Result<yew::services::fetch::FetchTask, Box<dyn std::error::Error>>
         where
             B: Into<Result<String, anyhow::Error>>,
             C: yew::Component,
-            <C as yew::Component>::Message: std::convert::TryFrom<yew::format::Text> + Clone,
+            <C as yew::Component>::Message: std::convert::TryFrom<(http::Method, yew::format::Text)> + Clone,
         {
             fetch(&stringify!($method).to_uppercase(), link, url, body)
         }
@@ -152,5 +163,6 @@ macro_rules! decl_fetch {
 
 decl_fetch!(delete);
 decl_fetch!(get);
+decl_fetch!(patch);
 decl_fetch!(post);
 decl_fetch!(put);
