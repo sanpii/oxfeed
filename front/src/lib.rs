@@ -1,5 +1,6 @@
-#![recursion_limit="512"]
+#![recursion_limit="1024"]
 
+mod cha;
 mod components;
 
 #[derive(Clone, Eq, PartialEq, serde::Deserialize)]
@@ -42,6 +43,7 @@ struct Item {
     source: String,
     read: bool,
     favorite: bool,
+    tags: Vec<String>,
 }
 
 impl Into<Result<std::string::String, anyhow::Error>> for &Item {

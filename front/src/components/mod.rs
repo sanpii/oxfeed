@@ -9,6 +9,7 @@ mod sidebar;
 mod source;
 mod sources;
 mod svg;
+mod tag;
 
 pub(crate) use actions::Component as Actions;
 pub(crate) use app::Component as App;
@@ -21,6 +22,7 @@ pub(crate) use sidebar::Component as Sidebar;
 pub(crate) use source::Component as Source;
 pub(crate) use sources::Component as Sources;
 pub(crate) use svg::Component as Svg;
+pub(crate) use tag::Component as Tag;
 
 macro_rules! decl_items {
     ($name:ident) => {

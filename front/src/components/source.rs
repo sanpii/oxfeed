@@ -156,9 +156,7 @@ impl yew::Component for Component {
                         <div class="tags">
                         {
                             for source.tags.iter().map(|tag| {
-                                yew::html! {
-                                    <span class=("badge", "badge-secondary")>{ tag }</span>
-                                }
+                                yew::html! { <super::Tag value=tag /> }
                             })
                         }
                         </div>

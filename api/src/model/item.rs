@@ -8,6 +8,7 @@ pub struct Item {
     pub icon: Option<String>,
     pub read: bool,
     pub favorite: bool,
+    pub tags: Vec<String>,
 }
 
 #[derive(elephantry::Entity, serde::Serialize)]
@@ -32,7 +33,7 @@ impl<'a> Model<'a> {
     pub fn all(&self, filter: &str, page: usize, max_per_page: usize) -> elephantry::Result<elephantry::Pager<Item>> {
         let query = format!(r#"
 select item.item_id, item.link, item.published, item.title, item.icon,
-        item.read, item.favorite, source.title as source
+        item.read, item.favorite, source.title as source, source.tags as tags
     from item
     join source using (source_id)
     where {}

@@ -132,6 +132,11 @@ impl yew::Component for Component {
             <>
                 <img src=self.item.icon.as_ref().unwrap_or(&empty_img) width="16" height="16" />
                 <a href=self.item.link.clone() target="_blank">{ &self.item.title }</a>
+                {
+                    for self.item.tags.iter().map(|tag| {
+                        yew::html! { <super::Tag value=tag /> }
+                    })
+                }
                 <span class="text-muted">{ " · " }{ &self.item.source }</span>
                 <div class="float-right">
                     <span class="text-muted">{ &published_ago }</span>
