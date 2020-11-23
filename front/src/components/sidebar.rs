@@ -66,6 +66,12 @@ impl yew::Component for Component {
                 label: "Sources",
                 url: "/sources",
             },
+            Link {
+                count: 0,
+                icon: "sliders",
+                label: "Settings",
+                url: "/settings",
+            },
         ];
 
         Self {

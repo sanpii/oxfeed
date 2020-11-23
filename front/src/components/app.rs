@@ -2,6 +2,8 @@
 enum Route {
     #[to = "/favorites"]
     Favorites,
+    #[to = "/settings"]
+    Settings,
     #[to = "/sources"]
     Sources,
     #[to = "/unread"]
@@ -52,6 +54,7 @@ impl yew::Component for Component {
                                     match switch {
                                         Route::All => yew::html!{<super::All pagination=pagination />},
                                         Route::Favorites => yew::html!{<super::Favorites pagination=pagination />},
+                                        Route::Settings => yew::html!{<super::Settings />},
                                         Route::Sources => yew::html!{<super::Sources pagination=pagination />},
                                         Route::Unread => yew::html!{<super::Unread pagination=pagination />},
                                     }

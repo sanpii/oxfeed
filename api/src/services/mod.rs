@@ -1,3 +1,12 @@
+pub(crate) mod item;
+pub(crate) mod opml;
+pub(crate) mod source;
+
+pub(crate) fn scope() -> actix_web::Scope {
+    actix_web::web::scope("/")
+        .service(counts)
+}
+
 #[derive(serde::Deserialize)]
 pub struct Pagination {
     pub page: usize,
@@ -7,14 +16,6 @@ pub struct Pagination {
 
 fn default_limit() -> usize {
     25
-}
-
-pub(crate) mod item;
-pub(crate) mod source;
-
-pub(crate) fn scope() -> actix_web::Scope {
-    actix_web::web::scope("/")
-        .service(counts)
 }
 
 #[derive(elephantry::Entity, serde::Serialize)]

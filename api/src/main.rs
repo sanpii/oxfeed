@@ -27,6 +27,7 @@ async fn main() -> std::io::Result<()> {
             .data(elephantry)
             .wrap(cors)
             .service(services::item::scope())
+            .service(services::opml::scope())
             .service(services::source::scope())
             .service(services::scope())
     })
