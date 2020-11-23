@@ -52,6 +52,14 @@ impl Into<Result<std::string::String, anyhow::Error>> for &Item {
     }
 }
 
+#[derive(Clone, serde::Deserialize)]
+struct Counts {
+    all: usize,
+    favorites: usize,
+    sources: usize,
+    unread: usize,
+}
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 struct Pagination {
     page: usize,
@@ -79,23 +87,6 @@ impl std::str::FromStr for Pagination {
 
         Ok(pagination)
     }
-}
-
-macro_rules! decl_fetch {
-    ($method:ident) => {
-        pub(crate) fn $method<B, C>(
-            link: &yew::ComponentLink<C>,
-            url: &str,
-            body: B,
-        ) -> Result<yew::services::fetch::FetchTask, Box<dyn std::error::Error>>
-        where
-            B: Into<Result<String, anyhow::Error>>,
-            C: yew::Component,
-            <C as yew::Component>::Message: std::convert::TryFrom<(http::Method, yew::format::Text)> + Clone,
-        {
-            fetch(&stringify!($method).to_uppercase(), link, url, body)
-        }
-    };
 }
 
 struct App;
@@ -138,6 +129,24 @@ pub fn run_app() {
     yew::App::<App>::new().mount_to_body();
 }
 
+macro_rules! decl_fetch {
+    ($method:ident) => {
+        pub(crate) fn $method<B, C>(
+            link: &yew::ComponentLink<C>,
+            url: &str,
+            body: B,
+        ) -> Result<yew::services::fetch::FetchTask, Box<dyn std::error::Error>>
+        where
+            B: Into<Result<String, anyhow::Error>>,
+            C: yew::Component,
+            <C as yew::Component>::Message: std::convert::TryFrom<(http::Method, yew::format::Text)> + Clone,
+            <<C as yew::Component>::Message as std::convert::TryFrom<(http::Method, std::result::Result<std::string::String, anyhow::Error>)>>::Error: std::fmt::Debug,
+        {
+            fetch(&stringify!($method).to_uppercase(), link, url, body)
+        }
+    };
+}
+
 pub(crate) fn fetch<B, C>(
     method: &str,
     link: &yew::ComponentLink<C>,
@@ -148,6 +157,7 @@ where
     B: Into<Result<String, anyhow::Error>>,
     C: yew::Component,
     <C as yew::Component>::Message: std::convert::TryFrom<(http::Method, yew::format::Text)> + Clone,
+    <<C as yew::Component>::Message as std::convert::TryFrom<(http::Method, std::result::Result<std::string::String, anyhow::Error>)>>::Error: std::fmt::Debug,
 {
     let request = yew::services::fetch::Request::builder()
         .method(method)
@@ -163,7 +173,10 @@ where
 
             match <C as yew::Component>::Message::try_from((method.clone(), response.into_body())) {
                 Ok(message) => vec![message],
-                Err(_) => Vec::new(),
+                Err(err) => {
+                    log::error!("{:?}", err);
+                    Vec::new()
+                },
             }
         },
     );

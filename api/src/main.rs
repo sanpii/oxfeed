@@ -28,6 +28,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .service(services::item::scope())
             .service(services::source::scope())
+            .service(services::scope())
     })
     .bind(&bind)?
     .run()
