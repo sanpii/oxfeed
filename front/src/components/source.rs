@@ -133,7 +133,7 @@ impl yew::Component for Component {
                 yew::html! {
                     <>
                         <div class="d-inline-flex">
-                            <h4>{ source.title.as_ref().unwrap_or(&source.url) }</h4>
+                            { source.title.as_ref().unwrap_or(&source.url) }
                         </div>
 
                         <div class=("btn-group", "float-right")>
@@ -142,14 +142,14 @@ impl yew::Component for Component {
                                 title="Edit"
                                 onclick=self.link.callback(move |_| Message::Edit)
                             >
-                                <super::Svg icon="pencil-square" size=24 />
+                                <super::Svg icon="pencil-square" size=16 />
                             </button>
                             <button
                                 class=("btn", "btn-danger")
                                 title="Delete"
                                 onclick=self.link.callback(|_| Message::Delete)
                             >
-                                <super::Svg icon="trash" size=24 />
+                                <super::Svg icon="trash" size=16 />
                             </button>
                         </div>
 
