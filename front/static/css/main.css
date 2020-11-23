@@ -31,6 +31,10 @@ li.list-group-item:hover .float-right .favorite {
     display: none;
 }
 
+.tags .badge {
+    font-size: 1rem;
+}
+
 /*
  * Sidebar
  */

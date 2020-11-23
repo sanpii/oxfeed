@@ -20,6 +20,7 @@ struct Pager<T: Clone + Eq + PartialEq> {
 struct Source {
     source_id: Option<String>,
     title: Option<String>,
+    tags: Vec<String>,
     url: String,
 }
 

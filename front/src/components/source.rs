@@ -132,7 +132,9 @@ impl yew::Component for Component {
 
                 yew::html! {
                     <>
-                        { source.title.as_ref().unwrap_or(&source.url) }
+                        <div class="d-inline-flex">
+                            <h4>{ source.title.as_ref().unwrap_or(&source.url) }</h4>
+                        </div>
 
                         <div class=("btn-group", "float-right")>
                             <button
@@ -149,6 +151,16 @@ impl yew::Component for Component {
                             >
                                 <super::Svg icon="trash" size=24 />
                             </button>
+                        </div>
+
+                        <div class="tags">
+                        {
+                            for source.tags.iter().map(|tag| {
+                                yew::html! {
+                                    <span class=("badge", "badge-secondary")>{ tag }</span>
+                                }
+                            })
+                        }
                         </div>
                     </>
                 }

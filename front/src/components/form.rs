@@ -1,6 +1,7 @@
 pub(crate) enum Message {
     Cancel,
     Submit,
+    UpdateTags(String),
     UpdateTitle(String),
     UpdateUrl(String),
 }
@@ -32,6 +33,7 @@ impl yew::Component for Component {
         match msg {
             Self::Message::Cancel => self.props.oncancel.emit(()),
             Self::Message::Submit => self.props.onsubmit.emit(self.props.source.clone()),
+            Self::Message::UpdateTags(tags) => self.props.source.tags = tags.split(',').map(|x| x.trim().to_string()).collect(),
             Self::Message::UpdateTitle(title) => self.props.source.title = if title.is_empty() {
                 None
             } else {
@@ -65,6 +67,16 @@ impl yew::Component for Component {
                         required=true
                         value={ &self.props.source.url }
                         oninput=self.link.callback(|e: yew::InputData| Message::UpdateUrl(e.value))
+                    />
+                </div>
+
+                <div class="from-group">
+                    <label for="tags">{ "Tags" }</label>
+                    <input
+                        class="form-control"
+                        name="tags"
+                        value={ &self.props.source.tags.clone().join(",") }
+                        oninput=self.link.callback(|e: yew::InputData| Message::UpdateTags(e.value))
                     />
                 </div>
 
