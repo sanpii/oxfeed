@@ -2,7 +2,19 @@
 
 mod components;
 
-use components::*;
+#[derive(Clone, Eq, PartialEq, serde::Deserialize)]
+struct Pager<T: Clone + Eq + PartialEq> {
+    result_count: usize,
+    result_min: usize,
+    result_max: usize,
+    last_page: usize,
+    page: usize,
+    has_next_page: bool,
+    has_previous_page: bool,
+    count: usize,
+    max_per_page: usize,
+    iterator: Vec<T>,
+}
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 struct Source {
@@ -17,20 +29,6 @@ impl Into<Result<std::string::String, anyhow::Error>> for &Source {
 
         Ok(json)
     }
-}
-
-#[derive(Clone, Eq, PartialEq, serde::Deserialize)]
-struct Pager<T: Clone + Eq + PartialEq> {
-    result_count: usize,
-    result_min: usize,
-    result_max: usize,
-    last_page: usize,
-    page: usize,
-    has_next_page: bool,
-    has_previous_page: bool,
-    count: usize,
-    max_per_page: usize,
-    iterator: Vec<T>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
@@ -51,18 +49,6 @@ impl Into<Result<std::string::String, anyhow::Error>> for &Item {
 
         Ok(json)
     }
-}
-
-#[derive(yew_router::Switch, Clone)]
-enum Route {
-    #[to = "/favorites"]
-    Favorites,
-    #[to = "/sources"]
-    Sources,
-    #[to = "/unread"]
-    Unread,
-    #[to = "/"]
-    All,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -94,62 +80,45 @@ impl std::str::FromStr for Pagination {
     }
 }
 
-struct Model {
-    pagination: Pagination,
+macro_rules! decl_fetch {
+    ($method:ident) => {
+        pub(crate) fn $method<B, C>(
+            link: &yew::ComponentLink<C>,
+            url: &str,
+            body: B,
+        ) -> Result<yew::services::fetch::FetchTask, Box<dyn std::error::Error>>
+        where
+            B: Into<Result<String, anyhow::Error>>,
+            C: yew::Component,
+            <C as yew::Component>::Message: std::convert::TryFrom<(http::Method, yew::format::Text)> + Clone,
+        {
+            fetch(&stringify!($method).to_uppercase(), link, url, body)
+        }
+    };
 }
 
-impl yew::Component for Model {
+struct App;
+
+impl yew::Component for App {
     type Message = ();
     type Properties = ();
 
     fn create(_: Self::Properties, _: yew::ComponentLink<Self>) -> Self {
-        let router = yew_router::service::RouteService::<()>::new();
-        let pagination = router.get_query().trim_start_matches('?').parse().unwrap();
-
-        Self {
-            pagination,
-        }
+        Self
     }
 
     fn update(&mut self, _: Self::Message) -> yew::ShouldRender {
-        true
-    }
-
-    fn view(&self) -> yew::Html {
-        use yew_router::router::Router;
-
-        let pagination = self.pagination;
-
-        yew::html! {
-            <>
-                <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-                    <Header />
-                </nav>
-                <div class="container-fluid">
-                    <div class="row">
-                        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-                            <Sidebar />
-                        </nav>
-                        <main class="col-md-9 ml-sm-auto col-lg-10">
-                            <Router<Route, ()>
-                                render = yew_router::router::Router::render(move |switch: Route| {
-                                    match switch {
-                                        Route::All => yew::html!{<All pagination=pagination />},
-                                        Route::Favorites => yew::html!{<Favorites pagination=pagination />},
-                                        Route::Sources => yew::html!{<Sources pagination=pagination />},
-                                        Route::Unread => yew::html!{<Unread pagination=pagination />},
-                                    }
-                                })
-                            />
-                        </main>
-                    </div>
-                </div>
-            </>
-        }
+        false
     }
 
     fn change(&mut self, _: Self::Properties) -> yew::ShouldRender {
         false
+    }
+
+    fn view(&self) -> yew::Html {
+        yew::html! {
+            <components::App />
+        }
     }
 }
 
@@ -165,7 +134,7 @@ pub fn run_app() {
 
     wasm_logger::init(wasm_logger::Config::new(log::Level::Debug));
     yew::initialize();
-    yew::App::<Model>::new().mount_to_body();
+    yew::App::<App>::new().mount_to_body();
 }
 
 pub(crate) fn fetch<B, C>(
@@ -201,23 +170,6 @@ where
     let fetch_task = yew::services::FetchService::fetch(request, callback)?;
 
     Ok(fetch_task)
-}
-
-macro_rules! decl_fetch {
-    ($method:ident) => {
-        pub(crate) fn $method<B, C>(
-            link: &yew::ComponentLink<C>,
-            url: &str,
-            body: B,
-        ) -> Result<yew::services::fetch::FetchTask, Box<dyn std::error::Error>>
-        where
-            B: Into<Result<String, anyhow::Error>>,
-            C: yew::Component,
-            <C as yew::Component>::Message: std::convert::TryFrom<(http::Method, yew::format::Text)> + Clone,
-        {
-            fetch(&stringify!($method).to_uppercase(), link, url, body)
-        }
-    };
 }
 
 decl_fetch!(delete);

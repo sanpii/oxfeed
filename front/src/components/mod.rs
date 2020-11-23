@@ -1,4 +1,5 @@
 mod actions;
+mod app;
 mod header;
 mod form;
 mod item;
@@ -10,6 +11,7 @@ mod sources;
 mod svg;
 
 pub(crate) use actions::Component as Actions;
+pub(crate) use app::Component as App;
 pub(crate) use form::Component as Form;
 pub(crate) use header::Component as Header;
 pub(crate) use item::Component as Item;
