@@ -106,8 +106,12 @@ impl yew::Component for Component {
     fn view(&self) -> yew::Html {
         let pager = match &self.pager {
             Some(pager) => pager,
-            None => return "".into(),
+            None => return "Nothing found".into(),
         };
+
+        if pager.iterator.is_empty() {
+            return "Nothing found".into();
+        }
 
         let add = match &self.scene {
             Scene::View => yew::html! {
