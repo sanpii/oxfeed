@@ -2,6 +2,7 @@
 pub(crate) struct Source {
     source_id: Option<uuid::Uuid>,
     url: String,
+    title: Option<String>,
     #[serde(default)]
     tags: Vec<String>,
 }
@@ -13,7 +14,11 @@ impl std::convert::TryInto<crate::model::source::Entity> for Source {
         let contents = attohttpc::get(&self.url).send()?.text()?;
         let feed = feed_rs::parser::parse(contents.as_bytes())?;
 
-        let mut title = feed.title.map(|x| x.content);
+        let mut title = self.title;
+
+        if title.is_none() {
+            title = feed.title.map(|x| x.content);
+        }
 
         if title.is_none() {
             for link in feed.links {

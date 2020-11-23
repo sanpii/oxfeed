@@ -3,9 +3,8 @@ create extension if not exists "uuid-ossp";
 create table source (
     source_id uuid primary key default uuid_generate_v4(),
     url text not null unique,
-    title text,
-    tags text[] not null,
-    type text
+    title text not null,
+    tags text[] not null
 );
 
 create table item (

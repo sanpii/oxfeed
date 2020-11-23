@@ -1,6 +1,7 @@
 pub(crate) enum Message {
     Cancel,
     Submit,
+    UpdateTitle(String),
     UpdateUrl(String),
 }
 
@@ -31,6 +32,11 @@ impl yew::Component for Component {
         match msg {
             Self::Message::Cancel => self.props.oncancel.emit(()),
             Self::Message::Submit => self.props.onsubmit.emit(self.props.source.clone()),
+            Self::Message::UpdateTitle(title) => self.props.source.title = if title.is_empty() {
+                None
+            } else {
+                Some(title)
+            },
             Self::Message::UpdateUrl(url) => self.props.source.url = url,
         }
 
@@ -40,6 +46,17 @@ impl yew::Component for Component {
     fn view(&self) -> yew::Html {
         yew::html! {
             <form>
+                <div class="from-group">
+                    <label for="title">{ "Title" }</label>
+                    <input
+                        class="form-control"
+                        name="title"
+                        value={ &self.props.source.title.clone().unwrap_or_default() }
+                        oninput=self.link.callback(|e: yew::InputData| Message::UpdateTitle(e.value))
+                    />
+                    <small class="form-text text-muted">{ "Leave empty to use the feed title." }</small>
+                </div>
+
                 <div class="from-group">
                     <label for="url">{ "Feed URL" }</label>
                     <input

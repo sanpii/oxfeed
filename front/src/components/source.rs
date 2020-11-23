@@ -4,17 +4,23 @@ pub(crate) enum Message {
     Delete,
     Deleted,
     Edit,
+    Error(String),
     Save(crate::Source),
-    Saved,
+    Saved(crate::Source),
 }
 
 impl std::convert::TryFrom<(http::Method, yew::format::Text)> for Message {
     type Error = ();
 
-    fn try_from((method, _): (http::Method, yew::format::Text)) -> Result<Self, Self::Error> {
+    fn try_from((method, response): (http::Method, yew::format::Text)) -> Result<Self, ()> {
+        let data = match response {
+            Ok(data) => data,
+            Err(err) => return Ok(Self::Error(err.to_string())),
+        };
+
         let message = match method {
             http::Method::DELETE => Self::Deleted,
-            http::Method::PUT => Self::Saved,
+            http::Method::PUT => Self::Saved(serde_json::from_str(&data).map_err(|_| ())?),
             _ => return Err(()),
         };
 
@@ -63,6 +69,11 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        if let Self::Message::Error(error) = msg {
+            log::error!("{}", error);
+            return false;
+        }
+
         match self.scene {
             Scene::View => match msg {
                 Self::Message::Delete => {
@@ -95,7 +106,8 @@ impl yew::Component for Component {
                     self.update();
                     return true;
                 },
-                Self::Message::Saved => {
+                Self::Message::Saved(source) => {
+                    self.source = source.clone();
                     self.scene = Scene::View;
                     return true;
                 },
