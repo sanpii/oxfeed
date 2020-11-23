@@ -22,7 +22,7 @@ features = ["serde"]
 
 [dependencies.elephantry]
 version = "1.1"
-features = ["date", "numeric", "uuid"]
+features = ["date", "numeric", "uuid", "serde-support"]
 
 [dependencies.uuid]
 version = "0.8"

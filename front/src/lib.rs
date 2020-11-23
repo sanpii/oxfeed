@@ -4,7 +4,7 @@ mod components;
 
 use components::*;
 
-#[derive(Clone, Debug, Default, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 struct Source {
     source_id: Option<String>,
     title: Option<String>,
@@ -19,7 +19,21 @@ impl Into<Result<std::string::String, anyhow::Error>> for &Source {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, Eq, PartialEq, serde::Deserialize)]
+struct Pager<T: Clone + Eq + PartialEq> {
+    result_count: usize,
+    result_min: usize,
+    result_max: usize,
+    last_page: usize,
+    page: usize,
+    has_next_page: bool,
+    has_previous_page: bool,
+    count: usize,
+    max_per_page: usize,
+    iterator: Vec<T>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 struct Item {
     item_id: String,
     icon: Option<String>,
@@ -39,8 +53,6 @@ impl Into<Result<std::string::String, anyhow::Error>> for &Item {
     }
 }
 
-struct Model;
-
 #[derive(yew_router::Switch, Clone)]
 enum Route {
     #[to = "/favorites"]
@@ -49,8 +61,41 @@ enum Route {
     Sources,
     #[to = "/unread"]
     Unread,
-    #[to = "/!"]
+    #[to = "/"]
     All,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+struct Pagination {
+    page: usize,
+    limit: usize,
+}
+
+impl std::str::FromStr for Pagination {
+    type Err = std::num::ParseIntError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut pagination = Pagination {
+            page: 1,
+            limit: 25,
+        };
+
+        for args in s.split('&') {
+            let tokens = args.split("=").collect::<Vec<_>>();
+
+            match tokens[0] {
+                "page" => pagination.page = tokens[1].parse()?,
+                "limit" => pagination.limit = tokens[1].parse()?,
+                _ => continue,
+            }
+        }
+
+        Ok(pagination)
+    }
+}
+
+struct Model {
+    pagination: Pagination,
 }
 
 impl yew::Component for Model {
@@ -58,7 +103,12 @@ impl yew::Component for Model {
     type Properties = ();
 
     fn create(_: Self::Properties, _: yew::ComponentLink<Self>) -> Self {
-        Self
+        let router = yew_router::service::RouteService::<()>::new();
+        let pagination = router.get_query().trim_start_matches('?').parse().unwrap();
+
+        Self {
+            pagination,
+        }
     }
 
     fn update(&mut self, _: Self::Message) -> yew::ShouldRender {
@@ -67,6 +117,8 @@ impl yew::Component for Model {
 
     fn view(&self) -> yew::Html {
         use yew_router::router::Router;
+
+        let pagination = self.pagination;
 
         yew::html! {
             <>
@@ -80,12 +132,12 @@ impl yew::Component for Model {
                         </nav>
                         <main class="col-md-9 ml-sm-auto col-lg-10">
                             <Router<Route, ()>
-                                render = yew_router::router::Router::render(|switch: Route| {
+                                render = yew_router::router::Router::render(move |switch: Route| {
                                     match switch {
-                                        Route::All => yew::html!{<All />},
-                                        Route::Favorites => yew::html!{<Favorites />},
-                                        Route::Sources => yew::html!{<Sources />},
-                                        Route::Unread => yew::html!{<Unread />},
+                                        Route::All => yew::html!{<All pagination=pagination />},
+                                        Route::Favorites => yew::html!{<Favorites pagination=pagination />},
+                                        Route::Sources => yew::html!{<Sources pagination=pagination />},
+                                        Route::Unread => yew::html!{<Unread pagination=pagination />},
                                     }
                                 })
                             />

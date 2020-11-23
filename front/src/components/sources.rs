@@ -1,10 +1,10 @@
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub(crate) enum Message {
     Add,
     Cancel,
     Create(crate::Source),
     Error(String),
-    Update(Vec<crate::Source>),
+    Update(crate::Pager<crate::Source>),
     NeedUpdate,
 }
 
@@ -18,7 +18,7 @@ impl std::convert::TryFrom<(http::Method, yew::format::Text)> for Message {
         };
 
         let message = match serde_json::from_str(&data) {
-            Ok(sources) => Self::Update(sources),
+            Ok(pager) => Self::Update(pager),
             Err(_) => Self::NeedUpdate,
         };
 
@@ -32,38 +32,50 @@ enum Scene {
     View,
 }
 
+#[derive(Clone, yew::Properties)]
+pub(crate) struct Properties {
+    pub pagination: crate::Pagination,
+}
+
 pub(crate) struct Component {
     fetch_task: Option<yew::services::fetch::FetchTask>,
     link: yew::ComponentLink<Self>,
     scene: Scene,
-    sources: Vec<crate::Source>,
+    pager: Option<crate::Pager<crate::Source>>,
+    pagination: crate::Pagination,
 }
 
 impl Component {
     fn create(&mut self, source: &crate::Source) {
         self.fetch_task = crate::post(&self.link, "/sources/", source).ok();
     }
+
+    fn fetch(&mut self) -> Option<yew::services::fetch::FetchTask> {
+        let url = format!("/sources/?page={}&limit={}", self.pagination.page, self.pagination.limit);
+
+        crate::get(&self.link, &url, yew::format::Nothing).ok()
+    }
 }
 
 impl yew::Component for Component {
+    type Properties = Properties;
     type Message = Message;
-    type Properties = ();
 
-    fn create(_: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        let sources = Vec::new();
-        let fetch_task = crate::get(&link, "/sources/", yew::format::Nothing).ok();
-
-        Self {
-            fetch_task,
+    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+        let mut component = Self {
+            fetch_task: None,
             link,
             scene: Scene::View,
-            sources,
-        }
+            pager: None,
+            pagination: props.pagination,
+        };
+
+        component.fetch_task = component.fetch();
+
+        component
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
-        log::debug!("<Sources /> {:?} => {:?}", self.scene, msg);
-
         if let Self::Message::Error(error) = msg {
             log::error!("{:?}", error);
             return true;
@@ -72,7 +84,7 @@ impl yew::Component for Component {
         match &self.scene {
             Scene::View => match msg {
                 Self::Message::Add => self.scene = Scene::Add,
-                Self::Message::Update(ref sources) => self.sources = sources.clone(),
+                Self::Message::Update(ref pager) => self.pager = Some(pager.clone()),
                 _ => (),
             },
             Scene::Add => match msg {
@@ -84,7 +96,7 @@ impl yew::Component for Component {
 
         if matches!(msg, Self::Message::NeedUpdate) {
             self.scene = Scene::View;
-            self.fetch_task = crate::get(&self.link, "/sources/", yew::format::Nothing).ok();
+            self.fetch_task = self.fetch();
             return false;
         }
 
@@ -92,6 +104,11 @@ impl yew::Component for Component {
     }
 
     fn view(&self) -> yew::Html {
+        let pager = match &self.pager {
+            Some(pager) => pager,
+            None => return "".into(),
+        };
+
         let add = match &self.scene {
             Scene::View => yew::html! {
                 <a
@@ -117,18 +134,23 @@ impl yew::Component for Component {
                 { add }
                 <ul class="list-group">
                 {
-                    for self.sources.iter().map(|source| {
+                    for pager.iterator.iter().map(|source| {
                         yew::html! {
                             <li class="list-group-item"><super::Source value=source /></li>
                         }
                     })
                 }
                 </ul>
+                <super::Pager<crate::Source> value=pager />
             </>
         }
     }
 
-    fn change(&mut self, _: Self::Properties) -> yew::ShouldRender {
-        false
+    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
+        let should_render = self.pagination != props.pagination;
+
+        self.pagination = props.pagination;
+
+        should_render
     }
 }

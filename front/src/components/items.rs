@@ -2,7 +2,7 @@
 pub(crate) enum Message {
     Error(String),
     NeedUpdate,
-    Update(Vec<crate::Item>),
+    Update(crate::Pager<crate::Item>),
     Updated(crate::Item),
 }
 
@@ -28,6 +28,7 @@ impl std::convert::TryFrom<(http::Method, yew::format::Text)> for Message {
 pub(crate) struct Properties {
     #[prop_or_default]
     pub filter: String,
+    pub pagination: crate::Pagination,
     #[prop_or_default]
     pub on_update: yew::Callback<crate::Item>,
 }
@@ -35,18 +36,20 @@ pub(crate) struct Properties {
 pub(crate) struct Component {
     fetch_task: Option<yew::services::fetch::FetchTask>,
     url: String,
-    items: Vec<crate::Item>,
+    pager: Option<crate::Pager<crate::Item>>,
     link: yew::ComponentLink<Self>,
     on_update: yew::Callback<crate::Item>,
 }
 
 impl Component {
-    fn url(filter: &str) -> String {
-        if filter == "all" {
+    fn url(filter: &str, pagination: &crate::Pagination) -> String {
+        let url = if filter == "all" {
             "/items/".to_string()
         } else {
             format!("/items/{}", filter)
-        }
+        };
+
+        format!("{}?page={}&limit={}", url, pagination.page, pagination.limit)
     }
 }
 
@@ -55,13 +58,12 @@ impl yew::Component for Component {
     type Properties = Properties;
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        let items = Vec::new();
-        let url = Self::url(&props.filter);
+        let url = Self::url(&props.filter, &props.pagination);
         let fetch_task = crate::get(&link, &url, yew::format::Nothing).ok();
 
         Self {
             fetch_task,
-            items,
+            pager: None,
             link,
             url,
             on_update: props.on_update,
@@ -78,7 +80,7 @@ impl yew::Component for Component {
                 self.fetch_task = crate::get(&self.link, &self.url, yew::format::Nothing).ok();
                 return false;
             },
-            Self::Message::Update(ref items) => self.items = items.clone(),
+            Self::Message::Update(ref pager) => self.pager = Some(pager.clone()),
             Self::Message::Updated(item) => self.on_update.emit(item),
         }
 
@@ -86,26 +88,34 @@ impl yew::Component for Component {
     }
 
     fn view(&self) -> yew::Html {
+        let pager = match &self.pager {
+            Some(pager) => pager,
+            None => return "".into(),
+        };
+
         yew::html! {
-            <ul class="list-group">
-            {
-                for self.items.iter().map(|item| {
-                    yew::html! {
-                        <li class="list-group-item">
-                            <super::Item
-                                value=item
-                                on_read=self.link.callback(|e| Self::Message::Updated(e))
-                            />
-                        </li>
-                    }
-                })
-            }
-            </ul>
+            <>
+                <ul class="list-group">
+                {
+                    for pager.iterator.iter().map(|item| {
+                        yew::html! {
+                            <li class="list-group-item">
+                                <super::Item
+                                    value=item
+                                    on_read=self.link.callback(|e| Self::Message::Updated(e))
+                                />
+                            </li>
+                        }
+                    })
+                }
+                </ul>
+                <super::Pager<crate::Item> value=pager />
+            </>
         }
     }
 
     fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-        let url = Self::url(&props.filter);
+        let url = Self::url(&props.filter, &props.pagination);
         let should_render = self.url != url;
 
         self.url = url;

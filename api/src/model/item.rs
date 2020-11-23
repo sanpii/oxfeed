@@ -29,7 +29,7 @@ pub struct Model<'a> {
 }
 
 impl<'a> Model<'a> {
-    pub fn all(&self, filter: &str) -> elephantry::Result<elephantry::Rows<Item>> {
+    pub fn all(&self, filter: &str, page: usize, max_per_page: usize) -> elephantry::Result<elephantry::Pager<Item>> {
         let query = format!(r#"
 select item.item_id, item.link, item.published, item.title, item.icon,
         item.read, item.favorite, source.title as source
@@ -37,9 +37,23 @@ select item.item_id, item.link, item.published, item.title, item.icon,
     join source using (source_id)
     where {}
     order by published desc
+    offset {} fetch first {} rows only
+        "#, filter, (page - 1) * max_per_page, max_per_page);
+
+        let rows = self.connection.query::<Item>(&query, &[])?;
+
+        let query = format!(r#"
+select count(*)
+    from item
+    join source using (source_id)
+    where {}
         "#, filter);
 
-        self.connection.query::<Item>(&query, &[])
+        let count = self.connection.query_one::<i64>(&query, &[])?;
+
+        let pager = elephantry::Pager::new(rows, count as usize, page, max_per_page);
+
+        Ok(pager)
     }
 }
 

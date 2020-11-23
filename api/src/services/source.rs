@@ -11,8 +11,8 @@ pub(crate) fn scope() -> actix_web::Scope {
 }
 
 #[actix_web::get("/")]
-async fn all(elephantry: Data<elephantry::Pool>) -> crate::Result {
-    let sources = elephantry.find_all::<Model>("order by title".into())?.collect::<Vec<_>>();
+async fn all(elephantry: Data<elephantry::Pool>, pagination: actix_web::web::Query<super::Pagination>) -> crate::Result {
+    let sources = elephantry.paginate_find_where::<Model>("true", &[], pagination.limit, pagination.page, "order by title".into())?;
     let response = actix_web::HttpResponse::Ok().json(sources);
 
     Ok(response)

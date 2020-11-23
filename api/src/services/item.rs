@@ -12,23 +12,23 @@ pub(crate) fn scope() -> actix_web::Scope {
 }
 
 #[actix_web::get("/")]
-async fn all(elephantry: Data<elephantry::Pool>) -> crate::Result {
-    fetch(&elephantry, "true")
+async fn all(elephantry: Data<elephantry::Pool>, pagination: actix_web::web::Query<super::Pagination>) -> crate::Result {
+    fetch(&elephantry, "true", &pagination.into_inner())
 }
 
 #[actix_web::get("/favorites")]
-async fn favorites(elephantry: Data<elephantry::Pool>) -> crate::Result {
-    fetch(&elephantry, "favorite")
+async fn favorites(elephantry: Data<elephantry::Pool>, pagination: actix_web::web::Query<super::Pagination>) -> crate::Result {
+    fetch(&elephantry, "favorite", &pagination.into_inner())
 }
 
 #[actix_web::get("/unread")]
-async fn unread(elephantry: Data<elephantry::Pool>) -> crate::Result {
-    fetch(&elephantry, "not read")
+async fn unread(elephantry: Data<elephantry::Pool>, pagination: actix_web::web::Query<super::Pagination>) -> crate::Result {
+    fetch(&elephantry, "not read", &pagination.into_inner())
 }
 
-fn fetch(elephantry: &elephantry::Pool, filter: &str) -> crate::Result {
+fn fetch(elephantry: &elephantry::Pool, filter: &str, pagination: &super::Pagination) -> crate::Result {
     let model = elephantry.model::<Model>();
-    let items = model.all(filter)?.collect::<Vec<_>>();
+    let items = model.all(filter, pagination.page, pagination.limit)?;
     let response = actix_web::HttpResponse::Ok().json(items);
 
     Ok(response)
