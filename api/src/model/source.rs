@@ -6,6 +6,32 @@ pub struct Entity {
     pub url: String,
 }
 
+impl std::convert::TryFrom<&opml::Outline> for Entity {
+    type Error = ();
+
+    fn try_from(outline: &opml::Outline) -> Result<Self, Self::Error> {
+        let url = match &outline.xml_url {
+            Some(url) => url.clone(),
+            None => return Err(()),
+        };
+
+        let mut tags = Vec::new();
+
+        if let Some(category) = &outline.category {
+            tags.push(category.clone());
+        }
+
+        let entity = Self {
+            source_id: None,
+            title: outline.text.clone(),
+            tags,
+            url,
+        };
+
+        Ok(entity)
+    }
+}
+
 pub struct Model;
 
 impl elephantry::Model<'_> for Model {
