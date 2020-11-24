@@ -13,7 +13,7 @@ pub(crate) fn scope() -> actix_web::Scope {
         .service(all)
 }
 
-#[actix_web::get("/")]
+#[actix_web::get("")]
 async fn all(elephantry: Data<elephantry::Pool>, pagination: actix_web::web::Query<super::Pagination>) -> crate::Result {
     fetch(&elephantry, "true", &pagination.into_inner())
 }

@@ -47,11 +47,11 @@ pub(crate) struct Component {
 
 impl Component {
     fn create(&mut self, source: &crate::Source) {
-        self.fetch_task = crate::post(&self.link, "/sources/", source).ok();
+        self.fetch_task = crate::post(&self.link, "/sources", source).ok();
     }
 
     fn fetch(&mut self) -> Option<yew::services::fetch::FetchTask> {
-        let url = format!("/sources/?page={}&limit={}", self.pagination.page, self.pagination.limit);
+        let url = format!("/sources?page={}&limit={}", self.pagination.page, self.pagination.limit);
 
         crate::get(&self.link, &url, yew::format::Nothing).ok()
     }

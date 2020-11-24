@@ -42,7 +42,7 @@ pub(crate) struct Component {
 impl Component {
     fn url(filter: &str, pagination: &crate::Pagination) -> String {
         let url = if filter == "all" {
-            "/items/".to_string()
+            "/items".to_string()
         } else {
             format!("/items/{}", filter)
         };

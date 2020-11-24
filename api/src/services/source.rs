@@ -3,14 +3,14 @@ use actix_web::web::{Data, Json, Path};
 
 pub(crate) fn scope() -> actix_web::Scope {
     actix_web::web::scope("/sources")
-        .service(all)
-        .service(create)
         .service(get)
         .service(delete)
         .service(update)
+        .service(all)
+        .service(create)
 }
 
-#[actix_web::get("/")]
+#[actix_web::get("")]
 async fn all(elephantry: Data<elephantry::Pool>, pagination: actix_web::web::Query<super::Pagination>) -> crate::Result {
     let sources = elephantry.paginate_find_where::<Model>("true", &[], pagination.limit, pagination.page, "order by last_error, title".into())?;
     let response = actix_web::HttpResponse::Ok().json(sources);
@@ -18,7 +18,7 @@ async fn all(elephantry: Data<elephantry::Pool>, pagination: actix_web::web::Que
     Ok(response)
 }
 
-#[actix_web::post("/")]
+#[actix_web::post("")]
 async fn create(
     elephantry: Data<elephantry::Pool>,
     data: Json<crate::form::Source>,
