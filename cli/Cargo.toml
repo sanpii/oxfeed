@@ -1,0 +1,19 @@
+[package]
+name = "oxfeed-cli"
+version = "0.1.0"
+authors = ["Sanpi <sanpi@homecomputing.fr>"]
+edition = "2018"
+
+[dependencies]
+attohttpc = "0.16"
+dotenv = "0.15"
+env_logger = "0.8"
+elephantry = "1.1"
+feed-rs = "0.4"
+log = "0.4"
+scraper = "0.12.0"
+single-instance = "0.1"
+
+[dependencies.oxfeed-api]
+version = "0.1"
+path = "../api"
