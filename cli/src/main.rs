@@ -1,7 +1,11 @@
-use oxfeed_api::model::item::Model as ItemModel;
-use oxfeed_api::model::source::Model as SourceModel;
+mod errors;
 
-type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+pub use errors::Result;
+
+use oxfeed_api::model::item::Model as ItemModel;
+use oxfeed_api::model::source::Entity as Source;
+use oxfeed_api::model::source::Model as SourceModel;
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 fn main() -> Result<()> {
     env_logger::init();
@@ -18,36 +22,44 @@ fn main() -> Result<()> {
     let database_url = std::env::var("DATABASE_URL").expect("Missing DATABASE_URL env variable");
     let elephantry = elephantry::Pool::new(&database_url).expect("Unable to connect to postgresql");
 
-    let sources = elephantry.find_all::<SourceModel>(None)?;
+    let sources = elephantry.find_all::<SourceModel>(None)?.collect::<Vec<_>>();
 
-    for source in sources {
-        log::info!("Fetching {}", source.url);
+    sources.par_iter()
+        .for_each(|x| match fetch(&elephantry, x) {
+            Ok(_) => (),
+            Err(err) => log::error!("{}", err),
+        });
 
-        let contents = attohttpc::get(&source.url).send()?.text()?;
-        let feed = feed_rs::parser::parse(contents.as_bytes())?;
+    Ok(())
+}
 
-        for entry in feed.entries {
-            let exist = elephantry.exist_where::<ItemModel>("id = $* and source_id = $*", &[&entry.id, &source.source_id])?;
+fn fetch(elephantry: &elephantry::Connection, source: &Source) -> Result<()> {
+    log::info!("Fetching {}", source.url);
 
-            if !exist {
-                let title = entry.title.map(|x| x.content).unwrap_or_else(|| "<no title>".to_string());
+    let contents = attohttpc::get(&source.url).send()?.text()?;
+    let feed = feed_rs::parser::parse(contents.as_bytes())?;
 
-                log::info!("Adding '{}'", title);
+    for entry in feed.entries {
+        let exist = elephantry.exist_where::<ItemModel>("id = $* and source_id = $*", &[&entry.id, &source.source_id])?;
 
-                let item = oxfeed_api::model::item::Entity {
-                    item_id: None,
-                    id: entry.id,
-                    icon: icon(&entry.links),
-                    content: entry.summary.map(|x| x.content),
-                    title,
-                    published: entry.published,
-                    read: false,
-                    source_id: source.source_id.unwrap(),
-                    link: entry.links[0].href.clone(),
-                    favorite: false,
-                };
-                elephantry.insert_one::<ItemModel>(&item)?;
-            }
+        if !exist {
+            let title = entry.title.map(|x| x.content).unwrap_or_else(|| "<no title>".to_string());
+
+            log::info!("Adding '{}'", title);
+
+            let item = oxfeed_api::model::item::Entity {
+                item_id: None,
+                id: entry.id,
+                icon: icon(&entry.links),
+                content: entry.summary.map(|x| x.content),
+                title,
+                published: entry.published,
+                read: false,
+                source_id: source.source_id.unwrap(),
+                link: entry.links[0].href.clone(),
+                favorite: false,
+            };
+            elephantry.insert_one::<ItemModel>(&item)?;
         }
     }
 

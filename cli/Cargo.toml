@@ -11,8 +11,10 @@ env_logger = "0.8"
 elephantry = "1.1"
 feed-rs = "0.4"
 log = "0.4"
-scraper = "0.12.0"
+rayon = "1.5"
+scraper = "0.12"
 single-instance = "0.1"
+thiserror = "1.0.22"
 
 [dependencies.oxfeed-api]
 version = "0.1"
