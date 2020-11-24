@@ -5,6 +5,7 @@ pub(crate) enum Error {
     Database(elephantry::Error),
     Feed(feed_rs::parser::ParseFeedError),
     Http(attohttpc::Error),
+    Io(std::io::Error),
     Opml(String),
 }
 
@@ -16,6 +17,7 @@ impl std::fmt::Display for Error {
             Self::Database(error) => error.to_string(),
             Self::Feed(error) => error.to_string(),
             Self::Http(error) => error.to_string(),
+            Self::Io(error) => error.to_string(),
             Self::Opml(error) => error.to_string(),
         };
 
@@ -40,5 +42,11 @@ impl From<elephantry::Error> for Error {
 impl From<feed_rs::parser::ParseFeedError> for Error {
     fn from(error: feed_rs::parser::ParseFeedError) -> Self {
         Self::Feed(error)
+    }
+}
+
+impl From<std::io::Error> for Error {
+    fn from(error: std::io::Error) -> Self {
+        Self::Io(error)
     }
 }

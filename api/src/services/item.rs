@@ -5,6 +5,7 @@ use actix_web::web::{Data, Json, Path};
 pub(crate) fn scope() -> actix_web::Scope {
     actix_web::web::scope("/items")
         .service(content)
+        .service(icon)
         .service(favorites)
         .service(patch)
         .service(unread)
@@ -43,6 +44,36 @@ async fn content(elephantry: Data<elephantry::Pool>, path: Path<uuid::Uuid>) -> 
         Some(content) => actix_web::HttpResponse::Ok().body(&content.unwrap_or_default()),
         None => actix_web::HttpResponse::NotFound().finish(),
     };
+
+    Ok(response)
+}
+
+#[actix_web::get("/{item_id}/icon")]
+async fn icon(elephantry: Data<elephantry::Pool>, path: Path<uuid::Uuid>) -> crate::Result {
+    let empty_img = [
+        71, 73, 70, 56, 57, 97, 1, 0, 1, 0, 128, 0, 0, 255, 255, 255, 255, 255,
+        255, 33, 249, 4, 1, 10, 0, 1, 0, 44, 0, 0, 0, 0, 1, 0, 1, 0, 0, 2, 2,
+        76, 1, 0, 59
+    ];
+
+    let item_id = path.into_inner();
+    let icon = elephantry.query_one::<Option<String>>("select icon from item where item_id = $*", &[&item_id])?;
+    let mut img = None;
+
+    if let Some(icon) = icon {
+        img = crate::cache::get(&icon).ok();
+    }
+
+    let body = img.unwrap_or(empty_img.to_vec());
+
+    let mut mime = tree_magic::from_u8(&body);
+    if mime == "text/plain" {
+        mime = "image/svg+xml".to_string();
+    }
+
+    let response = actix_web::HttpResponse::Ok()
+        .header("Content-Type", mime)
+        .body(body);
 
     Ok(response)
 }

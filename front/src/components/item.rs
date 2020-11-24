@@ -112,7 +112,6 @@ impl yew::Component for Component {
     }
 
     fn view(&self) -> yew::Html {
-        let empty_img = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7".to_string();
         // @FIXME https://gitlab.com/imp/chrono-humanize-rs/-/merge_requests/5
         let published_ago = chrono_humanize::HumanTime::from(self.item.published - chrono::Utc::now());
 
@@ -124,9 +123,11 @@ impl yew::Component for Component {
         let content = yew::utils::document().create_element("div").unwrap();
         content.set_inner_html(&self.content.as_ref().unwrap_or(&"Loading...".to_string()));
 
+        let icon = format!("{}/items/{}/icon", env!("API_URL"), self.item.item_id);
+
         yew::html! {
             <>
-                <img src=self.item.icon.as_ref().unwrap_or(&empty_img) width="16" height="16" />
+                <img src=icon width="16" height="16" />
                 <a href=self.item.link.clone() target="_blank">{ &self.item.title }</a>
                 {
                     for self.item.tags.iter().map(|tag| {
