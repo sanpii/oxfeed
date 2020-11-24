@@ -130,3 +130,18 @@ li.list-group-item:hover .float-right .favorite {
     border-color: transparent;
     box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
 }
+
+/*
+ * tags input
+ */
+.tags-input {
+    background-color: white;
+}
+
+.tags-input .badge {
+    font-size: 1rem;
+}
+
+.tags-input input[type="text"] {
+    border: 0px;
+}

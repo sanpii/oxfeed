@@ -1,7 +1,11 @@
+mod tags;
+
+use tags::Component as Tags;
+
 pub(crate) enum Message {
     Cancel,
     Submit,
-    UpdateTags(String),
+    UpdateTags(Vec<String>),
     UpdateTitle(String),
     UpdateUrl(String),
 }
@@ -33,7 +37,7 @@ impl yew::Component for Component {
         match msg {
             Self::Message::Cancel => self.props.oncancel.emit(()),
             Self::Message::Submit => self.props.onsubmit.emit(self.props.source.clone()),
-            Self::Message::UpdateTags(tags) => self.props.source.tags = tags.split(',').map(|x| x.trim().to_string()).collect(),
+            Self::Message::UpdateTags(tags) => self.props.source.tags = tags,
             Self::Message::UpdateTitle(title) => self.props.source.title = if title.is_empty() {
                 None
             } else {
@@ -54,7 +58,7 @@ impl yew::Component for Component {
                         class="form-control"
                         name="title"
                         value={ &self.props.source.title.clone().unwrap_or_default() }
-                        oninput=self.link.callback(|e: yew::InputData| Message::UpdateTitle(e.value))
+                        oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateTitle(e.value))
                     />
                     <small class="form-text text-muted">{ "Leave empty to use the feed title." }</small>
                 </div>
@@ -66,24 +70,22 @@ impl yew::Component for Component {
                         name="url"
                         required=true
                         value={ &self.props.source.url }
-                        oninput=self.link.callback(|e: yew::InputData| Message::UpdateUrl(e.value))
+                        oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateUrl(e.value))
                     />
                 </div>
 
                 <div class="from-group">
                     <label for="tags">{ "Tags" }</label>
-                    <input
-                        class="form-control"
-                        name="tags"
-                        value={ &self.props.source.tags.clone().join(",") }
-                        oninput=self.link.callback(|e: yew::InputData| Message::UpdateTags(e.value))
+                    <Tags
+                        values=self.props.source.tags.clone()
+                        on_change=self.link.callback(|tags| Self::Message::UpdateTags(tags))
                     />
                 </div>
 
                 <a
                     class=("btn", "btn-primary")
                     title="Save"
-                    onclick=self.link.callback(|_| Message::Submit)
+                    onclick=self.link.callback(|_| Self::Message::Submit)
                 >
                     <super::Svg icon="check" size=24 />
                     { "Save" }
@@ -92,7 +94,7 @@ impl yew::Component for Component {
                 <a
                     class=("btn", "btn-danger")
                     title="Cancel"
-                    onclick=self.link.callback(|_| Message::Cancel)
+                    onclick=self.link.callback(|_| Self::Message::Cancel)
                 >
                     <super::Svg icon="x" size=24 />
                     { "Cancel" }
