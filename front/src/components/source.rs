@@ -134,6 +134,19 @@ impl yew::Component for Component {
                     <>
                         <div class="d-inline-flex">
                             { source.title.as_ref().unwrap_or(&source.url) }
+                            {
+                                if let Some(last_error) = source.last_error {
+                                    yew::html! {
+                                        <>
+                                            { " · " }
+                                            <span class="error">{ last_error }</span>
+                                        </>
+                                    }
+                                }
+                                else {
+                                    "".into()
+                                }
+                            }
                         </div>
 
                         <div class=("btn-group", "float-right")>

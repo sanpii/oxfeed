@@ -1,8 +1,9 @@
 #[derive(Debug, elephantry::Entity, serde::Serialize)]
 pub struct Entity {
+    pub last_error: Option<String>,
     pub source_id: Option<uuid::Uuid>,
-    pub title: String,
     pub tags: Vec<String>,
+    pub title: String,
     pub url: String,
 }
 
@@ -22,9 +23,10 @@ impl std::convert::TryFrom<&opml::Outline> for Entity {
         }
 
         let entity = Self {
+            last_error: None,
             source_id: None,
-            title: outline.text.clone(),
             tags,
+            title: outline.text.clone(),
             url,
         };
 
@@ -39,7 +41,7 @@ impl elephantry::Model<'_> for Model {
     type Structure = Structure;
 
     fn new(_: &elephantry::Connection) -> Self {
-        Self {}
+        Self
     }
 }
 
@@ -55,6 +57,6 @@ impl elephantry::Structure for Structure {
     }
 
     fn columns() -> &'static [&'static str] {
-        &["source_id", "title", "tags", "url"]
+        &["source_id", "title", "tags", "url", "last_error"]
     }
 }

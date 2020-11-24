@@ -25,9 +25,24 @@ fn main() -> Result<()> {
     let sources = elephantry.find_all::<SourceModel>(None)?.collect::<Vec<_>>();
 
     sources.par_iter()
-        .for_each(|x| match fetch(&elephantry, x) {
-            Ok(_) => (),
-            Err(err) => log::error!("{}", err),
+        .for_each(|source| {
+            let last_error = match fetch(&elephantry, source) {
+                Ok(_) => None,
+                Err(err) => {
+                    log::error!("{}", err);
+                    Some(err.to_string())
+                }
+            };
+
+            let mut data = std::collections::HashMap::new();
+            data.insert("last_error".to_string(), &last_error as &dyn elephantry::ToSql);
+
+            if let Err(err) = elephantry.update_by_pk::<SourceModel>(
+                &elephantry::pk! { source_id => source.source_id },
+                &data,
+            ) {
+                log::error!("{}", err);
+            }
         });
 
     Ok(())

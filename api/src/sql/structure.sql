@@ -4,7 +4,8 @@ create table source (
     source_id uuid primary key default uuid_generate_v4(),
     url text not null unique,
     title text not null,
-    tags text[] not null
+    tags text[] not null,
+    last_error text
 );
 
 create table item (

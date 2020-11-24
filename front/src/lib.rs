@@ -19,9 +19,10 @@ struct Pager<T: Clone + Eq + PartialEq> {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 struct Source {
+    last_error: Option<String>,
     source_id: Option<String>,
-    title: Option<String>,
     tags: Vec<String>,
+    title: Option<String>,
     url: String,
 }
 

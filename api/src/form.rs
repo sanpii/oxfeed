@@ -35,10 +35,11 @@ impl std::convert::TryInto<crate::model::source::Entity> for Source {
         }
 
         let entity = crate::model::source::Entity {
-            url: self.url.clone(),
+            last_error: None,
             source_id: self.source_id,
-            title: title.unwrap_or_else(|| "<no title>".to_string()),
             tags: self.tags,
+            title: title.unwrap_or_else(|| "<no title>".to_string()),
+            url: self.url.clone(),
         };
 
         Ok(entity)

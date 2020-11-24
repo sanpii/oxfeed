@@ -139,8 +139,14 @@ impl yew::Component for Component {
                 <ul class="list-group">
                 {
                     for pager.iterator.iter().map(|source| {
+                        let class = if source.last_error.is_some() {
+                            "list-group-item list-error"
+                        } else {
+                            "list-group-item"
+                        };
+
                         yew::html! {
-                            <li class="list-group-item"><super::Source value=source /></li>
+                            <li class=class><super::Source value=source /></li>
                         }
                     })
                 }
