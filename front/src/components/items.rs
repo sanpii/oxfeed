@@ -4,7 +4,6 @@ pub(crate) enum Message {
     Event(crate::event::Message),
     NeedUpdate,
     Update(crate::Pager<crate::Item>),
-    Updated(crate::Item),
 }
 
 impl std::convert::TryFrom<(http::Method, yew::format::Text)> for Message {
@@ -30,8 +29,6 @@ pub(crate) struct Properties {
     #[prop_or_default]
     pub filter: String,
     pub pagination: crate::Pagination,
-    #[prop_or_default]
-    pub on_update: yew::Callback<crate::Item>,
 }
 
 pub(crate) struct Component {
@@ -39,7 +36,6 @@ pub(crate) struct Component {
     url: String,
     pager: Option<crate::Pager<crate::Item>>,
     link: yew::ComponentLink<Self>,
-    on_update: yew::Callback<crate::Item>,
     _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
 }
 
@@ -71,7 +67,6 @@ impl yew::Component for Component {
             pager: None,
             link,
             url,
-            on_update: props.on_update,
             _producer: crate::event::Bus::bridge(callback),
         }
     }
@@ -83,14 +78,14 @@ impl yew::Component for Component {
                 return false;
             },
             Self::Message::Event(event) =>  match event {
-                crate::event::Message::Read => self.link.send_message(Self::Message::NeedUpdate),
+                crate::event::Message::ItemUpdate => self.link.send_message(Self::Message::NeedUpdate),
+                _ => (),
             },
             Self::Message::NeedUpdate => {
                 self.fetch_task = crate::get(&self.link, &self.url, yew::format::Nothing).ok();
                 return false;
             },
             Self::Message::Update(ref pager) => self.pager = Some(pager.clone()),
-            Self::Message::Updated(item) => self.on_update.emit(item),
         }
 
         true
@@ -113,10 +108,7 @@ impl yew::Component for Component {
                     for pager.iterator.iter().map(|item| {
                         yew::html! {
                             <li class="list-group-item">
-                                <super::Item
-                                    value=item
-                                    on_read=self.link.callback(|e| Self::Message::Updated(e))
-                                />
+                                <super::Item value=item />
                             </li>
                         }
                     })
@@ -132,7 +124,6 @@ impl yew::Component for Component {
         let should_render = self.url != url;
 
         self.url = url;
-        self.on_update = props.on_update;
 
         should_render
     }

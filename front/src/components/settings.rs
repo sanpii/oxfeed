@@ -20,6 +20,7 @@ impl std::convert::TryFrom<(http::Method, yew::format::Text)> for Message {
 }
 
 pub(crate) struct Component {
+    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
     fetch_task: Option<yew::services::fetch::FetchTask>,
     files: Vec<yew::web_sys::File>,
     link: yew::ComponentLink<Self>,
@@ -49,7 +50,10 @@ impl yew::Component for Component {
     type Properties = ();
 
     fn create(_: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+        use yew::agent::Dispatched;
+
         Self {
+            event_bus: crate::event::Bus::dispatcher(),
             fetch_task: None,
             files: Vec::new(),
             link,
@@ -64,7 +68,7 @@ impl yew::Component for Component {
             Self::Message::Import => self.load(),
             Self::Message::Imported => {
                 log::info!("Import done");
-                yew::utils::document().location().unwrap().reload().ok();
+                self.event_bus.send(crate::event::Message::SettingUpdate);
                 self.fetch_task = None;
             },
             Self::Message::Loaded(content) => self.import(&content),

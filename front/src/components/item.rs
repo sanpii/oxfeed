@@ -6,7 +6,7 @@ pub(crate) enum Message {
     ToggleRead,
     ToggleFavorite,
     Update(crate::Item),
-    UpdateRead,
+    Toggled,
 }
 
 impl std::convert::TryFrom<(http::Method, yew::format::Text)> for Message {
@@ -20,7 +20,7 @@ impl std::convert::TryFrom<(http::Method, yew::format::Text)> for Message {
 
         let message = match method {
             http::Method::GET => Message::Content(data),
-            http::Method::PATCH => Message::UpdateRead,
+            http::Method::PATCH => Message::Toggled,
             http::Method::POST => Message::Update(serde_json::from_str(&data).map_err(|_| ())?),
             _ => return Err(()),
         };
@@ -49,17 +49,15 @@ impl std::ops::Not for Scene {
 #[derive(Clone, yew::Properties)]
 pub(crate) struct Properties {
     pub value: crate::Item,
-    #[prop_or_default]
-    pub on_read: yew::Callback<crate::Item>,
 }
 
 pub(crate) struct Component {
     content: Option<String>,
+    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
     fetch_task: Option<yew::services::fetch::FetchTask>,
     link: yew::ComponentLink<Self>,
     scene: Scene,
     item: crate::Item,
-    on_read: yew::Callback<crate::Item>,
 }
 
 impl yew::Component for Component {
@@ -67,12 +65,14 @@ impl yew::Component for Component {
     type Properties = Properties;
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+        use yew::agent::Dispatched;
+
         Self {
             content: None,
+            event_bus: crate::event::Bus::dispatcher(),
             fetch_task: None,
             item: props.value,
             link,
-            on_read: props.on_read,
             scene: Scene::Hidden,
         }
     }
@@ -104,11 +104,7 @@ impl yew::Component for Component {
 
                 self.fetch_task = crate::patch(&self.link, &url, yew::format::Json(&json)).ok();
             },
-            Self::Message::UpdateRead => {
-                self.item.read = !self.item.read;
-
-                self.on_read.emit(self.item.clone());
-            },
+            Self::Message::Toggled =>  self.event_bus.send(crate::event::Message::ItemUpdate),
             Self::Message::Update(item) => self.item = item,
         }
 
@@ -199,7 +195,6 @@ impl yew::Component for Component {
         let should_render = self.item != props.value;
 
         self.item = props.value;
-        self.on_read = props.on_read;
 
         should_render
     }

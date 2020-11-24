@@ -100,9 +100,7 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Self::Message::Error(error) => log::error!("{}", error),
-            Self::Message::Event(event) =>  match event {
-                crate::event::Message::Read => self.link.send_message(Self::Message::NeedUpdate),
-            },
+            Self::Message::Event(_) => self.link.send_message(Self::Message::NeedUpdate),
             Self::Message::NeedUpdate => self.fetch_task = crate::get(&self.link, "/counts", yew::format::Nothing).ok(),
             Self::Message::Update(counts) => {
                 self.links[0].count = counts.all;
@@ -113,7 +111,7 @@ impl yew::Component for Component {
                 return true;
             },
             Self::Message::Read => {
-                self.event_bus.send(crate::event::Message::Read);
+                self.event_bus.send(crate::event::Message::ItemUpdate);
             },
             Self::Message::ReadAll => self.fetch_task = crate::post(&self.link, "/items/read", yew::format::Nothing).ok(),
         }

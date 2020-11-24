@@ -2,7 +2,8 @@ use std::collections::HashSet;
 
 #[derive(Clone)]
 pub(crate) enum Message {
-    Read,
+    ItemUpdate,
+    SettingUpdate,
 }
 
 pub(crate) struct Bus {
