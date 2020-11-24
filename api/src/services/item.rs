@@ -8,6 +8,7 @@ pub(crate) fn scope() -> actix_web::Scope {
         .service(favorites)
         .service(patch)
         .service(unread)
+        .service(read_all)
         .service(all)
 }
 
@@ -74,6 +75,15 @@ async fn patch(
     } else {
         actix_web::HttpResponse::NoContent().finish()
     };
+
+    Ok(response)
+}
+
+#[actix_web::post("/read")]
+async fn read_all(elephantry: Data<elephantry::Pool>) -> crate::Result {
+    elephantry.execute("update item set read = true where not read;")?;
+
+    let response = actix_web::HttpResponse::NoContent().finish();
 
     Ok(response)
 }

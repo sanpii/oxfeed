@@ -1,6 +1,7 @@
 #![recursion_limit="1024"]
 
 mod cha;
+mod event;
 mod components;
 
 #[derive(Clone, Eq, PartialEq, serde::Deserialize)]

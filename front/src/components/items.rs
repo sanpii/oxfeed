@@ -1,6 +1,7 @@
 #[derive(Clone)]
 pub(crate) enum Message {
     Error(String),
+    Event(crate::event::Message),
     NeedUpdate,
     Update(crate::Pager<crate::Item>),
     Updated(crate::Item),
@@ -39,6 +40,7 @@ pub(crate) struct Component {
     pager: Option<crate::Pager<crate::Item>>,
     link: yew::ComponentLink<Self>,
     on_update: yew::Callback<crate::Item>,
+    _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
 }
 
 impl Component {
@@ -58,6 +60,9 @@ impl yew::Component for Component {
     type Properties = Properties;
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+        use yew::agent::Bridged;
+
+        let callback = link.callback(|x| Self::Message::Event(x));
         let url = Self::url(&props.filter, &props.pagination);
         let fetch_task = crate::get(&link, &url, yew::format::Nothing).ok();
 
@@ -67,6 +72,7 @@ impl yew::Component for Component {
             link,
             url,
             on_update: props.on_update,
+            _producer: crate::event::Bus::bridge(callback),
         }
     }
 
@@ -75,6 +81,9 @@ impl yew::Component for Component {
             Self::Message::Error(error) => {
                 log::error!("{:?}", error);
                 return false;
+            },
+            Self::Message::Event(event) =>  match event {
+                crate::event::Message::Read => self.link.send_message(Self::Message::NeedUpdate),
             },
             Self::Message::NeedUpdate => {
                 self.fetch_task = crate::get(&self.link, &self.url, yew::format::Nothing).ok();
