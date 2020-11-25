@@ -104,7 +104,7 @@ impl yew::Component for Component {
 
                 self.fetch_task = crate::patch(&self.link, &url, yew::format::Json(&json)).ok();
             },
-            Self::Message::Toggled =>  self.event_bus.send(crate::event::Message::ItemUpdate),
+            Self::Message::Toggled =>  self.event_bus.send(crate::event::Event::ItemUpdate),
             Self::Message::Update(item) => self.item = item,
         }
 

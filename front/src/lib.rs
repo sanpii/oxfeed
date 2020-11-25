@@ -1,8 +1,8 @@
 #![recursion_limit="1024"]
 
 mod cha;
-mod event;
 mod components;
+mod event;
 
 #[derive(Clone, Eq, PartialEq, serde::Deserialize)]
 struct Pager<T: Clone + Eq + PartialEq> {

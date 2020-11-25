@@ -1,7 +1,7 @@
 #[derive(Clone)]
 pub(crate) enum Message {
     Error(String),
-    Event(crate::event::Message),
+    Event(crate::event::Event),
     NeedUpdate,
     Read,
     ReadAll,
@@ -111,7 +111,9 @@ impl yew::Component for Component {
                 return true;
             },
             Self::Message::Read => {
-                self.event_bus.send(crate::event::Message::ItemUpdate);
+                let alert = crate::event::Alert::info("All items marked as read");
+                self.event_bus.send(crate::event::Event::Alert(alert));
+                self.event_bus.send(crate::event::Event::ItemUpdate);
             },
             Self::Message::ReadAll => self.fetch_task = crate::post(&self.link, "/items/read", yew::format::Nothing).ok(),
         }

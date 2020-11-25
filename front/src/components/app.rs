@@ -49,6 +49,7 @@ impl yew::Component for Component {
                             <super::Sidebar />
                         </nav>
                         <main class="col-md-9 ml-sm-auto col-lg-10">
+                            <super::Alerts />
                             <Router<Route, ()>
                                 render = yew_router::router::Router::render(move |switch: Route| {
                                     match switch {

@@ -1,4 +1,5 @@
 mod actions;
+mod alerts;
 mod app;
 mod header;
 mod form;
@@ -13,6 +14,7 @@ mod svg;
 mod tag;
 
 pub(crate) use actions::Component as Actions;
+pub(crate) use alerts::Component as Alerts;
 pub(crate) use app::Component as App;
 pub(crate) use form::Component as Form;
 pub(crate) use header::Component as Header;

@@ -1,7 +1,7 @@
 #[derive(Clone)]
 pub(crate) enum Message {
     Error(String),
-    Event(crate::event::Message),
+    Event(crate::event::Event),
     NeedUpdate,
     Update(crate::Pager<crate::Item>),
 }
@@ -78,7 +78,7 @@ impl yew::Component for Component {
                 return false;
             },
             Self::Message::Event(event) =>  match event {
-                crate::event::Message::ItemUpdate => self.link.send_message(Self::Message::NeedUpdate),
+                crate::event::Event::ItemUpdate => self.link.send_message(Self::Message::NeedUpdate),
                 _ => (),
             },
             Self::Message::NeedUpdate => {

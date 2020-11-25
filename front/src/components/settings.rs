@@ -67,8 +67,9 @@ impl yew::Component for Component {
             Self::Message::Files(files) => self.files = files,
             Self::Message::Import => self.load(),
             Self::Message::Imported => {
-                log::info!("Import done");
-                self.event_bus.send(crate::event::Message::SettingUpdate);
+                let alert = crate::event::Alert::info("Import done");
+                self.event_bus.send(crate::event::Event::Alert(alert));
+                self.event_bus.send(crate::event::Event::SettingUpdate);
                 self.fetch_task = None;
             },
             Self::Message::Loaded(content) => self.import(&content),
