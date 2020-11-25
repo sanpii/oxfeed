@@ -22,3 +22,6 @@ create table item (
 
     unique(source_id, id)
 );
+
+create index item_read on item(read);
+create index item_favorite on item(favorite);
