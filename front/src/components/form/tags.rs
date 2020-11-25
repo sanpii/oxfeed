@@ -72,10 +72,10 @@ impl yew::Component for Component {
                         }
                     })
                 }
-                <input
-                    type="text"
-                    oninput=self.link.callback(|e: yew::InputData| Self::Message::Update(e.value))
-                    onkeydown=self.link.callback(|e: yew::KeyboardEvent| match e.key().as_str() {
+                <super::Autocomplete
+                    what="tags"
+                    on_input=self.link.callback(|value| Self::Message::Update(value))
+                    on_keydown=self.link.callback(|key: String| match key.as_str() {
                         "Enter" => Self::Message::Add,
                         "Backspace" => Self::Message::Delete,
                         _ => Self::Message::Nope,

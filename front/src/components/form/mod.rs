@@ -1,5 +1,7 @@
+mod autocomplete;
 mod tags;
 
+use autocomplete::Component as Autocomplete;
 use tags::Component as Tags;
 
 pub(crate) enum Message {

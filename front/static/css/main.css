@@ -145,3 +145,8 @@ li.list-group-item:hover .float-right .favorite {
 .tags-input input[type="text"] {
     border: 0px;
 }
+
+.autocomplete {
+    position: absolute;
+    z-index: 99;
+}
