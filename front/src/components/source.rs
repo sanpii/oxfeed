@@ -179,7 +179,11 @@ impl yew::Component for Component {
         }
     }
 
-    fn change(&mut self, _: Self::Properties) -> yew::ShouldRender {
-        false
+    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
+        let should_render = self.source != props.value;
+
+        self.source = props.value;
+
+        should_render
     }
 }

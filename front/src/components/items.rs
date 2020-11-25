@@ -33,21 +33,24 @@ pub(crate) struct Properties {
 
 pub(crate) struct Component {
     fetch_task: Option<yew::services::fetch::FetchTask>,
-    url: String,
+    filter: String,
     pager: Option<crate::Pager<crate::Item>>,
+    pagination: crate::Pagination,
     link: yew::ComponentLink<Self>,
     _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
 }
 
 impl Component {
     fn url(filter: &str, pagination: &crate::Pagination) -> String {
-        let url = if filter == "all" {
-            "/items".to_string()
-        } else {
-            format!("/items/{}", filter)
-        };
+        let mut url = filter.to_string();
 
-        format!("{}?page={}&limit={}", url, pagination.page, pagination.limit)
+        if !url.contains('?') {
+            url.push('?');
+        } else {
+            url.push('&');
+        }
+
+        format!("{}page={}&limit={}", url, pagination.page, pagination.limit)
     }
 }
 
@@ -59,16 +62,19 @@ impl yew::Component for Component {
         use yew::agent::Bridged;
 
         let callback = link.callback(|x| Self::Message::Event(x));
-        let url = Self::url(&props.filter, &props.pagination);
-        let fetch_task = crate::get(&link, &url, yew::format::Nothing).ok();
 
-        Self {
-            fetch_task,
+        let component = Self {
+            fetch_task: None,
+            filter: props.filter,
             pager: None,
+            pagination: props.pagination,
             link,
-            url,
             _producer: crate::event::Bus::bridge(callback),
-        }
+        };
+
+        component.link.send_message(Self::Message::NeedUpdate);
+
+        component
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
@@ -82,7 +88,8 @@ impl yew::Component for Component {
                 _ => (),
             },
             Self::Message::NeedUpdate => {
-                self.fetch_task = crate::get(&self.link, &self.url, yew::format::Nothing).ok();
+                let url = Self::url(&self.filter, &self.pagination);
+                self.fetch_task = crate::get(&self.link, &url, yew::format::Nothing).ok();
                 return false;
             },
             Self::Message::Update(ref pager) => self.pager = Some(pager.clone()),
@@ -114,16 +121,17 @@ impl yew::Component for Component {
                     })
                 }
                 </ul>
-                <super::Pager<crate::Item> value=pager />
+                <super::Pager<crate::Item> base_url=self.filter.clone() value=pager />
             </>
         }
     }
 
     fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-        let url = Self::url(&props.filter, &props.pagination);
-        let should_render = self.url != url;
+        let should_render = self.filter != props.filter || self.pagination != props.pagination;
 
-        self.url = url;
+        self.filter = props.filter;
+        self.pagination = props.pagination;
+        self.link.send_message(Self::Message::NeedUpdate);
 
         should_render
     }

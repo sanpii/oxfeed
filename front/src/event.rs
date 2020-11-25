@@ -35,6 +35,7 @@ impl Alert {
 pub(crate) enum Event {
     Alert(Alert),
     ItemUpdate,
+    Search(String),
     SettingUpdate,
 }
 

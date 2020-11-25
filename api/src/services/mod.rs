@@ -10,13 +10,18 @@ pub(crate) fn scope() -> actix_web::Scope {
 
 #[derive(serde::Deserialize)]
 pub struct Pagination {
-    pub page: usize,
+    #[serde(default="default_page")]
+    pub page: String,
     #[serde(default="default_limit")]
-    pub limit: usize,
+    pub limit: String,
 }
 
-fn default_limit() -> usize {
-    25
+fn default_page() -> String {
+    "1".to_string()
+}
+
+fn default_limit() -> String {
+    "25".to_string()
 }
 
 #[derive(elephantry::Entity, serde::Serialize)]

@@ -31,7 +31,7 @@ struct Link {
     count: usize,
     icon: &'static str,
     label: &'static str,
-    url: &'static str,
+    url: String,
 }
 
 pub(crate) struct Component {
@@ -51,38 +51,49 @@ impl yew::Component for Component {
 
         let callback = link.callback(|x| Self::Message::Event(x));
 
-        let links = vec![
+        let mut links = vec![
             Link {
                 count: 0,
                 icon: "collection",
                 label: "All",
-                url: "/",
+                url: "/".to_string(),
             },
             Link {
                 count: 0,
                 icon: "book",
                 label: "Unread",
-                url: "/unread",
+                url: "/unread".to_string(),
             },
             Link {
                 count: 0,
                 icon: "star",
                 label: "Favorites",
-                url: "/favorites",
+                url: "/favorites".to_string(),
             },
             Link {
                 count: 0,
                 icon: "diagram-3",
                 label: "Sources",
-                url: "/sources",
+                url: "/sources".to_string(),
             },
             Link {
                 count: 0,
                 icon: "sliders",
                 label: "Settings",
-                url: "/settings",
+                url: "/settings".to_string(),
             },
         ];
+
+        let route = yew_router::service::RouteService::<()>::new().get_path();
+
+        if route.starts_with("/search") {
+            links.push(Link {
+                count: 0,
+                icon: "search",
+                label: "Search",
+                url: route,
+            });
+        }
 
         let component = Self {
             event_bus: crate::event::Bus::dispatcher(),
@@ -100,7 +111,10 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Self::Message::Error(error) => log::error!("{}", error),
-            Self::Message::Event(_) => self.link.send_message(Self::Message::NeedUpdate),
+            Self::Message::Event(event) => match event {
+                crate::event::Event::ItemUpdate | crate::event::Event::SettingUpdate => self.link.send_message(Self::Message::NeedUpdate),
+                _ => (),
+            },
             Self::Message::NeedUpdate => self.fetch_task = crate::get(&self.link, "/counts", yew::format::Nothing).ok(),
             Self::Message::Update(counts) => {
                 self.links[0].count = counts.all;
@@ -136,7 +150,7 @@ impl yew::Component for Component {
                     for self.links.iter().map(|link| yew::html! {
                         <li class="nav-item">
                             <a
-                                href={ link.url }
+                                href={ link.url.as_str() }
                                 class=if link.url == current_url { "nav-link active" } else { "nav-link" }
                             >
                                 <super::Svg icon=link.icon size=16 />

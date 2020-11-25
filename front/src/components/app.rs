@@ -4,6 +4,8 @@ enum Route {
     Favorites,
     #[to = "/settings"]
     Settings,
+    #[to = "/search/{}"]
+    Search(String),
     #[to = "/sources"]
     Sources,
     #[to = "/unread"]
@@ -21,11 +23,8 @@ impl yew::Component for Component {
     type Properties = ();
 
     fn create(_: Self::Properties, _: yew::ComponentLink<Self>) -> Self {
-        let router = yew_router::service::RouteService::<()>::new();
-        let pagination = router.get_query().trim_start_matches('?').parse().unwrap();
-
         Self {
-            pagination,
+            pagination: crate::Location::new().into(),
         }
     }
 
@@ -58,6 +57,7 @@ impl yew::Component for Component {
                                         Route::Settings => yew::html!{<super::Settings />},
                                         Route::Sources => yew::html!{<super::Sources pagination=pagination />},
                                         Route::Unread => yew::html!{<super::Unread pagination=pagination />},
+                                        Route::Search(kind) => yew::html!{<super::Search kind=kind pagination=pagination />},
                                     }
                                 })
                             />

@@ -35,10 +35,13 @@ enum Scene {
 #[derive(Clone, yew::Properties)]
 pub(crate) struct Properties {
     pub pagination: crate::Pagination,
+    #[prop_or_default]
+    pub filter: String,
 }
 
 pub(crate) struct Component {
     fetch_task: Option<yew::services::fetch::FetchTask>,
+    filter: String,
     link: yew::ComponentLink<Self>,
     scene: Scene,
     pager: Option<crate::Pager<crate::Source>>,
@@ -50,10 +53,24 @@ impl Component {
         self.fetch_task = crate::post(&self.link, "/sources", source).ok();
     }
 
-    fn fetch(&mut self) -> Option<yew::services::fetch::FetchTask> {
-        let url = format!("/sources?page={}&limit={}", self.pagination.page, self.pagination.limit);
+    fn url(&self) -> String {
+        let mut url = if self.filter.is_empty() {
+            "/sources".to_string()
+        } else {
+            self.filter.clone()
+        };
 
-        crate::get(&self.link, &url, yew::format::Nothing).ok()
+        if !url.contains('?') {
+            url.push('?');
+        } else {
+            url.push('&');
+        }
+
+        format!("{}page={}&limit={}", url, self.pagination.page, self.pagination.limit)
+    }
+
+    fn fetch(&mut self) -> Option<yew::services::fetch::FetchTask> {
+        crate::get(&self.link, &self.url(), yew::format::Nothing).ok()
     }
 }
 
@@ -64,6 +81,7 @@ impl yew::Component for Component {
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         let mut component = Self {
             fetch_task: None,
+            filter: props.filter,
             link,
             scene: Scene::View,
             pager: None,
@@ -151,15 +169,17 @@ impl yew::Component for Component {
                     })
                 }
                 </ul>
-                <super::Pager<crate::Source> value=pager />
+                <super::Pager<crate::Source> base_url=self.filter.clone() value=pager />
             </>
         }
     }
 
     fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-        let should_render = self.pagination != props.pagination;
+        let should_render = self.pagination != props.pagination || self.filter != props.filter;
 
         self.pagination = props.pagination;
+        self.filter = props.filter;
+        self.link.send_message(Self::Message::NeedUpdate);
 
         should_render
     }

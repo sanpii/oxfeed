@@ -3,6 +3,9 @@
 mod cha;
 mod components;
 mod event;
+mod location;
+
+pub(crate) use location::Location;
 
 #[derive(Clone, Eq, PartialEq, serde::Deserialize)]
 struct Pager<T: Clone + Eq + PartialEq> {
@@ -70,26 +73,14 @@ struct Pagination {
     limit: usize,
 }
 
-impl std::str::FromStr for Pagination {
-    type Err = std::num::ParseIntError;
+impl From<Location> for Pagination {
+    fn from(location: Location) -> Self {
+        let query = location.query();
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut pagination = Pagination {
-            page: 1,
-            limit: 25,
-        };
-
-        for args in s.split('&') {
-            let tokens = args.split("=").collect::<Vec<_>>();
-
-            match tokens[0] {
-                "page" => pagination.page = tokens[1].parse()?,
-                "limit" => pagination.limit = tokens[1].parse()?,
-                _ => continue,
-            }
+        Pagination {
+            page: query.get("page").map(|x| x.parse().ok()).flatten().unwrap_or(1),
+            limit: query.get("limit").map(|x| x.parse().ok()).flatten().unwrap_or(25),
         }
-
-        Ok(pagination)
     }
 }
 

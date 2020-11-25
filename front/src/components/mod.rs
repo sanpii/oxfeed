@@ -6,6 +6,7 @@ mod form;
 mod item;
 mod items;
 mod pager;
+mod search;
 mod settings;
 mod sidebar;
 mod source;
@@ -21,8 +22,9 @@ pub(crate) use header::Component as Header;
 pub(crate) use item::Component as Item;
 pub(crate) use items::Component as Items;
 pub(crate) use pager::Component as Pager;
-pub(crate) use sidebar::Component as Sidebar;
+pub(crate) use search::Component as Search;
 pub(crate) use settings::Component as Settings;
+pub(crate) use sidebar::Component as Sidebar;
 pub(crate) use source::Component as Source;
 pub(crate) use sources::Component as Sources;
 pub(crate) use svg::Component as Svg;
@@ -55,8 +57,15 @@ macro_rules! decl_items {
                 }
 
                 fn view(&self) -> yew::Html {
+                    let name = stringify!($name);
+                    let filter = if name == "all" {
+                        "/items".to_string()
+                    } else {
+                        format!("/items/{}", name)
+                    };
+
                     yew::html! {
-                        <super::Items filter=stringify!($name) pagination=self.pagination />
+                        <super::Items filter=filter pagination=self.pagination />
                     }
                 }
 
