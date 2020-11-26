@@ -4,27 +4,17 @@ pub(crate) enum Message {
     Delete,
     Deleted,
     Edit,
-    Error(String),
     Save(crate::Source),
     Saved(crate::Source),
 }
 
-impl std::convert::TryFrom<(http::Method, yew::format::Text)> for Message {
-    type Error = ();
-
-    fn try_from((method, response): (http::Method, yew::format::Text)) -> Result<Self, ()> {
-        let data = match response {
-            Ok(data) => data,
-            Err(err) => return Ok(Self::Error(err.to_string())),
-        };
-
-        let message = match method {
-            http::Method::DELETE => Self::Deleted,
-            http::Method::PUT => Self::Saved(serde_json::from_str(&data).map_err(|_| ())?),
-            _ => return Err(()),
-        };
-
-        Ok(message)
+impl From<crate::event::Api> for Message {
+    fn from(event: crate::event::Api) -> Self {
+        match event {
+            crate::event::Api::SourceDelete(_) => Self::Deleted,
+            crate::event::Api::SourceUpdate(source) => Self::Saved(source),
+            _ => unreachable!(),
+        }
     }
 }
 
@@ -39,20 +29,10 @@ pub(crate) struct Properties {
 }
 
 pub(crate) struct Component {
+    api: crate::Api<Self>,
     scene: Scene,
-    fetch_task: Option<yew::services::fetch::FetchTask>,
     link: yew::ComponentLink<Self>,
     source: crate::Source,
-}
-
-impl Component {
-    fn delete(&mut self) {
-        self.fetch_task = crate::delete(&self.link, &format!("/sources/{}", self.source.source_id.as_ref().unwrap()), yew::format::Nothing).ok();
-    }
-
-    fn update(&mut self) {
-        self.fetch_task = crate::put(&self.link, &format!("/sources/{}", self.source.source_id.as_ref().unwrap()), &self.source).ok();
-    }
 }
 
 impl yew::Component for Component {
@@ -61,19 +41,14 @@ impl yew::Component for Component {
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         Self {
+            api: crate::Api::new(link.clone()),
             scene: Scene::View,
-            fetch_task: None,
             link,
             source: props.value,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
-        if let Self::Message::Error(error) = msg {
-            log::error!("{}", error);
-            return false;
-        }
-
         match self.scene {
             Scene::View => match msg {
                 Self::Message::Delete => {
@@ -81,7 +56,7 @@ impl yew::Component for Component {
                     let message = format!("Would you like delete '{}' source?", name);
 
                     if yew::services::dialog::DialogService::confirm(&message) {
-                        self.delete();
+                        self.api.sources_delete(self.source.source_id.as_ref().unwrap());
                     }
                 },
                 Self::Message::Deleted => {
@@ -103,7 +78,7 @@ impl yew::Component for Component {
                 },
                 Self::Message::Save(source) => {
                     self.source = source.clone();
-                    self.update();
+                    self.api.sources_update(self.source.source_id.as_ref().unwrap(), &self.source);
                     return true;
                 },
                 Self::Message::Saved(source) => {

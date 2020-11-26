@@ -32,3 +32,9 @@ impl Location {
         map
     }
 }
+
+pub(crate) fn base_url() -> String {
+    let location = Location::new();
+
+    location.path()
+}

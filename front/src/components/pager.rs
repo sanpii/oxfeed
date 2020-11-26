@@ -1,18 +1,15 @@
 #[derive(Clone, Eq, PartialEq, yew::Properties)]
-pub(crate) struct Properties<T: Clone + Eq + PartialEq + serde::de::DeserializeOwned> {
-    #[prop_or_default]
-    pub base_url: String,
-    pub value: crate::Pager<T>,
+pub(crate) struct Properties<R: crate::Render> {
+    pub value: crate::Pager<R>,
 }
 
-pub(crate) struct Component<T: Clone + Eq + PartialEq + serde::de::DeserializeOwned> {
-    base_url: String,
-    pager: crate::Pager<T>,
+pub(crate) struct Component<R: crate::Render> {
+    pager: crate::Pager<R>,
 }
 
-impl<T: 'static + Clone + Eq + serde::de::DeserializeOwned> Component<T> {
+impl<R: 'static + crate::Render> Component<R> {
     fn url(&self, page: usize, max_per_page: usize) -> String {
-        let mut url = self.base_url.clone();
+        let mut url = self.pager.base_url.clone();
 
         if url.is_empty() {
             url = "?".to_string();
@@ -28,13 +25,12 @@ impl<T: 'static + Clone + Eq + serde::de::DeserializeOwned> Component<T> {
     }
 }
 
-impl<T: 'static + Clone + Eq + serde::de::DeserializeOwned> yew::Component for Component<T> {
+impl<R: 'static + crate::Render> yew::Component for Component<R> {
     type Message = ();
-    type Properties = Properties<T>;
+    type Properties = Properties<R>;
 
     fn create(props: Self::Properties, _: yew::ComponentLink<Self>) -> Self {
         Self {
-            base_url: props.base_url,
             pager: props.value,
         }
     }
@@ -136,9 +132,8 @@ impl<T: 'static + Clone + Eq + serde::de::DeserializeOwned> yew::Component for C
     }
 
     fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-        let should_render = self.base_url != props.base_url || self.pager != props.value;
+        let should_render = self.pager != props.value;
 
-        self.base_url = props.base_url;
         self.pager = props.value;
 
         should_render

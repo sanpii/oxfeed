@@ -1,27 +1,17 @@
 #[derive(Clone)]
 pub(crate) enum Message {
     Choose(usize),
-    Error(String),
     Input(String),
     Key(String),
     Terms(Vec<String>),
 }
 
-impl std::convert::TryFrom<(http::Method, yew::format::Text)> for Message {
-    type Error = ();
-
-    fn try_from((_, response): (http::Method, yew::format::Text)) -> Result<Self, ()> {
-        let data = match response {
-            Ok(data) => data,
-            Err(err) => return Ok(Self::Error(err.to_string())),
-        };
-
-        let message = match serde_json::from_str(&data) {
-            Ok(terms) => Self::Terms(terms),
-            Err(err) => return Ok(Self::Error(err.to_string())),
-        };
-
-        Ok(message)
+impl From<crate::event::Api> for Message {
+    fn from(event: crate::event::Api) -> Self {
+        match event {
+            crate::event::Api::SearchTags(tags) => Self::Terms(tags.iterator),
+            _ => unreachable!(),
+        }
     }
 }
 
@@ -36,7 +26,7 @@ pub(crate) struct Properties {
 
 pub(crate) struct Component {
     active: Option<usize>,
-    fetch_task: Option<yew::services::fetch::FetchTask>,
+    api: crate::Api<Self>,
     link: yew::ComponentLink<Self>,
     terms: Vec<String>,
     what: String,
@@ -51,7 +41,7 @@ impl yew::Component for Component {
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         Self {
             active: None,
-            fetch_task: None,
+            api: crate::Api::new(link.clone()),
             link,
             terms: Vec::new(),
             what: props.what,
@@ -66,14 +56,8 @@ impl yew::Component for Component {
                 self.on_input.emit(self.terms[idx].clone());
                 self.on_keydown.emit("Enter".to_string());
             },
-            Self::Message::Error(error) => {
-                log::error!("{}", error);
-                return false;
-            },
             Self::Message::Input(input) => if !input.is_empty() {
-                let q = urlencoding::encode(&input);
-                let url = format!("/search/{}?q={}", self.what, q);
-                self.fetch_task = crate::get(&self.link, &url, yew::format::Nothing).ok();
+                self.api.search(&self.what, &input, &crate::Pagination::new());
                 self.on_input.emit(input.clone());
                 return false;
             } else {

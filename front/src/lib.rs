@@ -1,14 +1,28 @@
 #![recursion_limit="1024"]
 
+mod api;
 mod cha;
 mod components;
+mod errors;
 mod event;
 mod location;
 
+pub(crate) use api::Api;
+pub(crate) use errors::*;
 pub(crate) use location::Location;
 
+trait Render: Clone + Eq + PartialEq {
+    fn render(&self) -> yew::Html;
+}
+
+impl Render for String {
+    fn render(&self) -> yew::Html {
+        self.into()
+    }
+}
+
 #[derive(Clone, Eq, PartialEq, serde::Deserialize)]
-struct Pager<T: Clone + Eq + PartialEq> {
+struct Pager<R: Render> {
     result_count: usize,
     result_min: usize,
     result_max: usize,
@@ -18,7 +32,9 @@ struct Pager<T: Clone + Eq + PartialEq> {
     has_previous_page: bool,
     count: usize,
     max_per_page: usize,
-    iterator: Vec<T>,
+    #[serde(default="location::base_url")]
+    base_url: String,
+    iterator: Vec<R>,
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
@@ -30,11 +46,19 @@ struct Source {
     url: String,
 }
 
-impl Into<Result<std::string::String, anyhow::Error>> for &Source {
-    fn into(self) -> Result<std::string::String, anyhow::Error> {
+impl Into<std::result::Result<std::string::String, anyhow::Error>> for &Source {
+    fn into(self) -> std::result::Result<std::string::String, anyhow::Error> {
         let json = serde_json::to_string(self)?;
 
         Ok(json)
+    }
+}
+
+impl Render for Source {
+    fn render(&self) -> yew::Html {
+        yew::html! {
+            <components::Source value=self />
+        }
     }
 }
 
@@ -51,11 +75,19 @@ struct Item {
     tags: Vec<String>,
 }
 
-impl Into<Result<std::string::String, anyhow::Error>> for &Item {
-    fn into(self) -> Result<std::string::String, anyhow::Error> {
+impl Into<std::result::Result<std::string::String, anyhow::Error>> for &Item {
+    fn into(self) -> std::result::Result<std::string::String, anyhow::Error> {
         let json = serde_json::to_string(self)?;
 
         Ok(json)
+    }
+}
+
+impl Render for Item {
+    fn render(&self) -> yew::Html {
+        yew::html! {
+            <components::Item value=self />
+        }
     }
 }
 
@@ -71,6 +103,15 @@ struct Counts {
 struct Pagination {
     page: usize,
     limit: usize,
+}
+
+impl Pagination {
+    fn new() -> Self {
+        Self {
+            page: 1,
+            limit: 25,
+        }
+    }
 }
 
 impl From<Location> for Pagination {
@@ -123,66 +164,3 @@ pub fn run_app() {
     yew::initialize();
     yew::App::<App>::new().mount_to_body();
 }
-
-macro_rules! decl_fetch {
-    ($method:ident) => {
-        pub(crate) fn $method<B, C>(
-            link: &yew::ComponentLink<C>,
-            url: &str,
-            body: B,
-        ) -> Result<yew::services::fetch::FetchTask, Box<dyn std::error::Error>>
-        where
-            B: Into<Result<String, anyhow::Error>>,
-            C: yew::Component,
-            <C as yew::Component>::Message: std::convert::TryFrom<(http::Method, yew::format::Text)> + Clone,
-            <<C as yew::Component>::Message as std::convert::TryFrom<(http::Method, std::result::Result<std::string::String, anyhow::Error>)>>::Error: std::fmt::Debug,
-        {
-            fetch(&stringify!($method).to_uppercase(), link, url, body)
-        }
-    };
-}
-
-pub(crate) fn fetch<B, C>(
-    method: &str,
-    link: &yew::ComponentLink<C>,
-    url: &str,
-    body: B,
-) -> Result<yew::services::fetch::FetchTask, Box<dyn std::error::Error>>
-where
-    B: Into<Result<String, anyhow::Error>>,
-    C: yew::Component,
-    <C as yew::Component>::Message: std::convert::TryFrom<(http::Method, yew::format::Text)> + Clone,
-    <<C as yew::Component>::Message as std::convert::TryFrom<(http::Method, std::result::Result<std::string::String, anyhow::Error>)>>::Error: std::fmt::Debug,
-{
-    let request = yew::services::fetch::Request::builder()
-        .method(method)
-        .uri(&format!("{}{}", env!("API_URL"), url))
-        .header("Content-Type", "application/json")
-        .body(body)?;
-
-    let method = request.method().clone();
-
-    let callback = link.batch_callback(
-        move |response: yew::services::fetch::Response<yew::format::Text>| {
-            use std::convert::TryFrom;
-
-            match <C as yew::Component>::Message::try_from((method.clone(), response.into_body())) {
-                Ok(message) => vec![message],
-                Err(err) => {
-                    log::error!("{:?}", err);
-                    Vec::new()
-                },
-            }
-        },
-    );
-
-    let fetch_task = yew::services::FetchService::fetch(request, callback)?;
-
-    Ok(fetch_task)
-}
-
-decl_fetch!(delete);
-decl_fetch!(get);
-decl_fetch!(patch);
-decl_fetch!(post);
-decl_fetch!(put);

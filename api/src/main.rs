@@ -25,6 +25,7 @@ async fn main() -> std::io::Result<()> {
             elephantry::Pool::new(&database_url).expect("Unable to connect to postgresql");
 
         actix_web::App::new()
+            .wrap(actix_web::middleware::NormalizePath::new(actix_web::middleware::normalize::TrailingSlash::Trim))
             .data(elephantry)
             .wrap(cors)
             .service(services::item::scope())

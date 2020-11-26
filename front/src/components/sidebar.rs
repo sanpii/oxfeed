@@ -1,29 +1,19 @@
 #[derive(Clone)]
 pub(crate) enum Message {
-    Error(String),
     Event(crate::event::Event),
     NeedUpdate,
     Read,
     ReadAll,
-    Update(crate::Counts),
+    Update(crate::Counts)
 }
 
-impl std::convert::TryFrom<(http::Method, yew::format::Text)> for Message {
-    type Error = serde_json::Error;
-
-    fn try_from((method, response): (http::Method, yew::format::Text)) -> Result<Self, serde_json::Error> {
-        let data = match response {
-            Ok(data) => data,
-            Err(err) => return Ok(Self::Error(err.to_string())),
-        };
-
-        let message = match method {
-            http::Method::GET => Message::Update(serde_json::from_str(&data)?),
-            http::Method::POST => Message::Read,
+impl From<crate::event::Api> for Message {
+    fn from(event: crate::event::Api) -> Self {
+        match event {
+            crate::event::Api::Counts(counts) => Self::Update(counts),
+            crate::event::Api::ItemsRead => Self::Read,
             _ => unreachable!(),
-        };
-
-        Ok(message)
+        }
     }
 }
 
@@ -35,8 +25,8 @@ struct Link {
 }
 
 pub(crate) struct Component {
+    api: crate::Api<Self>,
     event_bus: yew::agent::Dispatcher<crate::event::Bus>,
-    fetch_task: Option<yew::services::fetch::FetchTask>,
     link: yew::ComponentLink<Self>,
     links: Vec<Link>,
     _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
@@ -96,8 +86,8 @@ impl yew::Component for Component {
         }
 
         let component = Self {
+            api: crate::Api::new(link.clone()),
             event_bus: crate::event::Bus::dispatcher(),
-            fetch_task: None,
             link,
             links,
             _producer: crate::event::Bus::bridge(callback),
@@ -110,18 +100,17 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Error(error) => log::error!("{}", error),
             Self::Message::Event(event) => match event {
                 crate::event::Event::ItemUpdate | crate::event::Event::SettingUpdate => self.link.send_message(Self::Message::NeedUpdate),
                 _ => (),
             },
-            Self::Message::NeedUpdate => self.fetch_task = crate::get(&self.link, "/counts", yew::format::Nothing).ok(),
+            Self::Message::NeedUpdate => self.api.counts(),
             Self::Message::Update(counts) => {
                 self.links[0].count = counts.all;
                 self.links[1].count = counts.unread;
                 self.links[2].count = counts.favorites;
                 self.links[3].count = counts.sources;
-                self.fetch_task = None;
+
                 return true;
             },
             Self::Message::Read => {
@@ -129,7 +118,7 @@ impl yew::Component for Component {
                 self.event_bus.send(crate::event::Event::Alert(alert));
                 self.event_bus.send(crate::event::Event::ItemUpdate);
             },
-            Self::Message::ReadAll => self.fetch_task = crate::post(&self.link, "/items/read", yew::format::Nothing).ok(),
+            Self::Message::ReadAll => self.api.items_read(),
         }
 
         false

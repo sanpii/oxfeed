@@ -1,6 +1,22 @@
 use std::collections::HashSet;
 
 #[derive(Clone)]
+pub(crate) enum Event {
+    Alert(Alert),
+    ItemUpdate,
+    Search(String),
+    SettingUpdate,
+}
+
+impl From<crate::Error> for Event {
+    fn from(error: crate::Error) -> Self {
+        let alert = crate::event::Alert::error(&error.to_string());
+
+        Self::Alert(alert)
+    }
+}
+
+#[derive(Clone)]
 pub(crate) struct Alert {
     pub level: log::Level,
     pub message: String,
@@ -9,6 +25,10 @@ pub(crate) struct Alert {
 impl Alert {
     pub fn info(message: &str) -> Self {
         Self::new(log::Level::Info, message)
+    }
+
+    pub fn error(message: &str) -> Self {
+        Self::new(log::Level::Error, message)
     }
 
     fn new(level: log::Level, message: &str) -> Self {
@@ -32,11 +52,20 @@ impl Alert {
 }
 
 #[derive(Clone)]
-pub(crate) enum Event {
-    Alert(Alert),
-    ItemUpdate,
-    Search(String),
-    SettingUpdate,
+pub(crate) enum Api {
+    Counts(crate::Counts),
+    Items(crate::Pager<crate::Item>),
+    ItemsRead,
+    ItemContent(String),
+    ItemPatch,
+    OpmlImport,
+    SearchItems(crate::Pager<crate::Item>),
+    SearchSources(crate::Pager<crate::Source>),
+    SearchTags(crate::Pager<String>),
+    Sources(crate::Pager<crate::Source>),
+    SourceCreate(crate::Source),
+    SourceDelete(crate::Source),
+    SourceUpdate(crate::Source),
 }
 
 pub(crate) struct Bus {

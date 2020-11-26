@@ -52,11 +52,11 @@ impl yew::Component for Component {
                             <Router<Route, ()>
                                 render = yew_router::router::Router::render(move |switch: Route| {
                                     match switch {
-                                        Route::All => yew::html!{<super::All pagination=pagination />},
-                                        Route::Favorites => yew::html!{<super::Favorites pagination=pagination />},
+                                        Route::All => yew::html!{<super::Items kind="all" pagination=pagination />},
+                                        Route::Favorites => yew::html!{<super::Items kind="favorites" pagination=pagination />},
                                         Route::Settings => yew::html!{<super::Settings />},
                                         Route::Sources => yew::html!{<super::Sources pagination=pagination />},
-                                        Route::Unread => yew::html!{<super::Unread pagination=pagination />},
+                                        Route::Unread => yew::html!{<super::Items kind="unread" pagination=pagination />},
                                         Route::Search(kind) => yew::html!{<super::Search kind=kind pagination=pagination />},
                                     }
                                 })

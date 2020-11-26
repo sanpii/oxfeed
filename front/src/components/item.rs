@@ -1,31 +1,19 @@
 #[derive(Clone, Debug)]
 pub(crate) enum Message {
     Content(String),
-    Error(String),
     ToggleContent,
     ToggleRead,
     ToggleFavorite,
-    Update(crate::Item),
     Toggled,
 }
 
-impl std::convert::TryFrom<(http::Method, yew::format::Text)> for Message {
-    type Error = ();
-
-    fn try_from((method, response): (http::Method, yew::format::Text)) -> Result<Self, ()> {
-        let data = match response {
-            Ok(data) => data,
-            Err(err) => return Ok(Self::Error(err.to_string())),
-        };
-
-        let message = match method {
-            http::Method::GET => Message::Content(data),
-            http::Method::PATCH => Message::Toggled,
-            http::Method::POST => Message::Update(serde_json::from_str(&data).map_err(|_| ())?),
-            _ => return Err(()),
-        };
-
-        Ok(message)
+impl From<crate::event::Api> for Message {
+    fn from(event: crate::event::Api) -> Self {
+        match event {
+            crate::event::Api::ItemContent(content) => Self::Content(content),
+            crate::event::Api::ItemPatch => Self::Toggled,
+            _ => unreachable!(),
+        }
     }
 }
 
@@ -52,9 +40,9 @@ pub(crate) struct Properties {
 }
 
 pub(crate) struct Component {
+    api: crate::Api<Self>,
     content: Option<String>,
     event_bus: yew::agent::Dispatcher<crate::event::Bus>,
-    fetch_task: Option<yew::services::fetch::FetchTask>,
     link: yew::ComponentLink<Self>,
     scene: Scene,
     item: crate::Item,
@@ -68,9 +56,9 @@ impl yew::Component for Component {
         use yew::agent::Dispatched;
 
         Self {
+            api: crate::Api::new(link.clone()),
             content: None,
             event_bus: crate::event::Bus::dispatcher(),
-            fetch_task: None,
             item: props.value,
             link,
             scene: Scene::Hidden,
@@ -80,32 +68,18 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Self::Message::Content(content) => {
-                self.fetch_task = None;
                 self.content = Some(content);
             },
-            Self::Message::Error(error) => log::error!("{}", error),
             Self::Message::ToggleContent => {
                 self.scene = !self.scene;
 
                 if self.scene == Scene::Expanded && self.content.is_none() {
-                    self.fetch_task = crate::get(&self.link, &format!("/items/{}/content", self.item.item_id), yew::format::Nothing).ok();
+                    self.api.items_content(&self.item.item_id);
                 }
             },
-            Self::Message::ToggleFavorite | Self::Message::ToggleRead => {
-                let url = format!("/items/{}", self.item.item_id);
-                let (key, value) = match msg {
-                    Self::Message::ToggleFavorite => ("favorite", !self.item.favorite),
-                    Self::Message::ToggleRead => ("read", !self.item.read),
-                    _ => unreachable!(),
-                };
-                let json = serde_json::json!({
-                    key: value,
-                });
-
-                self.fetch_task = crate::patch(&self.link, &url, yew::format::Json(&json)).ok();
-            },
-            Self::Message::Toggled =>  self.event_bus.send(crate::event::Event::ItemUpdate),
-            Self::Message::Update(item) => self.item = item,
+            Self::Message::ToggleFavorite => self.api.items_tag(&self.item.item_id, "favorite", !self.item.favorite),
+            Self::Message::ToggleRead => self.api.items_tag(&self.item.item_id, "read", !self.item.read),
+            Self::Message::Toggled => self.event_bus.send(crate::event::Event::ItemUpdate),
         }
 
         true

@@ -6,22 +6,18 @@ pub(crate) enum Message {
     Files(Vec<yew::web_sys::File>),
 }
 
-impl std::convert::TryFrom<(http::Method, yew::format::Text)> for Message {
-    type Error = ();
-
-    fn try_from((method, _): (http::Method, yew::format::Text)) -> Result<Self, ()> {
-        let message = match method {
-            http::Method::POST => Message::Imported,
-            _ => return Err(()),
-        };
-
-        Ok(message)
+impl From<crate::event::Api> for Message {
+    fn from(event: crate::event::Api) -> Self {
+        match event {
+            crate::event::Api::OpmlImport => Self::Imported,
+            _ => unreachable!(),
+        }
     }
 }
 
 pub(crate) struct Component {
+    api: crate::Api<Self>,
     event_bus: yew::agent::Dispatcher<crate::event::Bus>,
-    fetch_task: Option<yew::services::fetch::FetchTask>,
     files: Vec<yew::web_sys::File>,
     link: yew::ComponentLink<Self>,
     tasks: Vec<yew::services::reader::ReaderTask>,
@@ -40,8 +36,8 @@ impl Component {
     }
 
     fn import(&mut self, content: &[u8]) {
-        let body = String::from_utf8(content.to_vec()).map_err(|err| anyhow::Error::new(err));
-        self.fetch_task = crate::post(&self.link, "/opml", body).ok();
+        let opml = String::from_utf8(content.to_vec()).map_err(|err| anyhow::Error::new(err));
+        self.api.opml_import(opml);
     }
 }
 
@@ -53,8 +49,8 @@ impl yew::Component for Component {
         use yew::agent::Dispatched;
 
         Self {
+            api: crate::Api::new(link.clone()),
             event_bus: crate::event::Bus::dispatcher(),
-            fetch_task: None,
             files: Vec::new(),
             link,
             tasks: Vec::new(),
@@ -70,7 +66,6 @@ impl yew::Component for Component {
                 let alert = crate::event::Alert::info("Import done");
                 self.event_bus.send(crate::event::Event::Alert(alert));
                 self.event_bus.send(crate::event::Event::SettingUpdate);
-                self.fetch_task = None;
             },
             Self::Message::Loaded(content) => self.import(&content),
         }

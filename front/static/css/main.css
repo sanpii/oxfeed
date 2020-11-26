@@ -14,11 +14,7 @@ li.list-group-item:hover {
     background-color: #d6d8db;
 }
 
-li.list-group-item.list-error {
-    border-color: #dc3545;
-}
-
-li.list-group-item.list-error .error {
+li.list-group-item .error {
     color: #dc3545;
 }
 

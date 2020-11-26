@@ -19,12 +19,6 @@ pub(crate) struct Component {
     _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
 }
 
-impl Component {
-    fn filter(kind: &str, q: &str) -> String {
-        format!("/search/{}?q={}", kind, q)
-    }
-}
-
 impl yew::Component for Component {
     type Message = Message;
     type Properties = Properties;
@@ -59,16 +53,20 @@ impl yew::Component for Component {
     }
 
     fn view(&self) -> yew::Html {
-        let filter = Self::filter(&self.kind, &self.term);
-
-        if self.kind == "sources" {
-            yew::html! {
-                <super::Sources filter=filter pagination=self.pagination />
-            }
-        } else {
-            yew::html! {
-                <super::Items filter=filter pagination=self.pagination />
-            }
+        match self.kind.as_str() {
+            "sources" => yew::html! {
+                <super::Sources filter=self.term.clone() pagination=self.pagination />
+            },
+            "all" => yew::html! {
+                <super::Items kind="all" filter=self.term.clone() pagination=self.pagination />
+            },
+            "favorites" => yew::html! {
+                <super::Items kind="favorites" filter=self.term.clone() pagination=self.pagination />
+            },
+            "unread" => yew::html! {
+                <super::Items kind="unread" filter=self.term.clone() pagination=self.pagination />
+            },
+            _ => unreachable!(),
         }
     }
 
