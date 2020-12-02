@@ -36,6 +36,11 @@ impl Location {
         let location = yew::utils::document().location().unwrap();
         location.set_href(url).ok();
     }
+
+    pub fn reload(&self) {
+        let location = yew::utils::document().location().unwrap();
+        location.reload().ok();
+    }
 }
 
 pub(crate) fn base_url() -> String {

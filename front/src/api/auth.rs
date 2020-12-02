@@ -12,4 +12,8 @@ impl<C> super::Api<C> where C: yew::Component, <C as yew::Component>::Message: F
 
         self.fetch(super::Kind::AuthLogin, http::Method::POST, "/auth/login", yew::format::Json(&token))
     }
+
+    pub fn auth_logout(&mut self) {
+        self.fetch(super::Kind::AuthLogout, http::Method::POST, "/auth/logout", yew::format::Nothing)
+    }
 }

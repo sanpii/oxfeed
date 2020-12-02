@@ -1,6 +1,7 @@
 pub(crate) fn scope() -> actix_web::Scope {
     actix_web::web::scope("/auth")
         .service(login)
+        .service(logout)
 }
 
 #[actix_web::post("/login")]
@@ -33,4 +34,13 @@ update "user"
         .body(&token.to_string());
 
     Ok(response)
+}
+
+#[actix_web::post("/logout")]
+async fn logout(elephantry: actix_web::web::Data<elephantry::Pool>, identity: crate::Identity) -> crate::Result {
+    if let Some(token) = identity.token() {
+        elephantry.query_one::<()>("update \"user\" set token = null where token = $*", &[&token])?;
+    };
+
+    Ok(actix_web::HttpResponse::NoContent().finish())
 }

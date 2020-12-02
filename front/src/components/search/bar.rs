@@ -63,7 +63,7 @@ impl yew::Component for Component {
         } else {
             yew::html! {
                 <input
-                    class="form-control form-control-dark w-100"
+                    class=("form-control", "form-control-dark")
                     type="text"
                     value=self.query
                     placeholder="Search"

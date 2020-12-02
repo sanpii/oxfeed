@@ -6,6 +6,7 @@ mod sources;
 #[derive(Clone, Copy)]
 enum Kind {
     AuthLogin,
+    AuthLogout,
     Counts,
     Items,
     ItemsRead,
@@ -145,6 +146,10 @@ impl<C> Api<C> where C: yew::Component, <C as yew::Component>::Message: From<cra
         let event = match kind {
             Kind::AuthLogin => {
                 Self::set_token(&data);
+                crate::event::Api::Auth
+            },
+            Kind::AuthLogout => {
+                Self::set_token("");
                 crate::event::Api::Auth
             },
             Kind::Counts => {
