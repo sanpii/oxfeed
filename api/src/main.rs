@@ -1,10 +1,12 @@
 mod cache;
 mod errors;
 mod form;
+mod identity;
 mod model;
 mod services;
 
 use errors::*;
+use identity::*;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -28,6 +30,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(actix_web::middleware::NormalizePath::new(actix_web::middleware::normalize::TrailingSlash::Trim))
             .data(elephantry)
             .wrap(cors)
+            .service(services::auth::scope())
             .service(services::item::scope())
             .service(services::opml::scope())
             .service(services::search::scope())

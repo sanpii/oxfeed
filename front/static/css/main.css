@@ -1,5 +1,6 @@
-body {
+html, body {
     font-size: .875rem;
+    height: 100%;
 }
 
 main {
@@ -145,4 +146,41 @@ li.list-group-item:hover .float-right .favorite {
 .autocomplete {
     position: absolute;
     z-index: 99;
+}
+
+/*
+ * login
+ */
+.login {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    background-color: #f8f9fa;
+    height: 100%;
+}
+
+.login form {
+    width: 100%;
+    max-width: 330px;
+    margin: auto;
+}
+
+.login form .form-control {
+    position: relative;
+    box-sizing: border-box;
+    height: auto;
+    padding: 10px;
+    font-size: 16px;
+}
+
+.login form input[type="email"] {
+    margin-bottom: -1px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.login form input[type="password"] {
+    margin-bottom: 10px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
 }

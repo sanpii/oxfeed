@@ -1,11 +1,15 @@
 create extension if not exists "uuid-ossp";
+create extension if not exists pgcrypto;
 
 create table source (
     source_id uuid primary key default uuid_generate_v4(),
+    user_id uuid references "user"(user_id) not null,
     url text not null unique,
     title text not null,
     tags text[] not null,
-    last_error text
+    last_error text,
+
+    unique(source_id, user_id)
 );
 
 create table item (
@@ -25,3 +29,11 @@ create table item (
 
 create index item_read on item(read);
 create index item_favorite on item(favorite);
+
+create table "user" (
+    user_id uuid primary key default uuid_generate_v4(),
+    name text not null,
+    email text not null,
+    password text not null,
+    token uuid
+);

@@ -1,9 +1,11 @@
+mod auth;
 mod items;
 mod opml;
 mod sources;
 
 #[derive(Clone, Copy)]
 enum Kind {
+    AuthLogin,
     Counts,
     Items,
     ItemsRead,
@@ -55,6 +57,22 @@ impl<C> Api<C> where C: yew::Component, <C as yew::Component>::Message: From<cra
         self.fetch(kind, http::Method::GET, &url, yew::format::Nothing)
     }
 
+    fn token() -> String {
+        use wasm_bindgen::JsCast;
+
+        let document = yew::utils::document();
+        let html_document = document.dyn_into::<web_sys::HtmlDocument>().unwrap();
+        html_document.cookie().unwrap()
+    }
+
+    fn set_token(token: &str) {
+        use wasm_bindgen::JsCast;
+
+        let document = yew::utils::document();
+        let html_document = document.dyn_into::<web_sys::HtmlDocument>().unwrap();
+        html_document.set_cookie(&token).unwrap();
+    }
+
     fn fetch<B>(
         &mut self,
         kind: Kind,
@@ -67,6 +85,7 @@ impl<C> Api<C> where C: yew::Component, <C as yew::Component>::Message: From<cra
             .method(method)
             .uri(&format!("{}{}", env!("API_URL"), url))
             .header("Content-Type", "application/json")
+            .header("Authorization", &format!("Bearer {}", Self::token()))
             .body(body) {
                 Ok(request) => request,
                 Err(err) => {
@@ -86,6 +105,11 @@ impl<C> Api<C> where C: yew::Component, <C as yew::Component>::Message: From<cra
                         return Vec::new();
                     },
                 };
+
+                use yew::agent::Dispatched;
+
+                let mut event_bus = crate::event::Bus::dispatcher();
+                event_bus.send(crate::event::Event::Api(event.clone()));
 
                 match <C as yew::Component>::Message::try_from(event) {
                     Ok(message) => vec![message],
@@ -108,9 +132,21 @@ impl<C> Api<C> where C: yew::Component, <C as yew::Component>::Message: From<cra
 
     fn on_response(kind: Kind, response: yew::services::fetch::Response<yew::format::Text>) -> crate::Result<crate::event::Api>
     {
+        if response.status() == http::status::StatusCode::UNAUTHORIZED {
+            use yew::agent::Dispatched;
+            let mut event_bus = crate::event::Bus::dispatcher();
+
+            event_bus.send(crate::event::Event::AuthRequire);
+            return Err(crate::Error::Auth);
+        }
+
         let data = response.into_body()?;
 
         let event = match kind {
+            Kind::AuthLogin => {
+                Self::set_token(&data);
+                crate::event::Api::Auth
+            },
             Kind::Counts => {
                 let counts = serde_json::from_str(&data)?;
                 crate::event::Api::Counts(counts)

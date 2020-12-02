@@ -31,6 +31,11 @@ impl Location {
 
         map
     }
+
+    pub fn redirect(&self, url: &str) {
+        let location = yew::utils::document().location().unwrap();
+        location.set_href(url).ok();
+    }
 }
 
 pub(crate) fn base_url() -> String {

@@ -1,6 +1,8 @@
 #[derive(serde::Deserialize)]
 pub(crate) struct Source {
     source_id: Option<uuid::Uuid>,
+    #[serde(default)]
+    pub user_id: Option<uuid::Uuid>,
     url: String,
     title: Option<String>,
     #[serde(default)]
@@ -13,6 +15,11 @@ impl std::convert::TryInto<crate::model::source::Entity> for Source {
     fn try_into(self) -> crate::Result<crate::model::source::Entity> {
         let contents = attohttpc::get(&self.url).send()?.text()?;
         let feed = feed_rs::parser::parse(contents.as_bytes())?;
+
+        let user_id = match self.user_id {
+            Some(user_id) => user_id,
+            None => return Err(crate::Error::Auth),
+        };
 
         let mut title = self.title;
 
@@ -40,6 +47,7 @@ impl std::convert::TryInto<crate::model::source::Entity> for Source {
             tags: self.tags,
             title: title.unwrap_or_else(|| "<no title>".to_string()),
             url: self.url.clone(),
+            user_id,
         };
 
         Ok(entity)

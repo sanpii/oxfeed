@@ -49,8 +49,8 @@ impl yew::Component for Component {
             },
             Self::Message::Nope => return false,
             Self::Message::Search => {
-                let location = yew::utils::document().location().unwrap();
-                location.set_href(&format!("{}?q={}", self.route, self.query)).ok();
+                let location = crate::Location::new();
+                location.redirect(&format!("{}?q={}", self.route, self.query));
             },
         }
 

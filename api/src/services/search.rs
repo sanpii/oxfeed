@@ -17,52 +17,96 @@ pub(crate) fn scope() -> actix_web::Scope {
 }
 
 #[actix_web::get("/all")]
-async fn all(elephantry: Data<elephantry::Pool>, query: Query<Request>) -> crate::Result {
-    let params = [&format!(".*{}.*", query.q) as &dyn elephantry::ToSql];
-    let clause = elephantry::Where::from("item.title ~* $*", &params);
+async fn all(
+    elephantry: Data<elephantry::Pool>,
+    query: Query<Request>,
+    identity: crate::Identity,
+) -> crate::Result {
+    let q = format!(".*{}.*", query.q);
+    let clause = elephantry::Where::from("item.title ~* $*", vec![&q]);
 
-    super::item::fetch(&elephantry, &clause, &query.pagination)
+    super::item::fetch(&elephantry, &identity, &clause, &query.pagination)
 }
 
 #[actix_web::get("/favorites")]
-async fn favorites(elephantry: Data<elephantry::Pool>, query: Query<Request>) -> crate::Result {
-    let params = [&format!(".*{}.*", query.q) as &dyn elephantry::ToSql];
-    let clause = elephantry::Where::from("item.title ~* $* and favorite", &params);
+async fn favorites(
+    elephantry: Data<elephantry::Pool>,
+    query: Query<Request>,
+    identity: crate::Identity,
+) -> crate::Result {
+    let q = format!(".*{}.*", query.q);
+    let clause = elephantry::Where::from("item.title ~* $* and favorite", vec![&q]);
 
-    super::item::fetch(&elephantry, &clause, &query.pagination)
+    super::item::fetch(&elephantry, &identity, &clause, &query.pagination)
 }
 
 #[actix_web::get("/unread")]
-async fn unread(elephantry: Data<elephantry::Pool>, query: Query<Request>) -> crate::Result {
-    let params = [&format!(".*{}.*", query.q) as &dyn elephantry::ToSql];
-    let clause = elephantry::Where::from("item.title ~* $* and not read", &params);
+async fn unread(
+    elephantry: Data<elephantry::Pool>,
+    query: Query<Request>,
+    identity: crate::Identity,
+) -> crate::Result {
+    let q = format!(".*{}.*", query.q);
+    let clause = elephantry::Where::from("item.title ~* $* and not read", vec![&q]);
 
-    super::item::fetch(&elephantry, &clause, &query.pagination)
+    super::item::fetch(&elephantry, &identity, &clause, &query.pagination)
 }
 
 #[actix_web::get("/tags")]
-async fn tags(elephantry: Data<elephantry::Pool>, query: Query<Request>) -> crate::Result {
-    let sql = r#"
+async fn tags(
+    elephantry: Data<elephantry::Pool>,
+    query: Query<Request>,
+    identity: crate::Identity,
+) -> crate::Result {
+    let token = match identity.token() {
+        Some(token) => token,
+        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
+    };
+
+    let sql = format!(r#"
 with tags as (
-    select unnest(tags) as tag from source
+    select unnest(tags) as tag
+        from source
+        join "user" using (user_id)
+        where token = $*
 )
 select distinct tag
     from tags
     where tag ~* $*
-    order by 1;
-"#;
+    order by 1
+    {}
+"#, query.pagination.to_sql());
 
     let q = format!("{}.*", query.q);
-    let tags = elephantry.query::<String>(sql, &[&q])?;
+    let tags = elephantry.query::<String>(&sql, &[&token, &q])?;
 
-    let response = actix_web::HttpResponse::Ok().json(tags);
+    let sql = r#"
+with tags as (
+    select unnest(tags) as tag
+        from source
+        join "user" using (user_id)
+        where token = $*
+)
+select count(tag)
+    from tags
+"#;
+
+    let count = elephantry.query_one::<i64>(&sql, &[&token])?;
+
+    let pager = elephantry::Pager::new(tags, count as usize, query.pagination.page(), query.pagination.limit());
+
+    let response = actix_web::HttpResponse::Ok().json(pager);
 
     Ok(response)
 }
 
 #[actix_web::get("/sources")]
-async fn sources(elephantry: Data<elephantry::Pool>, query: Query<Request>) -> crate::Result {
-    let params = [&format!(".*{}.*", query.q) as &dyn elephantry::ToSql];
-    let clause = elephantry::Where::from("source.title ~* $*", &params);
-    super::source::fetch(&elephantry, &clause, &query.pagination)
+async fn sources(
+    elephantry: Data<elephantry::Pool>,
+    query: Query<Request>,
+    identity: crate::Identity,
+) -> crate::Result {
+    let q = format!(".*{}.*", query.q);
+    let clause = elephantry::Where::from("source.title ~* $*", vec![&q]);
+    super::source::fetch(&elephantry, &identity, &clause, &query.pagination)
 }

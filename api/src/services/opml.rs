@@ -7,11 +7,20 @@ pub(crate) fn scope() -> actix_web::Scope {
 }
 
 #[actix_web::post("")]
-async fn import(elephantry: Data<elephantry::Pool>, xml: String) -> crate::Result {
+async fn import(
+    elephantry: Data<elephantry::Pool>,
+    xml: String,
+    identity: crate::Identity,
+) -> crate::Result {
+    let token = match identity.token() {
+        Some(token) => token,
+        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
+    };
+
     let opml = opml::OPML::new(&xml).unwrap();
 
     for outline in opml.body.outlines {
-        save(&elephantry, &outline);
+        save(&elephantry, &outline, &token);
     }
 
     let response = actix_web::HttpResponse::NoContent()
@@ -20,14 +29,14 @@ async fn import(elephantry: Data<elephantry::Pool>, xml: String) -> crate::Resul
     Ok(response)
 }
 
-fn save(elephantry: &elephantry::Pool, outline: &opml::Outline) {
+fn save(elephantry: &elephantry::Pool, outline: &opml::Outline, token: &uuid::Uuid) {
     use std::convert::TryInto;
 
     for outline in &outline.outlines {
-        save(&elephantry, outline);
+        save(&elephantry, outline, token);
     }
 
-    let source = match outline.try_into() {
+    let source = match (outline, token).try_into() {
         Ok(source) => source,
         Err(_) => return,
     };

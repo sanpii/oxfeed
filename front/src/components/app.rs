@@ -14,25 +14,51 @@ enum Route {
     All,
 }
 
+pub(crate) enum Message {
+    Event(crate::event::Event),
+}
+
 pub(crate) struct Component {
+    auth: bool,
     pagination: crate::Pagination,
+    _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
 }
 
 impl yew::Component for Component {
-    type Message = ();
+    type Message = Message;
     type Properties = ();
 
-    fn create(_: Self::Properties, _: yew::ComponentLink<Self>) -> Self {
+    fn create(_: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+        use yew::agent::Bridged;
+
+        let callback = link.callback(|x| Self::Message::Event(x));
+
         Self {
+            auth: true,
             pagination: crate::Location::new().into(),
+            _producer: crate::event::Bus::bridge(callback),
         }
     }
 
-    fn update(&mut self, _: Self::Message) -> yew::ShouldRender {
-        false
+    fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        match msg {
+            Self::Message::Event(event) => match event {
+                crate::event::Event::Api(crate::event::Api::Auth) => self.auth = true,
+                crate::event::Event::AuthRequire => self.auth = false,
+                _ => return false,
+            }
+        }
+
+        true
     }
 
     fn view(&self) -> yew::Html {
+        if !self.auth {
+            return yew::html! {
+                <super::Login />
+            }
+        }
+
         use yew_router::router::Router;
 
         let pagination = self.pagination;

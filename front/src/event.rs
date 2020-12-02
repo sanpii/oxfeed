@@ -2,7 +2,9 @@ use std::collections::HashSet;
 
 #[derive(Clone)]
 pub(crate) enum Event {
+    Api(Api),
     Alert(Alert),
+    AuthRequire,
     ItemUpdate,
     Search(String),
     SettingUpdate,
@@ -53,6 +55,7 @@ impl Alert {
 
 #[derive(Clone)]
 pub(crate) enum Api {
+    Auth,
     Counts(crate::Counts),
     Items(crate::Pager<crate::Item>),
     ItemsRead,

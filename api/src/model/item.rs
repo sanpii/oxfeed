@@ -30,18 +30,27 @@ pub struct Model<'a> {
 }
 
 impl<'a> Model<'a> {
-    pub fn all(&self, filter: &elephantry::Where, page: usize, max_per_page: usize) -> elephantry::Result<elephantry::Pager<Item>> {
-        let params = filter.params();
+    pub fn all(
+        &self,
+        token: &uuid::Uuid,
+        filter: &elephantry::Where,
+        page: usize,
+        max_per_page: usize
+    ) -> elephantry::Result<elephantry::Pager<Item>> {
+        let mut clause = filter.clone();
+        clause.and_where("\"user\".token = $*", vec![token]);
+        let params = clause.params();
 
         let query = format!(r#"
 select item.item_id, item.link, item.published, item.title, item.icon,
         item.read, item.favorite, source.title as source, source.tags as tags
     from item
     join source using (source_id)
+    join "user" using (user_id)
     where {}
     order by published desc
     offset {} fetch first {} rows only
-        "#, filter.to_string(), (page - 1) * max_per_page, max_per_page);
+        "#, clause.to_string(), (page - 1) * max_per_page, max_per_page);
 
         let rows = self.connection.query::<Item>(&query, &params)?;
 
@@ -49,14 +58,30 @@ select item.item_id, item.link, item.published, item.title, item.icon,
 select count(*)
     from item
     join source using (source_id)
+    join "user" using (user_id)
     where {}
-        "#, filter.to_string());
+        "#, clause.to_string());
 
         let count = self.connection.query_one::<i64>(&query, &params)?;
 
         let pager = elephantry::Pager::new(rows, count as usize, page, max_per_page);
 
         Ok(pager)
+    }
+
+    pub fn one(
+        &self,
+        token: &uuid::Uuid,
+        item_id: &uuid::Uuid,
+    ) -> elephantry::Result<Option<Entity>> {
+        self.connection.query::<Entity>(r#"
+select item.*
+    from item
+    join source using(source_id)
+    join "user" using(user_id)
+    where item_id = $*
+        and token = $*
+        "#, &[item_id, token]).map(|x| x.try_get(0))
     }
 }
 
