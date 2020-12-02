@@ -91,6 +91,22 @@ impl Render for Item {
     }
 }
 
+#[derive(Clone, serde::Deserialize, serde::Serialize)]
+struct User {
+    user_id: Option<String>,
+    name: String,
+    email: String,
+    password: String,
+}
+
+impl Into<std::result::Result<std::string::String, anyhow::Error>> for &User {
+    fn into(self) -> std::result::Result<std::string::String, anyhow::Error> {
+        let json = serde_json::to_string(self)?;
+
+        Ok(json)
+    }
+}
+
 #[derive(Clone, serde::Deserialize)]
 struct Counts {
     all: usize,

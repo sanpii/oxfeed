@@ -2,6 +2,7 @@ mod auth;
 mod items;
 mod opml;
 mod sources;
+mod user;
 
 #[derive(Clone, Copy)]
 enum Kind {
@@ -20,6 +21,7 @@ enum Kind {
     SourceCreate,
     SourceDelete,
     SourceUpdate,
+    UserCreate,
 }
 
 pub(crate) struct Api<C> where C: yew::Component, <C as yew::Component>::Message: std::convert::TryFrom<crate::event::Api> {
@@ -197,6 +199,10 @@ impl<C> Api<C> where C: yew::Component, <C as yew::Component>::Message: From<cra
             Kind::SourceUpdate => {
                 let source = serde_json::from_str(&data)?;
                 crate::event::Api::SourceUpdate(source)
+            },
+            Kind::UserCreate => {
+                let user = serde_json::from_str(&data)?;
+                crate::event::Api::UserCreate(user)
             },
         };
 

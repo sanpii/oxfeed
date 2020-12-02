@@ -35,6 +35,7 @@ async fn main() -> std::io::Result<()> {
             .service(services::opml::scope())
             .service(services::search::scope())
             .service(services::source::scope())
+            .service(services::user::scope())
             .service(services::scope())
     })
     .bind(&bind)?

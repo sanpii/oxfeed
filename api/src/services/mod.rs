@@ -3,6 +3,7 @@ pub(crate) mod item;
 pub(crate) mod opml;
 pub(crate) mod search;
 pub(crate) mod source;
+pub(crate) mod user;
 
 pub(crate) fn scope() -> actix_web::Scope {
     actix_web::web::scope("/")

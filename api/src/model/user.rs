@@ -1,8 +1,8 @@
 #[derive(elephantry::Entity, serde::Serialize)]
 pub struct Entity {
     pub user_id: uuid::Uuid,
-    pub name: String,
     pub email: String,
+    pub name: String,
 }
 
 pub struct Model<'a> {
@@ -35,6 +35,11 @@ impl<'a> elephantry::Model<'a> for Model<'a> {
             connection,
         }
     }
+
+    fn create_projection() -> elephantry::Projection {
+        Self::default_projection()
+            .unset_field("password")
+    }
 }
 
 pub struct Structure;
@@ -49,6 +54,6 @@ impl elephantry::Structure for Structure {
     }
 
     fn columns() -> &'static [&'static str] {
-        &["user_id", "name", "email"]
+        &["user_id", "name", "email", "password"]
     }
 }

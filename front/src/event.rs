@@ -69,6 +69,7 @@ pub(crate) enum Api {
     SourceCreate(crate::Source),
     SourceDelete(crate::Source),
     SourceUpdate(crate::Source),
+    UserCreate(crate::User),
 }
 
 pub(crate) struct Bus {

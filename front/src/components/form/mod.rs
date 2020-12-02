@@ -1,8 +1,12 @@
 mod autocomplete;
+pub mod login;
+pub mod register;
 mod tags;
 
-use autocomplete::Component as Autocomplete;
-use tags::Component as Tags;
+pub(crate) use autocomplete::Component as Autocomplete;
+pub(crate) use login::Component as Login;
+pub(crate) use register::Component as Register;
+pub(crate) use tags::Component as Tags;
 
 pub(crate) enum Message {
     Cancel,

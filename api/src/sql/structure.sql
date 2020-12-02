@@ -35,10 +35,25 @@ create index item_source_id on item(source_id);
 
 create table "user" (
     user_id uuid primary key default uuid_generate_v4(),
-    name text not null,
-    email text not null,
+    name text not null unique,
+    email text not null unique,
     password text not null,
     token uuid
 );
 
 create index user_read on "user"(token);
+
+create or replace function crypt_password()
+    returns trigger
+    language plpgsql
+as $$
+begin
+    NEW.password := crypt(NEW.password, gen_salt('bf'));
+    return NEW;
+end;
+$$;
+
+create trigger crypt_user_password
+    before insert or update on "user"
+    for each row
+    execute function crypt_password();
