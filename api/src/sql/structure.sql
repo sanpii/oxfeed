@@ -1,5 +1,17 @@
+begin;
+
 create extension if not exists "uuid-ossp";
 create extension if not exists pgcrypto;
+
+create table "user" (
+    user_id uuid primary key default uuid_generate_v4(),
+    name text not null unique,
+    email text not null unique,
+    password text not null,
+    token uuid
+);
+
+create index user_read on "user"(token);
 
 create table source (
     source_id uuid primary key default uuid_generate_v4(),
@@ -33,16 +45,6 @@ create index item_read on item(read);
 create index item_favorite on item(favorite);
 create index item_source_id on item(source_id);
 
-create table "user" (
-    user_id uuid primary key default uuid_generate_v4(),
-    name text not null unique,
-    email text not null unique,
-    password text not null,
-    token uuid
-);
-
-create index user_read on "user"(token);
-
 create or replace function crypt_password()
     returns trigger
     language plpgsql
@@ -57,3 +59,5 @@ create trigger crypt_user_password
     before insert or update on "user"
     for each row
     execute function crypt_password();
+
+commit;
