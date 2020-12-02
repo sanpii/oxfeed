@@ -12,6 +12,8 @@ create table source (
     unique(source_id, user_id)
 );
 
+create index source_user_id on source(user_id);
+
 create table item (
     item_id uuid primary key default uuid_generate_v4(),
     source_id uuid references source(source_id) not null,
@@ -29,6 +31,7 @@ create table item (
 
 create index item_read on item(read);
 create index item_favorite on item(favorite);
+create index item_source_id on item(source_id);
 
 create table "user" (
     user_id uuid primary key default uuid_generate_v4(),
@@ -37,3 +40,5 @@ create table "user" (
     password text not null,
     token uuid
 );
+
+create index user_read on "user"(token);
