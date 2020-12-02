@@ -1,5 +1,6 @@
 pub(crate) enum Message {
     Login,
+    ToggleRemember,
     UpdateLogin(String),
     UpdatePassword(String),
 }
@@ -18,6 +19,7 @@ pub(crate) struct Component {
     link: yew::ComponentLink<Self>,
     login: String,
     password: String,
+    remember_me: bool,
 }
 
 impl yew::Component for Component {
@@ -30,12 +32,14 @@ impl yew::Component for Component {
             link,
             login: String::new(),
             password: String::new(),
+            remember_me: false,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Login => self.api.auth_login(&self.login, &self.password),
+            Self::Message::Login => self.api.auth_login(&self.login, &self.password, self.remember_me),
+            Self::Message::ToggleRemember => self.remember_me = !self.remember_me,
             Self::Message::UpdateLogin(login) => self.login = login,
             Self::Message::UpdatePassword(password) => self.password = password,
         }
@@ -69,6 +73,15 @@ impl yew::Component for Component {
                         required=true
                         oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdatePassword(e.value))
                     />
+                    <div class="checkbox">
+                        <label>
+                            <input
+                                type="checkbox"
+                                value=self.remember_me
+                                onclick=self.link.callback(|_| Self::Message::ToggleRemember)
+                            />{ " Remember me" }
+                        </label>
+                    </div>
                     <a
                         class=("btn", "btn-lg", "btn-primary", "btn-block")
                         type="submit"

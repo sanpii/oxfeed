@@ -1,5 +1,5 @@
 impl<C> super::Api<C> where C: yew::Component, <C as yew::Component>::Message: From<crate::event::Api> {
-    pub fn auth_login(&mut self, login: &str, password: &str) {
+    pub fn auth_login(&mut self, login: &str, password: &str, remember_me: bool) {
         use hmac::NewMac;
         use jwt::SignWithKey;
 
@@ -10,7 +10,7 @@ impl<C> super::Api<C> where C: yew::Component, <C as yew::Component>::Message: F
 
         let token = claims.sign_with_key(&key).unwrap();
 
-        self.fetch(super::Kind::AuthLogin, http::Method::POST, "/auth/login", yew::format::Json(&token))
+        self.fetch(super::Kind::AuthLogin(remember_me), http::Method::POST, "/auth/login", yew::format::Json(&token))
     }
 
     pub fn auth_logout(&mut self) {

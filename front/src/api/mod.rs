@@ -5,7 +5,7 @@ mod sources;
 
 #[derive(Clone, Copy)]
 enum Kind {
-    AuthLogin,
+    AuthLogin(bool),
     AuthLogout,
     Counts,
     Items,
@@ -59,19 +59,25 @@ impl<C> Api<C> where C: yew::Component, <C as yew::Component>::Message: From<cra
     }
 
     fn token() -> String {
-        use wasm_bindgen::JsCast;
-
-        let document = yew::utils::document();
-        let html_document = document.dyn_into::<web_sys::HtmlDocument>().unwrap();
-        html_document.cookie().unwrap()
+        wasm_cookies::get("token")
+            .unwrap_or_else(|| Ok(String::new()))
+            .unwrap_or_default()
     }
 
-    fn set_token(token: &str) {
-        use wasm_bindgen::JsCast;
+    fn set_token(token: &str, remember_me: bool) {
+        let expires = std::time::Duration::from_secs(365*24*60*60);
+        let mut options = wasm_cookies::CookieOptions::default()
+            .expires_after(expires);
 
-        let document = yew::utils::document();
-        let html_document = document.dyn_into::<web_sys::HtmlDocument>().unwrap();
-        html_document.set_cookie(&token).unwrap();
+        if !remember_me {
+            options.expires = None;
+        }
+
+        wasm_cookies::set("token", token, &options);
+    }
+
+    fn clear_token() {
+        wasm_cookies::delete("token");
     }
 
     fn fetch<B>(
@@ -144,12 +150,12 @@ impl<C> Api<C> where C: yew::Component, <C as yew::Component>::Message: From<cra
         let data = response.into_body()?;
 
         let event = match kind {
-            Kind::AuthLogin => {
-                Self::set_token(&data);
+            Kind::AuthLogin(remember_me) => {
+                Self::set_token(&data, remember_me);
                 crate::event::Api::Auth
             },
             Kind::AuthLogout => {
-                Self::set_token("");
+                Self::clear_token();
                 crate::event::Api::Auth
             },
             Kind::Counts => {
