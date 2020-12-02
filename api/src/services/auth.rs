@@ -18,14 +18,8 @@ async fn login(elephantry: actix_web::web::Data<elephantry::Pool>, token: actix_
         return Ok(actix_web::HttpResponse::BadRequest().finish());
     }
 
-    let query = r#"
-update "user"
-    set token = uuid_generate_v4()
-    where (email = $1 or name = $1) and password = crypt($2, password)
-    returning token
-"#;
-
-    let token = match elephantry.query_one::<Option<uuid::Uuid>>(&query, &[&claims["login"], &claims["password"]])? {
+    let sql = include_str!("../sql/login.sql");
+    let token = match elephantry.query_one::<Option<uuid::Uuid>>(sql, &[&claims["login"], &claims["password"]])? {
         Some(token) => token,
         None => return Ok(actix_web::HttpResponse::Forbidden().finish()),
     };
@@ -39,7 +33,8 @@ update "user"
 #[actix_web::post("/logout")]
 async fn logout(elephantry: actix_web::web::Data<elephantry::Pool>, identity: crate::Identity) -> crate::Result {
     if let Some(token) = identity.token() {
-        elephantry.query_one::<()>("update \"user\" set token = null where token = $*", &[&token])?;
+        let sql = include_str!("../sql/logout.sql");
+        elephantry.query_one::<()>(sql, &[&token])?;
     };
 
     Ok(actix_web::HttpResponse::NoContent().finish())

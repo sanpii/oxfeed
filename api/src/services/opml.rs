@@ -50,9 +50,7 @@ fn save(elephantry: &elephantry::Pool, outline: &opml::Outline, token: &uuid::Uu
 async fn export(elephantry: Data<elephantry::Pool>) -> crate::Result {
     let mut opml = opml::OPML::default();
 
-    let feeds = elephantry.query::<(String, String)>(r#"
-select (title, url) from source;
-"#, &[])?;
+    let feeds = elephantry.query::<(String, String)>("select (title, url) from source", &[])?;
 
     for (title, url) in feeds {
         opml.add_feed(&title, &url);

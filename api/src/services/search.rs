@@ -63,34 +63,13 @@ async fn tags(
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
     };
 
-    let sql = format!(r#"
-with tags as (
-    select unnest(tags) as tag
-        from source
-        join "user" using (user_id)
-        where token = $*
-)
-select distinct tag
-    from tags
-    where tag ~* $*
-    order by 1
-    {}
-"#, query.pagination.to_sql());
+    let mut sql = include_str!("../sql/search_tags.sql").to_string();
+    sql.push_str(&query.pagination.to_sql());
 
     let q = format!("{}.*", query.q);
     let tags = elephantry.query::<String>(&sql, &[&token, &q])?;
 
-    let sql = r#"
-with tags as (
-    select unnest(tags) as tag
-        from source
-        join "user" using (user_id)
-        where token = $*
-)
-select count(tag)
-    from tags
-"#;
-
+    let sql = include_str!("../sql/search_tags_count.sql");
     let count = elephantry.query_one::<i64>(&sql, &[&token])?;
 
     let pager = elephantry::Pager::new(tags, count as usize, query.pagination.page(), query.pagination.limit());

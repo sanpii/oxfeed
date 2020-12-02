@@ -67,14 +67,7 @@ async fn content(
     };
 
     let item_id = Some(path.into_inner());
-    let sql = r#"
-select content
-    from item
-    join source using(source_id)
-    join "user" using(user_id)
-    where item_id = $*
-        and token = $*
-"#;
+    let sql = include_str!("../sql/item_content.sql");
     let content = elephantry.query::<Option<String>>(sql, &[&item_id, &token])?.next();
     let response = match content {
         Some(content) => actix_web::HttpResponse::Ok().body(&content.unwrap_or_default()),
@@ -103,14 +96,7 @@ async fn icon(
 
     let item_id = path.into_inner();
 
-    let sql = r#"
-select icon
-    from item
-    join source using(source_id)
-    join "user" using(user_id)
-    where item_id = $*
-        and token = $*
-"#;
+    let sql = include_str!("../sql/item_icon.sql");
     let icon = elephantry.query_one::<Option<String>>(sql, &[&item_id, &token])?;
     let mut img = None;
 
@@ -186,14 +172,7 @@ async fn read_all(
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
     };
 
-    let sql = r#"
-update item set read = true
-    from source
-    join "user" using(user_id)
-    where item.source_id = source.source_id
-        and "user".token = $*
-"#;
-
+    let sql = include_str!("../sql/read_all.sql");
     elephantry.query::<()>(sql, &[&token])?;
 
     let response = actix_web::HttpResponse::NoContent().finish();

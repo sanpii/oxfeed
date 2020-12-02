@@ -74,14 +74,8 @@ select count(*)
         token: &uuid::Uuid,
         item_id: &uuid::Uuid,
     ) -> elephantry::Result<Option<Entity>> {
-        self.connection.query::<Entity>(r#"
-select item.*
-    from item
-    join source using(source_id)
-    join "user" using(user_id)
-    where item_id = $*
-        and token = $*
-        "#, &[item_id, token]).map(|x| x.try_get(0))
+        let sql = include_str!("../sql/item.sql");
+        self.connection.query::<Entity>(sql, &[item_id, token]).map(|x| x.try_get(0))
     }
 }
 
