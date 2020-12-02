@@ -97,7 +97,7 @@ impl yew::Component for Component {
         let content = yew::utils::document().create_element("div").unwrap();
         content.set_inner_html(&self.content.as_ref().unwrap_or(&"Loading...".to_string()));
 
-        let icon = format!("{}/items/{}/icon", env!("API_URL"), self.item.item_id);
+        let icon = format!("{}/items/{}/icon?token={}", env!("API_URL"), self.item.item_id, crate::Api::<Self>::token());
 
         yew::html! {
             <>

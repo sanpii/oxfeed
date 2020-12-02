@@ -60,7 +60,7 @@ impl<C> Api<C> where C: yew::Component, <C as yew::Component>::Message: From<cra
         self.fetch(kind, http::Method::GET, &url, yew::format::Nothing)
     }
 
-    fn token() -> String {
+    pub fn token() -> String {
         wasm_cookies::get("token")
             .unwrap_or_else(|| Ok(String::new()))
             .unwrap_or_default()

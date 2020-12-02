@@ -81,7 +81,7 @@ async fn content(
 async fn icon(
     elephantry: Data<elephantry::Pool>,
     path: Path<uuid::Uuid>,
-    identity: crate::Identity,
+    identity: actix_web::web::Query<crate::Identity>,
 ) -> crate::Result {
     let token = match identity.token() {
         Some(token) => token,

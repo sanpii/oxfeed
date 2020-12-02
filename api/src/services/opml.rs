@@ -12,15 +12,15 @@ async fn import(
     xml: String,
     identity: crate::Identity,
 ) -> crate::Result {
-    let token = match identity.token() {
-        Some(token) => token,
+    let user = match elephantry.model::<crate::model::user::Model>().find_from_identity(&identity) {
+        Some(user) => user,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
     };
 
     let opml = opml::OPML::new(&xml).unwrap();
 
     for outline in opml.body.outlines {
-        save(&elephantry, &outline, &token);
+        save(&elephantry, &outline, &user);
     }
 
     let response = actix_web::HttpResponse::NoContent()
@@ -29,14 +29,14 @@ async fn import(
     Ok(response)
 }
 
-fn save(elephantry: &elephantry::Pool, outline: &opml::Outline, token: &uuid::Uuid) {
+fn save(elephantry: &elephantry::Pool, outline: &opml::Outline, user: &crate::model::user::Entity) {
     use std::convert::TryInto;
 
     for outline in &outline.outlines {
-        save(&elephantry, outline, token);
+        save(&elephantry, outline, user);
     }
 
-    let source = match (outline, token).try_into() {
+    let source = match (outline, user).try_into() {
         Ok(source) => source,
         Err(_) => return,
     };

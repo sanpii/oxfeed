@@ -1,4 +1,4 @@
-#[derive(Default, Debug)]
+#[derive(Default, Debug, serde::Deserialize)]
 pub struct Identity {
     token: Option<uuid::Uuid>,
 }

@@ -8,10 +8,10 @@ pub struct Entity {
     pub user_id: uuid::Uuid,
 }
 
-impl std::convert::TryFrom<(&opml::Outline, &uuid::Uuid)> for Entity {
+impl std::convert::TryFrom<(&opml::Outline, &super::user::Entity)> for Entity {
     type Error = ();
 
-    fn try_from((outline, user_id): (&opml::Outline, &uuid::Uuid)) -> Result<Self, Self::Error> {
+    fn try_from((outline, user): (&opml::Outline, &super::user::Entity)) -> Result<Self, Self::Error> {
         let url = match &outline.xml_url {
             Some(url) => url.clone(),
             None => return Err(()),
@@ -29,7 +29,7 @@ impl std::convert::TryFrom<(&opml::Outline, &uuid::Uuid)> for Entity {
             tags,
             title: outline.text.clone(),
             url,
-            user_id: user_id.clone(),
+            user_id: user.user_id.clone(),
         };
 
         Ok(entity)
