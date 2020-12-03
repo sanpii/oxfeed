@@ -42,7 +42,6 @@ pub(crate) struct Properties {
 pub(crate) struct Component {
     api: crate::Api<Self>,
     content: Option<String>,
-    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
     link: yew::ComponentLink<Self>,
     scene: Scene,
     item: crate::Item,
@@ -53,12 +52,9 @@ impl yew::Component for Component {
     type Properties = Properties;
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        use yew::agent::Dispatched;
-
         Self {
             api: crate::Api::new(link.clone()),
             content: None,
-            event_bus: crate::event::Bus::dispatcher(),
             item: props.value,
             link,
             scene: Scene::Hidden,
@@ -83,7 +79,7 @@ impl yew::Component for Component {
                 self.api
                     .items_tag(&self.item.item_id, "read", !self.item.read)
             }
-            Self::Message::Toggled => self.event_bus.send(crate::event::Event::ItemUpdate),
+            Self::Message::Toggled => (),
         }
 
         true

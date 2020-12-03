@@ -4,6 +4,8 @@ mod opml;
 mod sources;
 mod user;
 
+use yew::agent::Dispatched;
+
 #[derive(Clone, Copy)]
 enum Kind {
     AuthLogin(bool),
@@ -125,8 +127,6 @@ where
                     }
                 };
 
-                use yew::agent::Dispatched;
-
                 let mut event_bus = crate::event::Bus::dispatcher();
                 event_bus.send(crate::event::Event::Api(event.clone()));
 
@@ -153,7 +153,6 @@ where
         response: yew::services::fetch::Response<yew::format::Text>,
     ) -> crate::Result<crate::event::Api> {
         if response.status() == http::status::StatusCode::UNAUTHORIZED {
-            use yew::agent::Dispatched;
             let mut event_bus = crate::event::Bus::dispatcher();
 
             event_bus.send(crate::event::Event::AuthRequire);
@@ -162,7 +161,7 @@ where
 
         let data = response.into_body()?;
 
-        let event = match kind {
+        let api_event = match kind {
             Kind::AuthLogin(remember_me) => {
                 Self::set_token(&data, remember_me);
                 crate::event::Api::Auth
@@ -217,12 +216,21 @@ where
             }
         };
 
-        Ok(event)
+        let event = match kind {
+            Kind::SourceCreate | Kind::SourceDelete | Kind::SourceUpdate => Some(crate::event::Event::SourceUpdate),
+            Kind::ItemPatch => Some(crate::event::Event::ItemUpdate),
+            _ => None,
+        };
+
+        if let Some(event) = event {
+            let mut event_bus = crate::event::Bus::dispatcher();
+            event_bus.send(event.clone());
+        }
+
+        Ok(api_event)
     }
 
     fn error(error: crate::Error) {
-        use yew::agent::Dispatched;
-
         let mut event_bus = crate::event::Bus::dispatcher();
         event_bus.send(error.into());
     }

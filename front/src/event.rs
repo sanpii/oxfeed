@@ -8,6 +8,7 @@ pub(crate) enum Event {
     ItemUpdate,
     Search(String),
     SettingUpdate,
+    SourceUpdate,
 }
 
 impl From<crate::Error> for Event {

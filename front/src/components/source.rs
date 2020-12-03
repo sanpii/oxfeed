@@ -60,12 +60,7 @@ impl yew::Component for Component {
                             .sources_delete(self.source.source_id.as_ref().unwrap());
                     }
                 }
-                Self::Message::Deleted => {
-                    let parent = self.link.get_parent().unwrap();
-                    let sources = parent.clone().downcast::<super::Sources>();
-
-                    sources.send_message(super::sources::Message::NeedUpdate);
-                }
+                Self::Message::Deleted => (),
                 Self::Message::Edit => {
                     self.scene = Scene::Edit;
                     return true;

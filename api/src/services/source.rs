@@ -97,9 +97,9 @@ async fn delete(
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
     };
 
-    let source = match elephantry.model::<Model>().one(&source_id, &token)? {
+    let source = match elephantry.model::<Model>().one(&token, &source_id)? {
         Some(source) => source,
-        None => return Ok(actix_web::HttpResponse::NotFound().finish()),
+        None => return Ok(actix_web::HttpResponse::NoContent().finish()),
     };
 
     let response = match elephantry.delete_one::<Model>(&source)? {
