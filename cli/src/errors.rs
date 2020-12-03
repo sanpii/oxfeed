@@ -8,6 +8,6 @@ pub enum Error {
     Io(#[from] std::io::Error),
     #[error("http error: {0}")]
     Http(#[from] attohttpc::Error),
-    #[error("feed parse error: {0}")]
+    #[error("{0}")]
     Parser(#[from] feed_rs::parser::ParseFeedError),
 }
