@@ -98,7 +98,7 @@ impl yew::Component for Component {
     fn view(&self) -> yew::Html {
         match &self.scene {
             Scene::Edit => yew::html! {
-                <super::Form
+                <super::form::Source
                     source=self.source.clone()
                     oncancel=self.link.callback(|_| Message::Cancel)
                     onsubmit=self.link.callback(|source| Message::Save(source))

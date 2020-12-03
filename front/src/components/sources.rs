@@ -101,7 +101,7 @@ impl yew::Component for Component {
                 </a>
             },
             Scene::Add => yew::html! {
-                <super::Form
+                <super::form::Source
                     source=crate::Source::default()
                     oncancel=self.link.callback(|_| Message::Cancel)
                     onsubmit=self.link.callback(|source| Message::Create(source))

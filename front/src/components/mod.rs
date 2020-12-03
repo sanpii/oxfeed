@@ -19,7 +19,6 @@ mod tag;
 pub(crate) use actions::Component as Actions;
 pub(crate) use alerts::Component as Alerts;
 pub(crate) use app::Component as App;
-pub(crate) use form::Component as Form;
 pub(crate) use header::Component as Header;
 pub(crate) use item::Component as Item;
 pub(crate) use items::Component as Items;
