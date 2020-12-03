@@ -61,4 +61,23 @@ create trigger crypt_user_password
     for each row
     execute function crypt_password();
 
+create or replace function notify_new()
+    returns trigger
+    language plpgsql
+as $$
+begin
+    perform pg_notify('item_new', token::text)
+        from "user"
+        join source on source_id = new.source_id;
+
+    return new;
+end;
+$$;
+
+drop trigger if exists notify_new_item on item;
+create trigger notify_new_item
+    after insert on item
+    for each row
+    execute function notify_new();
+
 commit;

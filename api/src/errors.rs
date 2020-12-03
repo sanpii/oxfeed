@@ -9,6 +9,7 @@ pub enum Error {
     Jwt(jwt::Error),
     Io(std::io::Error),
     Opml(String),
+    Web(actix_web::Error),
 }
 
 impl std::error::Error for Error {}
@@ -23,6 +24,7 @@ impl std::fmt::Display for Error {
             Self::Jwt(error) => error.to_string(),
             Self::Io(error) => error.to_string(),
             Self::Opml(error) => error.to_string(),
+            Self::Web(error) => error.to_string(),
         };
 
         write!(f, "{}", message)
@@ -30,6 +32,12 @@ impl std::fmt::Display for Error {
 }
 
 impl actix_web::ResponseError for Error {}
+
+impl From<actix_web::Error> for Error {
+    fn from(error: actix_web::Error) -> Self {
+        Self::Web(error)
+    }
+}
 
 impl From<attohttpc::Error> for Error {
     fn from(error: attohttpc::Error) -> Self {
