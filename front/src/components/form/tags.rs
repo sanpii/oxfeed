@@ -44,7 +44,10 @@ impl yew::Component for Component {
             }
         }
 
-        self.on_change.emit(self.tags.clone());
+        let mut tags = self.tags.clone();
+        tags.sort();
+
+        self.on_change.emit(tags);
 
         true
     }
