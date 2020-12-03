@@ -55,6 +55,8 @@ fn main() -> Result<()> {
             }
         });
 
+    std::fs::remove_file(opt.lock_file)?;
+
     Ok(())
 }
 

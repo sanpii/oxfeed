@@ -4,6 +4,8 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     #[error("database error: {0}")]
     Database(#[from] elephantry::Error),
+    #[error("I/O error: {0}")]
+    Io(#[from] std::io::Error),
     #[error("http error: {0}")]
     Http(#[from] attohttpc::Error),
     #[error("feed parse error: {0}")]
