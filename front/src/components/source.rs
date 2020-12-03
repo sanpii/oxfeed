@@ -95,8 +95,8 @@ impl yew::Component for Component {
             Scene::Edit => yew::html! {
                 <super::form::Source
                     source=self.source.clone()
-                    oncancel=self.link.callback(|_| Message::Cancel)
-                    onsubmit=self.link.callback(|source| Message::Save(source))
+                    on_cancel=self.link.callback(|_| Message::Cancel)
+                    on_submit=self.link.callback(|source| Message::Save(source))
                 />
             },
             Scene::View => {

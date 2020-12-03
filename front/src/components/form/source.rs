@@ -9,8 +9,8 @@ pub(crate) enum Message {
 #[derive(Clone, yew::Properties)]
 pub(crate) struct Properties {
     pub source: crate::Source,
-    pub oncancel: yew::Callback<()>,
-    pub onsubmit: yew::Callback<crate::Source>,
+    pub on_cancel: yew::Callback<()>,
+    pub on_submit: yew::Callback<crate::Source>,
 }
 
 pub(crate) struct Component {
@@ -28,8 +28,8 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Cancel => self.props.oncancel.emit(()),
-            Self::Message::Submit => self.props.onsubmit.emit(self.props.source.clone()),
+            Self::Message::Cancel => self.props.on_cancel.emit(()),
+            Self::Message::Submit => self.props.on_submit.emit(self.props.source.clone()),
             Self::Message::UpdateTags(tags) => self.props.source.tags = tags,
             Self::Message::UpdateTitle(title) => {
                 self.props.source.title = if title.is_empty() { None } else { Some(title) }
