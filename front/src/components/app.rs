@@ -46,7 +46,7 @@ impl yew::Component for Component {
                 crate::event::Event::Api(crate::event::Api::Auth) => self.auth = true,
                 crate::event::Event::AuthRequire => self.auth = false,
                 _ => return false,
-            }
+            },
         }
 
         true
@@ -56,7 +56,7 @@ impl yew::Component for Component {
         if !self.auth {
             return yew::html! {
                 <super::Login />
-            }
+            };
         }
 
         use yew_router::router::Router;

@@ -48,7 +48,7 @@ impl yew::Component for Component {
                 };
 
                 self.on_submit.emit(info);
-            },
+            }
             Self::Message::ToggleRemember => self.remember_me = !self.remember_me,
             Self::Message::UpdateLogin(login) => self.login = login,
             Self::Message::UpdatePassword(password) => self.password = password,

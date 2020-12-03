@@ -27,12 +27,14 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Event(event) => if let crate::event::Event::Alert(alert) = event {
-                self.messages.push(alert);
-            },
+            Self::Message::Event(event) => {
+                if let crate::event::Event::Alert(alert) = event {
+                    self.messages.push(alert);
+                }
+            }
             Self::Message::Close(idx) => {
                 self.messages.remove(idx);
-            },
+            }
         };
 
         true

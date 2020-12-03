@@ -39,7 +39,7 @@ impl yew::Component for Component {
                 let alert = crate::event::Alert::info("Logged out");
                 self.event_bus.send(crate::event::Event::Alert(alert));
                 crate::Location::new().reload();
-            },
+            }
         }
 
         false

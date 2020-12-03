@@ -11,7 +11,7 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 #[derive(StructOpt)]
 struct Opt {
-    #[structopt(long, default_value="/var/lock/oxfeed")]
+    #[structopt(long, default_value = "/var/lock/oxfeed")]
     lock_file: String,
 }
 
@@ -32,28 +32,31 @@ fn main() -> Result<()> {
     let database_url = std::env::var("DATABASE_URL").expect("Missing DATABASE_URL env variable");
     let elephantry = elephantry::Pool::new(&database_url).expect("Unable to connect to postgresql");
 
-    let sources = elephantry.find_all::<SourceModel>(None)?.collect::<Vec<_>>();
+    let sources = elephantry
+        .find_all::<SourceModel>(None)?
+        .collect::<Vec<_>>();
 
-    sources.par_iter()
-        .for_each(|source| {
-            let last_error = match fetch(&elephantry, source) {
-                Ok(_) => None,
-                Err(err) => {
-                    log::error!("{}", err);
-                    Some(err.to_string())
-                }
-            };
-
-            let mut data = std::collections::HashMap::new();
-            data.insert("last_error".to_string(), &last_error as &dyn elephantry::ToSql);
-
-            if let Err(err) = elephantry.update_by_pk::<SourceModel>(
-                &elephantry::pk! { source_id => source.source_id },
-                &data,
-            ) {
+    sources.par_iter().for_each(|source| {
+        let last_error = match fetch(&elephantry, source) {
+            Ok(_) => None,
+            Err(err) => {
                 log::error!("{}", err);
+                Some(err.to_string())
             }
-        });
+        };
+
+        let mut data = std::collections::HashMap::new();
+        data.insert(
+            "last_error".to_string(),
+            &last_error as &dyn elephantry::ToSql,
+        );
+
+        if let Err(err) = elephantry
+            .update_by_pk::<SourceModel>(&elephantry::pk! { source_id => source.source_id }, &data)
+        {
+            log::error!("{}", err);
+        }
+    });
 
     std::fs::remove_file(opt.lock_file)?;
 
@@ -69,10 +72,16 @@ fn fetch(elephantry: &elephantry::Connection, source: &Source) -> Result<()> {
     let feed = feed_rs::parser::parse(contents.as_bytes())?;
 
     for entry in feed.entries {
-        let exist = elephantry.exist_where::<ItemModel>("id = $* and source_id = $*", &[&entry.id, &source.source_id])?;
+        let exist = elephantry.exist_where::<ItemModel>(
+            "id = $* and source_id = $*",
+            &[&entry.id, &source.source_id],
+        )?;
 
         if !exist {
-            let title = entry.title.map(|x| x.content).unwrap_or_else(|| "<no title>".to_string());
+            let title = entry
+                .title
+                .map(|x| x.content)
+                .unwrap_or_else(|| "<no title>".to_string());
 
             log::info!("Adding '{}'", title);
 

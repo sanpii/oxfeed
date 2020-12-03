@@ -24,12 +24,20 @@ enum Kind {
     UserCreate,
 }
 
-pub(crate) struct Api<C> where C: yew::Component, <C as yew::Component>::Message: std::convert::TryFrom<crate::event::Api> {
+pub(crate) struct Api<C>
+where
+    C: yew::Component,
+    <C as yew::Component>::Message: std::convert::TryFrom<crate::event::Api>,
+{
     link: yew::ComponentLink<C>,
     tasks: Vec<yew::services::fetch::FetchTask>,
 }
 
-impl<C> Api<C> where C: yew::Component, <C as yew::Component>::Message: From<crate::event::Api> {
+impl<C> Api<C>
+where
+    C: yew::Component,
+    <C as yew::Component>::Message: From<crate::event::Api>,
+{
     pub fn new(link: yew::ComponentLink<C>) -> Self {
         Self {
             link,
@@ -37,15 +45,21 @@ impl<C> Api<C> where C: yew::Component, <C as yew::Component>::Message: From<cra
         }
     }
 
-    pub fn counts(&mut self)
-    {
-        self.fetch(Kind::Counts, http::Method::GET, "/counts", yew::format::Nothing)
+    pub fn counts(&mut self) {
+        self.fetch(
+            Kind::Counts,
+            http::Method::GET,
+            "/counts",
+            yew::format::Nothing,
+        )
     }
 
-    pub fn search(&mut self, what: &str, query: &str, pagination: &crate::Pagination)
-    {
+    pub fn search(&mut self, what: &str, query: &str, pagination: &crate::Pagination) {
         let q = urlencoding::encode(query);
-        let url = format!("/search/{}?q={}&page={}&limit={}", what, q, pagination.page, pagination.limit);
+        let url = format!(
+            "/search/{}?q={}&page={}&limit={}",
+            what, q, pagination.page, pagination.limit
+        );
 
         let kind = match what {
             "all" | "unread" | "favorites" => Kind::SearchItems,
@@ -67,9 +81,8 @@ impl<C> Api<C> where C: yew::Component, <C as yew::Component>::Message: From<cra
     }
 
     fn set_token(token: &str, remember_me: bool) {
-        let expires = std::time::Duration::from_secs(365*24*60*60);
-        let mut options = wasm_cookies::CookieOptions::default()
-            .expires_after(expires);
+        let expires = std::time::Duration::from_secs(365 * 24 * 60 * 60);
+        let mut options = wasm_cookies::CookieOptions::default().expires_after(expires);
 
         if !remember_me {
             options.expires = None;
@@ -82,26 +95,23 @@ impl<C> Api<C> where C: yew::Component, <C as yew::Component>::Message: From<cra
         wasm_cookies::delete("token");
     }
 
-    fn fetch<B>(
-        &mut self,
-        kind: Kind,
-        method: http::Method,
-        url: &str,
-        body: B,
-    ) where B: Into<Result<String, anyhow::Error>>,
+    fn fetch<B>(&mut self, kind: Kind, method: http::Method, url: &str, body: B)
+    where
+        B: Into<Result<String, anyhow::Error>>,
     {
         let request = match yew::services::fetch::Request::builder()
             .method(method)
             .uri(&format!("{}{}", env!("API_URL"), url))
             .header("Content-Type", "application/json")
             .header("Authorization", &format!("Bearer {}", Self::token()))
-            .body(body) {
-                Ok(request) => request,
-                Err(err) => {
-                    Self::error(err.into());
-                    return;
-                },
-            };
+            .body(body)
+        {
+            Ok(request) => request,
+            Err(err) => {
+                Self::error(err.into());
+                return;
+            }
+        };
 
         let callback = self.link.batch_callback(
             move |response: yew::services::fetch::Response<yew::format::Text>| {
@@ -112,7 +122,7 @@ impl<C> Api<C> where C: yew::Component, <C as yew::Component>::Message: From<cra
                     Err(err) => {
                         Self::error(err.into());
                         return Vec::new();
-                    },
+                    }
                 };
 
                 use yew::agent::Dispatched;
@@ -125,7 +135,7 @@ impl<C> Api<C> where C: yew::Component, <C as yew::Component>::Message: From<cra
                     Err(_) => {
                         log::error!("fetch error");
                         Vec::new()
-                    },
+                    }
                 }
             },
         );
@@ -135,12 +145,14 @@ impl<C> Api<C> where C: yew::Component, <C as yew::Component>::Message: From<cra
             Err(err) => {
                 Self::error(err.into());
                 return;
-            },
+            }
         };
     }
 
-    fn on_response(kind: Kind, response: yew::services::fetch::Response<yew::format::Text>) -> crate::Result<crate::event::Api>
-    {
+    fn on_response(
+        kind: Kind,
+        response: yew::services::fetch::Response<yew::format::Text>,
+    ) -> crate::Result<crate::event::Api> {
         if response.status() == http::status::StatusCode::UNAUTHORIZED {
             use yew::agent::Dispatched;
             let mut event_bus = crate::event::Bus::dispatcher();
@@ -155,19 +167,19 @@ impl<C> Api<C> where C: yew::Component, <C as yew::Component>::Message: From<cra
             Kind::AuthLogin(remember_me) => {
                 Self::set_token(&data, remember_me);
                 crate::event::Api::Auth
-            },
+            }
             Kind::AuthLogout => {
                 Self::clear_token();
                 crate::event::Api::Auth
-            },
+            }
             Kind::Counts => {
                 let counts = serde_json::from_str(&data)?;
                 crate::event::Api::Counts(counts)
-            },
+            }
             Kind::Items => {
                 let items = serde_json::from_str(&data)?;
                 crate::event::Api::Items(items)
-            },
+            }
             Kind::ItemsRead => crate::event::Api::ItemsRead,
             Kind::ItemContent => crate::event::Api::ItemContent(data),
             Kind::ItemPatch => crate::event::Api::ItemPatch,
@@ -175,35 +187,35 @@ impl<C> Api<C> where C: yew::Component, <C as yew::Component>::Message: From<cra
             Kind::SearchItems => {
                 let items = serde_json::from_str(&data)?;
                 crate::event::Api::SearchItems(items)
-            },
+            }
             Kind::SearchSources => {
                 let sources = serde_json::from_str(&data)?;
                 crate::event::Api::SearchSources(sources)
-            },
+            }
             Kind::SearchTags => {
                 let tags = serde_json::from_str(&data)?;
                 crate::event::Api::SearchTags(tags)
-            },
+            }
             Kind::Sources => {
                 let sources = serde_json::from_str(&data)?;
                 crate::event::Api::Sources(sources)
-            },
+            }
             Kind::SourceCreate => {
                 let source = serde_json::from_str(&data)?;
                 crate::event::Api::SourceCreate(source)
-            },
+            }
             Kind::SourceDelete => {
                 let source = serde_json::from_str(&data)?;
                 crate::event::Api::SourceDelete(source)
-            },
+            }
             Kind::SourceUpdate => {
                 let source = serde_json::from_str(&data)?;
                 crate::event::Api::SourceUpdate(source)
-            },
+            }
             Kind::UserCreate => {
                 let user = serde_json::from_str(&data)?;
                 crate::event::Api::UserCreate(user)
-            },
+            }
         };
 
         Ok(event)

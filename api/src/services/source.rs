@@ -16,7 +16,12 @@ async fn all(
     pagination: actix_web::web::Query<super::Pagination>,
     identity: crate::Identity,
 ) -> crate::Result {
-    fetch(&elephantry, &identity, &elephantry::Where::new(), &pagination)
+    fetch(
+        &elephantry,
+        &identity,
+        &elephantry::Where::new(),
+        &pagination,
+    )
 }
 
 pub(crate) fn fetch(
@@ -47,7 +52,10 @@ async fn create(
 ) -> crate::Result {
     use std::convert::TryInto;
 
-    let user = match elephantry.model::<crate::model::user::Model>().find_from_identity(&identity) {
+    let user = match elephantry
+        .model::<crate::model::user::Model>()
+        .find_from_identity(&identity)
+    {
         Some(user) => user,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
     };
@@ -111,7 +119,10 @@ async fn update(
 ) -> crate::Result {
     use std::convert::TryInto;
 
-    let user = match elephantry.model::<crate::model::user::Model>().find_from_identity(&identity) {
+    let user = match elephantry
+        .model::<crate::model::user::Model>()
+        .find_from_identity(&identity)
+    {
         Some(user) => user,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
     };

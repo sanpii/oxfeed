@@ -1,8 +1,7 @@
 use crate::model::new_user::{Entity, Model};
 
 pub(crate) fn scope() -> actix_web::Scope {
-    actix_web::web::scope("/users")
-        .service(create)
+    actix_web::web::scope("/users").service(create)
 }
 
 #[actix_web::post("")]

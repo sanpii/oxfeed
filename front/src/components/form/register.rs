@@ -47,7 +47,7 @@ impl yew::Component for Component {
                     name: self.name.clone(),
                 };
                 self.on_submit.emit(info);
-            },
+            }
             Self::Message::UpdateEmail(email) => self.email = email,
             Self::Message::UpdatePassword(password) => self.password = password,
             Self::Message::UpdateName(name) => self.name = name,

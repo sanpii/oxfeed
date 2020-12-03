@@ -72,7 +72,12 @@ async fn tags(
     let sql = include_str!("../sql/search_tags_count.sql");
     let count = elephantry.query_one::<i64>(&sql, &[&token])?;
 
-    let pager = elephantry::Pager::new(tags, count as usize, query.pagination.page(), query.pagination.limit());
+    let pager = elephantry::Pager::new(
+        tags,
+        count as usize,
+        query.pagination.page(),
+        query.pagination.limit(),
+    );
 
     let response = actix_web::HttpResponse::Ok().json(pager);
 

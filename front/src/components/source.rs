@@ -56,38 +56,40 @@ impl yew::Component for Component {
                     let message = format!("Would you like delete '{}' source?", name);
 
                     if yew::services::dialog::DialogService::confirm(&message) {
-                        self.api.sources_delete(self.source.source_id.as_ref().unwrap());
+                        self.api
+                            .sources_delete(self.source.source_id.as_ref().unwrap());
                     }
-                },
+                }
                 Self::Message::Deleted => {
                     let parent = self.link.get_parent().unwrap();
                     let sources = parent.clone().downcast::<super::Sources>();
 
                     sources.send_message(super::sources::Message::NeedUpdate);
-                },
+                }
                 Self::Message::Edit => {
                     self.scene = Scene::Edit;
                     return true;
-                },
+                }
                 _ => unreachable!(),
             },
             Scene::Edit => match msg {
                 Self::Message::Cancel => {
                     self.scene = Scene::View;
                     return true;
-                },
+                }
                 Self::Message::Save(source) => {
                     self.source = source.clone();
-                    self.api.sources_update(self.source.source_id.as_ref().unwrap(), &self.source);
+                    self.api
+                        .sources_update(self.source.source_id.as_ref().unwrap(), &self.source);
                     return true;
-                },
+                }
                 Self::Message::Saved(source) => {
                     self.source = source.clone();
                     self.scene = Scene::View;
                     return true;
-                },
+                }
                 _ => unreachable!(),
-            }
+            },
         }
 
         false
@@ -150,7 +152,7 @@ impl yew::Component for Component {
                         </div>
                     </>
                 }
-            },
+            }
         }
     }
 

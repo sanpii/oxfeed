@@ -90,8 +90,7 @@ impl yew::agent::Agent for Bus {
         }
     }
 
-    fn update(&mut self, _: Self::Message) {
-    }
+    fn update(&mut self, _: Self::Message) {}
 
     fn handle_input(&mut self, msg: Self::Input, _: yew::agent::HandlerId) {
         for sub in self.subscribers.iter() {

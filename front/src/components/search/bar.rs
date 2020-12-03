@@ -46,12 +46,12 @@ impl yew::Component for Component {
                 if crate::Location::new().path().starts_with("/search") {
                     self.event_bus.send(crate::event::Event::Search(value));
                 }
-            },
+            }
             Self::Message::Nope => return false,
             Self::Message::Search => {
                 let location = crate::Location::new();
                 location.redirect(&format!("{}?q={}", self.route, self.query));
-            },
+            }
         }
 
         true

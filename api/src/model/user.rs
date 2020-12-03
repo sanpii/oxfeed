@@ -20,7 +20,8 @@ impl<'a> Model<'a> {
     }
 
     fn find_from_token(&self, token: &uuid::Uuid) -> Option<Entity> {
-        self.connection.find_where::<Self>("token = $*", &[token], None)
+        self.connection
+            .find_where::<Self>("token = $*", &[token], None)
             .map(|x| x.get(0))
             .ok()
     }
@@ -31,14 +32,11 @@ impl<'a> elephantry::Model<'a> for Model<'a> {
     type Structure = Structure;
 
     fn new(connection: &'a elephantry::Connection) -> Self {
-        Self {
-            connection,
-        }
+        Self { connection }
     }
 
     fn create_projection() -> elephantry::Projection {
-        Self::default_projection()
-            .unset_field("password")
+        Self::default_projection().unset_field("password")
     }
 }
 

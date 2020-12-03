@@ -4,7 +4,7 @@ pub(crate) enum Message {
     NeedUpdate,
     Read,
     ReadAll,
-    Update(crate::Counts)
+    Update(crate::Counts),
 }
 
 impl From<crate::event::Api> for Message {
@@ -93,7 +93,10 @@ impl yew::Component for Component {
             _producer: crate::event::Bus::bridge(callback),
         };
 
-        component.link.callback(|_| Self::Message::NeedUpdate).emit(());
+        component
+            .link
+            .callback(|_| Self::Message::NeedUpdate)
+            .emit(());
 
         component
     }
@@ -101,7 +104,9 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Self::Message::Event(event) => match event {
-                crate::event::Event::ItemUpdate | crate::event::Event::SettingUpdate => self.link.send_message(Self::Message::NeedUpdate),
+                crate::event::Event::ItemUpdate | crate::event::Event::SettingUpdate => {
+                    self.link.send_message(Self::Message::NeedUpdate)
+                }
                 _ => (),
             },
             Self::Message::NeedUpdate => self.api.counts(),
@@ -112,12 +117,12 @@ impl yew::Component for Component {
                 self.links[3].count = counts.sources;
 
                 return true;
-            },
+            }
             Self::Message::Read => {
                 let alert = crate::event::Alert::info("All items marked as read");
                 self.event_bus.send(crate::event::Event::Alert(alert));
                 self.event_bus.send(crate::event::Event::ItemUpdate);
-            },
+            }
             Self::Message::ReadAll => self.api.items_read(),
         }
 

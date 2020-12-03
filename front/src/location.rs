@@ -1,16 +1,14 @@
 use std::collections::HashMap;
 
 pub(crate) struct Location {
-    router: yew_router::service::RouteService::<()>,
+    router: yew_router::service::RouteService<()>,
 }
 
 impl Location {
     pub fn new() -> Self {
         let router = yew_router::service::RouteService::<()>::new();
 
-        Self {
-            router,
-        }
+        Self { router }
     }
 
     pub fn path(&self) -> String {

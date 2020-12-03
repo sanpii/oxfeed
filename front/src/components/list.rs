@@ -12,9 +12,7 @@ impl<R: 'static + crate::Render> yew::Component for Component<R> {
     type Message = ();
 
     fn create(props: Self::Properties, _: yew::ComponentLink<Self>) -> Self {
-        Self {
-            pager: props.value,
-        }
+        Self { pager: props.value }
     }
 
     fn update(&mut self, _: Self::Message) -> yew::ShouldRender {

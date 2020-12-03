@@ -69,16 +69,22 @@ impl yew::Component for Component {
         match msg {
             Self::Message::Content(content) => {
                 self.content = Some(content);
-            },
+            }
             Self::Message::ToggleContent => {
                 self.scene = !self.scene;
 
                 if self.scene == Scene::Expanded && self.content.is_none() {
                     self.api.items_content(&self.item.item_id);
                 }
-            },
-            Self::Message::ToggleFavorite => self.api.items_tag(&self.item.item_id, "favorite", !self.item.favorite),
-            Self::Message::ToggleRead => self.api.items_tag(&self.item.item_id, "read", !self.item.read),
+            }
+            Self::Message::ToggleFavorite => {
+                self.api
+                    .items_tag(&self.item.item_id, "favorite", !self.item.favorite)
+            }
+            Self::Message::ToggleRead => {
+                self.api
+                    .items_tag(&self.item.item_id, "read", !self.item.read)
+            }
             Self::Message::Toggled => self.event_bus.send(crate::event::Event::ItemUpdate),
         }
 
@@ -87,7 +93,8 @@ impl yew::Component for Component {
 
     fn view(&self) -> yew::Html {
         // @FIXME https://gitlab.com/imp/chrono-humanize-rs/-/merge_requests/5
-        let published_ago = chrono_humanize::HumanTime::from(self.item.published - chrono::Utc::now());
+        let published_ago =
+            chrono_humanize::HumanTime::from(self.item.published - chrono::Utc::now());
 
         let caret = match self.scene {
             Scene::Expanded => "caret-down",
@@ -97,7 +104,12 @@ impl yew::Component for Component {
         let content = yew::utils::document().create_element("div").unwrap();
         content.set_inner_html(&self.content.as_ref().unwrap_or(&"Loading...".to_string()));
 
-        let icon = format!("{}/items/{}/icon?token={}", env!("API_URL"), self.item.item_id, crate::Api::<Self>::token());
+        let icon = format!(
+            "{}/items/{}/icon?token={}",
+            env!("API_URL"),
+            self.item.item_id,
+            crate::Api::<Self>::token()
+        );
 
         yew::html! {
             <>

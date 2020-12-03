@@ -5,7 +5,10 @@ pub(crate) fn scope() -> actix_web::Scope {
 }
 
 #[actix_web::post("/login")]
-async fn login(elephantry: actix_web::web::Data<elephantry::Pool>, token: actix_web::web::Json<String>) -> crate::Result {
+async fn login(
+    elephantry: actix_web::web::Data<elephantry::Pool>,
+    token: actix_web::web::Json<String>,
+) -> crate::Result {
     let secret = std::env::var("SECRET").expect("Missing SECRET env variable");
 
     use hmac::NewMac;
@@ -19,19 +22,24 @@ async fn login(elephantry: actix_web::web::Data<elephantry::Pool>, token: actix_
     }
 
     let sql = include_str!("../sql/login.sql");
-    let token = match elephantry.query::<uuid::Uuid>(sql, &[&claims["login"], &claims["password"]])?.try_get(0) {
+    let token = match elephantry
+        .query::<uuid::Uuid>(sql, &[&claims["login"], &claims["password"]])?
+        .try_get(0)
+    {
         Some(token) => token,
         None => return Ok(actix_web::HttpResponse::Forbidden().finish()),
     };
 
-    let response = actix_web::HttpResponse::Ok()
-        .body(&token.to_string());
+    let response = actix_web::HttpResponse::Ok().body(&token.to_string());
 
     Ok(response)
 }
 
 #[actix_web::post("/logout")]
-async fn logout(elephantry: actix_web::web::Data<elephantry::Pool>, identity: crate::Identity) -> crate::Result {
+async fn logout(
+    elephantry: actix_web::web::Data<elephantry::Pool>,
+    identity: crate::Identity,
+) -> crate::Result {
     if let Some(token) = identity.token() {
         let sql = include_str!("../sql/logout.sql");
         elephantry.query_one::<()>(sql, &[&token])?;

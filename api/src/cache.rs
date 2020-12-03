@@ -28,12 +28,19 @@ pub(crate) fn get(url: &str) -> crate::Result<Vec<u8>> {
 fn path(url: &str) -> std::path::PathBuf {
     let digest = ring::digest::digest(&ring::digest::SHA256, url.as_bytes());
 
-    let mut path = digest.as_ref()
+    let mut path = digest
+        .as_ref()
         .chunks(4)
-        .map(|x| x.iter().fold(String::new(), |acc, b| format!("{}{:02x}", acc, b)))
+        .map(|x| {
+            x.iter()
+                .fold(String::new(), |acc, b| format!("{}{:02x}", acc, b))
+        })
         .collect::<Vec<_>>();
 
-    path.insert(0, std::env::var("CACHE_DIR").expect("Missing CACHE_DIR env variable"));
+    path.insert(
+        0,
+        std::env::var("CACHE_DIR").expect("Missing CACHE_DIR env variable"),
+    );
 
     path.iter().collect()
 }

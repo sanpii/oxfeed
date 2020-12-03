@@ -11,7 +11,9 @@ pub struct Entity {
 impl std::convert::TryFrom<(&opml::Outline, &super::user::Entity)> for Entity {
     type Error = ();
 
-    fn try_from((outline, user): (&opml::Outline, &super::user::Entity)) -> Result<Self, Self::Error> {
+    fn try_from(
+        (outline, user): (&opml::Outline, &super::user::Entity),
+    ) -> Result<Self, Self::Error> {
         let url = match &outline.xml_url {
             Some(url) => url.clone(),
             None => return Err(()),
@@ -52,23 +54,31 @@ impl<'a> Model<'a> {
         clause.and_where("\"user\".token = $*", vec![token]);
         let params = clause.params();
 
-        let query = format!(r#"
+        let query = format!(
+            r#"
 select *
     from source
     join "user" using (user_id)
     where {}
     order by last_error, title
     offset {} fetch first {} rows only
-        "#, clause.to_string(), (page - 1) * max_per_page, max_per_page);
+        "#,
+            clause.to_string(),
+            (page - 1) * max_per_page,
+            max_per_page
+        );
 
         let rows = self.connection.query::<Entity>(&query, &params)?;
 
-        let query = format!(r#"
+        let query = format!(
+            r#"
 select count(*)
     from source
     join "user" using (user_id)
     where {}
-        "#, clause.to_string());
+        "#,
+            clause.to_string()
+        );
 
         let count = self.connection.query_one::<i64>(&query, &params)?;
 
@@ -83,7 +93,9 @@ select count(*)
         source_id: &uuid::Uuid,
     ) -> elephantry::Result<Option<Entity>> {
         let sql = include_str!("../sql/source.sql");
-        self.connection.query::<Entity>(sql, &[source_id, token]).map(|x| x.try_get(0))
+        self.connection
+            .query::<Entity>(sql, &[source_id, token])
+            .map(|x| x.try_get(0))
     }
 }
 
@@ -92,9 +104,7 @@ impl<'a> elephantry::Model<'a> for Model<'a> {
     type Structure = Structure;
 
     fn new(connection: &'a elephantry::Connection) -> Self {
-        Self {
-            connection,
-        }
+        Self { connection }
     }
 }
 

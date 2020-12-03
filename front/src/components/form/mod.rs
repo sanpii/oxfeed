@@ -33,10 +33,7 @@ impl yew::Component for Component {
     type Properties = Properties;
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        Self {
-            link,
-            props,
-        }
+        Self { link, props }
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
@@ -44,11 +41,9 @@ impl yew::Component for Component {
             Self::Message::Cancel => self.props.oncancel.emit(()),
             Self::Message::Submit => self.props.onsubmit.emit(self.props.source.clone()),
             Self::Message::UpdateTags(tags) => self.props.source.tags = tags,
-            Self::Message::UpdateTitle(title) => self.props.source.title = if title.is_empty() {
-                None
-            } else {
-                Some(title)
-            },
+            Self::Message::UpdateTitle(title) => {
+                self.props.source.title = if title.is_empty() { None } else { Some(title) }
+            }
             Self::Message::UpdateUrl(url) => self.props.source.url = url,
         }
 

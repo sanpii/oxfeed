@@ -1,6 +1,6 @@
-use std::collections::HashMap;
 use crate::model::item::Model;
 use actix_web::web::{Data, Json, Path};
+use std::collections::HashMap;
 
 pub(crate) fn scope() -> actix_web::Scope {
     actix_web::web::scope("/items")
@@ -19,7 +19,12 @@ async fn all(
     pagination: actix_web::web::Query<super::Pagination>,
     identity: crate::Identity,
 ) -> crate::Result {
-    fetch(&elephantry, &identity, &elephantry::Where::new(), &pagination.into_inner())
+    fetch(
+        &elephantry,
+        &identity,
+        &elephantry::Where::new(),
+        &pagination.into_inner(),
+    )
 }
 
 #[actix_web::get("/favorites")]
@@ -28,7 +33,12 @@ async fn favorites(
     pagination: actix_web::web::Query<super::Pagination>,
     identity: crate::Identity,
 ) -> crate::Result {
-    fetch(&elephantry, &identity, &elephantry::Where::from("favorite", Vec::new()), &pagination.into_inner())
+    fetch(
+        &elephantry,
+        &identity,
+        &elephantry::Where::from("favorite", Vec::new()),
+        &pagination.into_inner(),
+    )
 }
 
 #[actix_web::get("/unread")]
@@ -37,10 +47,20 @@ async fn unread(
     pagination: actix_web::web::Query<super::Pagination>,
     identity: crate::Identity,
 ) -> crate::Result {
-    fetch(&elephantry, &identity, &elephantry::Where::from("not read", Vec::new()), &pagination.into_inner())
+    fetch(
+        &elephantry,
+        &identity,
+        &elephantry::Where::from("not read", Vec::new()),
+        &pagination.into_inner(),
+    )
 }
 
-pub(crate) fn fetch(elephantry: &elephantry::Pool, identity: &crate::Identity, filter: &elephantry::Where, pagination: &super::Pagination) -> crate::Result {
+pub(crate) fn fetch(
+    elephantry: &elephantry::Pool,
+    identity: &crate::Identity,
+    filter: &elephantry::Where,
+    pagination: &super::Pagination,
+) -> crate::Result {
     let token = match identity.token() {
         Some(token) => token,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
@@ -68,7 +88,9 @@ async fn content(
 
     let item_id = Some(path.into_inner());
     let sql = include_str!("../sql/item_content.sql");
-    let content = elephantry.query::<Option<String>>(sql, &[&item_id, &token])?.next();
+    let content = elephantry
+        .query::<Option<String>>(sql, &[&item_id, &token])?
+        .next();
     let response = match content {
         Some(content) => actix_web::HttpResponse::Ok().body(&content.unwrap_or_default()),
         None => actix_web::HttpResponse::NotFound().finish(),
@@ -89,9 +111,8 @@ async fn icon(
     };
 
     let empty_img = [
-        71, 73, 70, 56, 57, 97, 1, 0, 1, 0, 128, 0, 0, 255, 255, 255, 255, 255,
-        255, 33, 249, 4, 1, 10, 0, 1, 0, 44, 0, 0, 0, 0, 1, 0, 1, 0, 0, 2, 2,
-        76, 1, 0, 59
+        71, 73, 70, 56, 57, 97, 1, 0, 1, 0, 128, 0, 0, 255, 255, 255, 255, 255, 255, 33, 249, 4, 1,
+        10, 0, 1, 0, 44, 0, 0, 0, 0, 1, 0, 1, 0, 0, 2, 2, 76, 1, 0, 59,
     ];
 
     let item_id = path.into_inner();
@@ -163,10 +184,7 @@ async fn patch(
 }
 
 #[actix_web::post("/read")]
-async fn read_all(
-    elephantry: Data<elephantry::Pool>,
-    identity: crate::Identity,
-) -> crate::Result {
+async fn read_all(elephantry: Data<elephantry::Pool>, identity: crate::Identity) -> crate::Result {
     let token = match identity.token() {
         Some(token) => token,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),

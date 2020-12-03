@@ -49,12 +49,12 @@ impl yew::Component for Component {
             Self::Message::Cancel => {
                 self.scene = Scene::Login;
                 return true;
-            },
+            }
             Self::Message::UserCreated => {
                 let alert = crate::event::Alert::info("User created");
                 self.event_bus.send(crate::event::Event::Alert(alert));
                 self.link.send_message(Self::Message::Cancel);
-            },
+            }
             Self::Message::Create(info) => {
                 let user = crate::User {
                     user_id: None,
@@ -63,13 +63,16 @@ impl yew::Component for Component {
                     email: info.email,
                 };
                 self.api.user_create(&user);
-            },
-            Self::Message::Login(info) => self.api.auth_login(&info.login, &info.password, info.remember_me),
+            }
+            Self::Message::Login(info) => {
+                self.api
+                    .auth_login(&info.login, &info.password, info.remember_me)
+            }
             Self::Message::Logged => (),
             Self::Message::Register => {
-                self.scene =  Scene::Register;
+                self.scene = Scene::Register;
                 return true;
-            },
+            }
         }
 
         false
@@ -100,7 +103,7 @@ impl yew::Component for Component {
                         <a href="#" onclick=self.link.callback(|_| Self::Message::Cancel)>{ "Log in" }</a>
                     </form>
                 </div>
-            }
+            },
         }
     }
 

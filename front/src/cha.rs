@@ -3,7 +3,7 @@
  */
 
 #[derive(Debug)]
-pub(crate) struct Color (u8, u8, u8);
+pub(crate) struct Color(u8, u8, u8);
 
 impl Color {
     pub(crate) fn from(input: &str) -> Color {
@@ -34,10 +34,7 @@ impl Color {
      * http://alienryderflex.com/hsp.htm
      */
     fn hsp(&self) -> f32 {
-        (
-            0.299 * self.0.pow(2) as f32
-            + 0.587 * self.1.pow(2) as f32
-            + 0.114 * self.2.pow(2) as f32
-        ).sqrt()
+        (0.299 * self.0.pow(2) as f32 + 0.587 * self.1.pow(2) as f32 + 0.114 * self.2.pow(2) as f32)
+            .sqrt()
     }
 }

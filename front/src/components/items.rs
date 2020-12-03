@@ -70,7 +70,9 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Self::Message::Event(event) => match event {
-                crate::event::Event::ItemUpdate => self.link.send_message(Self::Message::NeedUpdate),
+                crate::event::Event::ItemUpdate => {
+                    self.link.send_message(Self::Message::NeedUpdate)
+                }
                 _ => (),
             },
             Self::Message::NeedUpdate => self.fetch(),

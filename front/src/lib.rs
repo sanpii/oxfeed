@@ -1,4 +1,4 @@
-#![recursion_limit="1024"]
+#![recursion_limit = "1024"]
 
 mod api;
 mod cha;
@@ -32,7 +32,7 @@ struct Pager<R: Render> {
     has_previous_page: bool,
     count: usize,
     max_per_page: usize,
-    #[serde(default="location::base_url")]
+    #[serde(default = "location::base_url")]
     base_url: String,
     iterator: Vec<R>,
 }
@@ -123,10 +123,7 @@ struct Pagination {
 
 impl Pagination {
     fn new() -> Self {
-        Self {
-            page: 1,
-            limit: 25,
-        }
+        Self { page: 1, limit: 25 }
     }
 }
 
@@ -135,8 +132,16 @@ impl From<Location> for Pagination {
         let query = location.query();
 
         Pagination {
-            page: query.get("page").map(|x| x.parse().ok()).flatten().unwrap_or(1),
-            limit: query.get("limit").map(|x| x.parse().ok()).flatten().unwrap_or(25),
+            page: query
+                .get("page")
+                .map(|x| x.parse().ok())
+                .flatten()
+                .unwrap_or(1),
+            limit: query
+                .get("limit")
+                .map(|x| x.parse().ok())
+                .flatten()
+                .unwrap_or(25),
         }
     }
 }

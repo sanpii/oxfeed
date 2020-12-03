@@ -41,11 +41,15 @@ impl yew::Component for Component {
     fn view(&self) -> yew::Html {
         let span = yew::utils::document().create_element("span").unwrap();
 
-        let svg = format!(r#"
+        let svg = format!(
+            r#"
         <svg width={size} height={size} fill="currentColor">
             <use xlink:href="/lib/bootstrap-icons/bootstrap-icons.svg#{src}"/>
         </svg>
-        "#, size=self.size, src=self.icon);
+        "#,
+            size = self.size,
+            src = self.icon
+        );
 
         span.set_inner_html(&svg);
 

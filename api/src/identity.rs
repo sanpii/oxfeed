@@ -15,8 +15,16 @@ impl actix_web::FromRequest for Identity {
     type Future = futures_util::future::Ready<crate::Result<Self>>;
 
     #[inline]
-    fn from_request(request: &actix_web::web::HttpRequest, _: &mut actix_web::dev::Payload) -> Self::Future {
-        let authorization = match request.headers().get("Authorization").map(|x| x.to_str().ok()).flatten() {
+    fn from_request(
+        request: &actix_web::web::HttpRequest,
+        _: &mut actix_web::dev::Payload,
+    ) -> Self::Future {
+        let authorization = match request
+            .headers()
+            .get("Authorization")
+            .map(|x| x.to_str().ok())
+            .flatten()
+        {
             Some(authorization) => authorization,
             None => return futures_util::future::ok(Self::default()),
         };
@@ -37,8 +45,6 @@ impl actix_web::FromRequest for Identity {
             None
         };
 
-        futures_util::future::ok(Identity {
-            token,
-        })
+        futures_util::future::ok(Identity { token })
     }
 }

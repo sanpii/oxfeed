@@ -6,15 +6,14 @@ pub(crate) mod source;
 pub(crate) mod user;
 
 pub(crate) fn scope() -> actix_web::Scope {
-    actix_web::web::scope("/")
-        .service(counts)
+    actix_web::web::scope("/").service(counts)
 }
 
 #[derive(serde::Deserialize)]
 pub struct Pagination {
-    #[serde(default="default_page")]
+    #[serde(default = "default_page")]
     pub page: String,
-    #[serde(default="default_limit")]
+    #[serde(default = "default_limit")]
     pub limit: String,
 }
 

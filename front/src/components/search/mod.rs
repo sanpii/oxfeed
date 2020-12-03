@@ -46,7 +46,7 @@ impl yew::Component for Component {
                     return true;
                 }
                 _ => (),
-            }
+            },
         }
 
         false

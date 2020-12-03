@@ -12,7 +12,10 @@ async fn import(
     xml: String,
     identity: crate::Identity,
 ) -> crate::Result {
-    let user = match elephantry.model::<crate::model::user::Model>().find_from_identity(&identity) {
+    let user = match elephantry
+        .model::<crate::model::user::Model>()
+        .find_from_identity(&identity)
+    {
         Some(user) => user,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
     };
@@ -23,8 +26,7 @@ async fn import(
         save(&elephantry, &outline, &user);
     }
 
-    let response = actix_web::HttpResponse::NoContent()
-        .finish();
+    let response = actix_web::HttpResponse::NoContent().finish();
 
     Ok(response)
 }
@@ -58,7 +60,10 @@ async fn export(elephantry: Data<elephantry::Pool>) -> crate::Result {
 
     let response = actix_web::HttpResponse::Ok()
         .header("Content-Type", "text/xml; charset=utf-8")
-        .header("Content-Disposition", "attachment; filename=\"oxfeed-subscriptions.xml\"")
+        .header(
+            "Content-Disposition",
+            "attachment; filename=\"oxfeed-subscriptions.xml\"",
+        )
         .body(opml.to_xml().map_err(|e| crate::Error::Opml(e))?);
 
     Ok(response)

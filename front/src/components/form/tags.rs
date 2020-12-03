@@ -35,22 +35,26 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Add => if !self.value.is_empty() {
-                if !self.tags.contains(&self.value) {
-                    self.tags.push(self.value.clone());
+            Self::Message::Add => {
+                if !self.value.is_empty() {
+                    if !self.tags.contains(&self.value) {
+                        self.tags.push(self.value.clone());
+                    }
+                    self.value = String::new();
                 }
-                self.value = String::new();
-            },
-            Self::Message::Delete => if self.value.is_empty() {
-                self.tags.pop();
-            },
+            }
+            Self::Message::Delete => {
+                if self.value.is_empty() {
+                    self.tags.pop();
+                }
+            }
             Self::Message::Remove(idx) => {
                 self.tags.remove(idx);
-            },
+            }
             Self::Message::Update(value) => {
                 self.value = value;
                 return false;
-            },
+            }
             Self::Message::Nope => return false,
         }
 

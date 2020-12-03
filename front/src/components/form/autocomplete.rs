@@ -55,30 +55,37 @@ impl yew::Component for Component {
             Self::Message::Choose(idx) => {
                 self.on_input.emit(self.terms[idx].clone());
                 self.on_keydown.emit("Enter".to_string());
-            },
-            Self::Message::Input(input) => if !input.is_empty() {
-                self.api.search(&self.what, &input, &crate::Pagination::new());
-                self.on_input.emit(input.clone());
-                return false;
-            } else {
-                self.terms = Vec::new();
-                self.active = None;
-            },
+            }
+            Self::Message::Input(input) => {
+                if !input.is_empty() {
+                    self.api
+                        .search(&self.what, &input, &crate::Pagination::new());
+                    self.on_input.emit(input.clone());
+                    return false;
+                } else {
+                    self.terms = Vec::new();
+                    self.active = None;
+                }
+            }
             Self::Message::Key(key) => match key.as_str() {
-                "ArrowDown" => self.active = if let Some(active) = self.active {
-                    Some((active + 1) % self.terms.len())
-                } else {
-                    Some(0)
-                },
-                "ArrowUp" => self.active = if let Some(active) = self.active {
-                    Some(active.checked_sub(1).unwrap_or(self.terms.len() - 1))
-                } else {
-                    Some(self.terms.len() - 1)
-                },
+                "ArrowDown" => {
+                    self.active = if let Some(active) = self.active {
+                        Some((active + 1) % self.terms.len())
+                    } else {
+                        Some(0)
+                    }
+                }
+                "ArrowUp" => {
+                    self.active = if let Some(active) = self.active {
+                        Some(active.checked_sub(1).unwrap_or(self.terms.len() - 1))
+                    } else {
+                        Some(self.terms.len() - 1)
+                    }
+                }
                 "Escape" => {
                     self.terms = Vec::new();
                     self.active = None;
-                },
+                }
                 key => self.on_keydown.emit(key.to_string()),
             },
             Self::Message::Terms(terms) => self.terms = terms,

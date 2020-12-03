@@ -28,9 +28,10 @@ impl Component {
     fn load(&mut self) {
         for file in &self.files {
             log::debug!("load {:?}", file);
-            let callback = self.link.callback(|e: yew::services::reader::FileData| Message::Loaded(e.content));
-            let task = self.reader.read_file(file.clone(), callback)
-                .unwrap();
+            let callback = self
+                .link
+                .callback(|e: yew::services::reader::FileData| Message::Loaded(e.content));
+            let task = self.reader.read_file(file.clone(), callback).unwrap();
             self.tasks.push(task);
         }
     }
@@ -66,7 +67,7 @@ impl yew::Component for Component {
                 let alert = crate::event::Alert::info("Import done");
                 self.event_bus.send(crate::event::Event::Alert(alert));
                 self.event_bus.send(crate::event::Event::SettingUpdate);
-            },
+            }
             Self::Message::Loaded(content) => self.import(&content),
         }
 
@@ -78,7 +79,8 @@ impl yew::Component for Component {
         let label = if self.files.is_empty() {
             "Choose a file".to_string()
         } else {
-            self.files.iter()
+            self.files
+                .iter()
                 .map(|x| x.name())
                 .collect::<Vec<_>>()
                 .join(",")

@@ -42,12 +42,12 @@ impl yew::Component for Component {
 
     fn view(&self) -> yew::Html {
         let bg_color = crate::cha::Color::from(&self.value);
-        let color = if bg_color.is_dark() {
-            "white"
-        } else {
-            "black"
-        };
-        let style = format!("background-color: {}; color: {}", bg_color.to_color_string(), color);
+        let color = if bg_color.is_dark() { "white" } else { "black" };
+        let style = format!(
+            "background-color: {}; color: {}",
+            bg_color.to_color_string(),
+            color
+        );
 
         yew::html! {
             <span style=style class="badge">
