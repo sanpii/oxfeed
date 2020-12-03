@@ -1,5 +1,7 @@
 mod errors;
 
+use structopt::StructOpt;
+
 pub use errors::Result;
 
 use oxfeed_api::model::item::Model as ItemModel;
@@ -7,10 +9,18 @@ use oxfeed_api::model::source::Entity as Source;
 use oxfeed_api::model::source::Model as SourceModel;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
+#[derive(StructOpt)]
+struct Opt {
+    #[structopt(long, default_value="/var/lock/oxfeed")]
+    lock_file: String,
+}
+
 fn main() -> Result<()> {
     env_logger::init();
 
-    let instance = single_instance::SingleInstance::new("oxfeed").unwrap();
+    let opt = Opt::from_args();
+
+    let instance = single_instance::SingleInstance::new(&opt.lock_file).unwrap();
     if !instance.is_single() {
         log::warn!("Already running");
         return Ok(());
