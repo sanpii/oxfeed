@@ -22,8 +22,7 @@ async fn all(
     query: Query<Request>,
     identity: crate::Identity,
 ) -> crate::Result {
-    let q = format!(".*{}.*", query.q);
-    let clause = elephantry::Where::from("item.title ~* $*", vec![&q]);
+    let clause = elephantry::Where::from("item.title ~* $*", vec![&query.q]);
 
     super::item::fetch(&elephantry, &identity, &clause, &query.pagination)
 }
@@ -34,8 +33,7 @@ async fn favorites(
     query: Query<Request>,
     identity: crate::Identity,
 ) -> crate::Result {
-    let q = format!(".*{}.*", query.q);
-    let clause = elephantry::Where::from("item.title ~* $* and favorite", vec![&q]);
+    let clause = elephantry::Where::from("item.title ~* $* and favorite", vec![&query.q]);
 
     super::item::fetch(&elephantry, &identity, &clause, &query.pagination)
 }
@@ -46,8 +44,7 @@ async fn unread(
     query: Query<Request>,
     identity: crate::Identity,
 ) -> crate::Result {
-    let q = format!(".*{}.*", query.q);
-    let clause = elephantry::Where::from("item.title ~* $* and not read", vec![&q]);
+    let clause = elephantry::Where::from("item.title ~* $* and not read", vec![&query.q]);
 
     super::item::fetch(&elephantry, &identity, &clause, &query.pagination)
 }
@@ -66,7 +63,7 @@ async fn tags(
     let mut sql = include_str!("../sql/search_tags.sql").to_string();
     sql.push_str(&query.pagination.to_sql());
 
-    let q = format!("{}.*", query.q);
+    let q = format!("^{}", query.q);
     let tags = elephantry.query::<String>(&sql, &[&token, &q])?;
 
     let sql = include_str!("../sql/search_tags_count.sql");
@@ -90,7 +87,6 @@ async fn sources(
     query: Query<Request>,
     identity: crate::Identity,
 ) -> crate::Result {
-    let q = format!(".*{}.*", query.q);
-    let clause = elephantry::Where::from("source.title ~* $*", vec![&q]);
+    let clause = elephantry::Where::from("source.title ~* $*", vec![&query.q]);
     super::source::fetch(&elephantry, &identity, &clause, &query.pagination)
 }
