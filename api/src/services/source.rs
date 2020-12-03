@@ -1,5 +1,5 @@
-use crate::model::source::Model;
 use actix_web::web::{Data, Json, Path};
+use oxfeed_common::source::Model;
 
 pub(crate) fn scope() -> actix_web::Scope {
     actix_web::web::scope("/sources")
@@ -13,7 +13,7 @@ pub(crate) fn scope() -> actix_web::Scope {
 #[actix_web::get("")]
 async fn all(
     elephantry: Data<elephantry::Pool>,
-    pagination: actix_web::web::Query<super::Pagination>,
+    pagination: actix_web::web::Query<oxfeed_common::Pagination>,
     identity: crate::Identity,
 ) -> crate::Result {
     fetch(
@@ -28,17 +28,15 @@ pub(crate) fn fetch(
     elephantry: &elephantry::Pool,
     identity: &crate::Identity,
     filter: &elephantry::Where,
-    pagination: &super::Pagination,
+    pagination: &oxfeed_common::Pagination,
 ) -> crate::Result {
     let token = match identity.token() {
         Some(token) => token,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
     };
 
-    let limit = pagination.limit.parse().unwrap();
-    let page = pagination.page.parse().unwrap();
     let model = elephantry.model::<Model>();
-    let sources = model.all(&token, filter, page, limit)?;
+    let sources = model.all(&token, filter, pagination)?;
     let response = actix_web::HttpResponse::Ok().json(sources);
 
     Ok(response)
@@ -52,9 +50,14 @@ async fn create(
 ) -> crate::Result {
     use std::convert::TryInto;
 
+    let token = match identity.token() {
+        Some(token) => token,
+        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
+    };
+
     let user = match elephantry
-        .model::<crate::model::user::Model>()
-        .find_from_identity(&identity)
+        .model::<oxfeed_common::user::Model>()
+        .find_from_token(&token)
     {
         Some(user) => user,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
@@ -119,9 +122,14 @@ async fn update(
 ) -> crate::Result {
     use std::convert::TryInto;
 
+    let token = match identity.token() {
+        Some(token) => token,
+        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
+    };
+
     let user = match elephantry
-        .model::<crate::model::user::Model>()
-        .find_from_identity(&identity)
+        .model::<oxfeed_common::user::Model>()
+        .find_from_token(&token)
     {
         Some(user) => user,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),

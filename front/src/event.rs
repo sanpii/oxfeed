@@ -57,20 +57,20 @@ impl Alert {
 #[derive(Clone)]
 pub(crate) enum Api {
     Auth,
-    Counts(crate::Counts),
-    Items(crate::Pager<crate::Item>),
+    Counts(oxfeed_common::Counts),
+    Items(crate::Pager<oxfeed_common::item::Item>),
     ItemsRead,
     ItemContent(String),
     ItemPatch,
     OpmlImport,
-    SearchItems(crate::Pager<crate::Item>),
-    SearchSources(crate::Pager<crate::Source>),
+    SearchItems(crate::Pager<oxfeed_common::item::Item>),
+    SearchSources(crate::Pager<oxfeed_common::source::Entity>),
     SearchTags(crate::Pager<String>),
-    Sources(crate::Pager<crate::Source>),
-    SourceCreate(crate::Source),
-    SourceDelete(crate::Source),
-    SourceUpdate(crate::Source),
-    UserCreate(crate::User),
+    Sources(crate::Pager<oxfeed_common::source::Entity>),
+    SourceCreate(oxfeed_common::source::Entity),
+    SourceDelete(oxfeed_common::source::Entity),
+    SourceUpdate(oxfeed_common::source::Entity),
+    UserCreate(oxfeed_common::user::Entity),
 }
 
 pub(crate) struct Bus {

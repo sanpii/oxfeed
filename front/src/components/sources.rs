@@ -2,9 +2,9 @@
 pub(crate) enum Message {
     Add,
     Cancel,
-    Create(crate::Source),
+    Create(oxfeed_common::source::Entity),
     Event(crate::event::Event),
-    Update(crate::Pager<crate::Source>),
+    Update(crate::Pager<oxfeed_common::source::Entity>),
     NeedUpdate,
 }
 
@@ -29,7 +29,7 @@ enum Scene {
 pub(crate) struct Properties {
     #[prop_or_default]
     pub filter: String,
-    pub pagination: crate::Pagination,
+    pub pagination: oxfeed_common::Pagination,
 }
 
 pub(crate) struct Component {
@@ -37,8 +37,8 @@ pub(crate) struct Component {
     filter: String,
     link: yew::ComponentLink<Self>,
     scene: Scene,
-    pager: Option<crate::Pager<crate::Source>>,
-    pagination: crate::Pagination,
+    pager: Option<crate::Pager<oxfeed_common::source::Entity>>,
+    pagination: oxfeed_common::Pagination,
     _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
 }
 
@@ -115,7 +115,7 @@ impl yew::Component for Component {
             },
             Scene::Add => yew::html! {
                 <super::form::Source
-                    source=crate::Source::default()
+                    source=oxfeed_common::source::Entity::default()
                     on_cancel=self.link.callback(|_| Message::Cancel)
                     on_submit=self.link.callback(|source| Message::Create(source))
                 />
@@ -134,7 +134,7 @@ impl yew::Component for Component {
         yew::html! {
             <>
                 { add }
-                <super::List<crate::Source> value=pager />
+                <super::List<oxfeed_common::source::Entity> value=pager />
             </>
         }
     }

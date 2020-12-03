@@ -2,7 +2,7 @@
 pub(crate) enum Message {
     Event(crate::event::Event),
     NeedUpdate,
-    Update(crate::Pager<crate::Item>),
+    Update(crate::Pager<oxfeed_common::item::Item>),
 }
 
 impl From<crate::event::Api> for Message {
@@ -20,7 +20,7 @@ pub(crate) struct Properties {
     #[prop_or_default]
     pub filter: String,
     pub kind: String,
-    pub pagination: crate::Pagination,
+    pub pagination: oxfeed_common::Pagination,
 }
 
 pub(crate) struct Component {
@@ -28,8 +28,8 @@ pub(crate) struct Component {
     kind: String,
     filter: String,
     link: yew::ComponentLink<Self>,
-    pager: Option<crate::Pager<crate::Item>>,
-    pagination: crate::Pagination,
+    pager: Option<crate::Pager<oxfeed_common::item::Item>>,
+    pagination: oxfeed_common::Pagination,
     _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
 }
 
@@ -92,7 +92,7 @@ impl yew::Component for Component {
         }
 
         yew::html! {
-            <super::List<crate::Item> value=pager />
+            <super::List<oxfeed_common::item::Item> value=pager />
         }
     }
 

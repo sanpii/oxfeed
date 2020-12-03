@@ -1,4 +1,5 @@
-#[derive(Debug, elephantry::Entity, serde::Serialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[cfg_attr(feature = "elephantry", derive(elephantry::Entity))]
 pub struct Entity {
     pub last_error: Option<String>,
     pub source_id: Option<uuid::Uuid>,
@@ -8,47 +9,26 @@ pub struct Entity {
     pub user_id: uuid::Uuid,
 }
 
-impl std::convert::TryFrom<(&opml::Outline, &super::user::Entity)> for Entity {
-    type Error = ();
+impl Into<std::result::Result<std::string::String, anyhow::Error>> for &Entity {
+    fn into(self) -> std::result::Result<std::string::String, anyhow::Error> {
+        let json = serde_json::to_string(self)?;
 
-    fn try_from(
-        (outline, user): (&opml::Outline, &super::user::Entity),
-    ) -> Result<Self, Self::Error> {
-        let url = match &outline.xml_url {
-            Some(url) => url.clone(),
-            None => return Err(()),
-        };
-
-        let mut tags = Vec::new();
-
-        if let Some(category) = &outline.category {
-            tags.push(category.clone());
-        }
-
-        let entity = Self {
-            last_error: None,
-            source_id: None,
-            tags,
-            title: outline.text.clone(),
-            url,
-            user_id: user.user_id.clone(),
-        };
-
-        Ok(entity)
+        Ok(json)
     }
 }
 
+#[cfg(feature = "elephantry")]
 pub struct Model<'a> {
     connection: &'a elephantry::Connection,
 }
 
+#[cfg(feature = "elephantry")]
 impl<'a> Model<'a> {
     pub fn all(
         &self,
         token: &uuid::Uuid,
         filter: &elephantry::Where,
-        page: usize,
-        max_per_page: usize,
+        pagination: &crate::Pagination,
     ) -> elephantry::Result<elephantry::Pager<Entity>> {
         let mut clause = filter.clone();
         clause.and_where("\"user\".token = $*", vec![token]);
@@ -61,11 +41,10 @@ select *
     join "user" using (user_id)
     where {}
     order by last_error, title
-    offset {} fetch first {} rows only
+    {}
         "#,
             clause.to_string(),
-            (page - 1) * max_per_page,
-            max_per_page
+            pagination.to_sql(),
         );
 
         let rows = self.connection.query::<Entity>(&query, &params)?;
@@ -82,7 +61,7 @@ select count(*)
 
         let count = self.connection.query_one::<i64>(&query, &params)?;
 
-        let pager = elephantry::Pager::new(rows, count as usize, page, max_per_page);
+        let pager = elephantry::Pager::new(rows, count as usize, pagination.page, pagination.limit);
 
         Ok(pager)
     }
@@ -99,6 +78,7 @@ select count(*)
     }
 }
 
+#[cfg(feature = "elephantry")]
 impl<'a> elephantry::Model<'a> for Model<'a> {
     type Entity = Entity;
     type Structure = Structure;
@@ -108,8 +88,10 @@ impl<'a> elephantry::Model<'a> for Model<'a> {
     }
 }
 
+#[cfg(feature = "elephantry")]
 pub struct Structure;
 
+#[cfg(feature = "elephantry")]
 impl elephantry::Structure for Structure {
     fn relation() -> &'static str {
         "public.source"

@@ -56,12 +56,9 @@ where
         )
     }
 
-    pub fn search(&mut self, what: &str, query: &str, pagination: &crate::Pagination) {
+    pub fn search(&mut self, what: &str, query: &str, pagination: &oxfeed_common::Pagination) {
         let q = urlencoding::encode(query);
-        let url = format!(
-            "/search/{}?q={}&page={}&limit={}",
-            what, q, pagination.page, pagination.limit
-        );
+        let url = format!("/search/{}?q={}&{}", what, q, pagination.to_query());
 
         let kind = match what {
             "all" | "unread" | "favorites" => Kind::SearchItems,
@@ -217,14 +214,16 @@ where
         };
 
         let event = match kind {
-            Kind::SourceCreate | Kind::SourceDelete | Kind::SourceUpdate => Some(crate::event::Event::SourceUpdate),
+            Kind::SourceCreate | Kind::SourceDelete | Kind::SourceUpdate => {
+                Some(crate::event::Event::SourceUpdate)
+            }
             Kind::ItemPatch => Some(crate::event::Event::ItemUpdate),
             _ => None,
         };
 
         if let Some(event) = event {
             let mut event_bus = crate::event::Bus::dispatcher();
-            event_bus.send(event.clone());
+            event_bus.send(event);
         }
 
         Ok(api_event)

@@ -2,5 +2,6 @@
 members = [
     "api",
     "cli",
+    "common",
     "front",
 ]

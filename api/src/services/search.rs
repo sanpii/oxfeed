@@ -4,7 +4,7 @@ use actix_web::web::{Data, Query};
 struct Request {
     q: String,
     #[serde(flatten)]
-    pagination: super::Pagination,
+    pagination: oxfeed_common::Pagination,
 }
 
 pub(crate) fn scope() -> actix_web::Scope {
@@ -72,8 +72,8 @@ async fn tags(
     let pager = elephantry::Pager::new(
         tags,
         count as usize,
-        query.pagination.page(),
-        query.pagination.limit(),
+        query.pagination.page,
+        query.pagination.limit,
     );
 
     let response = actix_web::HttpResponse::Ok().json(pager);

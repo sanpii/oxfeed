@@ -3,17 +3,14 @@ where
     C: yew::Component,
     <C as yew::Component>::Message: From<crate::event::Api>,
 {
-    pub fn items_all(&mut self, kind: &str, pagination: &crate::Pagination) {
+    pub fn items_all(&mut self, kind: &str, pagination: &oxfeed_common::Pagination) {
         let kind = if kind == "all" {
             String::new()
         } else {
             kind.to_string()
         };
 
-        let url = format!(
-            "/items/{}?page={}&limit={}",
-            kind, pagination.page, pagination.limit
-        );
+        let url = format!("/items/{}?{}", kind, pagination.to_query());
 
         self.fetch(
             super::Kind::Items,
@@ -23,7 +20,7 @@ where
         )
     }
 
-    pub fn items_content(&mut self, id: &str) {
+    pub fn items_content(&mut self, id: &uuid::Uuid) {
         let url = format!("/items/{}/content", id);
 
         self.fetch(
@@ -43,7 +40,7 @@ where
         )
     }
 
-    pub fn items_tag(&mut self, id: &str, key: &str, value: bool) {
+    pub fn items_tag(&mut self, id: &uuid::Uuid, key: &str, value: bool) {
         let url = format!("/items/{}", id);
 
         let json = serde_json::json!({

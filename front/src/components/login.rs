@@ -56,8 +56,7 @@ impl yew::Component for Component {
                 self.link.send_message(Self::Message::Cancel);
             }
             Self::Message::Create(info) => {
-                let user = crate::User {
-                    user_id: None,
+                let user = oxfeed_common::new_user::Entity {
                     name: info.name,
                     password: info.password,
                     email: info.email,

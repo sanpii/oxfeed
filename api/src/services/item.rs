@@ -1,5 +1,5 @@
-use crate::model::item::Model;
 use actix_web::web::{Data, Json, Path};
+use oxfeed_common::item::Model;
 use std::collections::HashMap;
 
 pub(crate) fn scope() -> actix_web::Scope {
@@ -16,7 +16,7 @@ pub(crate) fn scope() -> actix_web::Scope {
 #[actix_web::get("")]
 async fn all(
     elephantry: Data<elephantry::Pool>,
-    pagination: actix_web::web::Query<super::Pagination>,
+    pagination: actix_web::web::Query<oxfeed_common::Pagination>,
     identity: crate::Identity,
 ) -> crate::Result {
     fetch(
@@ -30,7 +30,7 @@ async fn all(
 #[actix_web::get("/favorites")]
 async fn favorites(
     elephantry: Data<elephantry::Pool>,
-    pagination: actix_web::web::Query<super::Pagination>,
+    pagination: actix_web::web::Query<oxfeed_common::Pagination>,
     identity: crate::Identity,
 ) -> crate::Result {
     fetch(
@@ -44,7 +44,7 @@ async fn favorites(
 #[actix_web::get("/unread")]
 async fn unread(
     elephantry: Data<elephantry::Pool>,
-    pagination: actix_web::web::Query<super::Pagination>,
+    pagination: actix_web::web::Query<oxfeed_common::Pagination>,
     identity: crate::Identity,
 ) -> crate::Result {
     fetch(
@@ -59,17 +59,15 @@ pub(crate) fn fetch(
     elephantry: &elephantry::Pool,
     identity: &crate::Identity,
     filter: &elephantry::Where,
-    pagination: &super::Pagination,
+    pagination: &oxfeed_common::Pagination,
 ) -> crate::Result {
     let token = match identity.token() {
         Some(token) => token,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
     };
 
-    let limit = pagination.limit.parse().unwrap();
-    let page = pagination.page.parse().unwrap();
     let model = elephantry.model::<Model>();
-    let items = model.all(&token, filter, page, limit)?;
+    let items = model.all(&token, filter, pagination)?;
     let response = actix_web::HttpResponse::Ok().json(items);
 
     Ok(response)
@@ -125,7 +123,7 @@ async fn icon(
         img = crate::cache::get(&icon).ok();
     }
 
-    let body = img.unwrap_or(empty_img.to_vec());
+    let body = img.unwrap_or_else(|| empty_img.to_vec());
 
     let mut mime = tree_magic::from_u8(&body);
     if mime == "text/plain" {

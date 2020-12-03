@@ -36,7 +36,7 @@ impl std::ops::Not for Scene {
 
 #[derive(Clone, yew::Properties)]
 pub(crate) struct Properties {
-    pub value: crate::Item,
+    pub value: oxfeed_common::item::Item,
 }
 
 pub(crate) struct Component {
@@ -44,7 +44,7 @@ pub(crate) struct Component {
     content: Option<String>,
     link: yew::ComponentLink<Self>,
     scene: Scene,
-    item: crate::Item,
+    item: oxfeed_common::item::Item,
 }
 
 impl yew::Component for Component {

@@ -41,6 +41,25 @@ impl Location {
     }
 }
 
+impl From<Location> for oxfeed_common::Pagination {
+    fn from(location: Location) -> Self {
+        let query = location.query();
+
+        Self {
+            page: query
+                .get("page")
+                .map(|x| x.parse().ok())
+                .flatten()
+                .unwrap_or(1),
+            limit: query
+                .get("limit")
+                .map(|x| x.parse().ok())
+                .flatten()
+                .unwrap_or(25),
+        }
+    }
+}
+
 pub(crate) fn base_url() -> String {
     let location = Location::new();
 

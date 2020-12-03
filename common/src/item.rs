@@ -1,4 +1,5 @@
-#[derive(elephantry::Entity, serde::Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[cfg_attr(feature = "elephantry", derive(elephantry::Entity))]
 pub struct Item {
     pub item_id: uuid::Uuid,
     pub link: String,
@@ -11,7 +12,16 @@ pub struct Item {
     pub tags: Vec<String>,
 }
 
-#[derive(elephantry::Entity, serde::Serialize)]
+impl Into<std::result::Result<std::string::String, anyhow::Error>> for &Item {
+    fn into(self) -> std::result::Result<std::string::String, anyhow::Error> {
+        let json = serde_json::to_string(self)?;
+
+        Ok(json)
+    }
+}
+
+#[derive(serde::Serialize)]
+#[cfg_attr(feature = "elephantry", derive(elephantry::Entity))]
 pub struct Entity {
     pub item_id: Option<uuid::Uuid>,
     pub source_id: uuid::Uuid,
@@ -25,17 +35,18 @@ pub struct Entity {
     pub icon: Option<String>,
 }
 
+#[cfg(feature = "elephantry")]
 pub struct Model<'a> {
     connection: &'a elephantry::Connection,
 }
 
+#[cfg(feature = "elephantry")]
 impl<'a> Model<'a> {
     pub fn all(
         &self,
         token: &uuid::Uuid,
         filter: &elephantry::Where,
-        page: usize,
-        max_per_page: usize,
+        pagination: &crate::Pagination,
     ) -> elephantry::Result<elephantry::Pager<Item>> {
         let mut clause = filter.clone();
         clause.and_where("\"user\".token = $*", vec![token]);
@@ -50,11 +61,10 @@ select item.item_id, item.link, item.published, item.title, item.icon,
     join "user" using (user_id)
     where {}
     order by published desc
-    offset {} fetch first {} rows only
+    {}
         "#,
             clause.to_string(),
-            (page - 1) * max_per_page,
-            max_per_page
+            pagination.to_sql(),
         );
 
         let rows = self.connection.query::<Item>(&query, &params)?;
@@ -72,7 +82,7 @@ select count(*)
 
         let count = self.connection.query_one::<i64>(&query, &params)?;
 
-        let pager = elephantry::Pager::new(rows, count as usize, page, max_per_page);
+        let pager = elephantry::Pager::new(rows, count as usize, pagination.page, pagination.limit);
 
         Ok(pager)
     }
@@ -89,6 +99,7 @@ select count(*)
     }
 }
 
+#[cfg(feature = "elephantry")]
 impl<'a> elephantry::Model<'a> for Model<'a> {
     type Entity = Entity;
     type Structure = Structure;
@@ -98,8 +109,10 @@ impl<'a> elephantry::Model<'a> for Model<'a> {
     }
 }
 
+#[cfg(feature = "elephantry")]
 pub struct Structure;
 
+#[cfg(feature = "elephantry")]
 impl elephantry::Structure for Structure {
     fn relation() -> &'static str {
         "public.item"

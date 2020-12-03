@@ -2,7 +2,6 @@ mod cache;
 mod errors;
 mod form;
 mod identity;
-mod model;
 mod services;
 
 use errors::*;

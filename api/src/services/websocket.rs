@@ -72,7 +72,7 @@ impl Websocket {
 }
 
 impl actix::Actor for Websocket {
-    type Context= ws::WebsocketContext<Self>;
+    type Context = ws::WebsocketContext<Self>;
 
     fn started(&mut self, context: &mut Self::Context) {
         match self.elephantry.listen("item_new") {
@@ -89,11 +89,7 @@ impl actix::Actor for Websocket {
 }
 
 impl actix::StreamHandler<Result<ws::Message, ws::ProtocolError>> for Websocket {
-    fn handle(
-        &mut self,
-        msg: Result<ws::Message, ws::ProtocolError>,
-        context: &mut Self::Context,
-    ) {
+    fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, context: &mut Self::Context) {
         match msg {
             Ok(ws::Message::Ping(msg)) => {
                 self.hb = std::time::Instant::now();

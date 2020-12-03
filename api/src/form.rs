@@ -9,10 +9,10 @@ pub(crate) struct Source {
     tags: Vec<String>,
 }
 
-impl std::convert::TryInto<crate::model::source::Entity> for Source {
+impl std::convert::TryInto<oxfeed_common::source::Entity> for Source {
     type Error = crate::Error;
 
-    fn try_into(self) -> crate::Result<crate::model::source::Entity> {
+    fn try_into(self) -> crate::Result<oxfeed_common::source::Entity> {
         let user_id = match self.user_id {
             Some(user_id) => user_id,
             None => return Err(crate::Error::Auth),
@@ -23,7 +23,7 @@ impl std::convert::TryInto<crate::model::source::Entity> for Source {
             None => self.title().unwrap_or_else(|| "<no title>".to_string()),
         };
 
-        let entity = crate::model::source::Entity {
+        let entity = oxfeed_common::source::Entity {
             last_error: None,
             source_id: self.source_id,
             tags: self.tags,

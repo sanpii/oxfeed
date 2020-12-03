@@ -5,7 +5,7 @@ pub struct Identity {
 
 impl Identity {
     pub fn token(&self) -> Option<uuid::Uuid> {
-        self.token.clone()
+        self.token
     }
 }
 

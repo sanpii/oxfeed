@@ -12,9 +12,14 @@ async fn import(
     xml: String,
     identity: crate::Identity,
 ) -> crate::Result {
+    let token = match identity.token() {
+        Some(token) => token,
+        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
+    };
+
     let user = match elephantry
-        .model::<crate::model::user::Model>()
-        .find_from_identity(&identity)
+        .model::<oxfeed_common::user::Model>()
+        .find_from_token(&token)
     {
         Some(user) => user,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
@@ -31,21 +36,50 @@ async fn import(
     Ok(response)
 }
 
-fn save(elephantry: &elephantry::Pool, outline: &opml::Outline, user: &crate::model::user::Entity) {
-    use std::convert::TryInto;
-
+fn save(
+    elephantry: &elephantry::Pool,
+    outline: &opml::Outline,
+    user: &oxfeed_common::user::Entity,
+) {
     for outline in &outline.outlines {
         save(&elephantry, outline, user);
     }
 
-    let source = match (outline, user).try_into() {
+    let source = match source_try_from(outline, user) {
         Ok(source) => source,
         Err(_) => return,
     };
 
-    if let Err(error) = elephantry.insert_one::<crate::model::source::Model>(&source) {
+    if let Err(error) = elephantry.insert_one::<oxfeed_common::source::Model>(&source) {
         log::error!("Unable to import outline '{}': {}", source.title, error);
     }
+}
+
+fn source_try_from(
+    outline: &opml::Outline,
+    user: &oxfeed_common::user::Entity,
+) -> Result<oxfeed_common::source::Entity, ()> {
+    let url = match &outline.xml_url {
+        Some(url) => url.clone(),
+        None => return Err(()),
+    };
+
+    let mut tags = Vec::new();
+
+    if let Some(category) = &outline.category {
+        tags.push(category.clone());
+    }
+
+    let entity = oxfeed_common::source::Entity {
+        last_error: None,
+        source_id: None,
+        tags,
+        title: outline.text.clone(),
+        url,
+        user_id: user.user_id,
+    };
+
+    Ok(entity)
 }
 
 #[actix_web::get("")]
@@ -64,7 +98,7 @@ async fn export(elephantry: Data<elephantry::Pool>) -> crate::Result {
             "Content-Disposition",
             "attachment; filename=\"oxfeed-subscriptions.xml\"",
         )
-        .body(opml.to_xml().map_err(|e| crate::Error::Opml(e))?);
+        .body(opml.to_xml().map_err(crate::Error::Opml)?);
 
     Ok(response)
 }

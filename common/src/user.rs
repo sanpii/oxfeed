@@ -1,25 +1,19 @@
-#[derive(elephantry::Entity, serde::Serialize)]
+#[derive(Clone, serde::Deserialize, serde::Serialize)]
+#[cfg_attr(feature = "elephantry", derive(elephantry::Entity))]
 pub struct Entity {
     pub user_id: uuid::Uuid,
     pub email: String,
     pub name: String,
 }
 
+#[cfg(feature = "elephantry")]
 pub struct Model<'a> {
     connection: &'a elephantry::Connection,
 }
 
+#[cfg(feature = "elephantry")]
 impl<'a> Model<'a> {
-    pub fn find_from_identity(&self, identity: &crate::Identity) -> Option<Entity> {
-        let token = match identity.token() {
-            Some(token) => token,
-            None => return None,
-        };
-
-        self.find_from_token(&token)
-    }
-
-    fn find_from_token(&self, token: &uuid::Uuid) -> Option<Entity> {
+    pub fn find_from_token(&self, token: &uuid::Uuid) -> Option<Entity> {
         self.connection
             .find_where::<Self>("token = $*", &[token], None)
             .map(|x| x.get(0))
@@ -27,6 +21,7 @@ impl<'a> Model<'a> {
     }
 }
 
+#[cfg(feature = "elephantry")]
 impl<'a> elephantry::Model<'a> for Model<'a> {
     type Entity = Entity;
     type Structure = Structure;
@@ -40,8 +35,10 @@ impl<'a> elephantry::Model<'a> for Model<'a> {
     }
 }
 
+#[cfg(feature = "elephantry")]
 pub struct Structure;
 
+#[cfg(feature = "elephantry")]
 impl elephantry::Structure for Structure {
     fn relation() -> &'static str {
         "public.user"

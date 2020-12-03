@@ -4,8 +4,8 @@ pub(crate) enum Message {
     Delete,
     Deleted,
     Edit,
-    Save(crate::Source),
-    Saved(crate::Source),
+    Save(oxfeed_common::source::Entity),
+    Saved(oxfeed_common::source::Entity),
 }
 
 impl From<crate::event::Api> for Message {
@@ -25,14 +25,14 @@ enum Scene {
 
 #[derive(yew::Properties, Clone)]
 pub(crate) struct Properties {
-    pub value: crate::Source,
+    pub value: oxfeed_common::source::Entity,
 }
 
 pub(crate) struct Component {
     api: crate::Api<Self>,
     scene: Scene,
     link: yew::ComponentLink<Self>,
-    source: crate::Source,
+    source: oxfeed_common::source::Entity,
 }
 
 impl yew::Component for Component {
@@ -52,12 +52,10 @@ impl yew::Component for Component {
         match self.scene {
             Scene::View => match msg {
                 Self::Message::Delete => {
-                    let name = self.source.title.as_ref().unwrap_or(&self.source.url);
-                    let message = format!("Would you like delete '{}' source?", name);
+                    let message = format!("Would you like delete '{}' source?", self.source.title);
 
                     if yew::services::dialog::DialogService::confirm(&message) {
-                        self.api
-                            .sources_delete(self.source.source_id.as_ref().unwrap());
+                        self.api.sources_delete(&self.source.source_id.unwrap());
                     }
                 }
                 Self::Message::Deleted => (),
@@ -75,7 +73,7 @@ impl yew::Component for Component {
                 Self::Message::Save(source) => {
                     self.source = source;
                     self.api
-                        .sources_update(self.source.source_id.as_ref().unwrap(), &self.source);
+                        .sources_update(&self.source.source_id.unwrap(), &self.source);
                     return true;
                 }
                 Self::Message::Saved(source) => {
@@ -105,7 +103,7 @@ impl yew::Component for Component {
                 yew::html! {
                     <>
                         <div class="d-inline-flex">
-                            { source.title.as_ref().unwrap_or(&source.url) }
+                            { source.title }
                             {
                                 if let Some(last_error) = source.last_error {
                                     yew::html! {

@@ -3,11 +3,8 @@ where
     C: yew::Component,
     <C as yew::Component>::Message: From<crate::event::Api>,
 {
-    pub fn sources_all(&mut self, pagination: &crate::Pagination) {
-        let url = format!(
-            "/sources?page={}&limit={}",
-            pagination.page, pagination.limit
-        );
+    pub fn sources_all(&mut self, pagination: &oxfeed_common::Pagination) {
+        let url = format!("/sources?{}", pagination.to_query());
 
         self.fetch(
             super::Kind::Sources,
@@ -17,7 +14,7 @@ where
         )
     }
 
-    pub fn sources_create(&mut self, source: &crate::Source) {
+    pub fn sources_create(&mut self, source: &oxfeed_common::source::Entity) {
         self.fetch(
             super::Kind::SourceCreate,
             http::Method::POST,
@@ -26,7 +23,7 @@ where
         )
     }
 
-    pub fn sources_update(&mut self, id: &str, source: &crate::Source) {
+    pub fn sources_update(&mut self, id: &uuid::Uuid, source: &oxfeed_common::source::Entity) {
         self.fetch(
             super::Kind::SourceUpdate,
             http::Method::PUT,
@@ -35,7 +32,7 @@ where
         )
     }
 
-    pub fn sources_delete(&mut self, id: &str) {
+    pub fn sources_delete(&mut self, id: &uuid::Uuid) {
         self.fetch(
             super::Kind::SourceDelete,
             http::Method::DELETE,

@@ -4,9 +4,10 @@ use structopt::StructOpt;
 
 pub use errors::Result;
 
-use oxfeed_api::model::item::Model as ItemModel;
-use oxfeed_api::model::source::Entity as Source;
-use oxfeed_api::model::source::Model as SourceModel;
+use oxfeed_common::item::Entity as Item;
+use oxfeed_common::item::Model as ItemModel;
+use oxfeed_common::source::Entity as Source;
+use oxfeed_common::source::Model as SourceModel;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 #[derive(StructOpt)]
@@ -34,9 +35,13 @@ fn main() -> Result<()> {
     let elephantry = elephantry::Pool::new(&database_url).expect("Unable to connect to postgresql");
 
     let sources = if opt.source_id.is_empty() {
-        elephantry .find_all::<SourceModel>(None)?.collect::<Vec<_>>()
+        elephantry
+            .find_all::<SourceModel>(None)?
+            .collect::<Vec<_>>()
     } else {
-        elephantry .find_where::<SourceModel>("source_id = any($*)", &[&opt.source_id], None)?.collect::<Vec<_>>()
+        elephantry
+            .find_where::<SourceModel>("source_id = any($*)", &[&opt.source_id], None)?
+            .collect::<Vec<_>>()
     };
 
     sources.par_iter().for_each(|source| {
@@ -88,7 +93,7 @@ fn fetch(elephantry: &elephantry::Connection, source: &Source) -> Result<()> {
 
             log::info!("Adding '{}'", title);
 
-            let item = oxfeed_api::model::item::Entity {
+            let item = Item {
                 item_id: None,
                 id: entry.id,
                 icon: icon(&entry.links),

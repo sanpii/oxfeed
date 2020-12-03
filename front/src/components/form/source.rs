@@ -8,9 +8,9 @@ pub(crate) enum Message {
 
 #[derive(Clone, yew::Properties)]
 pub(crate) struct Properties {
-    pub source: crate::Source,
+    pub source: oxfeed_common::source::Entity,
     pub on_cancel: yew::Callback<()>,
-    pub on_submit: yew::Callback<crate::Source>,
+    pub on_submit: yew::Callback<oxfeed_common::source::Entity>,
 }
 
 pub(crate) struct Component {
@@ -31,9 +31,7 @@ impl yew::Component for Component {
             Self::Message::Cancel => self.props.on_cancel.emit(()),
             Self::Message::Submit => self.props.on_submit.emit(self.props.source.clone()),
             Self::Message::UpdateTags(tags) => self.props.source.tags = tags,
-            Self::Message::UpdateTitle(title) => {
-                self.props.source.title = if title.is_empty() { None } else { Some(title) }
-            }
+            Self::Message::UpdateTitle(title) => self.props.source.title = title,
             Self::Message::UpdateUrl(url) => self.props.source.url = url,
         }
 
@@ -48,7 +46,7 @@ impl yew::Component for Component {
                     <input
                         class="form-control"
                         name="title"
-                        value={ &self.props.source.title.clone().unwrap_or_default() }
+                        value={ &self.props.source.title }
                         oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateTitle(e.value))
                     />
                     <small class="form-text text-muted">{ "Leave empty to use the feed title." }</small>

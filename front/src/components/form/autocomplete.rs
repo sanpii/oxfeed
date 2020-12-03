@@ -69,7 +69,7 @@ impl yew::Component for Component {
 
                 if !input.is_empty() {
                     self.api
-                        .search(&self.what, &input, &crate::Pagination::new());
+                        .search(&self.what, &input, &oxfeed_common::Pagination::new());
                     return false;
                 } else {
                     self.terms = Vec::new();
