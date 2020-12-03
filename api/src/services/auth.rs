@@ -19,7 +19,7 @@ async fn login(elephantry: actix_web::web::Data<elephantry::Pool>, token: actix_
     }
 
     let sql = include_str!("../sql/login.sql");
-    let token = match elephantry.query_one::<Option<uuid::Uuid>>(sql, &[&claims["login"], &claims["password"]])? {
+    let token = match elephantry.query::<uuid::Uuid>(sql, &[&claims["login"], &claims["password"]])?.try_get(0) {
         Some(token) => token,
         None => return Ok(actix_web::HttpResponse::Forbidden().finish()),
     };
