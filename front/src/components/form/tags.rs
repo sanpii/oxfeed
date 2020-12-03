@@ -57,6 +57,7 @@ impl yew::Component for Component {
                         yew::html! {
                             <crate::components::Tag
                                 value=tag
+                                editable=true
                                 on_click=self.link.callback(move |_| Self::Message::Remove(idx))
                             />
                         }
