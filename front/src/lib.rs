@@ -3,13 +3,11 @@
 mod api;
 mod cha;
 mod components;
-mod errors;
 mod event;
 mod location;
 mod render;
 
 pub(crate) use api::Api;
-pub(crate) use errors::*;
 pub(crate) use location::Location;
 pub(crate) use render::*;
 

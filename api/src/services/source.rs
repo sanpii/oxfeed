@@ -15,7 +15,7 @@ async fn all(
     elephantry: Data<elephantry::Pool>,
     pagination: actix_web::web::Query<oxfeed_common::Pagination>,
     identity: crate::Identity,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     fetch(
         &elephantry,
         &identity,
@@ -29,7 +29,7 @@ pub(crate) fn fetch(
     identity: &crate::Identity,
     filter: &elephantry::Where,
     pagination: &oxfeed_common::Pagination,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = match identity.token() {
         Some(token) => token,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
@@ -47,7 +47,7 @@ async fn create(
     elephantry: Data<elephantry::Pool>,
     mut data: Json<crate::form::Source>,
     identity: crate::Identity,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     use std::convert::TryInto;
 
     let token = match identity.token() {
@@ -75,7 +75,7 @@ async fn get(
     elephantry: Data<elephantry::Pool>,
     item_id: Path<uuid::Uuid>,
     identity: crate::Identity,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = match identity.token() {
         Some(token) => token,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
@@ -94,7 +94,7 @@ async fn delete(
     elephantry: Data<elephantry::Pool>,
     source_id: Path<uuid::Uuid>,
     identity: crate::Identity,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = match identity.token() {
         Some(token) => token,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
@@ -119,7 +119,7 @@ async fn update(
     mut data: Json<crate::form::Source>,
     path: Path<uuid::Uuid>,
     identity: crate::Identity,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     use std::convert::TryInto;
 
     let token = match identity.token() {

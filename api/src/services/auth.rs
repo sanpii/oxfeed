@@ -8,7 +8,7 @@ pub(crate) fn scope() -> actix_web::Scope {
 async fn login(
     elephantry: actix_web::web::Data<elephantry::Pool>,
     token: actix_web::web::Json<String>,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let secret = std::env::var("SECRET").expect("Missing SECRET env variable");
 
     use hmac::NewMac;
@@ -39,7 +39,7 @@ async fn login(
 async fn logout(
     elephantry: actix_web::web::Data<elephantry::Pool>,
     identity: crate::Identity,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     if let Some(token) = identity.token() {
         let sql = include_str!("../sql/logout.sql");
         elephantry.query_one::<()>(sql, &[&token])?;

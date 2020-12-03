@@ -8,7 +8,7 @@ pub(crate) fn scope() -> actix_web::Scope {
 }
 
 #[actix_web::get("/{url}")]
-async fn icon(url: actix_web::web::Path<String>) -> crate::Result {
+async fn icon(url: actix_web::web::Path<String>) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let url = base64::decode(url.into_inner())?;
     let icon = String::from_utf8(url)?;
 

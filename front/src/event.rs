@@ -11,8 +11,8 @@ pub(crate) enum Event {
     SourceUpdate,
 }
 
-impl From<crate::Error> for Event {
-    fn from(error: crate::Error) -> Self {
+impl From<oxfeed_common::Error> for Event {
+    fn from(error: oxfeed_common::Error) -> Self {
         let alert = crate::event::Alert::error(&error.to_string());
 
         Self::Alert(alert)

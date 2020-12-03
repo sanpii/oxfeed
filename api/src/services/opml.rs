@@ -11,7 +11,7 @@ async fn import(
     elephantry: Data<elephantry::Pool>,
     xml: String,
     identity: crate::Identity,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = match identity.token() {
         Some(token) => token,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
@@ -83,7 +83,9 @@ fn source_try_from(
 }
 
 #[actix_web::get("")]
-async fn export(elephantry: Data<elephantry::Pool>) -> crate::Result {
+async fn export(
+    elephantry: Data<elephantry::Pool>,
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let mut opml = opml::OPML::default();
 
     let feeds = elephantry.query::<(String, String)>("select (title, url) from source", &[])?;
@@ -98,7 +100,7 @@ async fn export(elephantry: Data<elephantry::Pool>) -> crate::Result {
             "Content-Disposition",
             "attachment; filename=\"oxfeed-subscriptions.xml\"",
         )
-        .body(opml.to_xml().map_err(crate::Error::Opml)?);
+        .body(opml.to_xml().map_err(oxfeed_common::Error::Opml)?);
 
     Ok(response)
 }

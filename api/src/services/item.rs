@@ -17,7 +17,7 @@ async fn all(
     elephantry: Data<elephantry::Pool>,
     pagination: actix_web::web::Query<oxfeed_common::Pagination>,
     identity: crate::Identity,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     fetch(
         &elephantry,
         &identity,
@@ -31,7 +31,7 @@ async fn favorites(
     elephantry: Data<elephantry::Pool>,
     pagination: actix_web::web::Query<oxfeed_common::Pagination>,
     identity: crate::Identity,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     fetch(
         &elephantry,
         &identity,
@@ -45,7 +45,7 @@ async fn unread(
     elephantry: Data<elephantry::Pool>,
     pagination: actix_web::web::Query<oxfeed_common::Pagination>,
     identity: crate::Identity,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     fetch(
         &elephantry,
         &identity,
@@ -59,7 +59,7 @@ pub(crate) fn fetch(
     identity: &crate::Identity,
     filter: &elephantry::Where,
     pagination: &oxfeed_common::Pagination,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = match identity.token() {
         Some(token) => token,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
@@ -77,7 +77,7 @@ async fn content(
     elephantry: Data<elephantry::Pool>,
     path: Path<uuid::Uuid>,
     identity: crate::Identity,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = match identity.token() {
         Some(token) => token,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
@@ -102,7 +102,7 @@ async fn patch(
     path: Path<uuid::Uuid>,
     json: Json<serde_json::Value>,
     identity: crate::Identity,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = match identity.token() {
         Some(token) => token,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
@@ -141,7 +141,10 @@ async fn patch(
 }
 
 #[actix_web::post("/read")]
-async fn read_all(elephantry: Data<elephantry::Pool>, identity: crate::Identity) -> crate::Result {
+async fn read_all(
+    elephantry: Data<elephantry::Pool>,
+    identity: crate::Identity,
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = match identity.token() {
         Some(token) => token,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),

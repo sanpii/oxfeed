@@ -148,12 +148,12 @@ where
     fn on_response(
         kind: Kind,
         response: yew::services::fetch::Response<yew::format::Text>,
-    ) -> crate::Result<crate::event::Api> {
+    ) -> oxfeed_common::Result<crate::event::Api> {
         if response.status() == http::status::StatusCode::UNAUTHORIZED {
             let mut event_bus = crate::event::Bus::dispatcher();
 
             event_bus.send(crate::event::Event::AuthRequire);
-            return Err(crate::Error::Auth);
+            return Err(oxfeed_common::Error::Auth);
         }
 
         let data = response.into_body()?;
@@ -229,7 +229,7 @@ where
         Ok(api_event)
     }
 
-    fn error(error: crate::Error) {
+    fn error(error: oxfeed_common::Error) {
         let mut event_bus = crate::event::Bus::dispatcher();
         event_bus.send(error.into());
     }

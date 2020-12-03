@@ -10,12 +10,12 @@ pub(crate) struct Source {
 }
 
 impl std::convert::TryInto<oxfeed_common::source::Entity> for Source {
-    type Error = crate::Error;
+    type Error = oxfeed_common::Error;
 
-    fn try_into(self) -> crate::Result<oxfeed_common::source::Entity> {
+    fn try_into(self) -> oxfeed_common::Result<oxfeed_common::source::Entity> {
         let user_id = match self.user_id {
             Some(user_id) => user_id,
-            None => return Err(crate::Error::Auth),
+            None => return Err(oxfeed_common::Error::Auth),
         };
 
         let title = match self.title {

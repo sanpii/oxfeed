@@ -1,10 +1,8 @@
 mod cache;
-mod errors;
 mod form;
 mod identity;
 mod services;
 
-use errors::*;
 use identity::*;
 
 #[actix_web::main]

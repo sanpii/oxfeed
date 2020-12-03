@@ -8,7 +8,7 @@ pub(crate) fn scope() -> actix_web::Scope {
 async fn create(
     elephantry: actix_web::web::Data<elephantry::Pool>,
     data: actix_web::web::Json<Entity>,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let user = elephantry.insert_one::<Model>(&data.into_inner())?;
     let response = actix_web::HttpResponse::Ok().json(user);
 

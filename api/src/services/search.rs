@@ -21,7 +21,7 @@ async fn all(
     elephantry: Data<elephantry::Pool>,
     query: Query<Request>,
     identity: crate::Identity,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let clause = elephantry::Where::from("item.title ~* $*", vec![&query.q]);
 
     super::item::fetch(&elephantry, &identity, &clause, &query.pagination)
@@ -32,7 +32,7 @@ async fn favorites(
     elephantry: Data<elephantry::Pool>,
     query: Query<Request>,
     identity: crate::Identity,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let clause = elephantry::Where::from("item.title ~* $* and favorite", vec![&query.q]);
 
     super::item::fetch(&elephantry, &identity, &clause, &query.pagination)
@@ -43,7 +43,7 @@ async fn unread(
     elephantry: Data<elephantry::Pool>,
     query: Query<Request>,
     identity: crate::Identity,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let clause = elephantry::Where::from("item.title ~* $* and not read", vec![&query.q]);
 
     super::item::fetch(&elephantry, &identity, &clause, &query.pagination)
@@ -54,7 +54,7 @@ async fn tags(
     elephantry: Data<elephantry::Pool>,
     query: Query<Request>,
     identity: crate::Identity,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = match identity.token() {
         Some(token) => token,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
@@ -86,7 +86,7 @@ async fn sources(
     elephantry: Data<elephantry::Pool>,
     query: Query<Request>,
     identity: crate::Identity,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let clause = elephantry::Where::from("source.title ~* $*", vec![&query.q]);
     super::source::fetch(&elephantry, &identity, &clause, &query.pagination)
 }

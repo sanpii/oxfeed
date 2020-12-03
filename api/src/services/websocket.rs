@@ -16,7 +16,7 @@ async fn websocket(
     identity: actix_web::web::Query<crate::Identity>,
     request: actix_web::HttpRequest,
     stream: actix_web::web::Payload,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = match identity.token() {
         Some(token) => token,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),

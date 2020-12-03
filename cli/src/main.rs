@@ -1,8 +1,4 @@
-mod errors;
-
 use structopt::StructOpt;
-
-pub use errors::Result;
 
 use oxfeed_common::item::Entity as Item;
 use oxfeed_common::item::Model as ItemModel;
@@ -17,7 +13,7 @@ struct Opt {
     source_id: Vec<uuid::Uuid>,
 }
 
-fn main() -> Result<()> {
+fn main() -> oxfeed_common::Result<()> {
     env_logger::init();
 
     let opt = Opt::from_args();
@@ -71,7 +67,7 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn fetch(elephantry: &elephantry::Connection, source: &Source) -> Result<()> {
+fn fetch(elephantry: &elephantry::Connection, source: &Source) -> oxfeed_common::Result<()> {
     log::info!("Fetching {}", source.url);
 
     let contents = attohttpc::RequestBuilder::try_new(attohttpc::Method::GET, &source.url)?

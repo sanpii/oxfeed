@@ -15,7 +15,7 @@ pub(crate) fn scope() -> actix_web::Scope {
 async fn counts(
     elephantry: actix_web::web::Data<elephantry::Pool>,
     identity: crate::Identity,
-) -> crate::Result {
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = match identity.token() {
         Some(token) => token,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),

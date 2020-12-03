@@ -11,8 +11,8 @@ impl Identity {
 
 impl actix_web::FromRequest for Identity {
     type Config = ();
-    type Error = crate::Error;
-    type Future = futures_util::future::Ready<crate::Result<Self>>;
+    type Error = oxfeed_common::Error;
+    type Future = futures_util::future::Ready<oxfeed_common::Result<Self>>;
 
     #[inline]
     fn from_request(
