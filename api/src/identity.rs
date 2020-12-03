@@ -1,5 +1,5 @@
 #[derive(Default, Debug, serde::Deserialize)]
-pub struct Identity {
+pub(crate) struct Identity {
     token: Option<uuid::Uuid>,
 }
 

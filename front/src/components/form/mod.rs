@@ -1,6 +1,7 @@
+pub(crate) mod login;
+pub(crate) mod register;
+
 mod autocomplete;
-pub mod login;
-pub mod register;
 mod source;
 mod tags;
 
