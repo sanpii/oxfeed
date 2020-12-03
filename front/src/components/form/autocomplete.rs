@@ -19,9 +19,9 @@ impl From<crate::event::Api> for Message {
 pub(crate) struct Properties {
     pub what: String,
     #[prop_or_default]
-    pub on_input: yew::Callback<String>,
+    pub on_select: yew::Callback<String>,
     #[prop_or_default]
-    pub on_keydown: yew::Callback<String>,
+    pub on_delete: yew::Callback<()>,
 }
 
 pub(crate) struct Component {
@@ -29,9 +29,19 @@ pub(crate) struct Component {
     api: crate::Api<Self>,
     link: yew::ComponentLink<Self>,
     terms: Vec<String>,
+    value: String,
     what: String,
-    on_input: yew::Callback<String>,
-    on_keydown: yew::Callback<String>,
+    on_select: yew::Callback<String>,
+    on_delete: yew::Callback<()>,
+}
+
+impl Component {
+    fn select(&mut self, value: String) {
+        self.on_select.emit(value);
+        self.active = None;
+        self.value = String::new();
+        self.terms = Vec::new();
+    }
 }
 
 impl yew::Component for Component {
@@ -44,23 +54,22 @@ impl yew::Component for Component {
             api: crate::Api::new(link.clone()),
             link,
             terms: Vec::new(),
+            value: String::new(),
             what: props.what,
-            on_input: props.on_input,
-            on_keydown: props.on_keydown,
+            on_select: props.on_select,
+            on_delete: props.on_delete,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Choose(idx) => {
-                self.on_input.emit(self.terms[idx].clone());
-                self.on_keydown.emit("Enter".to_string());
-            }
+            Self::Message::Choose(idx) => self.select(self.terms[idx].clone()),
             Self::Message::Input(input) => {
+                self.value = input.clone();
+
                 if !input.is_empty() {
                     self.api
                         .search(&self.what, &input, &crate::Pagination::new());
-                    self.on_input.emit(input.clone());
                     return false;
                 } else {
                     self.terms = Vec::new();
@@ -82,11 +91,23 @@ impl yew::Component for Component {
                         Some(self.terms.len() - 1)
                     }
                 }
+                "Backspace" => {
+                    if self.value.is_empty() {
+                        self.on_delete.emit(());
+                    }
+                }
+                "Enter" => {
+                    if let Some(active) = self.active {
+                        self.select(self.terms[active].clone());
+                    } else {
+                        self.select(self.value.clone());
+                    }
+                }
                 "Escape" => {
                     self.terms = Vec::new();
                     self.active = None;
                 }
-                key => self.on_keydown.emit(key.to_string()),
+                _ => (),
             },
             Self::Message::Terms(terms) => self.terms = terms,
         }
@@ -99,6 +120,7 @@ impl yew::Component for Component {
             <>
                 <input
                     type="text"
+                    value=self.value
                     oninput=self.link.callback(|e: yew::InputData| Self::Message::Input(e.value))
                     onkeydown=self.link.callback(|e: yew::KeyboardEvent| Self::Message::Key(e.key()))
                 />

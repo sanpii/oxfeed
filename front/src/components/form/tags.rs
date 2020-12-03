@@ -1,10 +1,8 @@
 #[derive(Clone)]
 pub(crate) enum Message {
-    Add,
+    Add(String),
     Delete,
-    Nope,
     Remove(usize),
-    Update(String),
 }
 
 #[derive(Clone, yew::Properties)]
@@ -16,7 +14,6 @@ pub(crate) struct Properties {
 pub(crate) struct Component {
     link: yew::ComponentLink<Self>,
     tags: Vec<String>,
-    value: String,
     on_change: yew::Callback<Vec<String>>,
 }
 
@@ -28,34 +25,23 @@ impl yew::Component for Component {
         Self {
             link,
             tags: props.values,
-            value: String::new(),
             on_change: props.on_change,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Add => {
-                if !self.value.is_empty() {
-                    if !self.tags.contains(&self.value) {
-                        self.tags.push(self.value.clone());
-                    }
-                    self.value = String::new();
+            Self::Message::Add(value) => {
+                if !self.tags.contains(&value) {
+                    self.tags.push(value);
                 }
             }
             Self::Message::Delete => {
-                if self.value.is_empty() {
-                    self.tags.pop();
-                }
+                self.tags.pop();
             }
             Self::Message::Remove(idx) => {
                 self.tags.remove(idx);
             }
-            Self::Message::Update(value) => {
-                self.value = value;
-                return false;
-            }
-            Self::Message::Nope => return false,
         }
 
         self.on_change.emit(self.tags.clone());
@@ -78,12 +64,8 @@ impl yew::Component for Component {
                 }
                 <super::Autocomplete
                     what="tags"
-                    on_input=self.link.callback(|value| Self::Message::Update(value))
-                    on_keydown=self.link.callback(|key: String| match key.as_str() {
-                        "Enter" => Self::Message::Add,
-                        "Backspace" => Self::Message::Delete,
-                        _ => Self::Message::Nope,
-                    })
+                    on_select=self.link.callback(|value| Self::Message::Add(value))
+                    on_delete=self.link.callback(|_| Self::Message::Delete)
                 />
             </div>
         }
