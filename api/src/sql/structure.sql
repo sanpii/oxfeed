@@ -3,7 +3,7 @@ begin;
 create extension if not exists "uuid-ossp";
 create extension if not exists pgcrypto;
 
-create table "user" (
+create table if not exists "user" (
     user_id uuid primary key default uuid_generate_v4(),
     name text not null unique,
     email text not null unique,
@@ -11,9 +11,9 @@ create table "user" (
     token uuid
 );
 
-create index user_read on "user"(token);
+create index if not exists user_read on "user"(token);
 
-create table source (
+create table if not exists source (
     source_id uuid primary key default uuid_generate_v4(),
     user_id uuid references "user"(user_id) not null,
     url text not null unique,
@@ -24,9 +24,9 @@ create table source (
     unique(source_id, user_id)
 );
 
-create index source_user_id on source(user_id);
+create index if not exists source_user_id on source(user_id);
 
-create table item (
+create table if not exists item (
     item_id uuid primary key default uuid_generate_v4(),
     source_id uuid references source(source_id) not null,
     id text not null,
@@ -41,20 +41,21 @@ create table item (
     unique(source_id, id)
 );
 
-create index item_read on item(read);
-create index item_favorite on item(favorite);
-create index item_source_id on item(source_id);
+create index if not exists item_read on item(read);
+create index if not exists item_favorite on item(favorite);
+create index if not exists item_source_id on item(source_id);
 
 create or replace function crypt_password()
     returns trigger
     language plpgsql
 as $$
 begin
-    NEW.password := crypt(NEW.password, gen_salt('bf'));
-    return NEW;
+    new.password := crypt(new.password, gen_salt('bf'));
+    return new;
 end;
 $$;
 
+drop trigger if exists crypt_user_password on "user";
 create trigger crypt_user_password
     before insert or update on "user"
     for each row
