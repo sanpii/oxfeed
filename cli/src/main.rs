@@ -63,7 +63,9 @@ fn main() -> Result<()> {
 fn fetch(elephantry: &elephantry::Connection, source: &Source) -> Result<()> {
     log::info!("Fetching {}", source.url);
 
-    let contents = attohttpc::get(&source.url).send()?.text()?;
+    let contents = attohttpc::RequestBuilder::try_new(attohttpc::Method::GET, &source.url)?
+        .send()?
+        .text()?;
     let feed = feed_rs::parser::parse(contents.as_bytes())?;
 
     for entry in feed.entries {
@@ -97,7 +99,12 @@ fn icon(links: &[feed_rs::model::Link]) -> Option<String> {
     let selector = scraper::Selector::parse("link[rel=\"icon\"]").unwrap();
 
     for link in links {
-        let contents = match attohttpc::get(&link.href).send() {
+        let request = match attohttpc::RequestBuilder::try_new(attohttpc::Method::GET, &link.href) {
+            Ok(request) => request,
+            Err(_) => continue,
+        };
+
+        let contents = match request.send() {
             Ok(contents) => contents.text().unwrap_or_default(),
             Err(_) => continue,
         };
