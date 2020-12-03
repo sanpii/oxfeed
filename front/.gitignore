@@ -1,3 +1,3 @@
 /static/lib
 /static/package.json
-/static/wasm*
+/static/oxfeed_front*
