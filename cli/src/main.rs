@@ -100,7 +100,7 @@ fn fetch(elephantry: &elephantry::Connection, source: &Source) -> Result<()> {
                 link: entry.links[0].href.clone(),
                 favorite: false,
             };
-            elephantry.insert_one::<ItemModel>(&item)?;
+            elephantry.upsert_one::<ItemModel>(&item, "(link)", "nothing")?;
         }
     }
 
