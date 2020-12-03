@@ -16,12 +16,27 @@ enum Route {
 
 pub(crate) enum Message {
     Event(crate::event::Event),
+    Websocket(WebsocketAction),
+}
+
+impl From<crate::event::Api> for Message {
+    fn from(_: crate::event::Api) -> Self {
+        unreachable!()
+    }
+}
+
+#[derive(Debug)]
+pub(crate) enum WebsocketAction {
+    Ready(Result<String, anyhow::Error>),
+    Status(yew::services::websocket::WebSocketStatus),
 }
 
 pub(crate) struct Component {
     auth: bool,
+    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
     pagination: crate::Pagination,
     _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
+    _websocket: yew::services::websocket::WebSocketTask,
 }
 
 impl yew::Component for Component {
@@ -29,14 +44,20 @@ impl yew::Component for Component {
     type Properties = ();
 
     fn create(_: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        use yew::agent::Bridged;
+        use yew::agent::{Bridged, Dispatched};
 
-        let callback = link.callback(Self::Message::Event);
+        let event_cb = link.callback(Self::Message::Event);
+
+        let ws_url = format!("{}/ws?token={}", env!("API_URL").replace("http", "ws"), crate::Api::<Self>::token());
+        let ws_cb = link.callback(|data| Self::Message::Websocket(WebsocketAction::Ready(data)));
+        let ws_notif = link.callback(|status| Self::Message::Websocket(WebsocketAction::Status(status)));
 
         Self {
             auth: true,
+            event_bus: crate::event::Bus::dispatcher(),
             pagination: crate::Location::new().into(),
-            _producer: crate::event::Bus::bridge(callback),
+            _producer: crate::event::Bus::bridge(event_cb),
+            _websocket: yew::services::websocket::WebSocketService::connect_text(&ws_url, ws_cb, ws_notif).unwrap(),
         }
     }
 
@@ -46,7 +67,11 @@ impl yew::Component for Component {
                 crate::event::Event::Api(crate::event::Api::Auth) => self.auth = true,
                 crate::event::Event::AuthRequire => self.auth = false,
                 _ => return false,
-            },
+            }
+            Self::Message::Websocket(event) => match event {
+                WebsocketAction::Ready(_) => self.event_bus.send(crate::event::Event::ItemUpdate),
+                WebsocketAction::Status(_) => (),
+            }
         }
 
         true
