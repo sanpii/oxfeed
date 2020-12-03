@@ -5,7 +5,6 @@ use std::collections::HashMap;
 pub(crate) fn scope() -> actix_web::Scope {
     actix_web::web::scope("/items")
         .service(content)
-        .service(icon)
         .service(favorites)
         .service(patch)
         .service(unread)
@@ -93,47 +92,6 @@ async fn content(
         Some(content) => actix_web::HttpResponse::Ok().body(&content.unwrap_or_default()),
         None => actix_web::HttpResponse::NotFound().finish(),
     };
-
-    Ok(response)
-}
-
-#[actix_web::get("/{item_id}/icon")]
-async fn icon(
-    elephantry: Data<elephantry::Pool>,
-    path: Path<uuid::Uuid>,
-    identity: actix_web::web::Query<crate::Identity>,
-) -> crate::Result {
-    let token = match identity.token() {
-        Some(token) => token,
-        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
-    };
-
-    let empty_img = [
-        71, 73, 70, 56, 57, 97, 1, 0, 1, 0, 128, 0, 0, 255, 255, 255, 255, 255, 255, 33, 249, 4, 1,
-        10, 0, 1, 0, 44, 0, 0, 0, 0, 1, 0, 1, 0, 0, 2, 2, 76, 1, 0, 59,
-    ];
-
-    let item_id = path.into_inner();
-
-    let sql = include_str!("../sql/item_icon.sql");
-    let icon = elephantry.query_one::<Option<String>>(sql, &[&item_id, &token])?;
-    let mut img = None;
-
-    if let Some(icon) = icon {
-        img = crate::cache::get(&icon).ok();
-    }
-
-    let body = img.unwrap_or_else(|| empty_img.to_vec());
-
-    let mut mime = tree_magic::from_u8(&body);
-    if mime == "text/plain" {
-        mime = "image/svg+xml".to_string();
-    }
-
-    let response = actix_web::HttpResponse::Ok()
-        .header("Content-Type", mime)
-        .header("Cache-Control", "public, max-age=604800, immutable")
-        .body(body);
 
     Ok(response)
 }

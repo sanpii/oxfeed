@@ -98,12 +98,11 @@ impl yew::Component for Component {
         let content = yew::utils::document().create_element("div").unwrap();
         content.set_inner_html(&self.content.as_ref().unwrap_or(&"Loading...".to_string()));
 
-        let icon = format!(
-            "{}/items/{}/icon?token={}",
-            env!("API_URL"),
-            self.item.item_id,
-            crate::Api::<Self>::token()
-        );
+        let icon = if let Some(icon) = &self.item.icon {
+            format!("{}{}", env!("API_URL"), icon)
+        } else {
+            "/1px.png".to_string()
+        };
 
         yew::html! {
             <>

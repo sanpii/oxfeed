@@ -32,6 +32,7 @@ async fn main() -> std::io::Result<()> {
             .data(elephantry)
             .wrap(cors)
             .service(services::auth::scope())
+            .service(services::icon::scope())
             .service(services::item::scope())
             .service(services::opml::scope())
             .service(services::search::scope())

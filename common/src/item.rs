@@ -54,7 +54,8 @@ impl<'a> Model<'a> {
 
         let query = format!(
             r#"
-select item.item_id, item.link, item.published, item.title, item.icon,
+select item.item_id, item.link, item.published, item.title,
+        '/icons/' || encode(convert_to(item.icon, 'utf8'), 'base64') as icon,
         item.read, item.favorite, source.title as source, source.tags as tags
     from item
     join source using (source_id)
