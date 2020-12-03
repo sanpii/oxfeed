@@ -117,7 +117,7 @@ impl yew::Component for Component {
 
     fn view(&self) -> yew::Html {
         yew::html! {
-            <>
+            <div class="autocomplete">
                 <input
                     type="text"
                     value=self.value
@@ -127,7 +127,7 @@ impl yew::Component for Component {
                 {
                     if !self.terms.is_empty() {
                         yew::html! {
-                            <div class=("list-group", "autocomplete")>
+                            <div class="list-group">
                             {
                                 for self.terms.iter().enumerate().map(|(idx, term)| {
                                     yew::html! {
@@ -144,7 +144,7 @@ impl yew::Component for Component {
                         "".into()
                     }
                 }
-            </>
+            </div>
         }
     }
 

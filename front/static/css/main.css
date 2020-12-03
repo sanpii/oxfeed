@@ -138,13 +138,24 @@ li.list-group-item:hover .float-right .favorite {
     font-size: 1rem;
 }
 
+.tags-input {
+    display: flex;
+}
+
 .tags-input input[type="text"] {
     border: 0px;
+    flex: 1 1 auto;
 }
 
 .autocomplete {
+    display: flex;
+    flex: 1 1 auto;
+}
+
+.autocomplete .list-group {
     position: absolute;
     z-index: 99;
+    margin-top: 1.5rem;
 }
 
 /*
