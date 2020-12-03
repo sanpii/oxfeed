@@ -57,7 +57,6 @@ impl yew::Component for Component {
             }
             Self::Message::Create(info) => {
                 let user = oxfeed_common::new_user::Entity {
-                    name: info.name,
                     password: info.password,
                     email: info.email,
                 };
@@ -65,7 +64,7 @@ impl yew::Component for Component {
             }
             Self::Message::Login(info) => {
                 self.api
-                    .auth_login(&info.login, &info.password, info.remember_me)
+                    .auth_login(&info.email, &info.password, info.remember_me)
             }
             Self::Message::Logged => (),
             Self::Message::Register => {

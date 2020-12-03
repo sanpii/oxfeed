@@ -1,12 +1,12 @@
 pub(crate) enum Message {
     ToggleRemember,
-    UpdateLogin(String),
+    UpdateEmail(String),
     UpdatePassword(String),
     Submit,
 }
 
 pub(crate) struct Info {
-    pub login: String,
+    pub email: String,
     pub password: String,
     pub remember_me: bool,
 }
@@ -18,7 +18,7 @@ pub(crate) struct Properties {
 
 pub(crate) struct Component {
     link: yew::ComponentLink<Self>,
-    login: String,
+    email: String,
     password: String,
     remember_me: bool,
     on_submit: yew::Callback<Info>,
@@ -31,7 +31,7 @@ impl yew::Component for Component {
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         Self {
             link,
-            login: String::new(),
+            email: String::new(),
             password: String::new(),
             remember_me: false,
             on_submit: props.on_submit,
@@ -42,7 +42,7 @@ impl yew::Component for Component {
         match msg {
             Self::Message::Submit => {
                 let info = Info {
-                    login: self.login.clone(),
+                    email: self.email.clone(),
                     password: self.password.clone(),
                     remember_me: self.remember_me,
                 };
@@ -50,7 +50,7 @@ impl yew::Component for Component {
                 self.on_submit.emit(info);
             }
             Self::Message::ToggleRemember => self.remember_me = !self.remember_me,
-            Self::Message::UpdateLogin(login) => self.login = login,
+            Self::Message::UpdateEmail(email) => self.email = email,
             Self::Message::UpdatePassword(password) => self.password = password,
         }
 
@@ -60,15 +60,15 @@ impl yew::Component for Component {
     fn view(&self) -> yew::Html {
         yew::html! {
             <>
-                <label for="login" class="sr-only">{ "Name or email" }</label>
+                <label for="email" class="sr-only">{ "Email" }</label>
                 <input
-                    type="text"
-                    name="login"
+                    type="email"
+                    name="email"
                     class="form-control"
-                    placeholder="Name or email"
+                    placeholder="Email"
                     required=true
                     autofocus=true
-                    oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateLogin(e.value))
+                    oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateEmail(e.value))
                 />
                 <label for="password" class="sr-only">{ "Password" }</label>
                 <input

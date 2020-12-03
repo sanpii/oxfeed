@@ -3,7 +3,6 @@
 pub struct Entity {
     pub user_id: uuid::Uuid,
     pub email: String,
-    pub name: String,
 }
 
 #[cfg(feature = "elephantry")]
@@ -49,6 +48,6 @@ impl elephantry::Structure for Structure {
     }
 
     fn columns() -> &'static [&'static str] {
-        &["user_id", "name", "email", "password"]
+        &["user_id", "email", "password"]
     }
 }

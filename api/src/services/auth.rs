@@ -17,13 +17,13 @@ async fn login(
     let key: hmac::Hmac<sha2::Sha256> = hmac::Hmac::new_varkey(secret.as_bytes()).unwrap();
     let claims: std::collections::BTreeMap<String, String> = token.verify_with_key(&key)?;
 
-    if claims.get("login").is_none() || claims.get("password").is_none() {
+    if claims.get("email").is_none() || claims.get("password").is_none() {
         return Ok(actix_web::HttpResponse::BadRequest().finish());
     }
 
     let sql = include_str!("../sql/login.sql");
     let token = match elephantry
-        .query::<uuid::Uuid>(sql, &[&claims["login"], &claims["password"]])?
+        .query::<uuid::Uuid>(sql, &[&claims["email"], &claims["password"]])?
         .try_get(0)
     {
         Some(token) => token,

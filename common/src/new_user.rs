@@ -3,7 +3,6 @@
 pub struct Entity {
     pub email: String,
     pub password: String,
-    pub name: String,
 }
 
 impl Into<std::result::Result<std::string::String, anyhow::Error>> for &Entity {
