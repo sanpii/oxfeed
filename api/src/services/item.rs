@@ -134,6 +134,7 @@ async fn icon(
 
     let response = actix_web::HttpResponse::Ok()
         .header("Content-Type", mime)
+        .header("Cache-Control", "public, max-age=604800, immutable")
         .body(body);
 
     Ok(response)
