@@ -118,11 +118,7 @@ impl yew::Component for Component {
 
                 return true;
             }
-            Self::Message::Read => {
-                let alert = crate::event::Alert::info("All items marked as read");
-                self.event_bus.send(crate::event::Event::Alert(alert));
-                self.event_bus.send(crate::event::Event::ItemUpdate);
-            }
+            Self::Message::Read => self.event_bus.send(crate::event::Event::ItemUpdate),
             Self::Message::ReadAll => self.api.items_read(),
         }
 
