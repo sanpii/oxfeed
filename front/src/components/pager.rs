@@ -13,12 +13,10 @@ impl<R: 'static + crate::Render> Component<R> {
 
         if url.is_empty() {
             url = "?".to_string();
+        } else if !url.contains('?') {
+            url.push('?');
         } else {
-            if !url.contains('?') {
-                url.push('?');
-            } else {
-                url.push('&');
-            }
+            url.push('&');
         }
 
         format!("{}page={}&limit={}", url, page, max_per_page)
