@@ -39,7 +39,7 @@ impl yew::Component for Component {
     fn create(_: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         use yew::agent::{Bridged, Dispatched};
 
-        let callback = link.callback(|x| Self::Message::Event(x));
+        let callback = link.callback(Self::Message::Event);
 
         let mut links = vec![
             Link {

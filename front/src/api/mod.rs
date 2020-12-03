@@ -120,7 +120,7 @@ where
                 let event = match Self::on_response(kind, response) {
                     Ok(event) => event,
                     Err(err) => {
-                        Self::error(err.into());
+                        Self::error(err);
                         return Vec::new();
                     }
                 };
@@ -144,7 +144,6 @@ where
             Ok(task) => self.tasks.push(task),
             Err(err) => {
                 Self::error(err.into());
-                return;
             }
         };
     }

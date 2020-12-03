@@ -78,13 +78,13 @@ impl yew::Component for Component {
                     return true;
                 }
                 Self::Message::Save(source) => {
-                    self.source = source.clone();
+                    self.source = source;
                     self.api
                         .sources_update(self.source.source_id.as_ref().unwrap(), &self.source);
                     return true;
                 }
                 Self::Message::Saved(source) => {
-                    self.source = source.clone();
+                    self.source = source;
                     self.scene = Scene::View;
                     return true;
                 }

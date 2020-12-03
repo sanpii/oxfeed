@@ -50,7 +50,7 @@ impl yew::Component for Component {
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         use yew::Bridged;
 
-        let callback = link.callback(|x| Self::Message::Event(x));
+        let callback = link.callback(Self::Message::Event);
 
         let component = Self {
             api: crate::Api::new(link.clone()),
@@ -69,12 +69,11 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Event(event) => match event {
-                crate::event::Event::ItemUpdate => {
+            Self::Message::Event(event) => {
+                if matches!(event, crate::event::Event::ItemUpdate) {
                     self.link.send_message(Self::Message::NeedUpdate)
                 }
-                _ => (),
-            },
+            }
             Self::Message::NeedUpdate => self.fetch(),
             Self::Message::Update(pager) => self.pager = Some(pager),
         }

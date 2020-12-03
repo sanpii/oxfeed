@@ -67,9 +67,7 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Content(content) => {
-                self.content = Some(content);
-            }
+            Self::Message::Content(content) => self.content = Some(content),
             Self::Message::ToggleContent => {
                 self.scene = !self.scene;
 

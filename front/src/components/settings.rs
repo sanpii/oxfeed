@@ -37,7 +37,7 @@ impl Component {
     }
 
     fn import(&mut self, content: &[u8]) {
-        let opml = String::from_utf8(content.to_vec()).map_err(|err| anyhow::Error::new(err));
+        let opml = String::from_utf8(content.to_vec()).map_err(anyhow::Error::new);
         self.api.opml_import(opml);
     }
 }

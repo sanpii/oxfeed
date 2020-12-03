@@ -28,7 +28,7 @@ impl yew::Component for Component {
 
         let location = crate::Location::new();
         let term = location.query().get("q").cloned().unwrap_or_default();
-        let callback = link.callback(|x| Self::Message::Event(x));
+        let callback = link.callback(Self::Message::Event);
 
         Self {
             pagination: props.pagination,
@@ -40,13 +40,12 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Event(event) => match event {
-                crate::event::Event::Search(term) => {
+            Self::Message::Event(event) => {
+                if let crate::event::Event::Search(term) = event {
                     self.term = term;
                     return true;
                 }
-                _ => (),
-            },
+            }
         }
 
         false

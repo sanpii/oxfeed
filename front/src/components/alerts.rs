@@ -16,7 +16,7 @@ impl yew::Component for Component {
     fn create(_: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         use yew::Bridged;
 
-        let callback = link.callback(|event| Self::Message::Event(event));
+        let callback = link.callback(Self::Message::Event);
 
         Self {
             link,
