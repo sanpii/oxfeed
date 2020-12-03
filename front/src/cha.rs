@@ -34,7 +34,10 @@ impl Color {
      * http://alienryderflex.com/hsp.htm
      */
     fn hsp(&self) -> f32 {
-        (0.299 * self.0.pow(2) as f32 + 0.587 * self.1.pow(2) as f32 + 0.114 * self.2.pow(2) as f32)
-            .sqrt()
+        let r = self.0 as u32;
+        let g = self.1 as u32;
+        let b = self.2 as u32;
+
+        (0.299 * r.pow(2) as f32 + 0.587 * g.pow(2) as f32 + 0.114 * b.pow(2) as f32).sqrt()
     }
 }
