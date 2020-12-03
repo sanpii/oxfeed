@@ -16,6 +16,7 @@ scraper = "0.12"
 single-instance = "0.1"
 structopt = "0.3"
 thiserror = "1.0"
+uuid = "0.8"
 
 [dependencies.oxfeed-api]
 version = "0.1"

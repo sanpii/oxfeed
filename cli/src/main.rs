@@ -13,6 +13,7 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 struct Opt {
     #[structopt(long, default_value = "/var/lock/oxfeed")]
     lock_file: String,
+    source_id: Vec<uuid::Uuid>,
 }
 
 fn main() -> Result<()> {
@@ -32,9 +33,11 @@ fn main() -> Result<()> {
     let database_url = std::env::var("DATABASE_URL").expect("Missing DATABASE_URL env variable");
     let elephantry = elephantry::Pool::new(&database_url).expect("Unable to connect to postgresql");
 
-    let sources = elephantry
-        .find_all::<SourceModel>(None)?
-        .collect::<Vec<_>>();
+    let sources = if opt.source_id.is_empty() {
+        elephantry .find_all::<SourceModel>(None)?.collect::<Vec<_>>()
+    } else {
+        elephantry .find_where::<SourceModel>("source_id = any($*)", &[&opt.source_id], None)?.collect::<Vec<_>>()
+    };
 
     sources.par_iter().for_each(|source| {
         let last_error = match fetch(&elephantry, source) {
