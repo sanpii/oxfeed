@@ -23,7 +23,7 @@ impl<R: 'static + crate::Render> yew::Component for Component<R> {
         if self.pager.iterator.is_empty() {
             return yew::html! {
                 <super::Empty />
-            }
+            };
         }
 
         yew::html! {

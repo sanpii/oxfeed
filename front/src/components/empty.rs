@@ -15,8 +15,14 @@ impl yew::Component for Component {
     fn view(&self) -> yew::Html {
         let contents = [
             ("book", "You really want to read something? Take a book!"),
-            ("cup", "Nothing here, it’s time to boil water while waiting something to read arrive!"),
-            ("pencil-square", "Nothing to read? Write what you want to read!"),
+            (
+                "cup",
+                "Nothing here, it’s time to boil water while waiting something to read arrive!",
+            ),
+            (
+                "pencil-square",
+                "Nothing to read? Write what you want to read!",
+            ),
         ];
 
         let now = chrono::Utc::now();

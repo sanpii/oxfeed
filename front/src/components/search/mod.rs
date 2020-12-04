@@ -26,14 +26,12 @@ impl yew::Component for Component {
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         use yew::agent::Bridged;
 
-        let location = crate::Location::new();
-        let term = location.query().get("q").cloned().unwrap_or_default();
         let callback = link.callback(Self::Message::Event);
 
         Self {
             pagination: props.pagination,
             kind: props.kind,
-            term,
+            term: Self::term(),
             _producer: crate::event::Bus::bridge(callback),
         }
     }
@@ -41,8 +39,8 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Self::Message::Event(event) => {
-                if let crate::event::Event::Search(term) = event {
-                    self.term = term;
+                if let crate::event::Event::Redirected(_) = event {
+                    self.term = Self::term();
                     return true;
                 }
             }
@@ -71,5 +69,12 @@ impl yew::Component for Component {
 
     fn change(&mut self, _: Self::Properties) -> yew::ShouldRender {
         false
+    }
+}
+
+impl Component {
+    fn term() -> String {
+        let location = crate::Location::new();
+        location.query().get("q").cloned().unwrap_or_default()
     }
 }

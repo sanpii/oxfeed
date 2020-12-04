@@ -17,6 +17,7 @@ impl From<crate::event::Api> for Message {
     }
 }
 
+#[derive(Clone)]
 struct Link {
     count: i64,
     icon: &'static str,
@@ -41,7 +42,7 @@ impl yew::Component for Component {
 
         let callback = link.callback(Self::Message::Event);
 
-        let mut links = vec![
+        let links = vec![
             Link {
                 count: 0,
                 icon: "collection",
@@ -74,17 +75,6 @@ impl yew::Component for Component {
             },
         ];
 
-        let route = yew_router::service::RouteService::<()>::new().get_path();
-
-        if route.starts_with("/search") {
-            links.push(Link {
-                count: 0,
-                icon: "search",
-                label: "Search",
-                url: route,
-            });
-        }
-
         let component = Self {
             api: crate::Api::new(link.clone()),
             event_bus: crate::event::Bus::dispatcher(),
@@ -109,6 +99,7 @@ impl yew::Component for Component {
                 | crate::event::Event::SourceUpdate => {
                     self.link.send_message(Self::Message::NeedUpdate)
                 }
+                crate::event::Event::Redirected(_) => return true,
                 _ => (),
             },
             Self::Message::NeedUpdate => self.api.counts(),
@@ -128,8 +119,18 @@ impl yew::Component for Component {
     }
 
     fn view(&self) -> yew::Html {
-        let router = yew_router::service::RouteService::<()>::new();
-        let current_url = router.get_path();
+        let current_url = crate::location::base_url();
+
+        let mut links = self.links.clone();
+
+        if current_url.starts_with("/search") {
+            links.push(Link {
+                count: 0,
+                icon: "search",
+                label: "Search",
+                url: current_url.clone(),
+            });
+        }
 
         yew::html! {
             <>
@@ -139,7 +140,7 @@ impl yew::Component for Component {
                 >{ "Mark all as read" }</button>
                 <ul class="nav flex-column">
                 {
-                    for self.links.iter().map(|link| yew::html! {
+                    for links.iter().map(|link| yew::html! {
                         <li class="nav-item">
                             <a
                                 href={ link.url.as_str() }

@@ -1,4 +1,4 @@
-#[derive(yew_router::Switch, Clone)]
+#[derive(Clone, yew_router::Switch, Debug)]
 enum Route {
     #[to = "/favorites"]
     Favorites,
@@ -16,6 +16,7 @@ enum Route {
 
 pub(crate) enum Message {
     Event(crate::event::Event),
+    Route(yew_router::route::Route<()>),
     Websocket(WebsocketAction),
 }
 
@@ -34,7 +35,7 @@ pub(crate) enum WebsocketAction {
 pub(crate) struct Component {
     auth: bool,
     event_bus: yew::agent::Dispatcher<crate::event::Bus>,
-    pagination: oxfeed_common::Pagination,
+    location: crate::Location,
     _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
     _websocket: yew::services::websocket::WebSocketTask,
 }
@@ -52,19 +53,19 @@ impl yew::Component for Component {
             .replace("http://", "ws://")
             .replace("https://", "wss://");
 
-        let ws_url = format!(
-            "{}/ws?token={}",
-            url,
-            crate::Api::<Self>::token()
-        );
+        let ws_url = format!("{}/ws?token={}", url, crate::Api::<Self>::token());
         let ws_cb = link.callback(|data| Self::Message::Websocket(WebsocketAction::Ready(data)));
         let ws_notif =
             link.callback(|status| Self::Message::Websocket(WebsocketAction::Status(status)));
 
+        let url_cb = link.callback(Self::Message::Route);
+        let mut location = crate::Location::new();
+        location.register_callback(url_cb);
+
         Self {
             auth: true,
             event_bus: crate::event::Bus::dispatcher(),
-            pagination: crate::Location::new().into(),
+            location,
             _producer: crate::event::Bus::bridge(event_cb),
             _websocket: yew::services::websocket::WebSocketService::connect_text(
                 &ws_url, ws_cb, ws_notif,
@@ -78,11 +79,16 @@ impl yew::Component for Component {
             Self::Message::Event(event) => match event {
                 crate::event::Event::Api(crate::event::Api::Auth) => self.auth = true,
                 crate::event::Event::AuthRequire => self.auth = false,
+                crate::event::Event::Redirect(route) => self.location.set_path(&route),
                 _ => return false,
             },
+            Self::Message::Route(_) => (),
             Self::Message::Websocket(event) => match event {
-                WebsocketAction::Ready(_) => self.event_bus.send(crate::event::Event::ItemUpdate),
-                WebsocketAction::Status(_) => (),
+                WebsocketAction::Ready(_) => {
+                    self.event_bus.send(crate::event::Event::ItemUpdate);
+                    return false;
+                }
+                WebsocketAction::Status(_) => return false,
             },
         }
 
@@ -96,9 +102,11 @@ impl yew::Component for Component {
             };
         }
 
-        use yew_router::router::Router;
+        use yew_router::Switch;
+        let route_service = yew_router::service::RouteService::<()>::new();
+        let route = Route::switch(route_service.get_route()).unwrap_or(Route::All);
 
-        let pagination = self.pagination;
+        let pagination: oxfeed_common::Pagination = (&self.location).into();
 
         yew::html! {
             <>
@@ -112,18 +120,16 @@ impl yew::Component for Component {
                         </nav>
                         <main class="col-md-9 ml-sm-auto col-lg-10">
                             <super::Alerts />
-                            <Router<Route, ()>
-                                render = yew_router::router::Router::render(move |switch: Route| {
-                                    match switch {
-                                        Route::All => yew::html!{<super::Items kind="all" pagination=pagination />},
-                                        Route::Favorites => yew::html!{<super::Items kind="favorites" pagination=pagination />},
-                                        Route::Settings => yew::html!{<super::Settings />},
-                                        Route::Sources => yew::html!{<super::Sources pagination=pagination />},
-                                        Route::Unread => yew::html!{<super::Items kind="unread" pagination=pagination />},
-                                        Route::Search(kind) => yew::html!{<super::Search kind=kind pagination=pagination />},
-                                    }
-                                })
-                            />
+                            {
+                                match route {
+                                    Route::All => yew::html!{<super::Items kind="all" pagination=pagination />},
+                                    Route::Favorites => yew::html!{<super::Items kind="favorites" pagination=pagination />},
+                                    Route::Settings => yew::html!{<super::Settings />},
+                                    Route::Sources => yew::html!{<super::Sources pagination=pagination />},
+                                    Route::Unread => yew::html!{<super::Items kind="unread" pagination=pagination />},
+                                    Route::Search(kind) => yew::html!{<super::Search kind=kind pagination=pagination />},
+                                }
+                            }
                         </main>
                     </div>
                 </div>

@@ -15,6 +15,14 @@ impl Location {
         self.router.get_path()
     }
 
+    pub fn set_path(&mut self, path: &str) {
+        self.router.set_route(path, ());
+
+        use yew::agent::Dispatched;
+        let mut event_bus = crate::event::Bus::dispatcher();
+        event_bus.send(crate::event::Event::Redirected(path.to_string()));
+    }
+
     pub fn query(&self) -> HashMap<String, String> {
         let mut map = HashMap::new();
         let query = self.router.get_query();
@@ -30,19 +38,14 @@ impl Location {
         map
     }
 
-    pub fn redirect(&self, url: &str) {
-        let location = yew::utils::document().location().unwrap();
-        location.set_href(url).ok();
-    }
-
     pub fn reload(&self) {
         let location = yew::utils::document().location().unwrap();
         location.reload().ok();
     }
 }
 
-impl From<Location> for oxfeed_common::Pagination {
-    fn from(location: Location) -> Self {
+impl From<&Location> for oxfeed_common::Pagination {
+    fn from(location: &Location) -> Self {
         let query = location.query();
 
         Self {
@@ -57,6 +60,20 @@ impl From<Location> for oxfeed_common::Pagination {
                 .flatten()
                 .unwrap_or(25),
         }
+    }
+}
+
+impl std::ops::Deref for Location {
+    type Target = yew_router::service::RouteService<()>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.router
+    }
+}
+
+impl std::ops::DerefMut for Location {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.router
     }
 }
 

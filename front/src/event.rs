@@ -6,9 +6,10 @@ pub(crate) enum Event {
     Alert(Alert),
     AuthRequire,
     ItemUpdate,
-    Search(String),
     SettingUpdate,
     SourceUpdate,
+    Redirect(String),
+    Redirected(String),
 }
 
 impl From<oxfeed_common::Error> for Event {

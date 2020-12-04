@@ -9,6 +9,16 @@ pub(crate) struct Component<R: crate::Render> {
 
 impl<R: 'static + crate::Render> Component<R> {
     fn url(&self, page: usize, max_per_page: usize) -> String {
+        let location = crate::Location::new();
+        let mut query = location.query();
+        query.insert("page".to_string(), page.to_string());
+        query.insert("limit".to_string(), max_per_page.to_string());
+        let query_str = query
+            .iter()
+            .map(|(k, v)| format!("{}={}", k, v))
+            .collect::<Vec<_>>()
+            .join("&");
+
         let mut url = self.pager.base_url.clone();
 
         if url.is_empty() {
@@ -19,7 +29,7 @@ impl<R: 'static + crate::Render> Component<R> {
             url.push('&');
         }
 
-        format!("{}page={}&limit={}", url, page, max_per_page)
+        format!("{}{}", url, query_str)
     }
 }
 

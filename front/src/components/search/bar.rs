@@ -1,7 +1,5 @@
 pub(crate) enum Message {
     Input(String),
-    Nope,
-    Search,
 }
 
 pub(crate) struct Component {
@@ -41,16 +39,15 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Self::Message::Input(value) => {
-                self.query = value.clone();
+                self.query = value;
 
-                if crate::Location::new().path().starts_with("/search") {
-                    self.event_bus.send(crate::event::Event::Search(value));
-                }
-            }
-            Self::Message::Nope => return false,
-            Self::Message::Search => {
-                let location = crate::Location::new();
-                location.redirect(&format!("{}?q={}", self.route, self.query));
+                let route = if self.query.is_empty() {
+                    self.route.trim_start_matches("/search").to_string()
+                } else {
+                    format!("{}?q={}", self.route, self.query)
+                };
+
+                self.event_bus.send(crate::event::Event::Redirect(route));
             }
         }
 
@@ -69,10 +66,6 @@ impl yew::Component for Component {
                     placeholder="Search"
                     aria-label="Search"
                     oninput=self.link.callback(|e: yew::InputData| Self::Message::Input(e.value))
-                    onkeydown=self.link.callback(|e: yew::KeyboardEvent| match e.key().as_str() {
-                        "Enter" => Self::Message::Search,
-                        _ => Self::Message::Nope,
-                    })
                 />
             }
         }

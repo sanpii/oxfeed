@@ -84,8 +84,10 @@ impl yew::Component for Component {
     fn view(&self) -> yew::Html {
         let pager = match &self.pager {
             Some(pager) => pager,
-            None => return yew::html! {
-                <super::Empty />
+            None => {
+                return yew::html! {
+                    <super::Empty />
+                }
             }
         };
 
