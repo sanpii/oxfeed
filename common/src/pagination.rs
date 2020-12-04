@@ -1,8 +1,8 @@
 #[derive(Clone, Copy, Eq, PartialEq, serde::Deserialize)]
 pub struct Pagination {
-    #[serde(default = "default_page")]
+    #[serde(default = "default_page", deserialize_with = "parse")]
     pub page: usize,
-    #[serde(default = "default_limit")]
+    #[serde(default = "default_limit", deserialize_with = "parse")]
     pub limit: usize,
 }
 
@@ -12,6 +12,18 @@ fn default_page() -> usize {
 
 fn default_limit() -> usize {
     25
+}
+
+fn parse<'de, D>(deserializer: D) -> Result<usize, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    use serde::de::Error;
+    use serde::Deserialize;
+
+    let s = String::deserialize(deserializer)?;
+
+    s.parse().map_err(D::Error::custom)
 }
 
 impl Pagination {
