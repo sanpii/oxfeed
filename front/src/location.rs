@@ -29,10 +29,9 @@ impl Location {
 
         for args in query.trim_start_matches('?').split('&') {
             let mut tokens = args.split('=');
-            map.insert(
-                tokens.next().unwrap().to_string(),
-                tokens.next().unwrap_or_default().to_string(),
-            );
+            let v = tokens.next().unwrap().to_string();
+            let k = tokens.next().unwrap_or_default().to_string();
+            map.insert(v, urlencoding::decode(&k).unwrap_or_default());
         }
 
         map
