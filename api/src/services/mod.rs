@@ -21,7 +21,7 @@ async fn counts(
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
     };
 
-    let sql = include_str!("../sql/counts.sql");
+    let sql = include_str!("../../sql/counts.sql");
     let counts = elephantry.query_one::<oxfeed_common::Counts>(sql, &[&token])?;
     let response = actix_web::HttpResponse::Ok().json(counts);
 

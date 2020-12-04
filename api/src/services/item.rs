@@ -84,7 +84,7 @@ async fn content(
     };
 
     let item_id = Some(path.into_inner());
-    let sql = include_str!("../sql/item_content.sql");
+    let sql = include_str!("../../sql/item_content.sql");
     let content = elephantry
         .query::<Option<String>>(sql, &[&item_id, &token])?
         .next();
@@ -150,7 +150,7 @@ async fn read_all(
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
     };
 
-    let sql = include_str!("../sql/read_all.sql");
+    let sql = include_str!("../../sql/read_all.sql");
     elephantry.query::<()>(sql, &[&token])?;
 
     let response = actix_web::HttpResponse::NoContent().finish();

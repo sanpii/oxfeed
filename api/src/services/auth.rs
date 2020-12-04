@@ -21,7 +21,7 @@ async fn login(
         return Ok(actix_web::HttpResponse::BadRequest().finish());
     }
 
-    let sql = include_str!("../sql/login.sql");
+    let sql = include_str!("../../sql/login.sql");
     let token = match elephantry
         .query::<uuid::Uuid>(sql, &[&claims["email"], &claims["password"]])?
         .try_get(0)
@@ -41,7 +41,7 @@ async fn logout(
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     if let Some(token) = identity.token() {
-        let sql = include_str!("../sql/logout.sql");
+        let sql = include_str!("../../sql/logout.sql");
         elephantry.query_one::<()>(sql, &[&token])?;
     };
 

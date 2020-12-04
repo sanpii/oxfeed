@@ -60,13 +60,13 @@ async fn tags(
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
     };
 
-    let mut sql = include_str!("../sql/search_tags.sql").to_string();
+    let mut sql = include_str!("../../sql/search_tags.sql").to_string();
     sql.push_str(&query.pagination.to_sql());
 
     let q = format!("^{}", query.q);
     let tags = elephantry.query::<String>(&sql, &[&token, &q])?;
 
-    let sql = include_str!("../sql/search_tags_count.sql");
+    let sql = include_str!("../../sql/search_tags_count.sql");
     let count = elephantry.query_one::<i64>(&sql, &[&token])?;
 
     let pager = elephantry::Pager::new(
