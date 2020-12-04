@@ -67,8 +67,13 @@ impl yew::Component for Component {
         }
     }
 
-    fn change(&mut self, _: Self::Properties) -> yew::ShouldRender {
-        false
+    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
+        let should_render = self.kind != props.kind || self.pagination != props.pagination;
+
+        self.kind = props.kind;
+        self.pagination = props.pagination;
+
+        should_render
     }
 }
 
