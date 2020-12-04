@@ -48,9 +48,13 @@ impl yew::Component for Component {
 
         let event_cb = link.callback(Self::Message::Event);
 
+        let url = env!("API_URL")
+            .replace("http://", "ws://")
+            .replace("https://", "wss://");
+
         let ws_url = format!(
             "{}/ws?token={}",
-            env!("API_URL").replace("http", "ws"),
+            url,
             crate::Api::<Self>::token()
         );
         let ws_cb = link.callback(|data| Self::Message::Websocket(WebsocketAction::Ready(data)));
