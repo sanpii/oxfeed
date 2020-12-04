@@ -21,7 +21,9 @@ impl<R: 'static + crate::Render> yew::Component for Component<R> {
 
     fn view(&self) -> yew::Html {
         if self.pager.iterator.is_empty() {
-            return "Nothing found".into();
+            return yew::html! {
+                <super::Empty />
+            }
         }
 
         yew::html! {

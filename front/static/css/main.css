@@ -1,4 +1,4 @@
-html, body {
+html, body, body > .container-fluid, body .row, body main {
     height: 100%;
 }
 
@@ -198,4 +198,21 @@ li.list-group-item:hover .float-right .favorite {
     margin-bottom: 10px;
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
+}
+
+/*
+ * empty
+ */
+.empty {
+    display: flex;
+    align-items: center;
+    color: lightgray;
+    height: 100%;
+    width: 100%;
+    max-width: 512px;
+    margin: auto;
+}
+
+.empty svg {
+    margin-right: 2rem;
 }

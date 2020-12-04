@@ -84,12 +84,10 @@ impl yew::Component for Component {
     fn view(&self) -> yew::Html {
         let pager = match &self.pager {
             Some(pager) => pager,
-            None => return "Nothing found".into(),
+            None => return yew::html! {
+                <super::Empty />
+            }
         };
-
-        if pager.iterator.is_empty() {
-            return "Nothing found".into();
-        }
 
         yew::html! {
             <super::List<oxfeed_common::item::Item> value=pager />

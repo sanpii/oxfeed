@@ -1,6 +1,7 @@
 mod actions;
 mod alerts;
 mod app;
+mod empty;
 mod form;
 mod header;
 mod item;
@@ -19,6 +20,7 @@ mod tag;
 pub(crate) use actions::Component as Actions;
 pub(crate) use alerts::Component as Alerts;
 pub(crate) use app::Component as App;
+pub(crate) use empty::Component as Empty;
 pub(crate) use header::Component as Header;
 pub(crate) use item::Component as Item;
 pub(crate) use items::Component as Items;
