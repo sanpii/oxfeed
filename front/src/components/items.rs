@@ -2,6 +2,7 @@
 pub(crate) enum Message {
     Event(crate::event::Event),
     NeedUpdate,
+    PageChange(usize),
     Update(crate::Pager<oxfeed_common::item::Item>),
 }
 
@@ -74,6 +75,11 @@ impl yew::Component for Component {
                     self.link.send_message(Self::Message::NeedUpdate)
                 }
             }
+            Self::Message::PageChange(page) => {
+                self.pagination.page = page;
+                yew::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
+                self.link.send_message(Self::Message::NeedUpdate);
+            }
             Self::Message::NeedUpdate => self.fetch(),
             Self::Message::Update(pager) => self.pager = Some(pager),
         }
@@ -92,7 +98,10 @@ impl yew::Component for Component {
         };
 
         yew::html! {
-            <super::List<oxfeed_common::item::Item> value=pager />
+            <super::List<oxfeed_common::item::Item>
+                value=pager
+                on_page_change=self.link.callback(Self::Message::PageChange)
+            />
         }
     }
 

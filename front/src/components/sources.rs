@@ -4,6 +4,7 @@ pub(crate) enum Message {
     Cancel,
     Create(oxfeed_common::source::Entity),
     Event(crate::event::Event),
+    PageChange(usize),
     Update(crate::Pager<oxfeed_common::source::Entity>),
     NeedUpdate,
 }
@@ -84,9 +85,11 @@ impl yew::Component for Component {
             if matches!(event, crate::event::Event::SourceUpdate) {
                 self.link.send_message(Self::Message::NeedUpdate);
             }
-        }
-
-        if matches!(msg, Self::Message::NeedUpdate) {
+        } if let Self::Message::PageChange(page) = msg {
+            self.pagination.page = page;
+            yew::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
+            self.link.send_message(Self::Message::NeedUpdate);
+        } else if matches!(msg, Self::Message::NeedUpdate) {
             self.scene = Scene::View;
 
             if self.filter.is_empty() {
@@ -134,7 +137,10 @@ impl yew::Component for Component {
         yew::html! {
             <>
                 { add }
-                <super::List<oxfeed_common::source::Entity> value=pager />
+                <super::List<oxfeed_common::source::Entity>
+                    value=pager
+                    on_page_change=self.link.callback(Self::Message::PageChange)
+                />
             </>
         }
     }
