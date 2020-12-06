@@ -7,10 +7,10 @@ use identity::*;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    env_logger::init();
-
     #[cfg(debug_assertions)]
     dotenv::dotenv().ok();
+
+    env_logger::init();
 
     let database_url = std::env::var("DATABASE_URL").expect("Missing DATABASE_URL env variable");
     let ip = std::env::var("LISTEN_IP").expect("Missing LISTEN_IP env variable");
