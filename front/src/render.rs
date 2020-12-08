@@ -7,6 +7,15 @@ impl Render for String {
         self.into()
     }
 }
+
+impl Render for oxfeed_common::item::Item {
+    fn render(&self) -> yew::Html {
+        yew::html! {
+            <crate::components::Item value=self />
+        }
+    }
+}
+
 impl Render for oxfeed_common::source::Entity {
     fn render(&self) -> yew::Html {
         yew::html! {
@@ -15,10 +24,10 @@ impl Render for oxfeed_common::source::Entity {
     }
 }
 
-impl Render for oxfeed_common::item::Item {
+impl Render for oxfeed_common::webhook::Entity {
     fn render(&self) -> yew::Html {
         yew::html! {
-            <crate::components::Item value=self />
+            <crate::components::Webhook value=self />
         }
     }
 }

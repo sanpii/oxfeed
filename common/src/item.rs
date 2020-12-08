@@ -1,4 +1,4 @@
-#[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "elephantry", derive(elephantry::Entity))]
 pub struct Item {
     pub item_id: uuid::Uuid,

@@ -37,7 +37,7 @@ front: yarn wasm
 .PHONY: front
 
 wasm:
-	$(WASM_PACK) build $(WASM_PACK_FLAGS) --target web --out-dir ./static front
+	RUST_LOG=info $(WASM_PACK) build $(WASM_PACK_FLAGS) --target web --out-dir ./static front
 	rm front/static/.gitignore
 .PHONY: wasm
 

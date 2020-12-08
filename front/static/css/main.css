@@ -10,7 +10,7 @@ main ul.list-group {
     margin-bottom: 1rem;
 }
 
-main > .btn-primary {
+main > .btn-primary, main > .card > .card-body > .btn-primary {
     margin-bottom: 1rem;
 }
 
@@ -75,6 +75,24 @@ li.list-group-item:hover .float-right .favorite {
 
 .tags .badge {
     font-size: .875rem;
+}
+
+.card {
+    margin-bottom: 1rem;
+}
+
+.help {
+    position: relative;
+}
+
+.help .popover {
+    display: none;
+    width: 276px;
+}
+
+.help:hover .popover {
+    display: block;
+    left: 24px;
 }
 
 /*

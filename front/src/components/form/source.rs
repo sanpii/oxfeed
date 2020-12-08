@@ -1,10 +1,21 @@
 pub(crate) enum Message {
     Cancel,
     Submit,
-    ToggleActive,
+    ToggleActive(bool),
+    ToggleWebhook(uuid::Uuid, bool),
     UpdateTags(Vec<String>),
     UpdateTitle(String),
     UpdateUrl(String),
+    Webhooks(Vec<oxfeed_common::webhook::Entity>),
+}
+
+impl From<crate::event::Api> for Message {
+    fn from(event: crate::event::Api) -> Self {
+        match event {
+            crate::event::Api::Webhooks(webhooks) => Self::Webhooks(webhooks),
+            _ => unreachable!(),
+        }
+    }
 }
 
 #[derive(Clone, yew::Properties)]
@@ -15,8 +26,10 @@ pub(crate) struct Properties {
 }
 
 pub(crate) struct Component {
+    api: crate::Api<Self>,
     link: yew::ComponentLink<Self>,
     props: Properties,
+    webhooks: Vec<oxfeed_common::webhook::Entity>,
 }
 
 impl yew::Component for Component {
@@ -24,17 +37,34 @@ impl yew::Component for Component {
     type Properties = Properties;
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        Self { link, props }
+        let mut component = Self {
+            api: crate::Api::new(link.clone()),
+            link,
+            props,
+            webhooks: Vec::new(),
+        };
+
+        component.api.webhooks_all();
+
+        component
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Self::Message::Cancel => self.props.on_cancel.emit(()),
             Self::Message::Submit => self.props.on_submit.emit(self.props.source.clone()),
-            Self::Message::ToggleActive => self.props.source.active = !self.props.source.active,
+            Self::Message::ToggleActive(active) => self.props.source.active = active,
+            Self::Message::ToggleWebhook(id, active) => if active {
+                if !self.props.source.webhooks.contains(&id) {
+                    self.props.source.webhooks.push(id)
+                }
+            } else {
+                self.props.source.webhooks.retain(|x| x != &id);
+            },
             Self::Message::UpdateTags(tags) => self.props.source.tags = tags,
             Self::Message::UpdateTitle(title) => self.props.source.title = title,
             Self::Message::UpdateUrl(url) => self.props.source.url = url,
+            Self::Message::Webhooks(webhooks) => self.webhooks = webhooks,
         }
 
         true
@@ -74,16 +104,35 @@ impl yew::Component for Component {
                 </div>
 
                 <div class="from-group">
-                    <div class=("custom-control", "custom-switch")>
-                        <input
-                            id="active"
-                            type="checkbox"
-                            class="custom-control-input"
-                            checked=self.props.source.active
-                            onclick=self.link.callback(|_| Self::Message::ToggleActive)
-                        />
-                        <label class="custom-control-label" for="active">{ "Active" }</label>
+                    <div>
+                        <label for="webhooks">{ "Webhooks" }</label>
                     </div>
+                    <div class="d-inline-flex">
+                    {
+                        for self.webhooks.iter().map(move |webhook| {
+                            let id = webhook.webhook_id.unwrap_or_default();
+                            let active = self.props.source.webhooks.contains(&id);
+
+                            yew::html! {
+                                <crate::components::Switch
+                                    id=id.to_string()
+                                    label=webhook.name.clone()
+                                    active=active
+                                    on_toggle=self.link.callback(move |active| Self::Message::ToggleWebhook(id, active))
+                                />
+                            }
+                        })
+                    }
+                    </div>
+                </div>
+
+                <div class="from-group">
+                    <label for="active">{ "Active" }</label>
+                    <crate::components::Switch
+                        id="active"
+                        active=self.props.source.active
+                        on_toggle=self.link.callback(Self::Message::ToggleActive)
+                    />
                 </div>
 
                 <a
@@ -107,7 +156,11 @@ impl yew::Component for Component {
         }
     }
 
-    fn change(&mut self, _: Self::Properties) -> yew::ShouldRender {
-        false
+    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
+        let should_render = self.props.source != props.source;
+
+        self.props = props;
+
+        should_render
     }
 }

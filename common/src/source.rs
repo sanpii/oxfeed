@@ -8,6 +8,8 @@ pub struct Entity {
     pub url: String,
     pub user_id: uuid::Uuid,
     pub active: bool,
+    #[cfg_attr(feature = "elephantry", elephantry(default))]
+    pub webhooks: Vec<uuid::Uuid>,
 }
 
 impl Into<std::result::Result<std::string::String, anyhow::Error>> for &Entity {
@@ -103,6 +105,6 @@ impl elephantry::Structure for Structure {
     }
 
     fn columns() -> &'static [&'static str] {
-        &["source_id", "user_id", "title", "tags", "url", "last_error", "active"]
+        &["source_id", "user_id", "title", "tags", "url", "last_error", "active", "webhooks"]
     }
 }

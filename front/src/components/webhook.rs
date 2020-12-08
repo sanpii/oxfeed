@@ -4,16 +4,15 @@ pub(crate) enum Message {
     Delete,
     Deleted,
     Edit,
-    ToggleActive(bool),
-    Save(oxfeed_common::source::Entity),
-    Saved(oxfeed_common::source::Entity),
+    Save(oxfeed_common::webhook::Entity),
+    Saved(oxfeed_common::webhook::Entity),
 }
 
 impl From<crate::event::Api> for Message {
     fn from(event: crate::event::Api) -> Self {
         match event {
-            crate::event::Api::SourceDelete(_) => Self::Deleted,
-            crate::event::Api::SourceUpdate(source) => Self::Saved(source),
+            crate::event::Api::WebhookDelete(_) => Self::Deleted,
+            crate::event::Api::WebhookUpdate(webhook) => Self::Saved(webhook),
             _ => unreachable!(),
         }
     }
@@ -26,14 +25,14 @@ enum Scene {
 
 #[derive(yew::Properties, Clone)]
 pub(crate) struct Properties {
-    pub value: oxfeed_common::source::Entity,
+    pub value: oxfeed_common::webhook::Entity,
 }
 
 pub(crate) struct Component {
     api: crate::Api<Self>,
     scene: Scene,
     link: yew::ComponentLink<Self>,
-    source: oxfeed_common::source::Entity,
+    webhook: oxfeed_common::webhook::Entity,
 }
 
 impl yew::Component for Component {
@@ -45,24 +44,18 @@ impl yew::Component for Component {
             api: crate::Api::new(link.clone()),
             scene: Scene::View,
             link,
-            source: props.value,
+            webhook: props.value,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
-        if let Self::Message::Saved(source) = msg {
-            self.source = source;
-            self.scene = Scene::View;
-            return true;
-        }
-
         match self.scene {
             Scene::View => match msg {
                 Self::Message::Delete => {
-                    let message = format!("Would you like delete '{}' source?", self.source.title);
+                    let message = format!("Would you like delete '{}' webhook?", self.webhook.name);
 
                     if yew::services::dialog::DialogService::confirm(&message) {
-                        self.api.sources_delete(&self.source.source_id.unwrap());
+                        self.api.webhooks_delete(&self.webhook.webhook_id.unwrap());
                     }
                 }
                 Self::Message::Deleted => (),
@@ -70,23 +63,22 @@ impl yew::Component for Component {
                     self.scene = Scene::Edit;
                     return true;
                 }
-                Self::Message::ToggleActive(active) => {
-                    self.source.active = active;
-                    self.api
-                        .sources_update(&self.source.source_id.unwrap(), &self.source);
-                    return true;
-                }
-                _ => (),
+                _ => unreachable!(),
             },
             Scene::Edit => match msg {
                 Self::Message::Cancel => {
                     self.scene = Scene::View;
                     return true;
                 }
-                Self::Message::Save(source) => {
-                    self.source = source;
+                Self::Message::Save(webhook) => {
+                    self.webhook = webhook;
                     self.api
-                        .sources_update(&self.source.source_id.unwrap(), &self.source);
+                        .webhooks_update(&self.webhook.webhook_id.unwrap(), &self.webhook);
+                    return true;
+                }
+                Self::Message::Saved(webhook) => {
+                    self.webhook = webhook;
+                    self.scene = Scene::View;
                     return true;
                 }
                 _ => unreachable!(),
@@ -99,28 +91,21 @@ impl yew::Component for Component {
     fn view(&self) -> yew::Html {
         match &self.scene {
             Scene::Edit => yew::html! {
-                <super::form::Source
-                    source=self.source.clone()
-                    on_cancel=self.link.callback(|_| Message::Cancel)
-                    on_submit=self.link.callback(|source| Message::Save(source))
+                <super::form::Webhook
+                    webhook=self.webhook.clone()
+                    on_cancel=self.link.callback(|_| Self::Message::Cancel)
+                    on_submit=self.link.callback(|webhook| Self::Message::Save(webhook))
                 />
             },
             Scene::View => {
-                let source = self.source.clone();
+                let webhook = self.webhook.clone();
 
                 yew::html! {
                     <>
                         <div class="d-inline-flex">
-                            <super::Switch
-                                id=format!("active-{}", self.source.source_id.unwrap_or_default().to_string())
-                                active=source.active
-                                on_toggle=self.link.callback(Self::Message::ToggleActive)
-                            />
-
-                            { source.title }
-
+                            { webhook.name }
                             {
-                                if let Some(last_error) = source.last_error {
+                                if let Some(last_error) = webhook.last_error {
                                     yew::html! {
                                         <>
                                             { " · " }
@@ -135,21 +120,10 @@ impl yew::Component for Component {
                         </div>
 
                         <div class=("btn-group", "float-right")>
-                            {
-                                if !source.webhooks.is_empty() {
-                                    yew::html! {
-                                        <button class=("btn", "btn-warning") disabled=true>
-                                            <super::Svg icon="plug" size=16 />
-                                        </button>
-                                    }
-                                } else {
-                                    "".into()
-                                }
-                            }
                             <button
                                 class=("btn", "btn-primary")
                                 title="Edit"
-                                onclick=self.link.callback(move |_| Message::Edit)
+                                onclick=self.link.callback(move |_| Self::Message::Edit)
                             >
                                 <super::Svg icon="pencil-square" size=16 />
                             </button>
@@ -161,14 +135,6 @@ impl yew::Component for Component {
                                 <super::Svg icon="trash" size=16 />
                             </button>
                         </div>
-
-                        <div class="tags">
-                        {
-                            for source.tags.iter().map(|tag| {
-                                yew::html! { <super::Tag value=tag /> }
-                            })
-                        }
-                        </div>
                     </>
                 }
             }
@@ -176,9 +142,9 @@ impl yew::Component for Component {
     }
 
     fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-        let should_render = self.source != props.value;
+        let should_render = self.webhook != props.value;
 
-        self.source = props.value;
+        self.webhook = props.value;
 
         should_render
     }

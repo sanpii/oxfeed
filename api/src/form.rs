@@ -8,6 +8,8 @@ pub(crate) struct Source {
     active: bool,
     #[serde(default)]
     tags: Vec<String>,
+    #[serde(default)]
+    webhooks: Vec<uuid::Uuid>,
 }
 
 impl std::convert::TryInto<oxfeed_common::source::Entity> for Source {
@@ -32,6 +34,7 @@ impl std::convert::TryInto<oxfeed_common::source::Entity> for Source {
             url: self.url.clone(),
             user_id,
             active: self.active,
+            webhooks: self.webhooks.clone(),
         };
 
         Ok(entity)
@@ -77,5 +80,39 @@ impl Source {
         attohttpc::RequestBuilder::try_new(attohttpc::Method::GET, url)?
             .send()?
             .text()
+    }
+}
+
+#[derive(serde::Deserialize)]
+pub(crate) struct Webhook {
+    #[serde(default)]
+    webhook_id: Option<uuid::Uuid>,
+    #[serde(default)]
+    pub user_id: Option<uuid::Uuid>,
+    url: String,
+    name: String,
+    #[serde(default)]
+    read: bool,
+}
+
+impl std::convert::TryInto<oxfeed_common::webhook::Entity> for Webhook {
+    type Error = oxfeed_common::Error;
+
+    fn try_into(self) -> oxfeed_common::Result<oxfeed_common::webhook::Entity> {
+        let user_id = match self.user_id {
+            Some(user_id) => Some(user_id),
+            None => return Err(oxfeed_common::Error::Auth),
+        };
+
+        let entity = oxfeed_common::webhook::Entity {
+            webhook_id: self.webhook_id,
+            name: self.name.clone(),
+            url: self.url.clone(),
+            user_id,
+            last_error: None,
+            mark_read: self.read,
+        };
+
+        Ok(entity)
     }
 }

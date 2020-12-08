@@ -10,6 +10,7 @@ pub(crate) enum Event {
     SourceUpdate,
     Redirect(String),
     Redirected(String),
+    WebhookUpdate,
 }
 
 impl From<oxfeed_common::Error> for Event {
@@ -72,6 +73,10 @@ pub(crate) enum Api {
     SourceDelete(oxfeed_common::source::Entity),
     SourceUpdate(oxfeed_common::source::Entity),
     UserCreate(oxfeed_common::user::Entity),
+    Webhooks(Vec<oxfeed_common::webhook::Entity>),
+    WebhookCreate(oxfeed_common::webhook::Entity),
+    WebhookDelete(oxfeed_common::webhook::Entity),
+    WebhookUpdate(oxfeed_common::webhook::Entity),
 }
 
 pub(crate) struct Bus {

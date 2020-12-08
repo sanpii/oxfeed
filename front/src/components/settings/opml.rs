@@ -87,39 +87,36 @@ impl yew::Component for Component {
         };
 
         yew::html! {
-            <div class="card">
-                <div class="card-header">{ "OPML" }</div>
-                <div class="card-body">
-                    <div class="input-group">
-                        <div class="custom-file">
-                            <input type="file" class="custom-file-input" onchange=self.link.callback(|value| {
-                                let mut files = Vec::new();
+            <>
+                <div class="input-group">
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" onchange=self.link.callback(|value| {
+                            let mut files = Vec::new();
 
-                                if let yew::ChangeData::Files(file_list) = value {
-                                    for x in 0..file_list.length() {
-                                        if let Some(file) = file_list.get(x) {
-                                            files.push(file);
-                                        }
+                            if let yew::ChangeData::Files(file_list) = value {
+                                for x in 0..file_list.length() {
+                                    if let Some(file) = file_list.get(x) {
+                                        files.push(file);
                                     }
                                 }
+                            }
 
-                                Self::Message::Files(files)
-                            }) />
-                            <label class="custom-file-label">{ label }</label>
-                        </div>
-                        <div class="input-group-append">
-                            <button
-                                class=("btn", "btn-outline-primary")
-                                type="button"
-                                onclick=self.link.callback(|_| Self::Message::Import)
-                            >{ "Import" }</button>
-                        </div>
+                            Self::Message::Files(files)
+                        }) />
+                        <label class="custom-file-label">{ label }</label>
                     </div>
-                    <div class=("input-group", "export")>
-                        <a href=export_url class=("btn", "btn-outline-primary")>{ "Export" }</a>
+                    <div class="input-group-append">
+                        <button
+                            class=("btn", "btn-outline-primary")
+                            type="button"
+                            onclick=self.link.callback(|_| Self::Message::Import)
+                        >{ "Import" }</button>
                     </div>
                 </div>
-            </div>
+                <div class=("input-group", "export")>
+                    <a href=export_url class=("btn", "btn-outline-primary")>{ "Export" }</a>
+                </div>
+            </>
         }
     }
 

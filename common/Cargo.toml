@@ -30,7 +30,7 @@ features = ["serde"]
 [dependencies.elephantry]
 version = "1.3"
 optional = true
-features = ["date", "uuid"]
+features = ["date", "json", "uuid"]
 
 [dependencies.feed-rs]
 version = "0.4"

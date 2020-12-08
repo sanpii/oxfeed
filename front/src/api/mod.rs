@@ -3,6 +3,7 @@ mod items;
 mod opml;
 mod sources;
 mod user;
+mod webhooks;
 
 use yew::agent::Dispatched;
 
@@ -24,6 +25,10 @@ enum Kind {
     SourceDelete,
     SourceUpdate,
     UserCreate,
+    Webhooks,
+    WebhookCreate,
+    WebhookDelete,
+    WebhookUpdate,
 }
 
 pub(crate) struct Api<C>
@@ -211,11 +216,30 @@ where
                 let user = serde_json::from_str(&data)?;
                 crate::event::Api::UserCreate(user)
             }
+            Kind::Webhooks => {
+                let webhooks = serde_json::from_str(&data)?;
+                crate::event::Api::Webhooks(webhooks)
+            }
+            Kind::WebhookCreate => {
+                let webhook = serde_json::from_str(&data)?;
+                crate::event::Api::WebhookCreate(webhook)
+            }
+            Kind::WebhookDelete => {
+                let webhook = serde_json::from_str(&data)?;
+                crate::event::Api::WebhookDelete(webhook)
+            }
+            Kind::WebhookUpdate => {
+                let webhook = serde_json::from_str(&data)?;
+                crate::event::Api::WebhookUpdate(webhook)
+            }
         };
 
         let event = match kind {
             Kind::SourceCreate | Kind::SourceDelete | Kind::SourceUpdate => {
                 Some(crate::event::Event::SourceUpdate)
+            }
+            Kind::WebhookCreate | Kind::WebhookDelete | Kind::WebhookUpdate => {
+                Some(crate::event::Event::WebhookUpdate)
             }
             Kind::ItemPatch => Some(crate::event::Event::ItemUpdate),
             _ => None,

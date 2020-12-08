@@ -4,6 +4,8 @@ use oxfeed_common::item::Entity as Item;
 use oxfeed_common::item::Model as ItemModel;
 use oxfeed_common::source::Entity as Source;
 use oxfeed_common::source::Model as SourceModel;
+use oxfeed_common::webhook::Entity as Webhook;
+use oxfeed_common::webhook::Model as WebhookModel;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 #[derive(StructOpt)]
@@ -70,6 +72,9 @@ fn main() -> oxfeed_common::Result<()> {
 fn fetch(elephantry: &elephantry::Connection, source: &Source) -> oxfeed_common::Result<()> {
     log::info!("Fetching {}", source.url);
 
+    let webhooks = elephantry.find_where::<WebhookModel>("webhook_id = any($*)", &[&source.webhooks], None)?
+        .into_vec();
+
     let contents = attohttpc::RequestBuilder::try_new(attohttpc::Method::GET, &source.url)?
         .send()?
         .text()?;
@@ -96,7 +101,7 @@ fn fetch(elephantry: &elephantry::Connection, source: &Source) -> oxfeed_common:
                 None => entry.summary.map(|x| x.content),
             };
 
-            let item = Item {
+            let mut item = Item {
                 item_id: None,
                 id: entry.id,
                 icon: feed_icon.clone().or_else(|| icon(&link)),
@@ -108,6 +113,8 @@ fn fetch(elephantry: &elephantry::Connection, source: &Source) -> oxfeed_common:
                 link,
                 favorite: false,
             };
+
+            call_webhooks(&elephantry, &webhooks, &mut item);
             elephantry.upsert_one::<ItemModel>(&item, "(link)", "nothing")?;
         }
     }
@@ -149,4 +156,35 @@ fn icon(link: &str) -> Option<String> {
 
         Some(format!("{}{}", url, href.trim_start_matches('/')))
     }
+}
+
+fn call_webhooks(elephantry: &elephantry::Connection, webhooks: &[Webhook], item: &mut Item) {
+    let mut read = false;
+
+    for webhook in webhooks {
+        match call_webhook(&webhook, &item) {
+            Ok(_) => (),
+            Err(err) => {
+                let last_error = err.to_string();
+                elephantry.update_by_pk::<WebhookModel>(
+                    &elephantry::pk! { webhook_id => webhook.webhook_id },
+                    &elephantry::values!(last_error),
+                ).ok();
+            }
+        }
+
+        read |= webhook.mark_read;
+    }
+
+    item.read = read;
+}
+
+fn call_webhook(webhook: &Webhook, item: &Item) -> oxfeed_common::Result<()> {
+    log::info!("call webhook '{}'", webhook.name);
+
+    attohttpc::RequestBuilder::try_new(attohttpc::Method::POST, &webhook.url)?
+        .json(item)?
+        .send()?;
+
+    Ok(())
 }

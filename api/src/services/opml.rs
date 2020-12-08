@@ -78,6 +78,7 @@ fn source_try_from(
         url,
         user_id: user.user_id,
         active: true,
+        webhooks: Vec::new(),
     };
 
     Ok(entity)
