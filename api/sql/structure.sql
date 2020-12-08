@@ -15,12 +15,12 @@ create index if not exists user_read on "user"(token);
 create table if not exists source (
     source_id uuid primary key default uuid_generate_v4(),
     user_id uuid references "user"(user_id) not null,
-    url text not null unique,
+    url text not null,
     title text not null,
     tags text[] not null,
     last_error text,
 
-    unique(source_id, user_id)
+    unique(url, user_id)
 );
 
 create index if not exists source_user_id on source(user_id);
