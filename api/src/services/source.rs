@@ -1,4 +1,5 @@
 use actix_web::web::{Data, Json, Path};
+use oxfeed_common::item::Model as ItemModel;
 use oxfeed_common::source::Model;
 
 pub(crate) fn scope() -> actix_web::Scope {
@@ -92,9 +93,11 @@ async fn get(
 #[actix_web::delete("/{source_id}")]
 async fn delete(
     elephantry: Data<elephantry::Pool>,
-    source_id: Path<uuid::Uuid>,
+    path: Path<uuid::Uuid>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
+    let source_id = path.into_inner();
+
     let token = match identity.token() {
         Some(token) => token,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
@@ -104,6 +107,8 @@ async fn delete(
         Some(source) => source,
         None => return Ok(actix_web::HttpResponse::NoContent().finish()),
     };
+
+    elephantry.delete_where::<ItemModel>("source_id = $*", &[&source_id])?;
 
     let response = match elephantry.delete_one::<Model>(&source)? {
         Some(source) => actix_web::HttpResponse::Ok().json(source),
