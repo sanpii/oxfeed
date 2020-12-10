@@ -3,7 +3,24 @@ html, body, body > .container-fluid, body .row, body main {
 }
 
 main {
-    padding: 1.5rem;
+    padding: 1rem;
+}
+
+main ul.list-group {
+    margin-bottom: 1rem;
+}
+
+main > .btn-primary {
+    margin-bottom: 1rem;
+}
+
+main form .btn {
+    margin-top: 1rem;
+    margin-right: 1rem;
+}
+
+.btn.logout {
+    margin: .5rem;
 }
 
 li.list-group-item:nth-child(even) {
@@ -18,17 +35,33 @@ li.list-group-item .error {
     color: #dc3545;
 }
 
+li.list-group-item > img, li.list-group-item > a {
+    margin-right: .5rem;
+}
+
+li.list-group-item .badge {
+    margin-right: .5rem;
+    vertical-align: middle;
+    font-size: 100%;
+}
+
 li.list-group-item .float-right .actions {
     display: none;
 }
 
 li.list-group-item:hover .float-right .actions {
+    margin-right: .5rem;
     display: block;
+}
+
+li.list-group-item .actions .btn {
+    margin-right: .5rem;
 }
 
 li.list-group-item .float-right .favorite {
     display: block;
     color: #ffc107;
+    margin-right: .5rem;
 }
 
 li.list-group-item:hover .float-right .favorite {
@@ -93,6 +126,15 @@ li.list-group-item:hover .float-right .favorite {
     text-transform: uppercase;
 }
 
+.sidebar .btn-primary {
+    margin-top: 1rem;
+    margin-left: 1rem;
+}
+
+.sidebar .badge {
+    margin-left: .5rem;
+}
+
 /*
  * Navbar
  */
@@ -112,8 +154,6 @@ li.list-group-item:hover .float-right .favorite {
 
 .navbar .form-control {
     padding: .75rem 1rem;
-    border-width: 0;
-    border-radius: 0;
 }
 
 .form-control-dark {
@@ -215,4 +255,8 @@ li.list-group-item:hover .float-right .favorite {
 
 .full-page svg {
     margin-right: 2rem;
+}
+
+.export .btn {
+    margin-top: 1rem;
 }

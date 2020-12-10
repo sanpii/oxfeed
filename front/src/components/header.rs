@@ -61,7 +61,7 @@ impl yew::Component for Component {
                 </button>
                 <super::search::Bar current_route=self.current_route.clone() />
                 <button
-                    class=("btn", "btn-secondary")
+                    class=("btn", "btn-secondary", "logout")
                     title="Logout"
                     onclick=self.link.callback(|_| Self::Message::Logout)
                 >

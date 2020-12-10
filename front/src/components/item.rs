@@ -113,7 +113,7 @@ impl yew::Component for Component {
                         yew::html! { <super::Tag value=tag /> }
                     })
                 }
-                <span class="text-muted">{ " · " }{ &self.item.source }</span>
+                <span class="text-muted">{ "· " }{ &self.item.source }</span>
                 <div class="float-right">
                     <span class="text-muted">{ &published_ago }</span>
                     <span onclick=self.link.callback(|_| Message::ToggleContent)>
