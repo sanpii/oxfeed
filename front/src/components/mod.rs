@@ -1,6 +1,7 @@
+pub(crate) mod app;
+
 mod actions;
 mod alerts;
-mod app;
 mod empty;
 mod form;
 mod header;
@@ -8,6 +9,7 @@ mod item;
 mod items;
 mod list;
 mod login;
+mod not_found;
 mod search;
 mod settings;
 mod sidebar;
@@ -25,6 +27,7 @@ pub(crate) use item::Component as Item;
 pub(crate) use items::Component as Items;
 pub(crate) use list::Component as List;
 pub(crate) use login::Component as Login;
+pub(crate) use not_found::Component as NotFound;
 pub(crate) use search::Component as Search;
 pub(crate) use settings::Component as Settings;
 pub(crate) use sidebar::Component as Sidebar;

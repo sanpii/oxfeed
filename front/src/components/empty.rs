@@ -29,7 +29,7 @@ impl yew::Component for Component {
         let choice = now.timestamp_subsec_nanos() as usize % contents.len();
 
         yew::html! {
-            <div class="empty">
+            <div class="full-page">
                 <super::Svg icon=contents[choice].0 size=256 />
                 <h2>{ contents[choice].1 }</h2>
             </div>

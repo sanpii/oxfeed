@@ -12,21 +12,28 @@ impl From<crate::event::Api> for Message {
     }
 }
 
+#[derive(Clone, yew::Properties)]
+pub(crate) struct Properties {
+    pub current_route: super::app::Route,
+}
+
 pub(crate) struct Component {
     api: crate::Api<Self>,
+    current_route: super::app::Route,
     event_bus: yew::agent::Dispatcher<crate::event::Bus>,
     link: yew::ComponentLink<Self>,
 }
 
 impl yew::Component for Component {
     type Message = Message;
-    type Properties = ();
+    type Properties = Properties;
 
-    fn create(_: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         use yew::agent::Dispatched;
 
         Self {
             api: crate::Api::new(link.clone()),
+            current_route: props.current_route,
             event_bus: crate::event::Bus::dispatcher(),
             link,
         }
@@ -52,7 +59,7 @@ impl yew::Component for Component {
                 <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <super::search::Bar />
+                <super::search::Bar current_route=self.current_route.clone() />
                 <button
                     class=("btn", "btn-secondary")
                     title="Logout"
@@ -64,7 +71,11 @@ impl yew::Component for Component {
         }
     }
 
-    fn change(&mut self, _: Self::Properties) -> yew::ShouldRender {
-        false
+    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
+        let should_render = self.current_route != props.current_route;
+
+        self.current_route = props.current_route;
+
+        should_render
     }
 }

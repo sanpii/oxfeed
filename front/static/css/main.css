@@ -201,9 +201,9 @@ li.list-group-item:hover .float-right .favorite {
 }
 
 /*
- * empty
+ * full-page
  */
-.empty {
+.full-page {
     display: flex;
     align-items: center;
     color: lightgray;
@@ -213,6 +213,6 @@ li.list-group-item:hover .float-right .favorite {
     margin: auto;
 }
 
-.empty svg {
+.full-page svg {
     margin-right: 2rem;
 }

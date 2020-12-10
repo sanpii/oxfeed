@@ -2,51 +2,53 @@ pub(crate) enum Message {
     Input(String),
 }
 
+#[derive(Clone, yew::Properties)]
+pub(crate) struct Properties {
+    pub current_route: crate::components::app::Route,
+}
+
 pub(crate) struct Component {
+    current_route: crate::components::app::Route,
     event_bus: yew::agent::Dispatcher<crate::event::Bus>,
-    link: yew::ComponentLink<Self>,
-    route: String,
     query: String,
+    link: yew::ComponentLink<Self>,
 }
 
 impl yew::Component for Component {
     type Message = Message;
-    type Properties = ();
+    type Properties = Properties;
 
-    fn create(_: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         use yew::agent::Dispatched;
 
         let location = crate::Location::new();
-        let path = match location.path().as_str() {
-            "/" => "/all".to_string(),
-            path => path.to_string(),
-        };
-
-        let route = if path.starts_with("/search") {
-            path
-        } else {
-            format!("/search{}", path)
-        };
 
         Self {
+            current_route: props.current_route,
+            query: location.q(),
             event_bus: crate::event::Bus::dispatcher(),
             link,
-            route,
-            query: location.query().get("q").cloned().unwrap_or_default(),
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Self::Message::Input(value) => {
-                self.query = value;
-
-                let route = if self.query.is_empty() {
-                    self.route.trim_start_matches("/search").to_string()
-                } else {
-                    format!("{}?q={}", self.route, self.query)
+                let location = crate::Location::new();
+                let mut route = match location.path().as_str() {
+                    "/" => "/all".to_string(),
+                    route => route.to_string(),
                 };
 
+                if route.starts_with("/search") {
+                    route = route.trim_start_matches("/search").to_string();
+                }
+
+                if !value.is_empty() {
+                    route = format!("/search{}?q={}", route, value);
+                }
+
+                self.query = value;
                 self.event_bus.send(crate::event::Event::Redirect(route));
             }
         }
@@ -55,7 +57,7 @@ impl yew::Component for Component {
     }
 
     fn view(&self) -> yew::Html {
-        if self.route == "/settings" {
+        if matches!(self.current_route, crate::components::app::Route::Settings) {
             "".into()
         } else {
             yew::html! {
@@ -71,7 +73,11 @@ impl yew::Component for Component {
         }
     }
 
-    fn change(&mut self, _: Self::Properties) -> yew::ShouldRender {
-        false
+    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
+        let should_render = self.current_route != props.current_route;
+
+        self.current_route = props.current_route;
+
+        should_render
     }
 }

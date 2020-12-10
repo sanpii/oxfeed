@@ -16,11 +16,24 @@ impl Location {
     }
 
     pub fn set_path(&mut self, path: &str) {
-        self.router.set_route(path, ());
-
         use yew::agent::Dispatched;
+
+        let route = yew_router::route::Route {
+            route: path.to_string(),
+            state: (),
+        };
+
+        self.router.set_route(&route.route, ());
+
+        let mut dispatcher = yew_router::agent::RouteAgentDispatcher::<()>::new();
+        dispatcher.send(yew_router::agent::RouteRequest::ChangeRoute(route));
+
         let mut event_bus = crate::event::Bus::dispatcher();
         event_bus.send(crate::event::Event::Redirected(path.to_string()));
+    }
+
+    pub fn q(&self) -> String {
+        self.query().get("q").cloned().unwrap_or_default()
     }
 
     pub fn query(&self) -> HashMap<String, String> {

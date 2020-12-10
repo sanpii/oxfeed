@@ -17,16 +17,22 @@ impl From<crate::event::Api> for Message {
     }
 }
 
+#[derive(Clone, yew::Properties)]
+pub(crate) struct Properties {
+    pub current_route: super::app::Route,
+}
+
 #[derive(Clone)]
 struct Link {
     count: i64,
     icon: &'static str,
     label: &'static str,
-    url: String,
+    route: super::app::Route,
 }
 
 pub(crate) struct Component {
     api: crate::Api<Self>,
+    current_route: super::app::Route,
     event_bus: yew::agent::Dispatcher<crate::event::Bus>,
     link: yew::ComponentLink<Self>,
     links: Vec<Link>,
@@ -35,48 +41,58 @@ pub(crate) struct Component {
 
 impl yew::Component for Component {
     type Message = Message;
-    type Properties = ();
+    type Properties = Properties;
 
-    fn create(_: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         use yew::agent::{Bridged, Dispatched};
 
         let callback = link.callback(Self::Message::Event);
 
-        let links = vec![
+        let mut links = vec![
             Link {
                 count: 0,
                 icon: "collection",
                 label: "All",
-                url: "/".to_string(),
+                route: super::app::Route::All,
             },
             Link {
                 count: 0,
                 icon: "book",
                 label: "Unread",
-                url: "/unread".to_string(),
+                route: super::app::Route::Unread,
             },
             Link {
                 count: 0,
                 icon: "star",
                 label: "Favorites",
-                url: "/favorites".to_string(),
+                route: super::app::Route::Favorites,
             },
             Link {
                 count: 0,
                 icon: "diagram-3",
                 label: "Sources",
-                url: "/sources".to_string(),
+                route: super::app::Route::Sources,
             },
             Link {
                 count: 0,
                 icon: "sliders",
                 label: "Settings",
-                url: "/settings".to_string(),
+                route: super::app::Route::Settings,
             },
         ];
 
+        if let super::app::Route::Search(_) = props.current_route {
+            links.push(Link {
+                count: 0,
+                icon: "search",
+                label: "Search",
+                route: props.current_route.clone(),
+            });
+        }
+
         let component = Self {
             api: crate::Api::new(link.clone()),
+            current_route: props.current_route,
             event_bus: crate::event::Bus::dispatcher(),
             link,
             links,
@@ -99,7 +115,6 @@ impl yew::Component for Component {
                 | crate::event::Event::SourceUpdate => {
                     self.link.send_message(Self::Message::NeedUpdate)
                 }
-                crate::event::Event::Redirected(_) => return true,
                 _ => (),
             },
             Self::Message::NeedUpdate => self.api.counts(),
@@ -119,19 +134,6 @@ impl yew::Component for Component {
     }
 
     fn view(&self) -> yew::Html {
-        let current_url = crate::location::base_url();
-
-        let mut links = self.links.clone();
-
-        if current_url.starts_with("/search") {
-            links.push(Link {
-                count: 0,
-                icon: "search",
-                label: "Search",
-                url: current_url.clone(),
-            });
-        }
-
         yew::html! {
             <>
                 <button
@@ -140,11 +142,11 @@ impl yew::Component for Component {
                 >{ "Mark all as read" }</button>
                 <ul class="nav flex-column">
                 {
-                    for links.iter().map(|link| yew::html! {
+                    for self.links.iter().map(move |link| yew::html! {
                         <li class="nav-item">
-                            <a
-                                href={ link.url.as_str() }
-                                class=if link.url == current_url { "nav-link active" } else { "nav-link" }
+                            <yew_router::components::RouterAnchor<super::app::Route>
+                                route=link.route.clone()
+                                classes=if link.route == self.current_route { "nav-link active" } else { "nav-link" }
                             >
                                 <super::Svg icon=link.icon size=16 />
                                 { link.label }
@@ -157,7 +159,7 @@ impl yew::Component for Component {
                                         "".into()
                                     }
                                 }
-                            </a>
+                            </yew_router::components::RouterAnchor<super::app::Route>>
                         </li>
                     })
                 }
@@ -166,7 +168,11 @@ impl yew::Component for Component {
         }
     }
 
-    fn change(&mut self, _: Self::Properties) -> yew::ShouldRender {
-        false
+    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
+        let should_render = self.current_route != props.current_route;
+
+        self.current_route = props.current_route;
+
+        should_render
     }
 }
