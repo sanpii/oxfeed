@@ -19,6 +19,7 @@ pub(crate) enum Route {
 
 pub(crate) enum Message {
     Event(crate::event::Event),
+    Index,
     Websocket(WebsocketAction),
 }
 
@@ -37,6 +38,7 @@ pub(crate) enum WebsocketAction {
 pub(crate) struct Component {
     auth: bool,
     event_bus: yew::agent::Dispatcher<crate::event::Bus>,
+    link: yew::ComponentLink<Self>,
     location: crate::Location,
     _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
     _websocket: yew::services::websocket::WebSocketTask,
@@ -63,6 +65,7 @@ impl yew::Component for Component {
         Self {
             auth: true,
             event_bus: crate::event::Bus::dispatcher(),
+            link,
             location: crate::Location::new(),
             _producer: crate::event::Bus::bridge(event_cb),
             _websocket: yew::services::websocket::WebSocketService::connect_text(
@@ -81,6 +84,10 @@ impl yew::Component for Component {
                 crate::event::Event::Redirected(_) => (),
                 _ => return false,
             }
+            Self::Message::Index => {
+                self.event_bus.send(crate::event::Event::Redirect("/all".to_string()));
+                return false;
+            }
             Self::Message::Websocket(event) => match event {
                 WebsocketAction::Ready(_) => {
                     self.event_bus.send(crate::event::Event::ItemUpdate);
@@ -98,6 +105,11 @@ impl yew::Component for Component {
             return yew::html! {
                 <super::Login />
             };
+        }
+
+        if self.location.path() == "/" {
+            self.link.send_message(Self::Message::Index);
+            return "Redirecting...".into();
         }
 
         let pagination: oxfeed_common::Pagination = (&self.location).into();
@@ -120,13 +132,14 @@ impl yew::Component for Component {
                                         <super::Alerts />
                                         {
                                             match route {
-                                                Route::All | Route::Index => yew::html!{<super::Items kind="all" pagination=pagination />},
+                                                Route::All => yew::html!{<super::Items kind="all" pagination=pagination />},
                                                 Route::Favorites => yew::html!{<super::Items kind="favorites" pagination=pagination />},
                                                 Route::Settings => yew::html!{<super::Settings />},
                                                 Route::Sources => yew::html!{<super::Sources pagination=pagination />},
                                                 Route::Unread => yew::html!{<super::Items kind="unread" pagination=pagination />},
                                                 Route::Search(kind) => yew::html!{<super::Search kind=kind pagination=pagination />},
                                                 Route::NotFound => yew::html!{<super::NotFound />},
+                                                Route::Index => unreachable!(),
                                             }
                                         }
                                     </main>
