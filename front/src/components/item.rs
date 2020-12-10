@@ -91,8 +91,8 @@ impl yew::Component for Component {
             chrono_humanize::HumanTime::from(self.item.published - chrono::Utc::now());
 
         let caret = match self.scene {
-            Scene::Expanded => "caret-down",
-            Scene::Hidden => "caret-up",
+            Scene::Expanded => "chevron-up",
+            Scene::Hidden => "chevron-down",
         };
 
         let content = yew::utils::document().create_element("div").unwrap();
