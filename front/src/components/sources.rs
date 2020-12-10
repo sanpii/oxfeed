@@ -20,7 +20,6 @@ impl From<crate::event::Api> for Message {
     }
 }
 
-#[derive(Debug)]
 enum Scene {
     Add,
     View,

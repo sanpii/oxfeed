@@ -1,4 +1,4 @@
-#[derive(Clone, Debug, PartialEq, Eq, yew_router::Switch)]
+#[derive(Clone, PartialEq, Eq, yew_router::Switch)]
 pub(crate) enum Route {
     #[to = "/favorites"]
     Favorites,
@@ -29,7 +29,6 @@ impl From<crate::event::Api> for Message {
     }
 }
 
-#[derive(Debug)]
 pub(crate) enum WebsocketAction {
     Ready(Result<String, anyhow::Error>),
     Status(yew::services::websocket::WebSocketStatus),

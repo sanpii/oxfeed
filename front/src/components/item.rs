@@ -1,4 +1,4 @@
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub(crate) enum Message {
     Content(String),
     ToggleContent,
@@ -17,7 +17,7 @@ impl From<crate::event::Api> for Message {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 enum Scene {
     Hidden,
     Expanded,

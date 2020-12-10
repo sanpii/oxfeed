@@ -1,4 +1,4 @@
-#[derive(Default, Debug, serde::Deserialize)]
+#[derive(Default, serde::Deserialize)]
 pub(crate) struct Identity {
     token: Option<uuid::Uuid>,
 }

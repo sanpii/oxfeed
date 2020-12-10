@@ -2,7 +2,6 @@
  * https://crates.io/crates/cha
  */
 
-#[derive(Debug)]
 pub(crate) struct Color(u8, u8, u8);
 
 impl Color {
