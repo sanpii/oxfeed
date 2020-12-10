@@ -14,6 +14,9 @@ struct Opt {
 }
 
 fn main() -> oxfeed_common::Result<()> {
+    #[cfg(debug_assertions)]
+    dotenv::dotenv().ok();
+
     env_logger::init();
 
     let opt = Opt::from_args();
@@ -23,9 +26,6 @@ fn main() -> oxfeed_common::Result<()> {
         log::warn!("Already running");
         return Ok(());
     }
-
-    #[cfg(debug_assertions)]
-    dotenv::dotenv().ok();
 
     let database_url = std::env::var("DATABASE_URL").expect("Missing DATABASE_URL env variable");
     let elephantry = elephantry::Pool::new(&database_url).expect("Unable to connect to postgresql");
@@ -74,6 +74,7 @@ fn fetch(elephantry: &elephantry::Connection, source: &Source) -> oxfeed_common:
         .send()?
         .text()?;
     let feed = feed_rs::parser::parse(contents.as_bytes())?;
+    let feed_icon = feed.icon.map(|x| x.uri);
 
     for entry in feed.entries {
         let exist = elephantry.exist_where::<ItemModel>(
@@ -88,17 +89,18 @@ fn fetch(elephantry: &elephantry::Connection, source: &Source) -> oxfeed_common:
                 .unwrap_or_else(|| "<no title>".to_string());
 
             log::info!("Adding '{}'", title);
+            let link = entry.links[0].href.clone();
 
             let item = Item {
                 item_id: None,
                 id: entry.id,
-                icon: icon(&entry.links),
+                icon: feed_icon.clone().or_else(|| icon(&link)),
                 content: entry.summary.map(|x| x.content),
                 title,
                 published: entry.published,
                 read: false,
                 source_id: source.source_id.unwrap(),
-                link: entry.links[0].href.clone(),
+                link,
                 favorite: false,
             };
             elephantry.upsert_one::<ItemModel>(&item, "(link)", "nothing")?;
@@ -108,26 +110,39 @@ fn fetch(elephantry: &elephantry::Connection, source: &Source) -> oxfeed_common:
     Ok(())
 }
 
-fn icon(links: &[feed_rs::model::Link]) -> Option<String> {
+fn icon(link: &str) -> Option<String> {
     let selector = scraper::Selector::parse("link[rel=\"icon\"]").unwrap();
 
-    for link in links {
-        let request = match attohttpc::RequestBuilder::try_new(attohttpc::Method::GET, &link.href) {
-            Ok(request) => request,
-            Err(_) => continue,
+    let request = match attohttpc::RequestBuilder::try_new(attohttpc::Method::GET, &link) {
+        Ok(request) => request,
+        Err(_) => return None,
+    };
+
+    let contents = match request.send() {
+        Ok(contents) => contents.text().unwrap_or_default(),
+        Err(_) => return None,
+    };
+
+    let html = scraper::Html::parse_document(&contents);
+    let icon = match html.select(&selector).next() {
+        Some(icon) => icon,
+        None => return None,
+    };
+    let href = match icon.value().attr("href") {
+        Some(href) => href.to_string(),
+        None => return None,
+    };
+
+    if href.starts_with("http") {
+        Some(href)
+    } else {
+        let mut url = match url::Url::parse(&link) {
+            Ok(url) => url,
+            Err(_) => return None,
         };
 
-        let contents = match request.send() {
-            Ok(contents) => contents.text().unwrap_or_default(),
-            Err(_) => continue,
-        };
+        url.set_path(&href);
 
-        let html = scraper::Html::parse_document(&contents);
-        match html.select(&selector).next() {
-            Some(icon) => return icon.value().attr("href").map(|x| x.to_string()),
-            None => continue,
-        }
+        Some(url.to_string())
     }
-
-    None
 }
