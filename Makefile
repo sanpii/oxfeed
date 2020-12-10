@@ -25,26 +25,20 @@ endif
 build: api cli front
 .PHONY: build
 
-api: target/$(ENV)/oxfeed-api
+api:
+	$(CARGO) build $(CARGO_FLAGS) --package oxfeed-api
 .PHONY: api
 
-target/$(ENV)/oxfeed-api:
-	$(CARGO) build $(CARGO_FLAGS) --package oxfeed-api
-
-cli: target/$(ENV)/oxfeed-cli
-.PHONY: cli
-
-target/$(ENV)/oxfeed-cli:
+cli:
 	$(CARGO) build $(CARGO_FLAGS) --bin oxfeed-cli
+.PHONY: cli
 
 front: yarn wasm
 .PHONY: front
 
-wasm: front/static/oxfeed_front.js
-.PHONY: wasm
-
-front/static/oxfeed_front.js:
+wasm:
 	$(WASM_PACK) build $(WASM_PACK_FLAGS) --target web --out-dir ./static front
+.PHONY: wasm
 
 yarn: front/static/lib
 .PHONY: yarn
