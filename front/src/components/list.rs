@@ -26,6 +26,8 @@ impl<R: 'static + crate::Render> yew::Component for Component<R> {
             };
         }
 
+        let pager: elephantry_extras::Pager = self.pager.clone().into();
+
         yew::html! {
             <>
                 <ul class="list-group">
@@ -37,7 +39,7 @@ impl<R: 'static + crate::Render> yew::Component for Component<R> {
                     })
                 }
                 </ul>
-                <super::Pager<R> value=self.pager.clone() />
+                <elephantry_extras::yew::Pager value=pager />
             </>
         }
     }

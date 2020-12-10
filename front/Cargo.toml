@@ -30,6 +30,10 @@ yew-router = "0.14"
 version = "0.4"
 features = ["serde", "wasmbind"]
 
+[dependencies.elephantry-extras]
+version = "0.1"
+features = ["yew-pager"]
+
 [dependencies.oxfeed-common]
 version = "0.1"
 path = "../common/"
