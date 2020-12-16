@@ -140,9 +140,8 @@ fn icon(link: &str) -> Option<String> {
             Ok(url) => url,
             Err(_) => return None,
         };
+        url.set_path("");
 
-        url.set_path(&href);
-
-        Some(url.to_string())
+        Some(format!("{}{}", url, href.trim_start_matches('/')))
     }
 }
