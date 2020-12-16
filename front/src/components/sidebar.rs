@@ -134,6 +134,16 @@ impl yew::Component for Component {
     }
 
     fn view(&self) -> yew::Html {
+        let favicon = if self.links[1].count == 0 {
+            "/favicon.ico"
+        } else {
+            "/favicon-unread.ico"
+        };
+
+        if let Ok(Some(element)) = yew::utils::document().query_selector("link[rel=icon]") {
+            element.set_attribute("href", &favicon).ok();
+        }
+
         yew::html! {
             <>
                 <button
