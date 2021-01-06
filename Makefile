@@ -38,6 +38,7 @@ front: yarn wasm
 
 wasm:
 	$(WASM_PACK) build $(WASM_PACK_FLAGS) --target web --out-dir ./static front
+	rm front/static/.gitignore
 .PHONY: wasm
 
 yarn: front/static/lib
