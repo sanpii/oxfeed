@@ -91,11 +91,16 @@ fn fetch(elephantry: &elephantry::Connection, source: &Source) -> oxfeed_common:
             log::info!("Adding '{}'", title);
             let link = entry.links[0].href.clone();
 
+            let content = match entry.content {
+                Some(content) => content.body,
+                None => entry.summary.map(|x| x.content),
+            };
+
             let item = Item {
                 item_id: None,
                 id: entry.id,
                 icon: feed_icon.clone().or_else(|| icon(&link)),
-                content: entry.summary.map(|x| x.content),
+                content,
                 title,
                 published: entry.published,
                 read: false,
