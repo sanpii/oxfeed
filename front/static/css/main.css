@@ -40,6 +40,7 @@ li.list-group-item > img, li.list-group-item > a {
 }
 
 li.list-group-item .badge {
+    font-weight: 400;
     margin-right: .5rem;
     vertical-align: middle;
     font-size: 100%;
