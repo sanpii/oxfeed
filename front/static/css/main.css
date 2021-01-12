@@ -24,7 +24,7 @@ main form .btn {
 }
 
 li.list-group-item:nth-child(even) {
-    background-color: #f8f9fa;
+    background-color: var(--light);
 }
 
 li.list-group-item:hover {
@@ -32,7 +32,7 @@ li.list-group-item:hover {
 }
 
 li.list-group-item .error {
-    color: #dc3545;
+    color: var(--red);
 }
 
 li.list-group-item > img, li.list-group-item > a {
@@ -60,12 +60,12 @@ li.list-group-item .actions .btn {
 }
 
 li.list-group-item .actions svg:hover {
-    color: #007bff;
+    color: var(--primary);
 }
 
 li.list-group-item .float-right .favorite {
     display: block;
-    color: #ffc107;
+    color: var(--yellow);
     margin-right: .5rem;
 }
 
@@ -123,7 +123,7 @@ li.list-group-item:hover .float-right .favorite {
 }
 
 .sidebar .nav-link.active {
-    color: #007bff;
+    color: var(--primary);
 }
 
 .sidebar-heading {
@@ -162,7 +162,7 @@ li.list-group-item:hover .float-right .favorite {
 }
 
 .form-control-dark {
-    color: #fff;
+    color: var(--white);
     background-color: rgba(255, 255, 255, .1);
     border-color: rgba(255, 255, 255, .1);
 }
@@ -176,7 +176,7 @@ li.list-group-item:hover .float-right .favorite {
  * tags input
  */
 .tags-input {
-    background-color: white;
+    background-color: var(--white);
 }
 
 .tags-input .badge {
@@ -210,7 +210,7 @@ li.list-group-item:hover .float-right .favorite {
     display: flex;
     align-items: center;
     text-align: center;
-    background-color: #f8f9fa;
+    background-color: var(--light);
     height: 100%;
 }
 
