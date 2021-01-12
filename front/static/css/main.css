@@ -59,6 +59,10 @@ li.list-group-item .actions .btn {
     margin-right: .5rem;
 }
 
+li.list-group-item .actions svg:hover {
+    color: #007bff;
+}
+
 li.list-group-item .float-right .favorite {
     display: block;
     color: #ffc107;
