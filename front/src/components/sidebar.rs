@@ -153,17 +153,17 @@ impl yew::Component for Component {
                 <ul class="nav flex-column">
                 {
                     for self.links.iter().map(move |link| yew::html! {
-                        <li class="nav-item">
+                        <li class=if link.route == self.current_route { "nav-item active" } else { "nav-item" }>
                             <yew_router::components::RouterAnchor<super::app::Route>
                                 route=link.route.clone()
-                                classes=if link.route == self.current_route { "nav-link active" } else { "nav-link" }
+                                classes="nav-link"
                             >
                                 <super::Svg icon=link.icon size=16 />
                                 { link.label }
                                 {
                                     if link.count > 0 {
                                         yew::html! {
-                                            <span class="badge badge-primary">{ link.count }</span>
+                                            <span class="badge badge-secondary">{ link.count }</span>
                                         }
                                     } else {
                                         "".into()
