@@ -87,6 +87,9 @@ async fn sources(
     query: Query<Request>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let clause = elephantry::Where::from("source.title ~* $*", vec![&query.q]);
+    let clause = elephantry::Where::builder()
+        .and_where("source.title ~* $*", vec![&query.q])
+        .or_where("source.url ~* $*", vec![&query.q])
+        .build();
     super::source::fetch(&elephantry, &identity, &clause, &query.pagination)
 }
