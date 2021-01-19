@@ -5,6 +5,7 @@ pub(crate) struct Source {
     pub user_id: Option<uuid::Uuid>,
     url: String,
     title: Option<String>,
+    active: bool,
     #[serde(default)]
     tags: Vec<String>,
 }
@@ -30,6 +31,7 @@ impl std::convert::TryInto<oxfeed_common::source::Entity> for Source {
             title,
             url: self.url.clone(),
             user_id,
+            active: self.active,
         };
 
         Ok(entity)

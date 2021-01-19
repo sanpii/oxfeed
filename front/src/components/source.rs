@@ -4,6 +4,7 @@ pub(crate) enum Message {
     Delete,
     Deleted,
     Edit,
+    ToggleActive,
     Save(oxfeed_common::source::Entity),
     Saved(oxfeed_common::source::Entity),
 }
@@ -49,6 +50,12 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        if let Self::Message::Saved(source) = msg {
+            self.source = source;
+            self.scene = Scene::View;
+            return true;
+        }
+
         match self.scene {
             Scene::View => match msg {
                 Self::Message::Delete => {
@@ -63,6 +70,12 @@ impl yew::Component for Component {
                     self.scene = Scene::Edit;
                     return true;
                 }
+                Self::Message::ToggleActive => {
+                    self.source.active = !self.source.active;
+                    self.api
+                        .sources_update(&self.source.source_id.unwrap(), &self.source);
+                    return true;
+                }
                 _ => unreachable!(),
             },
             Scene::Edit => match msg {
@@ -74,11 +87,6 @@ impl yew::Component for Component {
                     self.source = source;
                     self.api
                         .sources_update(&self.source.source_id.unwrap(), &self.source);
-                    return true;
-                }
-                Self::Message::Saved(source) => {
-                    self.source = source;
-                    self.scene = Scene::View;
                     return true;
                 }
                 _ => unreachable!(),
@@ -103,7 +111,21 @@ impl yew::Component for Component {
                 yew::html! {
                     <>
                         <div class="d-inline-flex">
+                            <div
+                                class=("custom-control", "custom-switch")
+                                title="active"
+                                onclick=self.link.callback(|_| Self::Message::ToggleActive)
+                            >
+                                <input
+                                    type="checkbox"
+                                    class="custom-control-input"
+                                    checked=source.active
+                                />
+                                <label class="custom-control-label" for="active"></label>
+                            </div>
+
                             { source.title }
+
                             {
                                 if let Some(last_error) = source.last_error {
                                     yew::html! {

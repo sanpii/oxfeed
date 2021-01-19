@@ -19,6 +19,7 @@ create table if not exists source (
     title text not null,
     tags text[] not null,
     last_error text,
+    active bool not null,
 
     unique(url, user_id)
 );

@@ -77,6 +77,7 @@ fn source_try_from(
         title: outline.text.clone(),
         url,
         user_id: user.user_id,
+        active: true,
     };
 
     Ok(entity)

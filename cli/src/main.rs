@@ -32,11 +32,11 @@ fn main() -> oxfeed_common::Result<()> {
 
     let sources = if opt.source_id.is_empty() {
         elephantry
-            .find_all::<SourceModel>(None)?
+            .find_where::<SourceModel>("active = $*", &[&true], None)?
             .collect::<Vec<_>>()
     } else {
         elephantry
-            .find_where::<SourceModel>("source_id = any($*)", &[&opt.source_id], None)?
+            .find_where::<SourceModel>("source_id = any($*) and active = $*", &[&opt.source_id, &true], None)?
             .collect::<Vec<_>>()
     };
 

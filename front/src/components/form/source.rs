@@ -1,6 +1,7 @@
 pub(crate) enum Message {
     Cancel,
     Submit,
+    ToggleActive,
     UpdateTags(Vec<String>),
     UpdateTitle(String),
     UpdateUrl(String),
@@ -30,6 +31,7 @@ impl yew::Component for Component {
         match msg {
             Self::Message::Cancel => self.props.on_cancel.emit(()),
             Self::Message::Submit => self.props.on_submit.emit(self.props.source.clone()),
+            Self::Message::ToggleActive => self.props.source.active = !self.props.source.active,
             Self::Message::UpdateTags(tags) => self.props.source.tags = tags,
             Self::Message::UpdateTitle(title) => self.props.source.title = title,
             Self::Message::UpdateUrl(url) => self.props.source.url = url,
@@ -69,6 +71,19 @@ impl yew::Component for Component {
                         values=self.props.source.tags.clone()
                         on_change=self.link.callback(|tags| Self::Message::UpdateTags(tags))
                     />
+                </div>
+
+                <div class="from-group">
+                    <div class=("custom-control", "custom-switch")>
+                        <input
+                            id="active"
+                            type="checkbox"
+                            class="custom-control-input"
+                            checked=self.props.source.active
+                            onclick=self.link.callback(|_| Self::Message::ToggleActive)
+                        />
+                        <label class="custom-control-label" for="active">{ "Active" }</label>
+                    </div>
                 </div>
 
                 <a
