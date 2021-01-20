@@ -1,4 +1,4 @@
-#[derive(Clone, Default, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "elephantry", derive(elephantry::Entity))]
 pub struct Entity {
     pub last_error: Option<String>,
@@ -10,6 +10,21 @@ pub struct Entity {
     pub active: bool,
     #[cfg_attr(feature = "elephantry", elephantry(default))]
     pub webhooks: Vec<uuid::Uuid>,
+}
+
+impl Default for Entity {
+    fn default() -> Self {
+        Self {
+            last_error: None,
+            source_id: None,
+            tags: Vec::new(),
+            title: String::new(),
+            url: String::new(),
+            user_id: uuid::Uuid::default(),
+            active: true,
+            webhooks: Vec::new(),
+        }
+    }
 }
 
 impl Into<std::result::Result<std::string::String, anyhow::Error>> for &Entity {
