@@ -24,12 +24,12 @@ pub struct Model<'a> {
 
 #[cfg(feature = "elephantry")]
 impl<'a> Model<'a> {
-    pub fn one(
+    pub fn delete(
         &self,
         token: &uuid::Uuid,
         webhook_id: &uuid::Uuid,
     ) -> elephantry::Result<Option<Entity>> {
-        let sql = include_str!("../sql/webhook.sql");
+        let sql = include_str!("../sql/webhook-delete.sql");
         self.connection
             .query::<Entity>(sql, &[webhook_id, token])
             .map(|x| x.try_get(0))

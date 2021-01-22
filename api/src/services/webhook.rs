@@ -66,12 +66,7 @@ async fn delete(
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
     };
 
-    let webhook = match elephantry.model::<Model>().one(&token, &webhook_id)? {
-        Some(webhook) => webhook,
-        None => return Ok(actix_web::HttpResponse::NoContent().finish()),
-    };
-
-    let response = match elephantry.delete_one::<Model>(&webhook)? {
+    let response = match elephantry.model::<Model>().delete(&token, &webhook_id)? {
         Some(webhook) => actix_web::HttpResponse::Ok().json(webhook),
         None => actix_web::HttpResponse::NoContent().finish(),
     };
