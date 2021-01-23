@@ -163,7 +163,7 @@ fn call_webhooks(elephantry: &elephantry::Connection, webhooks: &[Webhook], item
 
     for webhook in webhooks {
         match call_webhook(&webhook, &item) {
-            Ok(_) => (),
+            Ok(_) => read |= webhook.mark_read,
             Err(err) => {
                 let last_error = err.to_string();
                 elephantry.update_by_pk::<WebhookModel>(
@@ -172,8 +172,6 @@ fn call_webhooks(elephantry: &elephantry::Connection, webhooks: &[Webhook], item
                 ).ok();
             }
         }
-
-        read |= webhook.mark_read;
     }
 
     item.read = read;
