@@ -116,11 +116,15 @@ impl yew::Component for Component {
                 </a>
             },
             Scene::Add => yew::html! {
-                <super::form::Source
-                    source=oxfeed_common::source::Entity::default()
-                    on_cancel=self.link.callback(|_| Message::Cancel)
-                    on_submit=self.link.callback(|source| Message::Create(source))
-                />
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <super::form::Source
+                            source=oxfeed_common::source::Entity::default()
+                            on_cancel=self.link.callback(|_| Message::Cancel)
+                            on_submit=self.link.callback(|source| Message::Create(source))
+                        />
+                    </li>
+                </ul>
             },
         };
 
