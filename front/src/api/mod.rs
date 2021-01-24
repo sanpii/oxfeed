@@ -124,7 +124,9 @@ where
                 let event = match Self::on_response(kind, response) {
                     Ok(event) => event,
                     Err(err) => {
-                        Self::error(err);
+                        if err.to_string() != "AbortError: The operation was aborted. " {
+                            Self::error(err);
+                        }
                         return Vec::new();
                     }
                 };
