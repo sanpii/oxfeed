@@ -1,6 +1,7 @@
 pub(crate) enum Message {
     Cancel,
     Submit,
+    UpdateMarkRead(bool),
     UpdateName(String),
     UpdateUrl(String),
 }
@@ -29,6 +30,7 @@ impl yew::Component for Component {
         match msg {
             Self::Message::Cancel => self.props.on_cancel.emit(()),
             Self::Message::Submit => self.props.on_submit.emit(self.props.webhook.clone()),
+            Self::Message::UpdateMarkRead(mark_read) => self.props.webhook.mark_read = mark_read,
             Self::Message::UpdateName(name) => self.props.webhook.name = name,
             Self::Message::UpdateUrl(url) => self.props.webhook.url = url,
         }
@@ -58,6 +60,15 @@ impl yew::Component for Component {
                         required=true
                         value={ &self.props.webhook.url }
                         oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateUrl(e.value))
+                    />
+                </div>
+
+                <div class="from-group">
+                    <crate::components::Switch
+                        id="mark_read"
+                        label="Mark item as read after webhook call"
+                        active=self.props.webhook.mark_read
+                        on_toggle=self.link.callback(Self::Message::UpdateMarkRead)
                     />
                 </div>
 

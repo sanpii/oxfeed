@@ -91,8 +91,7 @@ pub(crate) struct Webhook {
     pub user_id: Option<uuid::Uuid>,
     url: String,
     name: String,
-    #[serde(default)]
-    read: bool,
+    mark_read: bool,
 }
 
 impl std::convert::TryInto<oxfeed_common::webhook::Entity> for Webhook {
@@ -110,7 +109,7 @@ impl std::convert::TryInto<oxfeed_common::webhook::Entity> for Webhook {
             url: self.url.clone(),
             user_id,
             last_error: None,
-            mark_read: self.read,
+            mark_read: self.mark_read,
         };
 
         Ok(entity)
