@@ -180,9 +180,13 @@ fn call_webhooks(elephantry: &elephantry::Connection, webhooks: &[Webhook], item
 fn call_webhook(webhook: &Webhook, item: &Item) -> oxfeed_common::Result<()> {
     log::info!("call webhook '{}'", webhook.name);
 
-    attohttpc::RequestBuilder::try_new(attohttpc::Method::POST, &webhook.url)?
+    let response = attohttpc::RequestBuilder::try_new(attohttpc::Method::POST, &webhook.url)?
         .json(item)?
         .send()?;
 
-    Ok(())
+    if response.is_success() {
+        Ok(())
+    } else {
+        Err(oxfeed_common::Error::Webhook(response.status().to_string()))
+    }
 }
