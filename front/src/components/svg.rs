@@ -7,6 +7,8 @@ pub(crate) struct Properties {
     pub icon: String,
     pub size: u32,
     #[prop_or_default]
+    pub class: String,
+    #[prop_or_default]
     pub on_click: yew::Callback<()>,
 }
 
@@ -15,6 +17,7 @@ pub(crate) struct Component {
     link: yew::ComponentLink<Self>,
     on_click: yew::Callback<()>,
     size: u32,
+    class: String,
 }
 
 impl yew::Component for Component {
@@ -27,6 +30,7 @@ impl yew::Component for Component {
             link,
             on_click: props.on_click,
             size: props.size,
+            class: props.class,
         }
     }
 
@@ -48,7 +52,7 @@ impl yew::Component for Component {
         </svg>
         "#,
             size = self.size,
-            src = self.icon
+            src = self.icon,
         );
 
         span.set_inner_html(&svg);
@@ -56,17 +60,20 @@ impl yew::Component for Component {
         let node = yew::virtual_dom::VNode::VRef(span.into());
 
         yew::html! {
-            <span onclick=self.link.callback(|_| Self::Message::Click)>
+            <span class=&self.class onclick=self.link.callback(|_| Self::Message::Click)>
             { node }
             </span>
         }
     }
 
     fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-        let should_render = self.icon != props.icon || self.size != props.size;
+        let should_render = self.icon != props.icon
+            || self.size != props.size
+            || self.class != props.class;
 
         self.icon = props.icon;
         self.size = props.size;
+        self.class = props.class;
         self.on_click = props.on_click;
 
         should_render

@@ -107,10 +107,7 @@ impl yew::Component for Component {
                             {
                                 if let Some(last_error) = webhook.last_error {
                                     yew::html! {
-                                        <>
-                                            { " · " }
-                                            <span class="error">{ last_error }</span>
-                                        </>
+                                        <super::Error text=last_error />
                                     }
                                 }
                                 else {
