@@ -48,11 +48,5 @@ impl yew::Component for Component {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-        let should_render = self.props != props;
-
-        self.props = props;
-
-        should_render
-    }
+    crate::change!(props);
 }

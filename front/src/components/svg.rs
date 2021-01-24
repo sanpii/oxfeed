@@ -66,16 +66,5 @@ impl yew::Component for Component {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-        let should_render = self.icon != props.icon
-            || self.size != props.size
-            || self.class != props.class;
-
-        self.icon = props.icon;
-        self.size = props.size;
-        self.class = props.class;
-        self.on_click = props.on_click;
-
-        should_render
-    }
+    crate::change!(icon, size, class, on_click);
 }

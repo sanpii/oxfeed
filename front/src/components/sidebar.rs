@@ -178,11 +178,5 @@ impl yew::Component for Component {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-        let should_render = self.current_route != props.current_route;
-
-        self.current_route = props.current_route;
-
-        should_render
-    }
+    crate::change!(current_route);
 }

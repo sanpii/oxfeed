@@ -69,13 +69,5 @@ impl yew::Component for Component {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-        let should_render = self.value != props.value || self.editable != props.editable;
-
-        self.editable = props.editable;
-        self.value = props.value;
-        self.on_click = props.on_click;
-
-        should_render
-    }
+    crate::change!(editable, value, on_click);
 }

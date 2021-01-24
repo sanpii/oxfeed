@@ -18,7 +18,7 @@ impl From<crate::event::Api> for Message {
     }
 }
 
-#[derive(Clone, yew::Properties)]
+#[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     pub source: oxfeed_common::source::Entity,
     pub on_cancel: yew::Callback<()>,
@@ -156,11 +156,5 @@ impl yew::Component for Component {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-        let should_render = self.props.source != props.source;
-
-        self.props = props;
-
-        should_render
-    }
+    crate::change!(props);
 }

@@ -4,7 +4,7 @@ pub(crate) struct Properties {
 }
 
 pub(crate) struct Component {
-    props: Properties,
+    text: String,
 }
 
 impl yew::Component for Component {
@@ -13,7 +13,7 @@ impl yew::Component for Component {
 
     fn create(props: Self::Properties, _: yew::ComponentLink<Self>) -> Self {
         Self {
-            props,
+            text: props.text,
         }
     }
 
@@ -28,18 +28,12 @@ impl yew::Component for Component {
                 <crate::components::Svg icon="exclamation-octagon" size=16 class="text-danger" />
                 <crate::components::Popover
                     title="Last error"
-                    text=&self.props.text
+                    text=&self.text
                     position="right"
                 />
             </span>
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-        let should_render = self.props.text != props.text;
-
-        self.props.text = props.text;
-
-        should_render
-    }
+    crate::change!(text);
 }

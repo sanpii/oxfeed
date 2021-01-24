@@ -13,7 +13,7 @@ pub(crate) struct Properties {
 
 pub(crate) struct Component {
     link: yew::ComponentLink<Self>,
-    tags: Vec<String>,
+    values: Vec<String>,
     on_change: yew::Callback<Vec<String>>,
 }
 
@@ -24,7 +24,7 @@ impl yew::Component for Component {
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         Self {
             link,
-            tags: props.values,
+            values: props.values,
             on_change: props.on_change,
         }
     }
@@ -32,19 +32,19 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Self::Message::Add(value) => {
-                if !self.tags.contains(&value) {
-                    self.tags.push(value);
+                if !self.values.contains(&value) {
+                    self.values.push(value);
                 }
             }
             Self::Message::Delete => {
-                self.tags.pop();
+                self.values.pop();
             }
             Self::Message::Remove(idx) => {
-                self.tags.remove(idx);
+                self.values.remove(idx);
             }
         }
 
-        let mut tags = self.tags.clone();
+        let mut tags = self.values.clone();
         tags.sort();
 
         self.on_change.emit(tags);
@@ -56,7 +56,7 @@ impl yew::Component for Component {
         yew::html! {
             <div class="form-control tags-input">
                 {
-                    for self.tags.iter().enumerate().map(|(idx, tag)| {
+                    for self.values.iter().enumerate().map(|(idx, tag)| {
                         yew::html! {
                             <crate::components::Tag
                                 value=tag
@@ -75,11 +75,5 @@ impl yew::Component for Component {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-        let should_render = self.tags != props.values;
-
-        self.tags = props.values;
-
-        should_render
-    }
+    crate::change!(values);
 }

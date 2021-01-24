@@ -69,3 +69,50 @@ pub fn run_app() {
     yew::initialize();
     yew::App::<App>::new().mount_to_body();
 }
+
+#[macro_export]
+macro_rules! change {
+    () => {
+        fn change(&mut self, _: Self::Properties) -> yew::ShouldRender {
+            false
+        }
+    };
+
+    (props) => {
+        fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
+            let should_render = self.props != props;
+
+            self.props = props;
+
+            should_render
+        }
+    };
+
+    ($(props.$prop: ident),+) => {
+        fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
+            let should_render = false
+                $(
+                    || self.props.$prop != props.$prop
+                )*;
+
+            self.props = props;
+
+            should_render
+        }
+    };
+
+    ($($prop: ident),+) => {
+        fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
+            let should_render = false
+                $(
+                    || self.$prop != props.$prop
+                )*;
+
+            $(
+                self.$prop = props.$prop;
+            )*
+
+            should_render
+        }
+    };
+}

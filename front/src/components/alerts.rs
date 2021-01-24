@@ -62,7 +62,5 @@ impl yew::Component for Component {
         }
     }
 
-    fn change(&mut self, _: Self::Properties) -> yew::ShouldRender {
-        false
-    }
+    crate::change!();
 }

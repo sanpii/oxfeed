@@ -55,13 +55,5 @@ impl yew::Component for Component {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-        let should_render = self.props.label != props.label
-            || self.props.active != props.active
-            || self.props.id != props.id;
-
-        self.props = props;
-
-        should_render
-    }
+    crate::change!(props.label, props.active, props.id);
 }

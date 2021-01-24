@@ -33,7 +33,7 @@ pub(crate) struct Component {
     api: crate::Api<Self>,
     scene: Scene,
     link: yew::ComponentLink<Self>,
-    source: oxfeed_common::source::Entity,
+    props: Properties,
 }
 
 impl yew::Component for Component {
@@ -45,13 +45,13 @@ impl yew::Component for Component {
             api: crate::Api::new(link.clone()),
             scene: Scene::View,
             link,
-            source: props.value,
+            props,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         if let Self::Message::Saved(source) = msg {
-            self.source = source;
+            self.props.value = source;
             self.scene = Scene::View;
             return true;
         }
@@ -59,10 +59,10 @@ impl yew::Component for Component {
         match self.scene {
             Scene::View => match msg {
                 Self::Message::Delete => {
-                    let message = format!("Would you like delete '{}' source?", self.source.title);
+                    let message = format!("Would you like delete '{}' source?", self.props.value.title);
 
                     if yew::services::dialog::DialogService::confirm(&message) {
-                        self.api.sources_delete(&self.source.source_id.unwrap());
+                        self.api.sources_delete(&self.props.value.source_id.unwrap());
                     }
                 }
                 Self::Message::Deleted => (),
@@ -71,9 +71,9 @@ impl yew::Component for Component {
                     return true;
                 }
                 Self::Message::ToggleActive(active) => {
-                    self.source.active = active;
+                    self.props.value.active = active;
                     self.api
-                        .sources_update(&self.source.source_id.unwrap(), &self.source);
+                        .sources_update(&self.props.value.source_id.unwrap(), &self.props.value);
                     return true;
                 }
                 _ => (),
@@ -84,9 +84,9 @@ impl yew::Component for Component {
                     return true;
                 }
                 Self::Message::Save(source) => {
-                    self.source = source;
+                    self.props.value = source;
                     self.api
-                        .sources_update(&self.source.source_id.unwrap(), &self.source);
+                        .sources_update(&self.props.value.source_id.unwrap(), &self.props.value);
                     return true;
                 }
                 _ => unreachable!(),
@@ -100,19 +100,19 @@ impl yew::Component for Component {
         match &self.scene {
             Scene::Edit => yew::html! {
                 <super::form::Source
-                    source=self.source.clone()
+                    source=self.props.value.clone()
                     on_cancel=self.link.callback(|_| Message::Cancel)
                     on_submit=self.link.callback(|source| Message::Save(source))
                 />
             },
             Scene::View => {
-                let source = self.source.clone();
+                let source = self.props.value.clone();
 
                 yew::html! {
                     <>
                         <div class="d-inline-flex">
                             <super::Switch
-                                id=format!("active-{}", self.source.source_id.unwrap_or_default().to_string())
+                                id=format!("active-{}", source.source_id.unwrap_or_default().to_string())
                                 active=source.active
                                 on_toggle=self.link.callback(Self::Message::ToggleActive)
                             />
@@ -172,11 +172,5 @@ impl yew::Component for Component {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-        let should_render = self.source != props.value;
-
-        self.source = props.value;
-
-        should_render
-    }
+    crate::change!(props.value);
 }

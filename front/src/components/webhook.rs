@@ -32,7 +32,7 @@ pub(crate) struct Component {
     api: crate::Api<Self>,
     scene: Scene,
     link: yew::ComponentLink<Self>,
-    webhook: oxfeed_common::webhook::Entity,
+    value: oxfeed_common::webhook::Entity,
 }
 
 impl yew::Component for Component {
@@ -44,7 +44,7 @@ impl yew::Component for Component {
             api: crate::Api::new(link.clone()),
             scene: Scene::View,
             link,
-            webhook: props.value,
+            value: props.value,
         }
     }
 
@@ -52,10 +52,10 @@ impl yew::Component for Component {
         match self.scene {
             Scene::View => match msg {
                 Self::Message::Delete => {
-                    let message = format!("Would you like delete '{}' webhook?", self.webhook.name);
+                    let message = format!("Would you like delete '{}' webhook?", self.value.name);
 
                     if yew::services::dialog::DialogService::confirm(&message) {
-                        self.api.webhooks_delete(&self.webhook.webhook_id.unwrap());
+                        self.api.webhooks_delete(&self.value.webhook_id.unwrap());
                     }
                 }
                 Self::Message::Deleted => (),
@@ -71,13 +71,13 @@ impl yew::Component for Component {
                     return true;
                 }
                 Self::Message::Save(webhook) => {
-                    self.webhook = webhook;
+                    self.value = webhook;
                     self.api
-                        .webhooks_update(&self.webhook.webhook_id.unwrap(), &self.webhook);
+                        .webhooks_update(&self.value.webhook_id.unwrap(), &self.value);
                     return true;
                 }
                 Self::Message::Saved(webhook) => {
-                    self.webhook = webhook;
+                    self.value = webhook;
                     self.scene = Scene::View;
                     return true;
                 }
@@ -92,13 +92,13 @@ impl yew::Component for Component {
         match &self.scene {
             Scene::Edit => yew::html! {
                 <super::form::Webhook
-                    webhook=self.webhook.clone()
+                    webhook=self.value.clone()
                     on_cancel=self.link.callback(|_| Self::Message::Cancel)
                     on_submit=self.link.callback(|webhook| Self::Message::Save(webhook))
                 />
             },
             Scene::View => {
-                let webhook = self.webhook.clone();
+                let webhook = self.value.clone();
 
                 yew::html! {
                     <>
@@ -138,11 +138,5 @@ impl yew::Component for Component {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-        let should_render = self.webhook != props.value;
-
-        self.webhook = props.value;
-
-        should_render
-    }
+    crate::change!(value);
 }
