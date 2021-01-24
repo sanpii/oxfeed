@@ -114,8 +114,9 @@ fn fetch(elephantry: &elephantry::Connection, source: &Source) -> oxfeed_common:
                 favorite: false,
             };
 
-            call_webhooks(&elephantry, &webhooks, &mut item);
-            elephantry.upsert_one::<ItemModel>(&item, "(link)", "nothing")?;
+            if elephantry.upsert_one::<ItemModel>(&item, "(link)", "nothing")?.is_some() {
+                call_webhooks(&elephantry, &webhooks, &mut item);
+            }
         }
     }
 
