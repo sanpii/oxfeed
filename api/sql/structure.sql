@@ -64,7 +64,10 @@ create or replace function crypt_password()
     language plpgsql
 as $$
 begin
-    new.password := crypt(new.password, gen_salt('bf'));
+    if new.password != old.password
+    then
+        new.password := crypt(new.password, gen_salt('bf'));
+    end if;
     return new;
 end;
 $$;
