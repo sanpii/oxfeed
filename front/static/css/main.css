@@ -181,6 +181,7 @@ li.list-group-item:hover .float-right .favorite {
 
 .navbar .form-control {
     padding: .75rem 1rem;
+    margin-left: .5rem;
 }
 
 .form-control-dark {
