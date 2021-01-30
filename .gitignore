@@ -2,3 +2,7 @@ cache
 /.env
 *.lock
 target
+/front/static/index.html
+/front/static/lib
+/front/static/package.json
+/front/static/oxfeed_front*
