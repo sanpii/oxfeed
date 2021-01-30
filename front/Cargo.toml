@@ -41,3 +41,11 @@ path = "../common/"
 [dependencies.web-sys]
 version = "0.3"
 features = ["HtmlDocument"]
+
+[build-dependencies.git2]
+version = "0.13"
+default-features = false
+
+[build-dependencies.tera]
+version = "1.0"
+default-features = false
