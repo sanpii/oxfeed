@@ -51,4 +51,29 @@ pub enum Error {
 }
 
 #[cfg(feature = "actix-web")]
-impl actix_web::ResponseError for Error {}
+impl Into<actix_web::http::StatusCode> for &Error {
+    fn into(self) -> actix_web::http::StatusCode {
+        use actix_web::http::StatusCode;
+
+        match self {
+            Error::Auth => StatusCode::UNAUTHORIZED,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
+        }
+    }
+}
+
+#[cfg(feature = "actix-web")]
+impl actix_web::ResponseError for Error {
+    fn error_response(&self) -> actix_web::HttpResponse {
+        let status: actix_web::http::StatusCode = self.into();
+
+        let message = self.to_string();
+
+        if status.is_server_error() {
+            log::error!("{}", message);
+        }
+
+        actix_web::HttpResponse::build(status)
+            .json(message)
+    }
+}
