@@ -12,14 +12,9 @@ async fn import(
     xml: String,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let token = match identity.token() {
-        Some(token) => token,
-        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
-    };
-
     let user = match elephantry
         .model::<oxfeed_common::user::Model>()
-        .find_from_token(&token)
+        .find_from_token(&identity.token())
     {
         Some(user) => user,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),

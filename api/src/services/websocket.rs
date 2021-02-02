@@ -17,11 +17,7 @@ async fn websocket(
     request: actix_web::HttpRequest,
     stream: actix_web::web::Payload,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let token = match identity.token() {
-        Some(token) => token,
-        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
-    };
-
+    let token = identity.token();
     let websocket = Websocket::new(elephantry.into_inner(), token);
     let response = ws::start(websocket, &request, stream)?;
 

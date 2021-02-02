@@ -55,10 +55,7 @@ async fn tags(
     query: Query<Request>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let token = match identity.token() {
-        Some(token) => token,
-        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
-    };
+    let token = identity.token();
 
     let mut sql = include_str!("../../sql/search_tags.sql").to_string();
     sql.push_str(&query.pagination.to_sql());

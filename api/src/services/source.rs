@@ -31,13 +31,8 @@ pub(crate) fn fetch(
     filter: &elephantry::Where,
     pagination: &oxfeed_common::Pagination,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let token = match identity.token() {
-        Some(token) => token,
-        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
-    };
-
     let model = elephantry.model::<Model>();
-    let sources = model.all(&token, filter, pagination)?;
+    let sources = model.all(&identity.token(), filter, pagination)?;
     let response = actix_web::HttpResponse::Ok().json(sources);
 
     Ok(response)
@@ -51,14 +46,9 @@ async fn create(
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     use std::convert::TryInto;
 
-    let token = match identity.token() {
-        Some(token) => token,
-        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
-    };
-
     let user = match elephantry
         .model::<oxfeed_common::user::Model>()
-        .find_from_token(&token)
+        .find_from_token(&identity.token())
     {
         Some(user) => user,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
@@ -77,11 +67,7 @@ async fn get(
     item_id: Path<uuid::Uuid>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let token = match identity.token() {
-        Some(token) => token,
-        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
-    };
-
+    let token = identity.token();
     let response = match elephantry.model::<Model>().one(&item_id, &token)? {
         Some(source) => actix_web::HttpResponse::Ok().json(source),
         None => actix_web::HttpResponse::NotFound().finish(),
@@ -98,10 +84,7 @@ async fn delete(
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let source_id = path.into_inner();
 
-    let token = match identity.token() {
-        Some(token) => token,
-        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
-    };
+    let token = identity.token();
 
     let source = match elephantry.model::<Model>().one(&token, &source_id)? {
         Some(source) => source,
@@ -127,14 +110,9 @@ async fn update(
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     use std::convert::TryInto;
 
-    let token = match identity.token() {
-        Some(token) => token,
-        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
-    };
-
     let user = match elephantry
         .model::<oxfeed_common::user::Model>()
-        .find_from_token(&token)
+        .find_from_token(&identity.token())
     {
         Some(user) => user,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),

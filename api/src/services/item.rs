@@ -60,10 +60,7 @@ pub(crate) fn fetch(
     filter: &elephantry::Where,
     pagination: &oxfeed_common::Pagination,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let token = match identity.token() {
-        Some(token) => token,
-        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
-    };
+    let token = identity.token();
 
     let model = elephantry.model::<Model>();
     let items = model.all(&token, filter, pagination)?;
@@ -78,11 +75,7 @@ async fn content(
     path: Path<uuid::Uuid>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let token = match identity.token() {
-        Some(token) => token,
-        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
-    };
-
+    let token = identity.token();
     let item_id = Some(path.into_inner());
     let sql = include_str!("../../sql/item_content.sql");
     let content = elephantry
@@ -103,11 +96,7 @@ async fn patch(
     json: Json<serde_json::Value>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let token = match identity.token() {
-        Some(token) => token,
-        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
-    };
-
+    let token = identity.token();
     let item_id = path.into_inner();
 
     match elephantry.model::<Model>().one(&token, &item_id)? {
@@ -145,12 +134,9 @@ async fn read_all(
     elephantry: Data<elephantry::Pool>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let token = match identity.token() {
-        Some(token) => token,
-        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
-    };
-
+    let token = identity.token();
     let sql = include_str!("../../sql/read_all.sql");
+
     elephantry.query::<()>(sql, &[&token])?;
 
     let response = actix_web::HttpResponse::NoContent().finish();

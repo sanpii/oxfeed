@@ -40,10 +40,9 @@ async fn logout(
     elephantry: actix_web::web::Data<elephantry::Pool>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    if let Some(token) = identity.token() {
-        let sql = include_str!("../../sql/logout.sql");
-        elephantry.query_one::<()>(sql, &[&token])?;
-    };
+    let token = identity.token();
+    let sql = include_str!("../../sql/logout.sql");
+    elephantry.query_one::<()>(sql, &[&token])?;
 
     Ok(actix_web::HttpResponse::NoContent().finish())
 }

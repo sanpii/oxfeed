@@ -1,11 +1,15 @@
 #[derive(Default, serde::Deserialize)]
 pub(crate) struct Identity {
-    token: Option<uuid::Uuid>,
+    token: uuid::Uuid,
 }
 
 impl Identity {
-    pub fn token(&self) -> Option<uuid::Uuid> {
+    pub fn token(&self) -> uuid::Uuid {
         self.token
+    }
+
+    fn unauthorized() -> futures_util::future::Ready<oxfeed_common::Result<Self>> {
+        futures_util::future::err(oxfeed_common::Error::Auth)
     }
 }
 
@@ -26,25 +30,23 @@ impl actix_web::FromRequest for Identity {
             .flatten()
         {
             Some(authorization) => authorization,
-            None => return futures_util::future::ok(Self::default()),
+            None => return Self::unauthorized(),
         };
 
         let mid = match authorization.find(' ') {
             Some(mid) => mid,
-            None => return futures_util::future::ok(Self::default()),
+            None => return Self::unauthorized(),
         };
 
         let (ty, token) = authorization.split_at(mid);
 
-        let token = if ty.eq_ignore_ascii_case("bearer") {
+        if ty.eq_ignore_ascii_case("bearer") {
             match token.trim().parse() {
-                Ok(token) => Some(token),
-                Err(_) => None,
+                Ok(token) => futures_util::future::ok(Identity { token }),
+                _ => Self::unauthorized(),
             }
         } else {
-            None
-        };
-
-        futures_util::future::ok(Identity { token })
+            Self::unauthorized()
+        }
     }
 }
