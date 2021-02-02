@@ -34,6 +34,7 @@ front: yarn wasm
 
 wasm:
 	RUST_LOG=info $(WASM_PACK) build $(WASM_PACK_FLAGS) --target web --out-dir ./static front
+	sleep 1
 	ln --relative --force --symbolic $(shell ls -rt $(shell find target/ -name index.html | grep ".") | tail -1) front/static/index.html
 	rm front/static/.gitignore
 .PHONY: wasm
