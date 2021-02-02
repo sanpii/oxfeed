@@ -211,7 +211,12 @@ impl Task {
         if response.is_success() {
             Ok(())
         } else {
-            Err(oxfeed_common::Error::Webhook(response.status().to_string()))
+            let error = format!(
+                "{} · {}",
+                response.status().to_string(),
+                response.text().unwrap_or_default(),
+            );
+            Err(oxfeed_common::Error::Webhook(error))
         }
     }
 }
