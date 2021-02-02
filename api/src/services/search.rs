@@ -56,21 +56,8 @@ fn search(
     let mut sql = include_str!("../../sql/search_items.sql").to_string();
     sql.push_str(&format!("and {}\n", clause.to_string()));
     sql.push_str("order by ts_rank_cd(f.document, to_tsquery($2))");
-    sql.push_str(&query.pagination.to_sql());
 
-    let items = elephantry.query::<oxfeed_common::item::Item>(&sql, &[&token, &query.q])?;
-
-    let mut sql = include_str!("../../sql/search_items_count.sql").to_string();
-    sql.push_str(&format!("and {}\n", clause.to_string()));
-    let count = elephantry.query_one::<i64>(&sql, &[&token, &query.q])?;
-
-    let pager = elephantry::Pager::new(
-        items,
-        count as usize,
-        query.pagination.page,
-        query.pagination.limit,
-    );
-
+    let pager = count::<oxfeed_common::item::Item>(&elephantry, &sql, &[&token, &query.q], &query.pagination)?;
     let response = actix_web::HttpResponse::Ok().json(pager);
 
     Ok(response)
@@ -83,23 +70,10 @@ async fn tags(
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = identity.token();
-
-    let mut sql = include_str!("../../sql/search_tags.sql").to_string();
-    sql.push_str(&query.pagination.to_sql());
-
+    let sql = include_str!("../../sql/search_tags.sql");
     let q = format!("^{}", query.q);
-    let tags = elephantry.query::<String>(&sql, &[&token, &q])?;
 
-    let sql = include_str!("../../sql/search_tags_count.sql");
-    let count = elephantry.query_one::<i64>(&sql, &[&token])?;
-
-    let pager = elephantry::Pager::new(
-        tags,
-        count as usize,
-        query.pagination.page,
-        query.pagination.limit,
-    );
-
+    let pager = count::<String>(&elephantry, sql, &[&token, &q], &query.pagination)?;
     let response = actix_web::HttpResponse::Ok().json(pager);
 
     Ok(response)
@@ -116,4 +90,28 @@ async fn sources(
         .or_where("source.url ~* $*", vec![&query.q])
         .build();
     super::source::fetch(&elephantry, &identity, &clause, &query.pagination)
+}
+
+fn count<T: elephantry::Entity>(
+    elephantry: &elephantry::Pool,
+    sql: &str,
+    params: &[&dyn elephantry::ToSql],
+    pagination: &oxfeed_common::Pagination,
+) -> oxfeed_common::Result<elephantry::Pager<T>> {
+    let sql_count = format!("with items as ({}) select count(items) from items", sql);
+    let count = elephantry.query_one::<i64>(&sql_count, params)?;
+
+    let mut sql = sql.to_string();
+    sql.push_str(&pagination.to_sql());
+
+    let items = elephantry.query::<T>(&sql, params)?;
+
+    let pager = elephantry::Pager::new(
+        items,
+        count as usize,
+        pagination.page,
+        pagination.limit,
+    );
+
+    Ok(pager)
 }
