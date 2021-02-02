@@ -86,9 +86,7 @@ impl yew::Component for Component {
     }
 
     fn view(&self) -> yew::Html {
-        // @FIXME https://gitlab.com/imp/chrono-humanize-rs/-/merge_requests/5
-        let published_ago =
-            chrono_humanize::HumanTime::from(self.item.published - chrono::Utc::now());
+        let published_ago = chrono_humanize::HumanTime::from(self.item.published);
 
         let caret = match self.scene {
             Scene::Expanded => "chevron-up",

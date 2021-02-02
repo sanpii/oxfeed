@@ -9,7 +9,6 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 anyhow = "1.0"
-chrono-humanize = "0.1"
 hmac = "0.9"
 http = "0.2"
 jwt = "0.12"
@@ -33,6 +32,10 @@ features = ["serde", "wasmbind"]
 [dependencies.elephantry-extras]
 version = "0.1"
 features = ["yew-pager"]
+
+[dependencies.chrono-humanize]
+version = "0.1.2"
+features = ["wasmbind"]
 
 [dependencies.oxfeed-common]
 version = "0.1"
