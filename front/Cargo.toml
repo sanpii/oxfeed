@@ -9,7 +9,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 anyhow = "1.0"
-chrono-humanize = "0.1"
+chrono-humanize = "0.1.2"
 hmac = "0.9"
 http = "0.2"
 jwt = "0.12"
