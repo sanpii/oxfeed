@@ -2,6 +2,7 @@ mod cache;
 mod form;
 mod identity;
 mod services;
+mod update;
 
 use identity::*;
 
@@ -23,10 +24,13 @@ async fn main() -> std::io::Result<()> {
         let elephantry =
             elephantry::Pool::new(&database_url).expect("Unable to connect to postgresql");
 
+        let update = update::Actor::new(&elephantry);
+
         actix_web::App::new()
             .wrap(actix_web::middleware::NormalizePath::new(
                 actix_web::middleware::normalize::TrailingSlash::Trim,
             ))
+            .data(update.start())
             .data(elephantry)
             .wrap(cors)
             .service(services::auth::scope())

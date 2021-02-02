@@ -22,16 +22,12 @@ ifneq (,$(wildcard ./.env))
 	export
 endif
 
-build: api cli front
+build: api front
 .PHONY: build
 
 api:
 	$(CARGO) build $(CARGO_FLAGS) --package oxfeed-api
 .PHONY: api
-
-cli:
-	$(CARGO) build $(CARGO_FLAGS) --bin oxfeed-cli
-.PHONY: cli
 
 front: yarn wasm
 .PHONY: front
