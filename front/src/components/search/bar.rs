@@ -5,6 +5,8 @@ pub(crate) enum Message {
 #[derive(Clone, yew::Properties)]
 pub(crate) struct Properties {
     pub current_route: crate::components::app::Route,
+    #[prop_or_default]
+    query: String,
 }
 
 pub(crate) struct Component {
@@ -73,5 +75,5 @@ impl yew::Component for Component {
         }
     }
 
-    crate::change!(current_route);
+    crate::change!(current_route, query);
 }
