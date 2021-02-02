@@ -95,6 +95,9 @@ impl yew::Component for Component {
             Scene::Hidden => "chevron-down",
         };
 
+        let title = yew::utils::document().create_element("span").unwrap();
+        title.set_inner_html(&self.item.title);
+
         let content = yew::utils::document().create_element("div").unwrap();
         content.set_inner_html(&self.content.as_ref().unwrap_or(&"Loading...".to_string()));
 
@@ -107,7 +110,9 @@ impl yew::Component for Component {
         yew::html! {
             <>
                 <img src=icon width="16" height="16" />
-                <a href=self.item.link.clone() target="_blank">{ &self.item.title }</a>
+                <a href=self.item.link.clone() target="_blank">
+                    { yew::virtual_dom::VNode::VRef(title.into()) }
+                </a>
                 {
                     for self.item.tags.iter().map(|tag| {
                         yew::html! { <super::Tag value=tag /> }

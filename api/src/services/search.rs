@@ -22,9 +22,7 @@ async fn all(
     query: Query<Request>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let clause = elephantry::Where::from("item.title ~* $*", vec![&query.q]);
-
-    super::item::fetch(&elephantry, &identity, &clause, &query.pagination)
+    search(&elephantry, &identity, &elephantry::Where::new(), &query)
 }
 
 #[actix_web::get("/favorites")]
@@ -33,9 +31,8 @@ async fn favorites(
     query: Query<Request>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let clause = elephantry::Where::from("item.title ~* $* and favorite", vec![&query.q]);
-
-    super::item::fetch(&elephantry, &identity, &clause, &query.pagination)
+    let clause = elephantry::Where::from("favorite", Vec::new());
+    search(&elephantry, &identity, &clause, &query)
 }
 
 #[actix_web::get("/unread")]
@@ -44,9 +41,39 @@ async fn unread(
     query: Query<Request>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let clause = elephantry::Where::from("item.title ~* $* and not read", vec![&query.q]);
+    let clause = elephantry::Where::from("not read", Vec::new());
+    search(&elephantry, &identity, &clause, &query)
+}
 
-    super::item::fetch(&elephantry, &identity, &clause, &query.pagination)
+fn search(
+    elephantry: &elephantry::Pool,
+    identity: &crate::Identity,
+    clause: &elephantry::Where,
+    query: &Request,
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
+    let token = identity.token();
+
+    let mut sql = include_str!("../../sql/search_items.sql").to_string();
+    sql.push_str(&format!("and {}\n", clause.to_string()));
+    sql.push_str("order by ts_rank_cd(f.document, to_tsquery($2))");
+    sql.push_str(&query.pagination.to_sql());
+
+    let items = elephantry.query::<oxfeed_common::item::Item>(&sql, &[&token, &query.q])?;
+
+    let mut sql = include_str!("../../sql/search_items_count.sql").to_string();
+    sql.push_str(&format!("and {}\n", clause.to_string()));
+    let count = elephantry.query_one::<i64>(&sql, &[&token, &query.q])?;
+
+    let pager = elephantry::Pager::new(
+        items,
+        count as usize,
+        query.pagination.page,
+        query.pagination.limit,
+    );
+
+    let response = actix_web::HttpResponse::Ok().json(pager);
+
+    Ok(response)
 }
 
 #[actix_web::get("/tags")]

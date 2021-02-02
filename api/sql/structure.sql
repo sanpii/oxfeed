@@ -97,4 +97,15 @@ create trigger notify_new_item
     for each row
     execute function notify_new();
 
+create schema if not exists fts;
+
+create materialized view if not exists fts.item as
+    select item.item_id,
+        setweight(to_tsvector(coalesce(item.title, '')), 'A')
+        || setweight(to_tsvector(coalesce(item.content, '')), 'B') as document
+        from item;
+
+create index fts_item_item_id on fts.item(item_id);
+create index fts_item_document on fts.item using gin(document);
+
 commit;
