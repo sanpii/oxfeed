@@ -55,7 +55,7 @@ fn search(
 
     let mut sql = include_str!("../../sql/search_items.sql").to_string();
     sql.push_str(&format!("and {}\n", clause.to_string()));
-    sql.push_str("order by ts_rank_cd(f.document, to_tsquery($2))");
+    sql.push_str("order by ts_rank_cd(f.document, websearch_to_tsquery($2))");
 
     let pager = count::<oxfeed_common::item::Item>(&elephantry, &sql, &[&token, &query.q], &query.pagination)?;
     let response = actix_web::HttpResponse::Ok().json(pager);
