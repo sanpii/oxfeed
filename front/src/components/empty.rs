@@ -25,8 +25,11 @@ impl yew::Component for Component {
             ),
         ];
 
-        let now = chrono::Utc::now();
-        let choice = now.timestamp_subsec_nanos() as usize % contents.len();
+        let now = web_sys::window().unwrap()
+            .performance()
+            .unwrap()
+            .now();
+        let choice = now as usize % contents.len();
 
         yew::html! {
             <div class="full-page">

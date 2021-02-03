@@ -25,10 +25,6 @@ wasm-logger = "0.2"
 yew = "0.17"
 yew-router = "0.14"
 
-[dependencies.chrono]
-version = "0.4"
-features = ["serde", "wasmbind"]
-
 [dependencies.elephantry-extras]
 version = "0.1"
 features = ["yew-pager"]
@@ -43,7 +39,7 @@ path = "../common/"
 
 [dependencies.web-sys]
 version = "0.3"
-features = ["HtmlDocument"]
+features = ["HtmlDocument", "Performance"]
 
 [build-dependencies.git2]
 version = "0.13"
