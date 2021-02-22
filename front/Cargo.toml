@@ -9,9 +9,9 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 anyhow = "1.0"
-hmac = "0.9"
+hmac = "0.10"
 http = "0.2"
-jwt = "0.12"
+jwt = "0.13"
 log = "0.4"
 ring = "0.17.0-alpha.7"
 serde = "1.0"
