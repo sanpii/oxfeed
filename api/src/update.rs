@@ -105,9 +105,11 @@ impl Task {
         let feed_icon = feed.icon.map(|x| x.uri);
 
         for entry in feed.entries {
+            let link = entry.links[0].href.clone();
+
             let exist = elephantry.exist_where::<ItemModel>(
-                "id = $* and source_id = $*",
-                &[&entry.id, &source.source_id],
+                "link = $* and source_id = $*",
+                &[&link, &source.source_id],
             )?;
 
             if !exist {
@@ -117,7 +119,6 @@ impl Task {
                     .unwrap_or_else(|| "<no title>".to_string());
 
                 log::info!("Adding '{}'", title);
-                let link = entry.links[0].href.clone();
 
                 let content = match entry.content {
                     Some(content) => content.body,
@@ -137,9 +138,8 @@ impl Task {
                     favorite: false,
                 };
 
-                if elephantry.upsert_one::<ItemModel>(&item, "(link)", "nothing")?.is_some() {
-                    Self::call_webhooks(elephantry, &webhooks, &mut item);
-                }
+                item.read = Self::call_webhooks(elephantry, &webhooks, &item);
+                elephantry.insert_one::<ItemModel>(&item)?;
             }
         }
 
@@ -182,7 +182,7 @@ impl Task {
         }
     }
 
-    fn call_webhooks(elephantry: &elephantry::Connection, webhooks: &[Webhook], item: &mut Item) {
+    fn call_webhooks(elephantry: &elephantry::Connection, webhooks: &[Webhook], item: &Item) -> bool {
         let mut read = false;
 
         for webhook in webhooks {
@@ -198,7 +198,7 @@ impl Task {
             }
         }
 
-        item.read = read;
+        read
     }
 
     fn call_webhook(webhook: &Webhook, item: &Item) -> oxfeed_common::Result<()> {
