@@ -45,14 +45,15 @@ create table if not exists item (
     source_id uuid references source(source_id) not null,
     id text not null,
     icon text,
-    link text not null unique,
+    link text not null,
     title text not null,
     content text,
     read bool default false,
     favorite bool default false,
     published timestamptz not null default now(),
 
-    unique(source_id, id)
+    unique(source_id, id),
+    unique(source_id, link)
 );
 
 create index if not exists item_read on item(read);
