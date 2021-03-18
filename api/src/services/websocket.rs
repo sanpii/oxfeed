@@ -44,7 +44,9 @@ impl Websocket {
 
         context.run_interval(HEARTBEAT_INTERVAL, |actor, context| {
             actor.ping(context);
-            actor.notify(context);
+            if let Err(err) = actor.notify(context) {
+                log::error!("{}", err);
+            }
         });
     }
 
@@ -58,12 +60,14 @@ impl Websocket {
         context.ping(b"");
     }
 
-    fn notify(&self, context: &mut <Self as actix::Actor>::Context) {
-        while let Some(notify) = self.elephantry.notifies() {
+    fn notify(&self, context: &mut <Self as actix::Actor>::Context) -> elephantry::Result {
+        while let Some(notify) = self.elephantry.notifies()? {
             if notify.extra() == self.token.to_string() {
                 context.text(notify.relname());
             }
         }
+
+        Ok(())
     }
 }
 
