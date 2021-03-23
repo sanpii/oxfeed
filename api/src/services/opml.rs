@@ -97,7 +97,7 @@ async fn export(
             "Content-Disposition",
             "attachment; filename=\"oxfeed-subscriptions.xml\"",
         )
-        .body(opml.to_xml().map_err(oxfeed_common::Error::Opml)?);
+        .body(opml.to_xml()?);
 
     Ok(response)
 }
