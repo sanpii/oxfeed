@@ -20,7 +20,7 @@ async fn import(
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
     };
 
-    let opml = opml::OPML::new(&xml).unwrap();
+    let opml = opml::OPML::from_str(&xml).unwrap();
 
     for outline in opml.body.outlines {
         save(&elephantry, &outline, &user);
@@ -97,7 +97,7 @@ async fn export(
             "Content-Disposition",
             "attachment; filename=\"oxfeed-subscriptions.xml\"",
         )
-        .body(opml.to_xml().map_err(oxfeed_common::Error::Opml)?);
+        .body(opml.to_string()?);
 
     Ok(response)
 }

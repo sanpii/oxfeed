@@ -36,8 +36,9 @@ pub enum Error {
     #[error("{0}")]
     Io(#[from] std::io::Error),
 
+    #[cfg(feature = "opml")]
     #[error("{0}")]
-    Opml(String),
+    Opml(#[from] opml::Error),
 
     #[error("{0}")]
     Utf8(#[from] std::string::FromUtf8Error),
