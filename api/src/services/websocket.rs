@@ -100,7 +100,7 @@ impl actix::StreamHandler<Result<ws::Message, ws::ProtocolError>> for Websocket 
                 context.close(reason);
                 context.stop();
             }
-            _ => (),
+            _ => context.stop(),
         }
     }
 }
