@@ -16,7 +16,7 @@ version = "3.3"
 optional = true
 
 [dependencies.attohttpc]
-version = "0.16"
+version = "0.17"
 optional = true
 
 [dependencies.base64]
