@@ -51,7 +51,7 @@ fn search(
     clause: &elephantry::Where,
     query: &Request,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let token = identity.token();
+    let token = identity.token(&elephantry)?;
 
     let mut sql = include_str!("../../sql/search_items.sql").to_string();
     sql.push_str(&format!("and {}\n", clause.to_string()));
@@ -69,7 +69,7 @@ async fn tags(
     query: Query<Request>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let token = identity.token();
+    let token = identity.token(&elephantry)?;
     let sql = include_str!("../../sql/search_tags.sql");
     let q = format!("^{}", query.q);
 

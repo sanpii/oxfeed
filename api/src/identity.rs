@@ -4,8 +4,14 @@ pub(crate) struct Identity {
 }
 
 impl Identity {
-    pub fn token(&self) -> uuid::Uuid {
-        self.token
+    pub fn token(&self, elephantry: &elephantry::Connection) -> oxfeed_common::Result<uuid::Uuid> {
+        use oxfeed_common::user::Model;
+
+        if elephantry.exist_where::<Model>("token = $*", &[&self.token])? {
+            Ok(self.token)
+        } else {
+            Err(oxfeed_common::Error::Auth)
+        }
     }
 
     fn unauthorized() -> futures_util::future::Ready<oxfeed_common::Result<Self>> {

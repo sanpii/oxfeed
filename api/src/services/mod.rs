@@ -17,7 +17,7 @@ async fn counts(
     elephantry: actix_web::web::Data<elephantry::Pool>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let token = identity.token();
+    let token = identity.token(&elephantry)?;
 
     let sql = include_str!("../../sql/counts.sql");
     let counts = elephantry.query_one::<oxfeed_common::Counts>(sql, &[&token])?;

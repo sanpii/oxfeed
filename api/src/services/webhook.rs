@@ -13,7 +13,7 @@ async fn all(
     elephantry: actix_web::web::Data<elephantry::Pool>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let token = identity.token();
+    let token = identity.token(&elephantry)?;
     let model = elephantry.model::<Model>();
     let items = model.all(&token)?;
     let response = actix_web::HttpResponse::Ok().json(items);
@@ -29,9 +29,11 @@ async fn create(
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     use std::convert::TryInto;
 
+    let token = identity.token(&elephantry)?;
+
     let user = match elephantry
         .model::<oxfeed_common::user::Model>()
-        .find_from_token(&identity.token())
+        .find_from_token(&token)
     {
         Some(user) => user,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
@@ -51,7 +53,7 @@ async fn delete(
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let webhook_id = path.into_inner();
-    let token = identity.token();
+    let token = identity.token(&elephantry)?;
     let response = match elephantry.model::<Model>().delete(&token, &webhook_id)? {
         Some(webhook) => actix_web::HttpResponse::Ok().json(webhook),
         None => actix_web::HttpResponse::NoContent().finish(),
@@ -69,9 +71,11 @@ async fn update(
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     use std::convert::TryInto;
 
+    let token = identity.token(&elephantry)?;
+
     let user = match elephantry
         .model::<oxfeed_common::user::Model>()
-        .find_from_token(&identity.token())
+        .find_from_token(&token)
     {
         Some(user) => user,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),

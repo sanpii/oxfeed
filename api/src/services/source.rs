@@ -32,7 +32,8 @@ pub(crate) fn fetch(
     pagination: &oxfeed_common::Pagination,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let model = elephantry.model::<Model>();
-    let sources = model.all(&identity.token(), filter, pagination)?;
+    let token = identity.token(&elephantry)?;
+    let sources = model.all(&token, filter, pagination)?;
     let response = actix_web::HttpResponse::Ok().json(sources);
 
     Ok(response)
@@ -46,9 +47,11 @@ async fn create(
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     use std::convert::TryInto;
 
+    let token = identity.token(&elephantry)?;
+
     let user = match elephantry
         .model::<oxfeed_common::user::Model>()
-        .find_from_token(&identity.token())
+        .find_from_token(&token)
     {
         Some(user) => user,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
@@ -67,7 +70,7 @@ async fn get(
     item_id: Path<uuid::Uuid>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let token = identity.token();
+    let token = identity.token(&elephantry)?;
     let response = match elephantry.model::<Model>().one(&item_id, &token)? {
         Some(source) => actix_web::HttpResponse::Ok().json(source),
         None => actix_web::HttpResponse::NotFound().finish(),
@@ -84,7 +87,7 @@ async fn delete(
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let source_id = path.into_inner();
 
-    let token = identity.token();
+    let token = identity.token(&elephantry)?;
 
     let source = match elephantry.model::<Model>().one(&token, &source_id)? {
         Some(source) => source,
@@ -110,9 +113,11 @@ async fn update(
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     use std::convert::TryInto;
 
+    let token = identity.token(&elephantry)?;
+
     let user = match elephantry
         .model::<oxfeed_common::user::Model>()
-        .find_from_token(&identity.token())
+        .find_from_token(&token)
     {
         Some(user) => user,
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
