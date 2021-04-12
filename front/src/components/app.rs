@@ -84,7 +84,7 @@ impl yew::Component for Component {
                 _ => return false,
             }
             Self::Message::Index => {
-                self.event_bus.send(crate::event::Event::Redirect("/all".to_string()));
+                self.event_bus.send(crate::event::Event::Redirect("/unread".to_string()));
                 return false;
             }
             Self::Message::Websocket(event) => match event {
