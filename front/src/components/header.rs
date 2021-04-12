@@ -53,13 +53,15 @@ impl yew::Component for Component {
     }
 
     fn view(&self) -> yew::Html {
+        let location = crate::Location::new();
+
         yew::html! {
             <>
                 <a class="navbar-brand col-md-3 col-lg-2 mr-0 px-3" href="#">{{ "Oxfeed" }}</a>
                 <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <super::search::Bar current_route=self.current_route.clone() />
+                <super::search::Bar current_route=self.current_route.clone() query=location.q() />
                 <button
                     class=("btn", "btn-secondary", "logout")
                     title="Logout"

@@ -72,7 +72,6 @@ impl yew::Component for Component {
 
 impl Component {
     fn term() -> String {
-        let location = crate::Location::new();
-        location.query().get("q").cloned().unwrap_or_default()
+        crate::Location::new().q()
     }
 }

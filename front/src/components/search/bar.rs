@@ -6,7 +6,7 @@ pub(crate) enum Message {
 pub(crate) struct Properties {
     pub current_route: crate::components::app::Route,
     #[prop_or_default]
-    query: String,
+    pub query: String,
 }
 
 pub(crate) struct Component {
@@ -37,10 +37,7 @@ impl yew::Component for Component {
         match msg {
             Self::Message::Input(value) => {
                 let location = crate::Location::new();
-                let mut route = match location.path().as_str() {
-                    "/" => "/all".to_string(),
-                    route => route.to_string(),
-                };
+                let mut route = location.path();
 
                 if route.starts_with("/search") {
                     route = route.trim_start_matches("/search").to_string();
