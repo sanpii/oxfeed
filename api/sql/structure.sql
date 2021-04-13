@@ -12,19 +12,6 @@ create table if not exists "user" (
 
 create index if not exists user_read on "user"(token);
 
-create table if not exists webhook (
-    webhook_id uuid primary key default uuid_generate_v4(),
-    user_id uuid references "user"(user_id) not null,
-    name text not null,
-    url text not null,
-    last_error text,
-    mark_read bool not null default false,
-
-    unique(name, user_id)
-);
-
-create index if not exists webhook_user_id on source(user_id);
-
 create table if not exists source (
     source_id uuid primary key default uuid_generate_v4(),
     user_id uuid references "user"(user_id) not null,
@@ -39,6 +26,19 @@ create table if not exists source (
 );
 
 create index if not exists source_user_id on source(user_id);
+
+create table if not exists webhook (
+    webhook_id uuid primary key default uuid_generate_v4(),
+    user_id uuid references "user"(user_id) not null,
+    name text not null,
+    url text not null,
+    last_error text,
+    mark_read bool not null default false,
+
+    unique(name, user_id)
+);
+
+create index if not exists webhook_user_id on source(user_id);
 
 create table if not exists item (
     item_id uuid primary key default uuid_generate_v4(),
