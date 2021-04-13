@@ -28,13 +28,13 @@ enum Scene {
 #[derive(Clone, yew::Properties)]
 pub(crate) struct Properties {
     #[prop_or_default]
-    pub filter: String,
+    pub filter: crate::Filter,
     pub pagination: oxfeed_common::Pagination,
 }
 
 pub(crate) struct Component {
     api: crate::Api<Self>,
-    filter: String,
+    filter: crate::Filter,
     link: yew::ComponentLink<Self>,
     scene: Scene,
     pager: Option<crate::Pager<oxfeed_common::source::Entity>>,

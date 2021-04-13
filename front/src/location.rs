@@ -33,7 +33,11 @@ impl Location {
     }
 
     pub fn q(&self) -> String {
-        self.query().get("q").cloned().unwrap_or_default()
+        self.param("q")
+    }
+
+    pub fn param(&self, name: &str) -> String {
+        self.query().get(name).cloned().unwrap_or_default()
     }
 
     pub fn query(&self) -> HashMap<String, String> {

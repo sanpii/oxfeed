@@ -4,10 +4,12 @@ mod api;
 mod cha;
 mod components;
 mod event;
+mod filter;
 mod location;
 mod render;
 
 pub(crate) use api::Api;
+pub(crate) use filter::*;
 pub(crate) use location::Location;
 pub(crate) use render::*;
 

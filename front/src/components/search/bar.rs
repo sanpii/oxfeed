@@ -6,13 +6,13 @@ pub(crate) enum Message {
 pub(crate) struct Properties {
     pub current_route: crate::components::app::Route,
     #[prop_or_default]
-    pub query: String,
+    pub filter: crate::Filter,
 }
 
 pub(crate) struct Component {
     current_route: crate::components::app::Route,
     event_bus: yew::agent::Dispatcher<crate::event::Bus>,
-    query: String,
+    filter: crate::Filter,
     link: yew::ComponentLink<Self>,
 }
 
@@ -23,11 +23,9 @@ impl yew::Component for Component {
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         use yew::agent::Dispatched;
 
-        let location = crate::Location::new();
-
         Self {
             current_route: props.current_route,
-            query: location.q(),
+            filter: crate::Filter::new(),
             event_bus: crate::event::Bus::dispatcher(),
             link,
         }
@@ -36,6 +34,8 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Self::Message::Input(value) => {
+                self.filter = value.into();
+
                 let location = crate::Location::new();
                 let mut route = location.path();
 
@@ -43,11 +43,8 @@ impl yew::Component for Component {
                     route = route.trim_start_matches("/search").to_string();
                 }
 
-                if !value.is_empty() {
-                    route = format!("/search{}?q={}", route, value);
-                }
+                route = format!("/search{}?{}", route, self.filter.to_url_param());
 
-                self.query = value;
                 self.event_bus.send(crate::event::Event::Redirect(route));
             }
         }
@@ -63,7 +60,7 @@ impl yew::Component for Component {
                 <input
                     class=("form-control", "form-control-dark")
                     type="text"
-                    value=self.query
+                    value=self.filter.to_string(),
                     placeholder="Search"
                     aria-label="Search"
                     oninput=self.link.callback(|e: yew::InputData| Self::Message::Input(e.value))
@@ -72,5 +69,5 @@ impl yew::Component for Component {
         }
     }
 
-    crate::change!(current_route, query);
+    crate::change!(current_route, filter);
 }

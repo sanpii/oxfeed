@@ -15,7 +15,7 @@ pub(crate) struct Properties {
 pub(crate) struct Component {
     kind: String,
     pagination: oxfeed_common::Pagination,
-    term: String,
+    filter: crate::Filter,
     _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
 }
 
@@ -31,7 +31,7 @@ impl yew::Component for Component {
         Self {
             pagination: props.pagination,
             kind: props.kind,
-            term: Self::term(),
+            filter: crate::Filter::new(),
             _producer: crate::event::Bus::bridge(callback),
         }
     }
@@ -40,7 +40,7 @@ impl yew::Component for Component {
         match msg {
             Self::Message::Event(event) => {
                 if let crate::event::Event::Redirected(_) = event {
-                    self.term = Self::term();
+                    self.filter = crate::Filter::new();
                     return true;
                 }
             }
@@ -50,28 +50,24 @@ impl yew::Component for Component {
     }
 
     fn view(&self) -> yew::Html {
+        let filter = self.filter.clone();
+
         match self.kind.as_str() {
             "sources" => yew::html! {
-                <super::Sources filter=self.term.clone() pagination=self.pagination />
+                <super::Sources filter=filter pagination=self.pagination />
             },
             "all" => yew::html! {
-                <super::Items kind="all" filter=self.term.clone() pagination=self.pagination />
+                <super::Items kind="all" filter=filter pagination=self.pagination />
             },
             "favorites" => yew::html! {
-                <super::Items kind="favorites" filter=self.term.clone() pagination=self.pagination />
+                <super::Items kind="favorites" filter=filter pagination=self.pagination />
             },
             "unread" => yew::html! {
-                <super::Items kind="unread" filter=self.term.clone() pagination=self.pagination />
+                <super::Items kind="unread" filter=filter pagination=self.pagination />
             },
             _ => unreachable!(),
         }
     }
 
     crate::change!(kind, pagination);
-}
-
-impl Component {
-    fn term() -> String {
-        crate::Location::new().q()
-    }
 }

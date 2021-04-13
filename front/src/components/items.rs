@@ -19,7 +19,7 @@ impl From<crate::event::Api> for Message {
 #[derive(Clone, yew::Properties)]
 pub(crate) struct Properties {
     #[prop_or_default]
-    pub filter: String,
+    pub filter: crate::Filter,
     pub kind: String,
     pub pagination: oxfeed_common::Pagination,
 }
@@ -27,7 +27,7 @@ pub(crate) struct Properties {
 pub(crate) struct Component {
     api: crate::Api<Self>,
     kind: String,
-    filter: String,
+    filter: crate::Filter,
     link: yew::ComponentLink<Self>,
     pager: Option<crate::Pager<oxfeed_common::item::Item>>,
     pagination: oxfeed_common::Pagination,

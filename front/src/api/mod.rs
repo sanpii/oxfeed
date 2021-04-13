@@ -63,9 +63,8 @@ where
         )
     }
 
-    pub fn search(&mut self, what: &str, query: &str, pagination: &oxfeed_common::Pagination) {
-        let q = urlencoding::encode(query);
-        let url = format!("/search/{}?q={}&{}", what, q, pagination.to_query());
+    pub fn search(&mut self, what: &str, filter: &crate::Filter, pagination: &oxfeed_common::Pagination) {
+        let url = format!("/search/{}?{}&{}", what, filter.to_url_param(), pagination.to_query());
 
         let kind = match what {
             "all" | "unread" | "favorites" => Kind::SearchItems,

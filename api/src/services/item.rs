@@ -22,7 +22,7 @@ async fn all(
         &elephantry,
         &identity,
         &elephantry::Where::new(),
-        &pagination.into_inner(),
+        &pagination,
     )
 }
 
