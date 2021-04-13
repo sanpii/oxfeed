@@ -82,7 +82,7 @@ impl yew::Component for Component {
                 </a>
 
                 <a
-                    class=("btn", "btn-danger")
+                    class=("btn", "btn-secondary")
                     title="Cancel"
                     onclick=self.link.callback(|_| Self::Message::Cancel)
                 >
