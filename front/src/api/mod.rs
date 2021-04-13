@@ -219,10 +219,7 @@ where
                 let tags = serde_json::from_str(&data)?;
                 crate::event::Api::Tags(tags)
             }
-            Kind::UserCreate => {
-                let user = serde_json::from_str(&data)?;
-                crate::event::Api::UserCreate(user)
-            }
+            Kind::UserCreate => crate::event::Api::UserCreate,
             Kind::Webhooks => {
                 let webhooks = serde_json::from_str(&data)?;
                 crate::event::Api::Webhooks(webhooks)

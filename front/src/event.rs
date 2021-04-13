@@ -73,7 +73,7 @@ pub(crate) enum Api {
     SourceDelete(oxfeed_common::source::Entity),
     SourceUpdate(oxfeed_common::source::Entity),
     Tags(Vec<oxfeed_common::Tag>),
-    UserCreate(oxfeed_common::user::Entity),
+    UserCreate,
     Webhooks(Vec<oxfeed_common::webhook::Entity>),
     WebhookCreate(oxfeed_common::webhook::Entity),
     WebhookDelete(oxfeed_common::webhook::Entity),

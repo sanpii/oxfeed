@@ -11,7 +11,7 @@ impl From<crate::event::Api> for Message {
     fn from(event: crate::event::Api) -> Self {
         match event {
             crate::event::Api::Auth => Self::Logged,
-            crate::event::Api::UserCreate(_) => Self::UserCreated,
+            crate::event::Api::UserCreate => Self::UserCreated,
             _ => unreachable!(),
         }
     }
