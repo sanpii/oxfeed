@@ -27,7 +27,6 @@ pub(crate) struct Component {
 impl Component {
     fn load(&mut self) {
         for file in &self.files {
-            log::debug!("load {:?}", file);
             let callback = self
                 .link
                 .callback(|e: yew::services::reader::FileData| Message::Loaded(e.content));
