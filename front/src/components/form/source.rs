@@ -99,7 +99,7 @@ impl yew::Component for Component {
                     <label for="tags">{ "Tags" }</label>
                     <super::Tags
                         values=self.props.source.tags.clone()
-                        on_change=self.link.callback(|tags| Self::Message::UpdateTags(tags))
+                        on_change=self.link.callback(Self::Message::UpdateTags)
                     />
                 </div>
 
