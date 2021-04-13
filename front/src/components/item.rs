@@ -179,6 +179,11 @@ impl yew::Component for Component {
 
         self.item = props.value;
 
+        if should_render {
+            self.content = None;
+            self.scene = Scene::Hidden;
+        }
+
         should_render
     }
 }
