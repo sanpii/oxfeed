@@ -69,6 +69,12 @@ impl yew::Component for Component {
             },
             Link {
                 count: 0,
+                icon: "tags",
+                label: "Tags",
+                route: super::app::Route::Tags,
+            },
+            Link {
+                count: 0,
                 icon: "diagram-3",
                 label: "Sources",
                 route: super::app::Route::Sources,
@@ -122,7 +128,8 @@ impl yew::Component for Component {
                 self.links[0].count = counts.all;
                 self.links[1].count = counts.unread;
                 self.links[2].count = counts.favorites;
-                self.links[3].count = counts.sources;
+                self.links[3].count = counts.tags;
+                self.links[4].count = counts.sources;
 
                 return true;
             }

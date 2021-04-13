@@ -3,6 +3,7 @@ mod items;
 mod opml;
 mod sources;
 mod user;
+mod tag;
 mod webhooks;
 
 use yew::agent::Dispatched;
@@ -24,6 +25,7 @@ enum Kind {
     SourceCreate,
     SourceDelete,
     SourceUpdate,
+    Tags,
     UserCreate,
     Webhooks,
     WebhookCreate,
@@ -213,6 +215,10 @@ where
             Kind::SourceUpdate => {
                 let source = serde_json::from_str(&data)?;
                 crate::event::Api::SourceUpdate(source)
+            }
+            Kind::Tags => {
+                let tags = serde_json::from_str(&data)?;
+                crate::event::Api::Tags(tags)
             }
             Kind::UserCreate => {
                 let user = serde_json::from_str(&data)?;

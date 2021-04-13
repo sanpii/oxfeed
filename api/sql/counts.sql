@@ -5,6 +5,15 @@ with
             join "user" using(user_id)
             where "user".token = $1
     ),
+    user_tags as (
+        select distinct unnest(tags)
+            from source
+            join "user" using(user_id)
+            where "user".token = $1
+    ),
+    count_tags as (
+        select count(*) from user_tags
+    ),
     user_item as (
         select *
             from item
@@ -22,10 +31,12 @@ with
         select count(*) from user_item where favorite
     )
 select count_sources.count as sources,
+        count_tags.count as tags,
         count_unread.count as unread,
         count_all.count as all,
         count_favorites.count as favorites
     from count_sources,
+        count_tags,
         count_unread,
         count_all,
         count_favorites

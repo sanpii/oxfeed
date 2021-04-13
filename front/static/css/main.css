@@ -19,6 +19,10 @@ main form .btn {
     margin-right: 1rem;
 }
 
+.cloud .badge {
+    margin: .5rem;
+}
+
 .btn.logout {
     margin: .5rem;
 }

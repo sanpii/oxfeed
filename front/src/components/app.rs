@@ -8,6 +8,8 @@ pub(crate) enum Route {
     Search(String),
     #[to = "/sources"]
     Sources,
+    #[to = "/tags"]
+    Tags,
     #[to = "/unread"]
     Unread,
     #[to = "/all"]
@@ -135,6 +137,7 @@ impl yew::Component for Component {
                                                 Route::Favorites => yew::html!{<super::Items kind="favorites" pagination=pagination />},
                                                 Route::Settings => yew::html!{<super::Settings />},
                                                 Route::Sources => yew::html!{<super::Sources pagination=pagination />},
+                                                Route::Tags => yew::html!{<super::Tags pagination=pagination />},
                                                 Route::Unread => yew::html!{<super::Items kind="unread" pagination=pagination />},
                                                 Route::Search(kind) => yew::html!{<super::Search kind=kind pagination=pagination />},
                                                 Route::NotFound => yew::html!{<super::NotFound />},

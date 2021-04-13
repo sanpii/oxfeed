@@ -20,6 +20,7 @@ mod sources;
 mod svg;
 mod switch;
 mod tag;
+mod tags;
 mod webhook;
 
 pub(crate) use actions::Component as Actions;
@@ -42,4 +43,5 @@ pub(crate) use sources::Component as Sources;
 pub(crate) use svg::Component as Svg;
 pub(crate) use switch::Component as Switch;
 pub(crate) use tag::Component as Tag;
+pub(crate) use tags::Component as Tags;
 pub(crate) use webhook::Component as Webhook;

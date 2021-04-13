@@ -39,6 +39,7 @@ async fn main() -> std::io::Result<()> {
             .service(services::opml::scope())
             .service(services::search::scope())
             .service(services::source::scope())
+            .service(services::tag::scope())
             .service(services::user::scope())
             .service(services::webhook::scope())
             .service(services::websocket::scope())
