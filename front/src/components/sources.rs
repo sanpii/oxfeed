@@ -84,10 +84,14 @@ impl yew::Component for Component {
             if matches!(event, crate::event::Event::SourceUpdate) {
                 self.link.send_message(Self::Message::NeedUpdate);
             }
+
+            return false;
         } else if let Self::Message::PageChange(page) = msg {
             self.pagination.page = page;
             yew::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
             self.link.send_message(Self::Message::NeedUpdate);
+
+            return false;
         } else if matches!(msg, Self::Message::NeedUpdate) {
             self.scene = Scene::View;
 

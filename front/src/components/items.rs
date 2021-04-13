@@ -72,7 +72,7 @@ impl yew::Component for Component {
         match msg {
             Self::Message::Event(event) => {
                 if matches!(event, crate::event::Event::ItemUpdate) {
-                    self.link.send_message(Self::Message::NeedUpdate)
+                    self.link.send_message(Self::Message::NeedUpdate);
                 }
             }
             Self::Message::PageChange(page) => {
@@ -81,10 +81,13 @@ impl yew::Component for Component {
                 self.link.send_message(Self::Message::NeedUpdate);
             }
             Self::Message::NeedUpdate => self.fetch(),
-            Self::Message::Update(pager) => self.pager = Some(pager),
+            Self::Message::Update(pager) => {
+                self.pager = Some(pager);
+                return true;
+            }
         }
 
-        true
+        false
     }
 
     fn view(&self) -> yew::Html {
