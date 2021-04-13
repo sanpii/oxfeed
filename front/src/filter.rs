@@ -24,7 +24,7 @@ impl Filter {
         let mut params = Vec::new();
 
         if !self.q.is_empty() {
-            params.push(format!("q={}", urlencoding::encode(&self.q)));
+            params.push(format!("q={}", urlencoding::encode(self.q.trim())));
         }
 
         if !self.tag.is_empty() {

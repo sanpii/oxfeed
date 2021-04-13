@@ -102,10 +102,17 @@ async fn sources(
     query: Query<Request>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let clause = elephantry::Where::builder()
-        .and_where("source.title ~* $*", vec![&query.q])
-        .or_where("source.url ~* $*", vec![&query.q])
+    let q = query.q.clone().unwrap_or_else(|| ".*".to_string());
+
+    let mut clause = elephantry::Where::builder()
+        .and_where("source.title ~* $*", vec![&q])
+        .or_where("source.url ~* $*", vec![&q])
         .build();
+
+    if let Some(tag) = &query.tag {
+        clause.and_where("$* = any(source.tags)", vec![tag]);
+    }
+
     super::source::fetch(&elephantry, &identity, &clause, &query.pagination)
 }
 
