@@ -105,28 +105,36 @@ impl yew::Component for Component {
                     />
                 </div>
 
-                <div class="from-group">
-                    <div>
-                        <label for="webhooks">{ "Webhooks" }</label>
-                    </div>
-                    <div class="d-inline-flex">
-                    {
-                        for self.webhooks.iter().map(move |webhook| {
-                            let id = webhook.webhook_id.unwrap_or_default();
-                            let active = self.props.source.webhooks.contains(&id);
+                {
+                    if !self.webhooks.is_empty() {
+                        yew::html! {
+                            <div class="from-group">
+                                <div>
+                                    <label for="webhooks">{ "Webhooks" }</label>
+                                </div>
+                                <div class="d-inline-flex">
+                                {
+                                    for self.webhooks.iter().map(move |webhook| {
+                                        let id = webhook.webhook_id.unwrap_or_default();
+                                        let active = self.props.source.webhooks.contains(&id);
 
-                            yew::html! {
-                                <crate::components::Switch
-                                    id=id.to_string()
-                                    label=webhook.name.clone()
-                                    active=active
-                                    on_toggle=self.link.callback(move |active| Self::Message::ToggleWebhook(id, active))
-                                />
-                            }
-                        })
+                                        yew::html! {
+                                            <crate::components::Switch
+                                                id=id.to_string()
+                                                label=webhook.name.clone()
+                                                active=active
+                                                on_toggle=self.link.callback(move |active| Self::Message::ToggleWebhook(id, active))
+                                            />
+                                        }
+                                    })
+                                }
+                                </div>
+                            </div>
+                        }
+                    } else {
+                        "".into()
                     }
-                    </div>
-                </div>
+                }
 
                 <div class="from-group">
                     <label for="active">{ "Active" }</label>
