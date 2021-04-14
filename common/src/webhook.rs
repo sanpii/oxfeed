@@ -34,10 +34,7 @@ impl<'a> Model<'a> {
             .query::<Entity>(sql, &[webhook_id, token])
             .map(|x| x.try_get(0))
     }
-}
 
-#[cfg(feature = "elephantry")]
-impl<'a> Model<'a> {
     pub fn all(&self, token: &uuid::Uuid) -> elephantry::Result<elephantry::Rows<Entity>> {
         let sql = include_str!("../sql/webhooks.sql");
         self.connection.query::<Entity>(sql, &[token])
