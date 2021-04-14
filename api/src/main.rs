@@ -7,18 +7,18 @@ mod update;
 use identity::*;
 
 #[actix_web::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> oxfeed_common::Result<()> {
     #[cfg(debug_assertions)]
     dotenv::dotenv().ok();
 
     env_logger::init();
 
-    let database_url = std::env::var("DATABASE_URL").expect("Missing DATABASE_URL env variable");
-    let ip = std::env::var("LISTEN_IP").expect("Missing LISTEN_IP env variable");
-    let port = std::env::var("LISTEN_PORT").expect("Missing LISTEN_IP env variable");
+    let database_url = env("DATABASE_URL")?;
+    let ip = env("LISTEN_IP")?;
+    let port = env("LISTEN_PORT")?;
     let bind = format!("{}:{}", ip, port);
 
-    let elephantry = elephantry::Pool::new(&database_url).expect("Unable to connect to postgresql");
+    let elephantry = elephantry::Pool::new(&database_url)?;
 
     let update = update::Actor::new(&elephantry);
     let actor = actix_web::web::Data::new(update.start());
@@ -47,5 +47,11 @@ async fn main() -> std::io::Result<()> {
     })
     .bind(&bind)?
     .run()
-    .await
+    .await?;
+
+    Ok(())
+}
+
+fn env(name: &str) -> oxfeed_common::Result<String> {
+    std::env::var(name).map_err(|_| oxfeed_common::Error::Env(name.to_string()))
 }

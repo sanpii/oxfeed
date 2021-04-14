@@ -9,7 +9,7 @@ async fn login(
     elephantry: actix_web::web::Data<elephantry::Pool>,
     token: actix_web::web::Json<String>,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let secret = std::env::var("SECRET").expect("Missing SECRET env variable");
+    let secret = crate::env("SECRET")?;
 
     use hmac::NewMac;
     use jwt::VerifyWithKey;

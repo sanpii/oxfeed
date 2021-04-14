@@ -34,7 +34,7 @@ impl actix::Actor for Actor {
     fn started(&mut self, ctx: &mut Self::Context) {
         use actix::AsyncContext;
 
-        let minutes = std::env::var("UPDATE_INTERVAL")
+        let minutes = crate::env("UPDATE_INTERVAL")
             .unwrap_or_else(|_| "20".to_string())
             .parse()
             .unwrap_or(20);

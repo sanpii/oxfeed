@@ -37,10 +37,7 @@ fn path(url: &str) -> std::path::PathBuf {
         })
         .collect::<Vec<_>>();
 
-    path.insert(
-        0,
-        std::env::var("CACHE_DIR").expect("Missing CACHE_DIR env variable"),
-    );
+    path.insert(0, crate::env("CACHE_DIR").unwrap());
 
     path.iter().collect()
 }
