@@ -5,9 +5,9 @@ pub struct Entity {
     pub password: String,
 }
 
-impl Into<std::result::Result<std::string::String, anyhow::Error>> for &Entity {
-    fn into(self) -> std::result::Result<std::string::String, anyhow::Error> {
-        let json = serde_json::to_string(self)?;
+impl From<&Entity> for std::result::Result<std::string::String, anyhow::Error> {
+    fn from(entity: &Entity) -> Self {
+        let json = serde_json::to_string(entity)?;
 
         Ok(json)
     }

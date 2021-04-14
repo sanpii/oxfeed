@@ -29,12 +29,12 @@ struct Pager<R: Render> {
     iterator: Vec<R>,
 }
 
-impl<R: crate::Render> Into<elephantry_extras::Pager> for Pager<R> {
-    fn into(self) -> elephantry_extras::Pager {
+impl<R: crate::Render> From<Pager<R>> for elephantry_extras::Pager {
+    fn from(pager: Pager<R>) -> Self {
         elephantry_extras::Pager {
-            count: self.count,
-            page: self.page,
-            max_per_page: self.max_per_page,
+            count: pager.count,
+            page: pager.page,
+            max_per_page: pager.max_per_page,
         }
     }
 }

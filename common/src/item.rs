@@ -12,9 +12,9 @@ pub struct Item {
     pub tags: Vec<String>,
 }
 
-impl Into<std::result::Result<std::string::String, anyhow::Error>> for &Item {
-    fn into(self) -> std::result::Result<std::string::String, anyhow::Error> {
-        let json = serde_json::to_string(self)?;
+impl From<&Item> for std::result::Result<std::string::String, anyhow::Error> {
+    fn from(item: &Item) -> Self {
+        let json = serde_json::to_string(item)?;
 
         Ok(json)
     }

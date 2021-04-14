@@ -27,9 +27,9 @@ impl Default for Entity {
     }
 }
 
-impl Into<std::result::Result<std::string::String, anyhow::Error>> for &Entity {
-    fn into(self) -> std::result::Result<std::string::String, anyhow::Error> {
-        let json = serde_json::to_string(self)?;
+impl From<&Entity> for std::result::Result<std::string::String, anyhow::Error> {
+    fn from(entity: &Entity) -> Self {
+        let json = serde_json::to_string(entity)?;
 
         Ok(json)
     }
@@ -120,6 +120,15 @@ impl elephantry::Structure for Structure {
     }
 
     fn columns() -> &'static [&'static str] {
-        &["source_id", "user_id", "title", "tags", "url", "last_error", "active", "webhooks"]
+        &[
+            "source_id",
+            "user_id",
+            "title",
+            "tags",
+            "url",
+            "last_error",
+            "active",
+            "webhooks",
+        ]
     }
 }

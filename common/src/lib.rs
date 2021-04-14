@@ -1,16 +1,16 @@
 mod errors;
-mod tag;
 pub mod item;
 pub mod new_user;
 pub mod source;
+mod tag;
 pub mod user;
 pub mod webhook;
 
 mod pagination;
 
 pub use errors::*;
-pub use tag::*;
 pub use pagination::*;
+pub use tag::*;
 
 #[derive(Clone, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "elephantry", derive(elephantry::Entity))]
