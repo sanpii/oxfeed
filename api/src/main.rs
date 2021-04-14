@@ -7,7 +7,7 @@ mod update;
 use identity::*;
 
 #[actix_web::main]
-async fn main() -> oxfeed_common::Result<()> {
+async fn main() -> oxfeed_common::Result {
     #[cfg(debug_assertions)]
     dotenv::dotenv().ok();
 

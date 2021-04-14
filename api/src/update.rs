@@ -51,7 +51,7 @@ impl actix::Supervised for Actor {}
 struct Task;
 
 impl Task {
-    fn run(elephantry: &elephantry::Connection) -> oxfeed_common::Result<()> {
+    fn run(elephantry: &elephantry::Connection) -> oxfeed_common::Result {
         let sources = elephantry
             .find_where::<SourceModel>("active = $*", &[&true], None)?
             .collect::<Vec<_>>();
@@ -76,7 +76,7 @@ impl Task {
         Ok(())
     }
 
-    fn fetch(elephantry: &elephantry::Connection, source: &Source) -> oxfeed_common::Result<()> {
+    fn fetch(elephantry: &elephantry::Connection, source: &Source) -> oxfeed_common::Result {
         log::info!("Fetching {}", source.url);
 
         let webhooks = elephantry
@@ -192,7 +192,7 @@ impl Task {
         read
     }
 
-    fn call_webhook(webhook: &Webhook, item: &Item) -> oxfeed_common::Result<()> {
+    fn call_webhook(webhook: &Webhook, item: &Item) -> oxfeed_common::Result {
         log::info!("call webhook '{}'", webhook.name);
 
         let response = attohttpc::RequestBuilder::try_new(attohttpc::Method::POST, &webhook.url)?
