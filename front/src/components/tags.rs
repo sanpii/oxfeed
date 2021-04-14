@@ -61,10 +61,7 @@ impl yew::Component for Component {
             };
         }
 
-        let max = self.tags.iter()
-            .map(|x| x.count)
-            .max()
-            .unwrap_or(1);
+        let max = self.tags.iter().map(|x| x.count).max().unwrap_or(1);
 
         yew::html! {
             <div class=("d-flex", "flex-wrap", "align-items-center", "cloud")>

@@ -109,7 +109,9 @@ impl yew::Component for Component {
     }
 
     fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-        let should_render = self.kind != props.kind || self.filter != props.filter || self.pagination != props.pagination;
+        let should_render = self.kind != props.kind
+            || self.filter != props.filter
+            || self.pagination != props.pagination;
 
         if should_render {
             self.link.send_message(Self::Message::NeedUpdate);

@@ -54,13 +54,15 @@ impl yew::Component for Component {
             Self::Message::Cancel => self.props.on_cancel.emit(()),
             Self::Message::Submit => self.props.on_submit.emit(self.props.source.clone()),
             Self::Message::ToggleActive(active) => self.props.source.active = active,
-            Self::Message::ToggleWebhook(id, active) => if active {
-                if !self.props.source.webhooks.contains(&id) {
-                    self.props.source.webhooks.push(id)
+            Self::Message::ToggleWebhook(id, active) => {
+                if active {
+                    if !self.props.source.webhooks.contains(&id) {
+                        self.props.source.webhooks.push(id)
+                    }
+                } else {
+                    self.props.source.webhooks.retain(|x| x != &id);
                 }
-            } else {
-                self.props.source.webhooks.retain(|x| x != &id);
-            },
+            }
             Self::Message::UpdateTags(tags) => self.props.source.tags = tags,
             Self::Message::UpdateTitle(title) => self.props.source.title = title,
             Self::Message::UpdateUrl(url) => self.props.source.url = url,

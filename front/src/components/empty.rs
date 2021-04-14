@@ -25,10 +25,7 @@ impl yew::Component for Component {
             ),
         ];
 
-        let now = web_sys::window().unwrap()
-            .performance()
-            .unwrap()
-            .now();
+        let now = web_sys::window().unwrap().performance().unwrap().now();
         let choice = now as usize % contents.len();
 
         yew::html! {

@@ -12,9 +12,7 @@ impl yew::Component for Component {
     type Properties = Properties;
 
     fn create(props: Self::Properties, _: yew::ComponentLink<Self>) -> Self {
-        Self {
-            text: props.text,
-        }
+        Self { text: props.text }
     }
 
     fn update(&mut self, _: Self::Message) -> yew::ShouldRender {

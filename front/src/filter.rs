@@ -49,14 +49,17 @@ impl From<String> for Filter {
         let regex = regex::Regex::new(r#"(tag=(?P<tag>[^ ]+))?(?P<q>.*)"#).unwrap();
 
         if let Some(captures) = regex.captures(&query) {
-            q = captures.name("q").map(|x| x.as_str().to_string()).unwrap_or_else(|| query.clone());
-            tag = captures.name("tag").map(|x| x.as_str().to_string()).unwrap_or_default();
+            q = captures
+                .name("q")
+                .map(|x| x.as_str().to_string())
+                .unwrap_or_else(|| query.clone());
+            tag = captures
+                .name("tag")
+                .map(|x| x.as_str().to_string())
+                .unwrap_or_default();
         }
 
-        Self {
-            q,
-            tag,
-        }
+        Self { q, tag }
     }
 }
 

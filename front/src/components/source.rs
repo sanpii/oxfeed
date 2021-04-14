@@ -59,10 +59,12 @@ impl yew::Component for Component {
         match self.scene {
             Scene::View => match msg {
                 Self::Message::Delete => {
-                    let message = format!("Would you like delete '{}' source?", self.props.value.title);
+                    let message =
+                        format!("Would you like delete '{}' source?", self.props.value.title);
 
                     if yew::services::dialog::DialogService::confirm(&message) {
-                        self.api.sources_delete(&self.props.value.source_id.unwrap());
+                        self.api
+                            .sources_delete(&self.props.value.source_id.unwrap());
                     }
                 }
                 Self::Message::Deleted => (),

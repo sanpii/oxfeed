@@ -74,7 +74,8 @@ fn search(
         sql.push_str("order by ts_rank_cd(f.document, websearch_to_tsquery($1))\n");
     }
 
-    let pager = count::<oxfeed_common::item::Item>(&elephantry, &sql, &clause.params(), &query.pagination)?;
+    let pager =
+        count::<oxfeed_common::item::Item>(&elephantry, &sql, &clause.params(), &query.pagination)?;
     let response = actix_web::HttpResponse::Ok().json(pager);
 
     Ok(response)
@@ -130,12 +131,7 @@ fn count<T: elephantry::Entity>(
 
     let items = elephantry.query::<T>(&sql, params)?;
 
-    let pager = elephantry::Pager::new(
-        items,
-        count as usize,
-        pagination.page,
-        pagination.limit,
-    );
+    let pager = elephantry::Pager::new(items, count as usize, pagination.page, pagination.limit);
 
     Ok(pager)
 }

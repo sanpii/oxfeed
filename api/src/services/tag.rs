@@ -1,6 +1,5 @@
 pub(crate) fn scope() -> actix_web::Scope {
-    actix_web::web::scope("/tags")
-        .service(all)
+    actix_web::web::scope("/tags").service(all)
 }
 
 #[actix_web::get("")]
@@ -16,7 +15,7 @@ async fn all(
     let params = clause.params();
 
     let query = format!(
-            r#"
+        r#"
 select unnest(tags) as name, count(*) as count
     from source
     join "user" using (user_id)

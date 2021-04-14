@@ -84,9 +84,10 @@ impl yew::Component for Component {
                 crate::event::Event::Redirect(route) => self.location.set_path(&route),
                 crate::event::Event::Redirected(_) => (),
                 _ => return false,
-            }
+            },
             Self::Message::Index => {
-                self.event_bus.send(crate::event::Event::Redirect("/unread".to_string()));
+                self.event_bus
+                    .send(crate::event::Event::Redirect("/unread".to_string()));
                 return false;
             }
             Self::Message::Websocket(event) => match event {
@@ -95,7 +96,7 @@ impl yew::Component for Component {
                     return false;
                 }
                 WebsocketAction::Status(_) => return false,
-            }
+            },
         }
 
         true

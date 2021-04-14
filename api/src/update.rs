@@ -46,15 +46,14 @@ impl actix::Actor for Actor {
     }
 }
 
-impl actix::Supervised for Actor {
-}
+impl actix::Supervised for Actor {}
 
 struct Task;
 
 impl Task {
     fn run(elephantry: &elephantry::Connection) -> oxfeed_common::Result<()> {
-        let lock_file = std::env::var("LOCK_FILE")
-            .unwrap_or_else(|_| "/var/lock/oxfeed".to_string());
+        let lock_file =
+            std::env::var("LOCK_FILE").unwrap_or_else(|_| "/var/lock/oxfeed".to_string());
         let instance = single_instance::SingleInstance::new(&lock_file).unwrap();
         if !instance.is_single() {
             log::warn!("Already running");
@@ -80,9 +79,10 @@ impl Task {
                 &last_error as &dyn elephantry::ToSql,
             );
 
-            if let Err(err) = elephantry
-                .update_by_pk::<SourceModel>(&elephantry::pk! { source_id => source.source_id }, &data)
-            {
+            if let Err(err) = elephantry.update_by_pk::<SourceModel>(
+                &elephantry::pk! { source_id => source.source_id },
+                &data,
+            ) {
                 log::error!("{}", err);
             }
         });
@@ -95,7 +95,8 @@ impl Task {
     fn fetch(elephantry: &elephantry::Connection, source: &Source) -> oxfeed_common::Result<()> {
         log::info!("Fetching {}", source.url);
 
-        let webhooks = elephantry.find_where::<WebhookModel>("webhook_id = any($*)", &[&source.webhooks], None)?
+        let webhooks = elephantry
+            .find_where::<WebhookModel>("webhook_id = any($*)", &[&source.webhooks], None)?
             .into_vec();
 
         let contents = attohttpc::RequestBuilder::try_new(attohttpc::Method::GET, &source.url)?
@@ -182,7 +183,11 @@ impl Task {
         }
     }
 
-    fn call_webhooks(elephantry: &elephantry::Connection, webhooks: &[Webhook], item: &Item) -> bool {
+    fn call_webhooks(
+        elephantry: &elephantry::Connection,
+        webhooks: &[Webhook],
+        item: &Item,
+    ) -> bool {
         let mut read = false;
 
         for webhook in webhooks {
@@ -190,10 +195,12 @@ impl Task {
                 Ok(_) => read |= webhook.mark_read,
                 Err(err) => {
                     let last_error = err.to_string();
-                    elephantry.update_by_pk::<WebhookModel>(
-                        &elephantry::pk! { webhook_id => webhook.webhook_id },
-                        &elephantry::values!(last_error),
-                    ).ok();
+                    elephantry
+                        .update_by_pk::<WebhookModel>(
+                            &elephantry::pk! { webhook_id => webhook.webhook_id },
+                            &elephantry::values!(last_error),
+                        )
+                        .ok();
                 }
             }
         }
