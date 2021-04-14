@@ -18,20 +18,20 @@ async fn main() -> std::io::Result<()> {
     let port = std::env::var("LISTEN_PORT").expect("Missing LISTEN_IP env variable");
     let bind = format!("{}:{}", ip, port);
 
+    let elephantry = elephantry::Pool::new(&database_url).expect("Unable to connect to postgresql");
+
+    let update = update::Actor::new(&elephantry);
+    let actor = actix_web::web::Data::new(update.start());
+
     actix_web::HttpServer::new(move || {
         let cors = actix_cors::Cors::permissive();
-
-        let elephantry =
-            elephantry::Pool::new(&database_url).expect("Unable to connect to postgresql");
-
-        let update = update::Actor::new(&elephantry);
 
         actix_web::App::new()
             .wrap(actix_web::middleware::NormalizePath::new(
                 actix_web::middleware::normalize::TrailingSlash::Trim,
             ))
-            .data(update.start())
-            .data(elephantry)
+            .data(actor.clone())
+            .data(elephantry.clone())
             .wrap(cors)
             .service(services::auth::scope())
             .service(services::icon::scope())

@@ -52,14 +52,6 @@ struct Task;
 
 impl Task {
     fn run(elephantry: &elephantry::Connection) -> oxfeed_common::Result<()> {
-        let lock_file =
-            std::env::var("LOCK_FILE").unwrap_or_else(|_| "/var/lock/oxfeed".to_string());
-        let instance = single_instance::SingleInstance::new(&lock_file).unwrap();
-        if !instance.is_single() {
-            log::warn!("Already running");
-            return Ok(());
-        }
-
         let sources = elephantry
             .find_where::<SourceModel>("active = $*", &[&true], None)?
             .collect::<Vec<_>>();
@@ -86,8 +78,6 @@ impl Task {
                 log::error!("{}", err);
             }
         });
-
-        std::fs::remove_file(lock_file)?;
 
         Ok(())
     }
