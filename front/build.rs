@@ -1,4 +1,16 @@
 fn main() {
+    #[cfg(debug_assertions)]
+    dotenv::dotenv().ok();
+
+    println!(
+        "cargo:rustc-env=API_URL={}",
+        std::env::var("API_URL").unwrap_or_default()
+    );
+    println!(
+        "cargo:rustc-env=SECRET={}",
+        std::env::var("SECRET").unwrap_or_default()
+    );
+
     let version = match version() {
         Ok(version) => version,
         Err(_) => env!("CARGO_PKG_VERSION").to_string(),

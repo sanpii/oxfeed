@@ -42,6 +42,9 @@ path = "../common/"
 version = "0.3"
 features = ["HtmlDocument", "Performance"]
 
+[build-dependencies]
+dotenv = "0.15"
+
 [build-dependencies.git2]
 version = "0.13"
 default-features = false
