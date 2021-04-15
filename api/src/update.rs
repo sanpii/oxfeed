@@ -101,7 +101,7 @@ impl Task {
                 let title = entry
                     .title
                     .map(|x| x.content)
-                    .unwrap_or_else(|| "<no title>".to_string());
+                    .unwrap_or_else(|| "&lt;no title&gt;".to_string());
 
                 log::info!("Adding '{}'", title);
 
