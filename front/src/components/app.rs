@@ -42,7 +42,7 @@ pub(crate) struct Component {
     link: yew::ComponentLink<Self>,
     location: crate::Location,
     _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
-    _websocket: yew::services::websocket::WebSocketTask,
+    _websocket: Option<yew::services::websocket::WebSocketTask>,
 }
 
 impl yew::Component for Component {
@@ -62,6 +62,15 @@ impl yew::Component for Component {
         let ws_cb = link.callback(|data| Self::Message::Websocket(WebsocketAction::Ready(data)));
         let ws_notif =
             link.callback(|status| Self::Message::Websocket(WebsocketAction::Status(status)));
+        let websocket = match yew::services::websocket::WebSocketService::connect_text(
+            &ws_url, ws_cb, ws_notif,
+        ) {
+            Ok(websocket) => Some(websocket),
+            Err(err) => {
+                log::error!("Unable to connect to websocket: {}", err);
+                None
+            }
+        };
 
         Self {
             auth: true,
@@ -69,10 +78,7 @@ impl yew::Component for Component {
             link,
             location: crate::Location::new(),
             _producer: crate::event::Bus::bridge(event_cb),
-            _websocket: yew::services::websocket::WebSocketService::connect_text(
-                &ws_url, ws_cb, ws_notif,
-            )
-            .unwrap(),
+            _websocket: websocket,
         }
     }
 
