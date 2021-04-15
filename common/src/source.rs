@@ -1,7 +1,12 @@
 #[derive(Clone, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "elephantry", derive(elephantry::Entity))]
+#[cfg_attr(
+    feature = "elephantry",
+    elephantry(model = "Model", structure = "Structure", relation = "public.source")
+)]
 pub struct Entity {
     pub last_error: Option<String>,
+    #[cfg_attr(feature = "elephantry", elephantry(pk))]
     pub source_id: Option<uuid::Uuid>,
     pub tags: Vec<String>,
     pub title: String,
@@ -33,11 +38,6 @@ impl From<&Entity> for std::result::Result<std::string::String, anyhow::Error> {
 
         Ok(json)
     }
-}
-
-#[cfg(feature = "elephantry")]
-pub struct Model<'a> {
-    connection: &'a elephantry::Connection,
 }
 
 #[cfg(feature = "elephantry")]
@@ -93,42 +93,5 @@ select count(*)
         self.connection
             .query::<Entity>(sql, &[source_id, token])
             .map(|x| x.try_get(0))
-    }
-}
-
-#[cfg(feature = "elephantry")]
-impl<'a> elephantry::Model<'a> for Model<'a> {
-    type Entity = Entity;
-    type Structure = Structure;
-
-    fn new(connection: &'a elephantry::Connection) -> Self {
-        Self { connection }
-    }
-}
-
-#[cfg(feature = "elephantry")]
-pub struct Structure;
-
-#[cfg(feature = "elephantry")]
-impl elephantry::Structure for Structure {
-    fn relation() -> &'static str {
-        "public.source"
-    }
-
-    fn primary_key() -> &'static [&'static str] {
-        &["source_id"]
-    }
-
-    fn columns() -> &'static [&'static str] {
-        &[
-            "source_id",
-            "user_id",
-            "title",
-            "tags",
-            "url",
-            "last_error",
-            "active",
-            "webhooks",
-        ]
     }
 }

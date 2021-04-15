@@ -42,7 +42,7 @@ path = "../common/"
 features = ["back"]
 
 [dependencies.elephantry]
-version = "2.0"
+version = "2.1"
 features = ["date", "numeric", "uuid", "serde"]
 
 [dependencies.uuid]

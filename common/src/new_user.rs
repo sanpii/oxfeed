@@ -1,5 +1,9 @@
 #[derive(Clone, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "elephantry", derive(elephantry::Entity))]
+#[cfg_attr(
+    feature = "elephantry",
+    elephantry(model = "Model", structure = "Structure", relation = "public.user")
+)]
 pub struct Entity {
     pub email: String,
     pub password: String,
@@ -10,18 +14,5 @@ impl From<&Entity> for std::result::Result<std::string::String, anyhow::Error> {
         let json = serde_json::to_string(entity)?;
 
         Ok(json)
-    }
-}
-
-#[cfg(feature = "elephantry")]
-pub struct Model;
-
-#[cfg(feature = "elephantry")]
-impl elephantry::Model<'_> for Model {
-    type Entity = Entity;
-    type Structure = crate::user::Structure;
-
-    fn new(_: &elephantry::Connection) -> Self {
-        Self
     }
 }

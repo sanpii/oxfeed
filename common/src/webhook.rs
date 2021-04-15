@@ -1,6 +1,11 @@
 #[derive(Clone, Default, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "elephantry", derive(elephantry::Entity))]
+#[cfg_attr(
+    feature = "elephantry",
+    elephantry(model = "Model", structure = "Structure", relation = "public.webhook")
+)]
 pub struct Entity {
+    #[cfg_attr(feature = "elephantry", elephantry(pk))]
     pub webhook_id: Option<uuid::Uuid>,
     pub user_id: Option<uuid::Uuid>,
     pub name: String,
@@ -15,11 +20,6 @@ impl From<&Entity> for std::result::Result<std::string::String, anyhow::Error> {
 
         Ok(json)
     }
-}
-
-#[cfg(feature = "elephantry")]
-pub struct Model<'a> {
-    connection: &'a elephantry::Connection,
 }
 
 #[cfg(feature = "elephantry")]
@@ -38,40 +38,5 @@ impl<'a> Model<'a> {
     pub fn all(&self, token: &uuid::Uuid) -> elephantry::Result<elephantry::Rows<Entity>> {
         let sql = include_str!("../sql/webhooks.sql");
         self.connection.query::<Entity>(sql, &[token])
-    }
-}
-
-#[cfg(feature = "elephantry")]
-impl<'a> elephantry::Model<'a> for Model<'a> {
-    type Entity = Entity;
-    type Structure = Structure;
-
-    fn new(connection: &'a elephantry::Connection) -> Self {
-        Self { connection }
-    }
-}
-
-#[cfg(feature = "elephantry")]
-pub struct Structure;
-
-#[cfg(feature = "elephantry")]
-impl elephantry::Structure for Structure {
-    fn relation() -> &'static str {
-        "public.webhook"
-    }
-
-    fn primary_key() -> &'static [&'static str] {
-        &["webhook_id"]
-    }
-
-    fn columns() -> &'static [&'static str] {
-        &[
-            "webhook_id",
-            "user_id",
-            "name",
-            "url",
-            "last_error",
-            "mark_read",
-        ]
     }
 }

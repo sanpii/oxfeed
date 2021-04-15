@@ -22,7 +22,12 @@ impl From<&Item> for std::result::Result<std::string::String, anyhow::Error> {
 
 #[derive(serde::Serialize)]
 #[cfg_attr(feature = "elephantry", derive(elephantry::Entity))]
+#[cfg_attr(
+    feature = "elephantry",
+    elephantry(model = "Model", structure = "Structure", relation = "public.item")
+)]
 pub struct Entity {
+    #[cfg_attr(feature = "elephantry", elephantry(pk))]
     pub item_id: Option<uuid::Uuid>,
     pub source_id: uuid::Uuid,
     pub id: String,
@@ -33,11 +38,6 @@ pub struct Entity {
     pub favorite: bool,
     pub published: Option<chrono::DateTime<chrono::offset::Utc>>,
     pub icon: Option<String>,
-}
-
-#[cfg(feature = "elephantry")]
-pub struct Model<'a> {
-    connection: &'a elephantry::Connection,
 }
 
 #[cfg(feature = "elephantry")]
@@ -97,44 +97,5 @@ select count(*)
         self.connection
             .query::<Entity>(sql, &[item_id, token])
             .map(|x| x.try_get(0))
-    }
-}
-
-#[cfg(feature = "elephantry")]
-impl<'a> elephantry::Model<'a> for Model<'a> {
-    type Entity = Entity;
-    type Structure = Structure;
-
-    fn new(connection: &'a elephantry::Connection) -> Self {
-        Self { connection }
-    }
-}
-
-#[cfg(feature = "elephantry")]
-pub struct Structure;
-
-#[cfg(feature = "elephantry")]
-impl elephantry::Structure for Structure {
-    fn relation() -> &'static str {
-        "public.item"
-    }
-
-    fn primary_key() -> &'static [&'static str] {
-        &["item_id"]
-    }
-
-    fn columns() -> &'static [&'static str] {
-        &[
-            "item_id",
-            "source_id",
-            "id",
-            "link",
-            "title",
-            "content",
-            "read",
-            "favorite",
-            "published",
-            "icon",
-        ]
     }
 }
