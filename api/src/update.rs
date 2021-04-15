@@ -73,6 +73,8 @@ impl Task {
             }
         });
 
+        elephantry.execute("refresh materialized view concurrently fts.item")?;
+
         Ok(())
     }
 

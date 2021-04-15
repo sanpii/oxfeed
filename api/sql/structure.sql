@@ -106,7 +106,7 @@ create materialized view if not exists fts.item as
         || setweight(to_tsvector(coalesce(item.content, '')), 'B') as document
         from item;
 
-create index if not exists fts_item_item_id on fts.item(item_id);
+create unique index if not exists fts_item_item_id on fts.item(item_id);
 create index if not exists fts_item_document on fts.item using gin(document);
 
 commit;
