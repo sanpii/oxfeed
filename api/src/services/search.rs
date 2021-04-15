@@ -71,7 +71,7 @@ fn search(
     sql.push_str(&format!("where {}\n", clause.to_string()));
 
     if query.q.is_some() {
-        sql.push_str("order by ts_rank_cd(f.document, websearch_to_tsquery($1))\n");
+        sql.push_str("order by ts_rank_cd(f.document, websearch_to_tsquery($1)) desc\n");
     }
 
     let pager =
