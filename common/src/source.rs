@@ -6,8 +6,8 @@
 )]
 pub struct Entity {
     pub last_error: Option<String>,
-    #[cfg_attr(feature = "elephantry", elephantry(pk))]
-    pub source_id: Option<uuid::Uuid>,
+    #[cfg_attr(feature = "elephantry", elephantry(pk, column = "source_id"))]
+    pub id: Option<uuid::Uuid>,
     pub tags: Vec<String>,
     pub title: String,
     pub url: String,
@@ -21,7 +21,7 @@ impl Default for Entity {
     fn default() -> Self {
         Self {
             last_error: None,
-            source_id: None,
+            id: None,
             tags: Vec::new(),
             title: String::new(),
             url: String::new(),

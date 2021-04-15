@@ -63,8 +63,7 @@ impl yew::Component for Component {
                         format!("Would you like delete '{}' source?", self.props.value.title);
 
                     if yew::services::dialog::DialogService::confirm(&message) {
-                        self.api
-                            .sources_delete(&self.props.value.source_id.unwrap());
+                        self.api.sources_delete(&self.props.value.id.unwrap());
                     }
                 }
                 Self::Message::Deleted => (),
@@ -75,7 +74,7 @@ impl yew::Component for Component {
                 Self::Message::ToggleActive(active) => {
                     self.props.value.active = active;
                     self.api
-                        .sources_update(&self.props.value.source_id.unwrap(), &self.props.value);
+                        .sources_update(&self.props.value.id.unwrap(), &self.props.value);
                     return true;
                 }
                 _ => (),
@@ -88,7 +87,7 @@ impl yew::Component for Component {
                 Self::Message::Save(source) => {
                     self.props.value = source;
                     self.api
-                        .sources_update(&self.props.value.source_id.unwrap(), &self.props.value);
+                        .sources_update(&self.props.value.id.unwrap(), &self.props.value);
                     return true;
                 }
                 _ => unreachable!(),
@@ -114,7 +113,7 @@ impl yew::Component for Component {
                     <>
                         <div class="d-inline-flex">
                             <super::Switch
-                                id=format!("active-{}", source.source_id.unwrap_or_default().to_string())
+                                id=format!("active-{}", source.id.unwrap_or_default().to_string())
                                 active=source.active
                                 on_toggle=self.link.callback(Self::Message::ToggleActive)
                             />

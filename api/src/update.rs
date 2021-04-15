@@ -66,7 +66,7 @@ impl Task {
             };
 
             if let Err(err) = elephantry.update_by_pk::<SourceModel>(
-                &elephantry::pk! { source_id => source.source_id },
+                &elephantry::pk! { source_id => source.id },
                 &elephantry::values!(last_error),
             ) {
                 log::error!("{}", err);
@@ -92,10 +92,8 @@ impl Task {
         for entry in feed.entries {
             let link = entry.links[0].href.clone();
 
-            let exist = elephantry.exist_where::<ItemModel>(
-                "link = $* and source_id = $*",
-                &[&link, &source.source_id],
-            )?;
+            let exist = elephantry
+                .exist_where::<ItemModel>("link = $* and source_id = $*", &[&link, &source.id])?;
 
             if !exist {
                 let title = entry
@@ -111,14 +109,14 @@ impl Task {
                 };
 
                 let mut item = Item {
-                    item_id: None,
-                    id: entry.id,
+                    id: None,
+                    feed_id: entry.id,
                     icon: feed_icon.clone().or_else(|| Self::icon(&link)),
                     content,
                     title,
                     published: entry.published,
                     read: false,
-                    source_id: source.source_id.unwrap(),
+                    source_id: source.id.unwrap(),
                     link,
                     favorite: false,
                 };
@@ -181,7 +179,7 @@ impl Task {
                     let last_error = err.to_string();
                     elephantry
                         .update_by_pk::<WebhookModel>(
-                            &elephantry::pk! { webhook_id => webhook.webhook_id },
+                            &elephantry::pk! { webhook_id => webhook.id },
                             &elephantry::values!(last_error),
                         )
                         .ok();

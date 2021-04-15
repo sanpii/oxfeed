@@ -57,7 +57,7 @@ async fn create(
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
     };
 
-    data.user_id = Some(user.user_id);
+    data.user_id = Some(user.id);
     let source = elephantry.insert_one::<Model>(&data.into_inner().try_into()?)?;
     let response = actix_web::HttpResponse::Ok().json(source);
 
@@ -67,11 +67,11 @@ async fn create(
 #[actix_web::get("/{source_id}")]
 async fn get(
     elephantry: Data<elephantry::Pool>,
-    item_id: Path<uuid::Uuid>,
+    source_id: Path<uuid::Uuid>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = identity.token(&elephantry)?;
-    let response = match elephantry.model::<Model>().one(&item_id, &token)? {
+    let response = match elephantry.model::<Model>().one(&source_id, &token)? {
         Some(source) => actix_web::HttpResponse::Ok().json(source),
         None => actix_web::HttpResponse::NotFound().finish(),
     };
@@ -123,7 +123,7 @@ async fn update(
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
     };
 
-    data.user_id = Some(user.user_id);
+    data.user_id = Some(user.id);
     let source_id = Some(path.into_inner());
     let pk = elephantry::pk!(source_id);
     let source = elephantry.update_one::<Model>(&pk, &data.into_inner().try_into()?)?;

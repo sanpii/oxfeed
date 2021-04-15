@@ -5,8 +5,8 @@
     elephantry(model = "Model", structure = "Structure", relation = "public.webhook")
 )]
 pub struct Entity {
-    #[cfg_attr(feature = "elephantry", elephantry(pk))]
-    pub webhook_id: Option<uuid::Uuid>,
+    #[cfg_attr(feature = "elephantry", elephantry(pk, column = "webhook_id"))]
+    pub id: Option<uuid::Uuid>,
     pub user_id: Option<uuid::Uuid>,
     pub name: String,
     pub url: String,

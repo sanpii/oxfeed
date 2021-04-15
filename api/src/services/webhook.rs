@@ -39,7 +39,7 @@ async fn create(
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
     };
 
-    data.user_id = Some(user.user_id);
+    data.user_id = Some(user.id);
     let webhook = elephantry.insert_one::<Model>(&data.into_inner().try_into()?)?;
     let response = actix_web::HttpResponse::Ok().json(webhook);
 
@@ -81,7 +81,7 @@ async fn update(
         None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
     };
 
-    data.user_id = Some(user.user_id);
+    data.user_id = Some(user.id);
     let webhook_id = Some(path.into_inner());
     let pk = elephantry::pk!(webhook_id);
     let webhook = elephantry.update_one::<Model>(&pk, &data.into_inner().try_into()?)?;

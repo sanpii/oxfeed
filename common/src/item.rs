@@ -1,7 +1,8 @@
 #[derive(Clone, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "elephantry", derive(elephantry::Entity))]
 pub struct Item {
-    pub item_id: uuid::Uuid,
+    #[cfg_attr(feature = "elephantry", elephantry(column = "item_id"))]
+    pub id: uuid::Uuid,
     pub link: String,
     pub published: chrono::DateTime<chrono::offset::Utc>,
     pub title: String,
@@ -27,10 +28,11 @@ impl From<&Item> for std::result::Result<std::string::String, anyhow::Error> {
     elephantry(model = "Model", structure = "Structure", relation = "public.item")
 )]
 pub struct Entity {
-    #[cfg_attr(feature = "elephantry", elephantry(pk))]
-    pub item_id: Option<uuid::Uuid>,
+    #[cfg_attr(feature = "elephantry", elephantry(pk, column = "item_id"))]
+    pub id: Option<uuid::Uuid>,
     pub source_id: uuid::Uuid,
-    pub id: String,
+    #[cfg_attr(feature = "elephantry", elephantry(column = "id"))]
+    pub feed_id: String,
     pub link: String,
     pub title: String,
     pub content: Option<String>,

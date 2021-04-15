@@ -68,14 +68,12 @@ fn source_try_from(
     }
 
     let entity = oxfeed_common::source::Entity {
-        last_error: None,
-        source_id: None,
         tags,
         title: outline.text.clone(),
         url,
-        user_id: user.user_id,
-        active: true,
-        webhooks: Vec::new(),
+        user_id: user.id,
+
+        ..Default::default()
     };
 
     Ok(entity)

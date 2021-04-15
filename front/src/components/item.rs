@@ -68,17 +68,14 @@ impl yew::Component for Component {
                 self.scene = !self.scene;
 
                 if self.scene == Scene::Expanded && self.content.is_none() {
-                    self.api.items_content(&self.item.item_id);
+                    self.api.items_content(&self.item.id);
                 }
             }
             Self::Message::ToggleFavorite => {
                 self.api
-                    .items_tag(&self.item.item_id, "favorite", !self.item.favorite)
+                    .items_tag(&self.item.id, "favorite", !self.item.favorite)
             }
-            Self::Message::ToggleRead => {
-                self.api
-                    .items_tag(&self.item.item_id, "read", !self.item.read)
-            }
+            Self::Message::ToggleRead => self.api.items_tag(&self.item.id, "read", !self.item.read),
             Self::Message::Toggled => (),
         }
 

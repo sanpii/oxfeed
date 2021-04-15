@@ -1,6 +1,6 @@
 #[derive(serde::Deserialize)]
 pub(crate) struct Source {
-    source_id: Option<uuid::Uuid>,
+    id: Option<uuid::Uuid>,
     #[serde(default)]
     pub user_id: Option<uuid::Uuid>,
     url: String,
@@ -28,7 +28,7 @@ impl std::convert::TryInto<oxfeed_common::source::Entity> for Source {
 
         let entity = oxfeed_common::source::Entity {
             last_error: None,
-            source_id: self.source_id,
+            id: self.id,
             tags: self.tags,
             title,
             url: self.url.clone(),
@@ -86,7 +86,7 @@ impl Source {
 #[derive(serde::Deserialize)]
 pub(crate) struct Webhook {
     #[serde(default)]
-    webhook_id: Option<uuid::Uuid>,
+    id: Option<uuid::Uuid>,
     #[serde(default)]
     pub user_id: Option<uuid::Uuid>,
     url: String,
@@ -104,7 +104,7 @@ impl std::convert::TryInto<oxfeed_common::webhook::Entity> for Webhook {
         };
 
         let entity = oxfeed_common::webhook::Entity {
-            webhook_id: self.webhook_id,
+            id: self.id,
             name: self.name.clone(),
             url: self.url.clone(),
             user_id,

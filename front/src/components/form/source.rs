@@ -115,7 +115,7 @@ impl yew::Component for Component {
                                 <div class="d-inline-flex">
                                 {
                                     for self.webhooks.iter().map(move |webhook| {
-                                        let id = webhook.webhook_id.unwrap_or_default();
+                                        let id = webhook.id.unwrap_or_default();
                                         let active = self.props.source.webhooks.contains(&id);
 
                                         yew::html! {

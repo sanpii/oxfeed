@@ -55,7 +55,7 @@ impl yew::Component for Component {
                     let message = format!("Would you like delete '{}' webhook?", self.value.name);
 
                     if yew::services::dialog::DialogService::confirm(&message) {
-                        self.api.webhooks_delete(&self.value.webhook_id.unwrap());
+                        self.api.webhooks_delete(&self.value.id.unwrap());
                     }
                 }
                 Self::Message::Deleted => (),
@@ -73,7 +73,7 @@ impl yew::Component for Component {
                 Self::Message::Save(webhook) => {
                     self.value = webhook;
                     self.api
-                        .webhooks_update(&self.value.webhook_id.unwrap(), &self.value);
+                        .webhooks_update(&self.value.id.unwrap(), &self.value);
                     return true;
                 }
                 Self::Message::Saved(webhook) => {
