@@ -4,6 +4,15 @@ Feed reader.
 
 ![Screenshot](screenshot.png)
 
+## Demo
+
+<https://oxfeed.homecomputing.fr/>
+
+- email: `demo`
+- password: `demo`
+
+This is a read-only demo: you can only read/unread and fav/unfav item.
+
 ## Compilation
 
 ```
