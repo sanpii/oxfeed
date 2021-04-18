@@ -44,6 +44,13 @@ yarn: front/static/lib
 front/static/lib: front/package.json
 	cd front && $(YARN) $(YARN_FLAGS) install
 
-serve: front
-	microserver front/static/
+serve: serve_api serve_front
 .PHONY: server
+
+serve_api:
+	$(CARGO) $(CARGO_FLAGS) run --package oxfeed-api
+.PHONY: serve_api
+
+serve_front: front
+	microserver front/static/
+.PHONY: serve_front
