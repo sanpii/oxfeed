@@ -58,7 +58,7 @@ select *
     from source
     join "user" using (user_id)
     where {}
-    order by last_error, title
+    order by last_error is null, title
     {}
         "#,
             clause.to_string(),
