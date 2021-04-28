@@ -31,7 +31,7 @@ version = "0.1"
 features = ["yew-pager"]
 
 [dependencies.chrono-humanize]
-version = "0.1.2"
+version = "0.2"
 features = ["wasmbind"]
 
 [dependencies.oxfeed-common]
