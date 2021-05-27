@@ -90,7 +90,7 @@ impl yew::Component for Component {
                 if matches!(self.scene, Scene::View) {
                     yew::html! {
                         <a
-                            class=("btn", "btn-primary")
+                            class=yew::classes!("btn", "btn-primary")
                             title="Add"
                             onclick=self.link.callback(|_| Message::Add)
                         >

@@ -111,7 +111,7 @@ impl yew::Component for Component {
         let add = match &self.scene {
             Scene::View => yew::html! {
                 <a
-                    class=("btn", "btn-primary")
+                    class=yew::classes!("btn", "btn-primary")
                     title="Add"
                     onclick=self.link.callback(|_| Message::Add)
                 >
@@ -145,7 +145,7 @@ impl yew::Component for Component {
             <>
                 { add }
                 <super::List<oxfeed_common::source::Entity>
-                    value=pager
+                    value=pager.clone()
                     on_page_change=self.link.callback(Self::Message::PageChange)
                 />
             </>

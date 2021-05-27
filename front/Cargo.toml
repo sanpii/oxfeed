@@ -23,11 +23,11 @@ uuid = "0.8"
 wasm-bindgen = "0.2"
 wasm-cookies = "0.1"
 wasm-logger = "0.2"
-yew = "0.17"
-yew-router = "0.14"
+yew = "0.18"
+yew-router = "0.15"
 
 [dependencies.elephantry-extras]
-version = "0.1"
+version = "0.2"
 features = ["yew-pager"]
 
 [dependencies.chrono-humanize]

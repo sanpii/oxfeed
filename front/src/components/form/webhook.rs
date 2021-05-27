@@ -47,7 +47,7 @@ impl yew::Component for Component {
                         class="form-control"
                         name="name"
                         required=true
-                        value={ &self.props.webhook.name }
+                        value=self.props.webhook.name.clone()
                         oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateName(e.value))
                     />
                 </div>
@@ -58,7 +58,7 @@ impl yew::Component for Component {
                         class="form-control"
                         name="url"
                         required=true
-                        value={ &self.props.webhook.url }
+                        value=self.props.webhook.url.clone()
                         oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateUrl(e.value))
                     />
                 </div>
@@ -73,7 +73,7 @@ impl yew::Component for Component {
                 </div>
 
                 <a
-                    class=("btn", "btn-primary")
+                    class=yew::classes!("btn", "btn-primary")
                     title="Save"
                     onclick=self.link.callback(|_| Self::Message::Submit)
                 >
@@ -82,7 +82,7 @@ impl yew::Component for Component {
                 </a>
 
                 <a
-                    class=("btn", "btn-secondary")
+                    class=yew::classes!("btn", "btn-secondary")
                     title="Cancel"
                     onclick=self.link.callback(|_| Self::Message::Cancel)
                 >

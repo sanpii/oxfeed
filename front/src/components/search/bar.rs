@@ -58,9 +58,9 @@ impl yew::Component for Component {
         } else {
             yew::html! {
                 <input
-                    class=("form-control", "form-control-dark")
+                    class=yew::classes!("form-control", "form-control-dark")
                     type="text"
-                    value=self.filter.to_string(),
+                    value=self.filter.to_string()
                     placeholder="Search"
                     aria-label="Search"
                     oninput=self.link.callback(|e: yew::InputData| Self::Message::Input(e.value))

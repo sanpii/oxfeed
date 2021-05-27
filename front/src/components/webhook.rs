@@ -116,16 +116,16 @@ impl yew::Component for Component {
                             }
                         </div>
 
-                        <div class=("btn-group", "float-right")>
+                        <div class=yew::classes!("btn-group", "float-right")>
                             <button
-                                class=("btn", "btn-primary")
+                                class=yew::classes!("btn", "btn-primary")
                                 title="Edit"
                                 onclick=self.link.callback(move |_| Self::Message::Edit)
                             >
                                 <super::Svg icon="pencil-square" size=16 />
                             </button>
                             <button
-                                class=("btn", "btn-danger")
+                                class=yew::classes!("btn", "btn-danger")
                                 title="Delete"
                                 onclick=self.link.callback(|_| Message::Delete)
                             >

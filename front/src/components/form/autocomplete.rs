@@ -120,7 +120,7 @@ impl yew::Component for Component {
             <div class="autocomplete">
                 <input
                     type="text"
-                    value=self.value
+                    value=self.value.clone()
                     oninput=self.link.callback(|e: yew::InputData| Self::Message::Input(e.value))
                     onkeydown=self.link.callback(|e: yew::KeyboardEvent| Self::Message::Key(e.key()))
                 />
@@ -132,7 +132,7 @@ impl yew::Component for Component {
                                 for self.terms.iter().enumerate().map(|(idx, term)| {
                                     yew::html! {
                                         <div
-                                            class=("list-group-item", "list-group-item-action", if self.active == Some(idx) { "active" } else { "" })
+                                            class=yew::classes!("list-group-item", "list-group-item-action", if self.active == Some(idx) { "active" } else { "" })
                                             onclick=self.link.callback(move |_| Self::Message::Choose(idx))
                                         >{ term }</div>
                                     }

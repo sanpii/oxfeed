@@ -102,7 +102,7 @@ impl yew::Component for Component {
 
         yew::html! {
             <super::List<oxfeed_common::item::Item>
-                value=pager
+                value=pager.clone()
                 on_page_change=self.link.callback(Self::Message::PageChange)
             />
         }

@@ -132,11 +132,11 @@ impl yew::Component for Component {
                             }
                         </div>
 
-                        <div class=("btn-group", "float-right")>
+                        <div class=yew::classes!("btn-group", "float-right")>
                             {
                                 if !source.webhooks.is_empty() {
                                     yew::html! {
-                                        <button class=("btn", "btn-warning") disabled=true>
+                                        <button class=yew::classes!("btn", "btn-warning") disabled=true>
                                             <super::Svg icon="plug" size=16 />
                                         </button>
                                     }
@@ -145,14 +145,14 @@ impl yew::Component for Component {
                                 }
                             }
                             <button
-                                class=("btn", "btn-primary")
+                                class=yew::classes!("btn", "btn-primary")
                                 title="Edit"
                                 onclick=self.link.callback(move |_| Message::Edit)
                             >
                                 <super::Svg icon="pencil-square" size=16 />
                             </button>
                             <button
-                                class=("btn", "btn-danger")
+                                class=yew::classes!("btn", "btn-danger")
                                 title="Delete"
                                 onclick=self.link.callback(|_| Message::Delete)
                             >
@@ -163,7 +163,7 @@ impl yew::Component for Component {
                         <div class="tags">
                         {
                             for source.tags.iter().map(|tag| {
-                                yew::html! { <super::Tag value=tag /> }
+                                yew::html! { <super::Tag value=tag.clone() /> }
                             })
                         }
                         </div>

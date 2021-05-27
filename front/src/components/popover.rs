@@ -30,7 +30,7 @@ impl yew::Component for Component {
         let node = yew::virtual_dom::VNode::VRef(span.into());
 
         yew::html! {
-            <div class=("popover", position_class)>
+            <div class=yew::classes!("popover", position_class)>
                 <div class="arrow"></div>
                 {
                     if let Some(title) = &self.props.title {

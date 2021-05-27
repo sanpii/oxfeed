@@ -39,15 +39,15 @@ impl yew::Component for Component {
 
     fn view(&self) -> yew::Html {
         yew::html! {
-            <div class=("custom-control", "custom-switch")>
+            <div class=yew::classes!("custom-control", "custom-switch")>
                 <input
-                    id=self.props.id
+                    id=self.props.id.clone()
                     type="checkbox"
                     class="custom-control-input"
                     checked=self.props.active
                     onclick=self.link.callback(|_| Self::Message::Toggle)
                 />
-                <label class="custom-control-label" for=self.props.id>{ &self.props.label }</label>
+                <label class="custom-control-label" for=self.props.id.clone()>{ &self.props.label }</label>
             </div>
         }
     }

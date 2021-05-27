@@ -50,7 +50,7 @@ impl yew::Component for Component {
 
         if self.props.inline {
             yew::html! {
-                <div class=("actions", "inline")>
+                <div class=yew::classes!("actions", "inline")>
                     <span onclick=self.link.callback(|_| Self::Message::ToggleRead) title=read_label>
                         <super::Svg icon=eye size=24 />
                     </span>
@@ -62,11 +62,11 @@ impl yew::Component for Component {
         } else {
             yew::html! {
                 <div class="actions">
-                    <button class=("btn", "btn-outline-secondary") onclick=self.link.callback(|_| Self::Message::ToggleRead)>
+                    <button class=yew::classes!("btn", "btn-outline-secondary") onclick=self.link.callback(|_| Self::Message::ToggleRead)>
                         <super::Svg icon=eye size=24 />
                         { read_label }
                     </button>
-                    <button class=("btn", "btn-outline-warning") onclick=self.link.callback(|_| Self::Message::ToggleFavorite)>
+                    <button class=yew::classes!("btn", "btn-outline-warning") onclick=self.link.callback(|_| Self::Message::ToggleFavorite)>
                         <super::Svg icon=star size=24 />
                         { favorite_label }
                     </button>

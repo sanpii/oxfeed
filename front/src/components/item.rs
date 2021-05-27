@@ -110,7 +110,7 @@ impl yew::Component for Component {
                 </a>
                 {
                     for self.item.tags.iter().map(|tag| {
-                        yew::html! { <super::Tag value=tag /> }
+                        yew::html! { <super::Tag value=tag.clone() /> }
                     })
                 }
                 <span class="text-muted">{ "· " }{ &self.item.source }</span>

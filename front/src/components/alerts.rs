@@ -47,7 +47,7 @@ impl yew::Component for Component {
             {
                 for self.messages.iter().enumerate().map(|(idx, alert)| {
                     yew::html! {
-                        <div class=("alert", format!("alert-{}", alert.severity()), "alert-dismissible") role="alert">
+                        <div class=yew::classes!("alert", format!("alert-{}", alert.severity()), "alert-dismissible") role="alert">
                             { &alert.message }
 
                             <button class="close">

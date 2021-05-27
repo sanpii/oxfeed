@@ -72,7 +72,7 @@ impl yew::Component for Component {
                     oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdatePassword(e.value))
                 />
                 <a
-                    class=("btn", "btn-lg", "btn-primary", "btn-block")
+                    class=yew::classes!("btn", "btn-lg", "btn-primary", "btn-block")
                     type="submit"
                     onclick=self.link.callback(|_| Self::Message::Submit)
                 >{ "Register" }</a>

@@ -21,7 +21,6 @@ pub(crate) struct Component {
     files: Vec<yew::web_sys::File>,
     link: yew::ComponentLink<Self>,
     tasks: Vec<yew::services::reader::ReaderTask>,
-    reader: yew::services::reader::ReaderService,
 }
 
 impl Component {
@@ -30,7 +29,7 @@ impl Component {
             let callback = self
                 .link
                 .callback(|e: yew::services::reader::FileData| Message::Loaded(e.content));
-            let task = self.reader.read_file(file.clone(), callback).unwrap();
+            let task = yew::services::reader::ReaderService::read_file(file.clone(), callback).unwrap();
             self.tasks.push(task);
         }
     }
@@ -54,7 +53,6 @@ impl yew::Component for Component {
             files: Vec::new(),
             link,
             tasks: Vec::new(),
-            reader: yew::services::reader::ReaderService::new(),
         }
     }
 
@@ -106,14 +104,14 @@ impl yew::Component for Component {
                     </div>
                     <div class="input-group-append">
                         <button
-                            class=("btn", "btn-outline-primary")
+                            class=yew::classes!("btn", "btn-outline-primary")
                             type="button"
                             onclick=self.link.callback(|_| Self::Message::Import)
                         >{ "Import" }</button>
                     </div>
                 </div>
-                <div class=("input-group", "export")>
-                    <a href=export_url class=("btn", "btn-outline-primary")>{ "Export" }</a>
+                <div class=yew::classes!("input-group", "export")>
+                    <a href=export_url class=yew::classes!("btn", "btn-outline-primary")>{ "Export" }</a>
                 </div>
             </>
         }

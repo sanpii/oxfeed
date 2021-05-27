@@ -59,7 +59,7 @@ impl yew::Component for Component {
                     for self.values.iter().enumerate().map(|(idx, tag)| {
                         yew::html! {
                             <crate::components::Tag
-                                value=tag
+                                value=tag.clone()
                                 editable=true
                                 on_click=self.link.callback(move |_| Self::Message::Remove(idx))
                             />

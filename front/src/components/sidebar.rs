@@ -154,7 +154,7 @@ impl yew::Component for Component {
         yew::html! {
             <>
                 <button
-                    class=("btn", "btn-primary")
+                    class=yew::classes!("btn", "btn-primary")
                     onclick=self.link.callback(|_| Self::Message::ReadAll)
                 >{ "Mark all as read" }</button>
                 <ul class="nav flex-column">

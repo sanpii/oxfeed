@@ -64,7 +64,7 @@ impl yew::Component for Component {
         let max = self.tags.iter().map(|x| x.count).max().unwrap_or(1);
 
         yew::html! {
-            <div class=("d-flex", "flex-wrap", "align-items-center", "cloud")>
+            <div class=yew::classes!("d-flex", "flex-wrap", "align-items-center", "cloud")>
             {
                 for self.tags.iter().map(|tag| {
                     let style = format!("font-size: {}rem", tag.count as f32 / max as f32 * 5. + 1.);
@@ -73,7 +73,7 @@ impl yew::Component for Component {
                     yew::html! {
                         <div style=style>
                             <a href=href>
-                                <crate::components::Tag value=&tag.name />
+                                <crate::components::Tag value=tag.name.clone() />
                             </a>
                         </div>
                     }

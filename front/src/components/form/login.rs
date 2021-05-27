@@ -83,13 +83,13 @@ impl yew::Component for Component {
                     <label>
                         <input
                             type="checkbox"
-                            value=self.remember_me
+                            checked=self.remember_me
                             onclick=self.link.callback(|_| Self::Message::ToggleRemember)
                         />{ " Remember me" }
                     </label>
                 </div>
                 <a
-                    class=("btn", "btn-lg", "btn-primary", "btn-block")
+                    class=yew::classes!("btn", "btn-lg", "btn-primary", "btn-block")
                     type="submit"
                     onclick=self.link.callback(|_| Self::Message::Submit)
                 >{ "Sign in" }</a>
