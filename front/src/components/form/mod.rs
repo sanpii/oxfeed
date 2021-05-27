@@ -1,11 +1,13 @@
 pub(crate) mod login;
 pub(crate) mod register;
 
+mod account;
 mod autocomplete;
 mod source;
 mod tags;
 mod webhook;
 
+pub(crate) use account::Component as Account;
 pub(crate) use autocomplete::Component as Autocomplete;
 pub(crate) use login::Component as Login;
 pub(crate) use register::Component as Register;

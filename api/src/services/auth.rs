@@ -1,7 +1,22 @@
 pub(crate) fn scope() -> actix_web::Scope {
     actix_web::web::scope("/auth")
+        .service(get)
         .service(login)
         .service(logout)
+}
+
+#[actix_web::get("")]
+async fn get(
+    elephantry: actix_web::web::Data<elephantry::Pool>,
+    identity: crate::Identity,
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
+    let token = identity.token(&elephantry)?;
+    let user = elephantry.model::<oxfeed_common::user::Model>()
+        .find_from_token(&token);
+
+    let response = actix_web::HttpResponse::Ok().json(&user);
+
+    Ok(response)
 }
 
 #[actix_web::post("/login")]

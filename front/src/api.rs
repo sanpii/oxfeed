@@ -29,6 +29,10 @@ impl Api {
         Self::fetch(Method::GET, "/counts", ()).await
     }
 
+    pub async fn auth() -> oxfeed_common::Result<oxfeed_common::user::Entity> {
+        Self::fetch(Method::GET, "/auth", ()).await
+    }
+
     pub async fn auth_login(
         email: &str,
         password: &str,
@@ -175,8 +179,16 @@ impl Api {
         Self::fetch(Method::GET, &url, ()).await
     }
 
-    pub async fn user_create(user: &oxfeed_common::new_user::Entity) -> oxfeed_common::Result {
-        Self::fetch(Method::POST, "/users", user).await
+    pub async fn account_create(user: &oxfeed_common::account::Entity) -> oxfeed_common::Result {
+        Self::fetch(Method::POST, "/account", user).await
+    }
+
+    pub async fn account_delete() -> oxfeed_common::Result {
+        Self::fetch(Method::DELETE, "/account", ()).await
+    }
+
+    pub async fn account_update(account: &oxfeed_common::account::Entity) -> oxfeed_common::Result {
+        Self::fetch(Method::PUT, "/account", account).await
     }
 
     pub async fn webhooks_all() -> oxfeed_common::Result<Vec<oxfeed_common::webhook::Entity>> {
@@ -293,6 +305,6 @@ macro_rules! body_impl {
     }
 }
 
-body_impl!(oxfeed_common::new_user::Entity);
+body_impl!(oxfeed_common::account::Entity);
 body_impl!(oxfeed_common::source::Entity);
 body_impl!(oxfeed_common::webhook::Entity);

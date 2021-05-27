@@ -46,14 +46,15 @@ impl yew::Component for Component {
                 ctx.link().send_message(Message::Cancel);
             }
             Message::Create(info) => {
-                let user = oxfeed_common::new_user::Entity {
+                let user = oxfeed_common::account::Entity {
+                    id: None,
                     password: info.password,
                     email: info.email,
                 };
 
                 crate::api!(
                     ctx.link(),
-                    user_create(user) -> |_| Message::UserCreated
+                    account_create(user) -> |_| Message::UserCreated
                 );
             }
             Message::Login(info) => {

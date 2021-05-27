@@ -1,3 +1,4 @@
+mod account;
 mod opml;
 mod webhooks;
 
@@ -37,6 +38,12 @@ impl yew::Component for Component {
                     <div class="card-header">{ "OPML" }</div>
                     <div class="card-body">
                         <opml::Component />
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">{ "Account" }</div>
+                    <div class="card-body">
+                        <account::Component />
                     </div>
                 </div>
             </>
