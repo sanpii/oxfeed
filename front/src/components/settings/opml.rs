@@ -73,44 +73,30 @@ impl yew::Component for Component {
 
     fn view(&self) -> yew::Html {
         let export_url = format!("{}/opml", env!("API_URL"));
-        let label = if self.files.is_empty() {
-            "Choose a file".to_string()
-        } else {
-            self.files
-                .iter()
-                .map(|x| x.name())
-                .collect::<Vec<_>>()
-                .join(",")
-        };
 
         yew::html! {
             <>
-                <div class="input-group">
-                    <div class="custom-file">
-                        <input type="file" class="custom-file-input" onchange=self.link.callback(|value| {
-                            let mut files = Vec::new();
+                <div class="input-group mb-3">
+                    <input type="file" class="form-control" onchange=self.link.callback(|value| {
+                        let mut files = Vec::new();
 
-                            if let yew::ChangeData::Files(file_list) = value {
-                                for x in 0..file_list.length() {
-                                    if let Some(file) = file_list.get(x) {
-                                        files.push(file);
-                                    }
+                        if let yew::ChangeData::Files(file_list) = value {
+                            for x in 0..file_list.length() {
+                                if let Some(file) = file_list.get(x) {
+                                    files.push(file);
                                 }
                             }
+                        }
 
-                            Self::Message::Files(files)
-                        }) />
-                        <label class="custom-file-label">{ label }</label>
-                    </div>
-                    <div class="input-group-append">
-                        <button
-                            class=yew::classes!("btn", "btn-outline-primary")
-                            type="button"
-                            onclick=self.link.callback(|_| Self::Message::Import)
-                        >{ "Import" }</button>
-                    </div>
+                        Self::Message::Files(files)
+                    }) />
+                    <button
+                        class=yew::classes!("btn", "btn-outline-primary")
+                        type="button"
+                        onclick=self.link.callback(|_| Self::Message::Import)
+                    >{ "Import" }</button>
                 </div>
-                <div class=yew::classes!("input-group", "export")>
+                <div class="input-group">
                     <a href=export_url class=yew::classes!("btn", "btn-outline-primary")>{ "Export" }</a>
                 </div>
             </>

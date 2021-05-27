@@ -76,7 +76,7 @@ impl yew::Component for Component {
         yew::html! {
             <form>
                 <div class="from-group">
-                    <label for="title">{ "Title" }</label>
+                    <label class="form-label" for="title">{ "Title" }</label>
                     <input
                         class="form-control"
                         name="title"
@@ -87,7 +87,7 @@ impl yew::Component for Component {
                 </div>
 
                 <div class="from-group">
-                    <label for="url">{ "Feed URL" }</label>
+                    <label class="form-label" for="url">{ "Feed URL" }</label>
                     <input
                         class="form-control"
                         name="url"
@@ -98,7 +98,7 @@ impl yew::Component for Component {
                 </div>
 
                 <div class="from-group">
-                    <label for="tags">{ "Tags" }</label>
+                    <label class="form-label" for="tags">{ "Tags" }</label>
                     <super::Tags
                         values=self.props.source.tags.clone()
                         on_change=self.link.callback(Self::Message::UpdateTags)
@@ -110,7 +110,7 @@ impl yew::Component for Component {
                         yew::html! {
                             <div class="from-group">
                                 <div>
-                                    <label for="webhooks">{ "Webhooks" }</label>
+                                    <label class="form-label" for="webhooks">{ "Webhooks" }</label>
                                 </div>
                                 <div class="d-inline-flex">
                                 {
@@ -137,7 +137,7 @@ impl yew::Component for Component {
                 }
 
                 <div class="from-group">
-                    <label for="active">{ "Active" }</label>
+                    <label class="form-label" for="active">{ "Active" }</label>
                     <crate::components::Switch
                         id="active"
                         active=self.props.source.active

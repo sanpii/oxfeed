@@ -114,13 +114,13 @@ impl yew::Component for Component {
                     })
                 }
                 <span class="text-muted">{ "· " }{ &self.item.source }</span>
-                <div class="float-right">
+                <div class="float-end">
                     <span class="text-muted">{ &published_ago }</span>
                     <span onclick=self.link.callback(|_| Message::ToggleContent)>
                         <super::Svg icon=caret size=24 />
                     </span>
                 </div>
-                <div class="float-right">
+                <div class="float-end">
                     {
                         if self.scene == Scene::Hidden {
                             yew::html! {

@@ -82,7 +82,7 @@ impl yew::Component for Component {
                 <div class="login">
                     <form>
                         <img class="mb-4" src="/logo" alt="" width="72px" height="72px" />
-                        <h1 class="h3 mb-3 font-weight-normal">{ "Please sign in" }</h1>
+                        <h1 class="h3 mb-3 fw-normal">{ "Please sign in" }</h1>
                         <super::Alerts />
                         <super::form::Login on_submit=self.link.callback(|info| Self::Message::Login(info)) />
                         { "Don't have an account yet?" }
@@ -94,7 +94,7 @@ impl yew::Component for Component {
                 <div class="login">
                     <form>
                         <img class="mb-4" src="/logo" alt="" width="72px" height="72px" />
-                        <h1 class="h3 mb-3 font-weight-normal">{ "Register" }</h1>
+                        <h1 class="h3 mb-3 fw-normal">{ "Register" }</h1>
                         <super::Alerts />
                         <super::form::Register on_submit=self.link.callback(|info| Self::Message::Create(info)) />
                         { "Already have login and password?" }

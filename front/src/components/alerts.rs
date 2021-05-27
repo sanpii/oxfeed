@@ -50,12 +50,10 @@ impl yew::Component for Component {
                         <div class=yew::classes!("alert", format!("alert-{}", alert.severity()), "alert-dismissible") role="alert">
                             { &alert.message }
 
-                            <button class="close">
-                                <crate::components::Svg
-                                    icon="x"
-                                    size=24
-                                    on_click=self.link.callback(move |_| Self::Message::Close(idx))
-                                />
+                            <button
+                                class="btn-close"
+                                onclick=self.link.callback(move |_| Self::Message::Close(idx))
+                            >
                             </button>
                         </div>
                     }

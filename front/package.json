@@ -1,8 +1,7 @@
 {
     "name": "oxfeed",
     "dependencies": {
-        "bootstrap": "^4.0",
-        "bootstrap-icons": "^1.5",
-        "jquery": "^3.6"
+        "bootstrap": "^5.0",
+        "bootstrap-icons": "^1.5"
     }
 }

@@ -42,7 +42,7 @@ impl yew::Component for Component {
         yew::html! {
             <form>
                 <div class="from-group">
-                    <label for="title">{ "Name" }</label>
+                    <label class="form-label" for="title">{ "Name" }</label>
                     <input
                         class="form-control"
                         name="name"
@@ -53,7 +53,7 @@ impl yew::Component for Component {
                 </div>
 
                 <div class="from-group">
-                    <label for="url">{ "URL" }</label>
+                    <label class="form-label" for="url">{ "URL" }</label>
                     <input
                         class="form-control"
                         name="url"

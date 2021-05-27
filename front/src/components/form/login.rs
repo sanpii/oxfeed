@@ -60,27 +60,31 @@ impl yew::Component for Component {
     fn view(&self) -> yew::Html {
         yew::html! {
             <>
-                <label for="email" class="sr-only">{ "Email" }</label>
-                <input
-                    type="email"
-                    name="email"
-                    class="form-control"
-                    placeholder="Email"
-                    required=true
-                    autofocus=true
-                    oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateEmail(e.value))
-                />
-                <label for="password" class="sr-only">{ "Password" }</label>
-                <input
-                    type="password"
-                    name="password"
-                    class="form-control"
-                    placeholder="Password"
-                    required=true
-                    oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdatePassword(e.value))
-                />
+                <div class="form-floating">
+                    <input
+                        type="email"
+                        name="email"
+                        class="form-control"
+                        placeholder="Email"
+                        required=true
+                        autofocus=true
+                        oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateEmail(e.value))
+                    />
+                    <label for="email" class="form-label sr-only">{ "Email" }</label>
+                </div>
+                <div class="form-floating">
+                    <input
+                        type="password"
+                        name="password"
+                        class="form-control"
+                        placeholder="Password"
+                        required=true
+                        oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdatePassword(e.value))
+                    />
+                    <label for="password" class="form-label sr-only">{ "Password" }</label>
+                </div>
                 <div class="checkbox">
-                    <label>
+                    <label class="form-label">
                         <input
                             type="checkbox"
                             checked=self.remember_me
@@ -89,7 +93,7 @@ impl yew::Component for Component {
                     </label>
                 </div>
                 <a
-                    class=yew::classes!("btn", "btn-lg", "btn-primary", "btn-block")
+                    class=yew::classes!("btn", "btn-lg", "btn-primary", "w-100")
                     type="submit"
                     onclick=self.link.callback(|_| Self::Message::Submit)
                 >{ "Sign in" }</a>

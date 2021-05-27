@@ -14,7 +14,6 @@
         <link href="/css/main.css?v={{ version }}" rel="stylesheet" />
         <link rel="icon" href="/favicon.ico?v={{ version }}" />
 
-        <script src="/lib/jquery/dist/jquery.min.js?v={{ version }}"></script>
         <script src="/lib/bootstrap/dist/js/bootstrap.bundle.min.js?v={{ version }}"></script>
     </head>
     <body>

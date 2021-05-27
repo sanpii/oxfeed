@@ -116,7 +116,7 @@ impl yew::Component for Component {
                             }
                         </div>
 
-                        <div class=yew::classes!("btn-group", "float-right")>
+                        <div class=yew::classes!("btn-group", "float-end")>
                             <button
                                 class=yew::classes!("btn", "btn-primary")
                                 title="Edit"

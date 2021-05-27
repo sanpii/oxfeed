@@ -27,7 +27,7 @@ impl yew::Component for Component {
                 <crate::components::Popover
                     title="Last error".to_string()
                     text=self.text.clone()
-                    position="right"
+                    position="end"
                 />
             </span>
         }

@@ -29,7 +29,7 @@ impl yew::Component for Component {
                                 A webhook is an URL called when a new item is fetched.<br />
                                 This URL is called via POST method and the new item will be pass as json body.
                                 "
-                                position="right"
+                                position="end"
                             />
                         </span>
                     </div>

@@ -19,6 +19,14 @@ main form .btn {
     margin-right: 1rem;
 }
 
+a, a.btn:hover {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
 .cloud .badge {
     margin: .5rem;
 }
@@ -28,7 +36,7 @@ main form .btn {
 }
 
 li.list-group-item:nth-child(even) {
-    background-color: var(--light);
+    background-color: var(--bs-light);
 }
 
 li.list-group-item:hover {
@@ -36,7 +44,7 @@ li.list-group-item:hover {
 }
 
 li.list-group-item .error {
-    color: var(--red);
+    color: var(--bs-red);
 }
 
 li.list-group-item > img, li.list-group-item > a {
@@ -50,11 +58,11 @@ li.list-group-item .badge {
     font-size: 100%;
 }
 
-li.list-group-item .float-right .actions {
+li.list-group-item .float-end .actions {
     display: none;
 }
 
-li.list-group-item:hover .float-right .actions {
+li.list-group-item:hover .float-end .actions {
     margin-right: .5rem;
     display: block;
 }
@@ -64,16 +72,16 @@ li.list-group-item .actions .btn {
 }
 
 li.list-group-item .actions svg:hover {
-    color: var(--primary);
+    color: var(--bs-primary);
 }
 
-li.list-group-item .float-right .favorite {
+li.list-group-item .float-end .favorite {
     display: block;
-    color: var(--yellow);
+    color: var(--bs-yellow);
     margin-right: .5rem;
 }
 
-li.list-group-item:hover .float-right .favorite {
+li.list-group-item:hover .float-end .favorite {
     display: none;
 }
 
@@ -144,12 +152,12 @@ li.list-group-item:hover .float-right .favorite {
     text-decoration: underline;
 }
 
-.sidebar .nav-item.active .nav-link {
-    color: var(--primary);
+.sidebar .nav-item .nav-link.active {
+    color: var(--bs-primary);
 }
 
-.sidebar .nav-item.active .badge {
-    background-color: var(--primary);
+.sidebar .nav-item .nav-link.active .badge {
+    background-color: var(--bs-primary);
 }
 
 .sidebar-heading {
@@ -183,13 +191,8 @@ li.list-group-item:hover .float-right .favorite {
     right: 1rem;
 }
 
-.navbar .form-control {
-    padding: .75rem 1rem;
-    margin-left: .5rem;
-}
-
 .form-control-dark {
-    color: var(--white);
+    color: var(--bs-white);
     background-color: rgba(255, 255, 255, .1);
     border-color: rgba(255, 255, 255, .1);
 }
@@ -203,7 +206,7 @@ li.list-group-item:hover .float-right .favorite {
  * tags input
  */
 .tags-input {
-    background-color: var(--white);
+    background-color: var(--bs-white);
 }
 
 .tags-input .badge {
@@ -237,7 +240,7 @@ li.list-group-item:hover .float-right .favorite {
     display: flex;
     align-items: center;
     text-align: center;
-    background-color: var(--light);
+    background-color: var(--bs-light);
     height: 100%;
 }
 
@@ -287,8 +290,4 @@ li.list-group-item:hover .float-right .favorite {
 
 .full-page svg {
     margin-right: 2rem;
-}
-
-.export .btn {
-    margin-top: 1rem;
 }

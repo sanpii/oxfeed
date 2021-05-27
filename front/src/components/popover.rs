@@ -31,7 +31,6 @@ impl yew::Component for Component {
 
         yew::html! {
             <div class=yew::classes!("popover", position_class)>
-                <div class="arrow"></div>
                 {
                     if let Some(title) = &self.props.title {
                         yew::html! {
@@ -41,6 +40,7 @@ impl yew::Component for Component {
                         "".into()
                     }
                 }
+                <div class="popover-arrow"></div>
                 <div class="popover-body">{ node }</div>
             </div>
         }

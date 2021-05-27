@@ -132,7 +132,7 @@ impl yew::Component for Component {
                             }
                         </div>
 
-                        <div class=yew::classes!("btn-group", "float-right")>
+                        <div class=yew::classes!("btn-group", "float-end")>
                             {
                                 if !source.webhooks.is_empty() {
                                     yew::html! {
