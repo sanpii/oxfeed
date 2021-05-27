@@ -3,6 +3,7 @@ name = "oxfeed-common"
 version = "0.1.0"
 authors = ["Sanpi <sanpi@homecomputing.fr>"]
 edition = "2018"
+license = "MIT"
 
 [dependencies]
 anyhow = "1.0"
