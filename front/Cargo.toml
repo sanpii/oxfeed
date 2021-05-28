@@ -27,7 +27,7 @@ yew = "0.17"
 yew-router = "0.14"
 
 [dependencies.elephantry-extras]
-version = "0.1"
+version = "0.2"
 features = ["yew-pager"]
 
 [dependencies.chrono-humanize]
