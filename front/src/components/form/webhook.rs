@@ -41,35 +41,41 @@ impl yew::Component for Component {
     fn view(&self) -> yew::Html {
         yew::html! {
             <form>
-                <div class="from-group">
-                    <label class="form-label" for="title">{ "Name" }</label>
-                    <input
-                        class="form-control"
-                        name="name"
-                        required=true
-                        value=self.props.webhook.name.clone()
-                        oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateName(e.value))
-                    />
+                <div class="row mb-3">
+                    <label class="col-sm-1 col-form-label" for="title">{ "Name" }</label>
+                    <div class="col-sm-11">
+                        <input
+                            class="form-control"
+                            name="name"
+                            required=true
+                            value=self.props.webhook.name.clone()
+                            oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateName(e.value))
+                        />
+                    </div>
                 </div>
 
-                <div class="from-group">
-                    <label class="form-label" for="url">{ "URL" }</label>
-                    <input
-                        class="form-control"
-                        name="url"
-                        required=true
-                        value=self.props.webhook.url.clone()
-                        oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateUrl(e.value))
-                    />
+                <div class="row mb-3">
+                    <label class="col-sm-1 col-form-label" for="url">{ "URL" }</label>
+                    <div class="col-sm-11">
+                        <input
+                            class="form-control"
+                            name="url"
+                            required=true
+                            value=self.props.webhook.url.clone()
+                            oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateUrl(e.value))
+                        />
+                    </div>
                 </div>
 
-                <div class="from-group">
-                    <crate::components::Switch
-                        id="mark_read"
-                        label="Mark item as read after webhook call"
-                        active=self.props.webhook.mark_read
-                        on_toggle=self.link.callback(Self::Message::UpdateMarkRead)
-                    />
+                <div class="row mb-3">
+                    <div class="col-sm-11 offset-sm-1">
+                        <crate::components::Switch
+                            id="mark_read"
+                            label="Mark item as read after webhook call"
+                            active=self.props.webhook.mark_read
+                            on_toggle=self.link.callback(Self::Message::UpdateMarkRead)
+                        />
+                    </div>
                 </div>
 
                 <a

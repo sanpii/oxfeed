@@ -75,44 +75,59 @@ impl yew::Component for Component {
     fn view(&self) -> yew::Html {
         yew::html! {
             <form>
-                <div class="from-group">
-                    <label class="form-label" for="title">{ "Title" }</label>
-                    <input
-                        class="form-control"
-                        name="title"
-                        value=self.props.source.title.clone()
-                        oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateTitle(e.value))
-                    />
-                    <small class="form-text text-muted">{ "Leave empty to use the feed title." }</small>
+                <div class="row mb-3">
+                    <label class="col-sm-1 col-form-label" for="title">{ "Title" }</label>
+                    <div class="col-sm-11">
+                        <input
+                            class="form-control"
+                            name="title"
+                            value=self.props.source.title.clone()
+                            oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateTitle(e.value))
+                        />
+                        <small class="form-text text-muted">{ "Leave empty to use the feed title." }</small>
+                    </div>
                 </div>
 
-                <div class="from-group">
-                    <label class="form-label" for="url">{ "Feed URL" }</label>
-                    <input
-                        class="form-control"
-                        name="url"
-                        required=true
-                        value=self.props.source.url.clone()
-                        oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateUrl(e.value))
-                    />
+                <div class="row mb-3">
+                    <label class="col-sm-1 col-form-label" for="url">{ "Feed URL" }</label>
+                    <div class="col-sm-11">
+                        <input
+                            class="form-control"
+                            name="url"
+                            required=true
+                            value=self.props.source.url.clone()
+                            oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateUrl(e.value))
+                        />
+                    </div>
                 </div>
 
-                <div class="from-group">
-                    <label class="form-label" for="tags">{ "Tags" }</label>
-                    <super::Tags
-                        values=self.props.source.tags.clone()
-                        on_change=self.link.callback(Self::Message::UpdateTags)
-                    />
+                <div class="row mb-3">
+                    <label class="col-sm-1 col-form-label" for="tags">{ "Tags" }</label>
+                    <div class="col-sm-11">
+                        <super::Tags
+                            values=self.props.source.tags.clone()
+                            on_change=self.link.callback(Self::Message::UpdateTags)
+                        />
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-11 offset-sm-1">
+                        <crate::components::Switch
+                            id="active"
+                            active=self.props.source.active
+                            on_toggle=self.link.callback(Self::Message::ToggleActive)
+                            label="active"
+                        />
+                    </div>
                 </div>
 
                 {
                     if !self.webhooks.is_empty() {
                         yew::html! {
-                            <div class="from-group">
-                                <div>
-                                    <label class="form-label" for="webhooks">{ "Webhooks" }</label>
-                                </div>
-                                <div class="d-inline-flex">
+                            <div class="row mb-3">
+                                <label class="col-sm-1 col-form-label" for="webhooks">{ "Webhooks" }</label>
+                                <div class="col-sm-11">
                                 {
                                     for self.webhooks.iter().map(move |webhook| {
                                         let id = webhook.id.unwrap_or_default();
@@ -135,15 +150,6 @@ impl yew::Component for Component {
                         "".into()
                     }
                 }
-
-                <div class="from-group">
-                    <label class="form-label" for="active">{ "Active" }</label>
-                    <crate::components::Switch
-                        id="active"
-                        active=self.props.source.active
-                        on_toggle=self.link.callback(Self::Message::ToggleActive)
-                    />
-                </div>
 
                 <a
                     class=yew::classes!("btn", "btn-primary")
