@@ -14,7 +14,7 @@ async fn login(
     use hmac::NewMac;
     use jwt::VerifyWithKey;
 
-    let key: hmac::Hmac<sha2::Sha256> = hmac::Hmac::new_varkey(secret.as_bytes()).unwrap();
+    let key: hmac::Hmac<sha2::Sha256> = hmac::Hmac::new_from_slice(secret.as_bytes()).unwrap();
     let claims: std::collections::BTreeMap<String, String> = token.verify_with_key(&key)?;
 
     if claims.get("email").is_none() || claims.get("password").is_none() {

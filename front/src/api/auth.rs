@@ -8,7 +8,7 @@ where
         use jwt::SignWithKey;
 
         let key: hmac::Hmac<sha2::Sha256> =
-            hmac::Hmac::new_varkey(env!("SECRET").as_bytes()).unwrap();
+            hmac::Hmac::new_from_slice(env!("SECRET").as_bytes()).unwrap();
         let mut claims = std::collections::BTreeMap::new();
         claims.insert("email", email);
         claims.insert("password", password);
