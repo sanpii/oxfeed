@@ -1,5 +1,5 @@
 html, body, body > .container-fluid, body .row, body main {
-    height: 100%;
+    height: calc(100% - 55px);
 }
 
 main {
@@ -285,7 +285,7 @@ li.list-group-item:hover .float-end .favorite {
     height: 100%;
     width: 100%;
     max-width: 512px;
-    margin: auto;
+    margin: 55px auto 0 auto;
 }
 
 .full-page svg {
