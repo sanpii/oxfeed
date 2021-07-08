@@ -64,8 +64,7 @@ impl yew::Component for App {
     }
 }
 
-#[wasm_bindgen::prelude::wasm_bindgen(start)]
-pub fn run_app() {
+fn main() {
     wasm_logger::init(wasm_logger::Config::new(log::Level::Debug));
     yew::initialize();
     yew::App::<App>::new().mount_to_body();

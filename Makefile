@@ -2,17 +2,16 @@ YARN?=yarn
 YARN_FLAGS?=
 CARGO?=cargo
 CARGO_FLAGS?=
-WASM_PACK?=wasm-pack
-WASM_PACK_FLAGS?=
+TRUNK?=trunk
+TRUNK_FLAGS?=
 
 ifeq ($(APP_ENVIRONMENT),prod)
 	ENV=release
 	YARN_FLAGS+=--production
 	CARGO_FLAGS+=--release
-	WASM_PACK_FLAGS+=--release
+	TRUNK_FLAGS+=--release
 else
 	ENV=debug
-	WASM_PACK_FLAGS+=--dev
 endif
 
 .DEFAULT_GOAL := build
@@ -33,9 +32,7 @@ front: yarn wasm
 .PHONY: front
 
 wasm:
-	RUST_LOG=info $(WASM_PACK) build $(WASM_PACK_FLAGS) --target web --out-dir ./static front
-	ln --relative --force --symbolic $(shell ls -rt $(shell find target/ -name index.html | grep ".") | tail -1) front/static/index.html
-	rm front/static/.gitignore
+	RUST_LOG=info $(TRUNK) build $(TRUNK_FLAGS) front/index.html
 .PHONY: wasm
 
 yarn: front/static/lib
@@ -52,5 +49,5 @@ serve_api:
 .PHONY: serve_api
 
 serve_front: front
-	microserver front/static/
+	$(TRUNK) serve $(TRUNK_FLAGS) front/index.html
 .PHONY: serve_front

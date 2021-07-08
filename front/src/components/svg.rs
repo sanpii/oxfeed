@@ -48,7 +48,7 @@ impl yew::Component for Component {
         let svg = format!(
             r#"
         <svg width={size} height={size} fill="currentColor">
-            <use xlink:href="/lib/bootstrap-icons/bootstrap-icons.svg#{src}"/>
+            <use xlink:href="/bootstrap-icons.svg#{src}"/>
         </svg>
         "#,
             size = self.size,
