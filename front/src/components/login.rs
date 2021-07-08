@@ -84,7 +84,7 @@ impl yew::Component for Component {
                         <img class="mb-4" src="/logo" alt="" width="72px" height="72px" />
                         <h1 class="h3 mb-3 fw-normal">{ "Please sign in" }</h1>
                         <super::Alerts />
-                        <super::form::Login on_submit=self.link.callback(|info| Self::Message::Login(info)) />
+                        <super::form::Login on_submit=self.link.callback(Self::Message::Login) />
                         { "Don't have an account yet?" }
                         <a href="#" onclick=self.link.callback(|_| Self::Message::Register)>{ "Register now" }</a>
                     </form>
@@ -96,7 +96,7 @@ impl yew::Component for Component {
                         <img class="mb-4" src="/logo" alt="" width="72px" height="72px" />
                         <h1 class="h3 mb-3 fw-normal">{ "Register" }</h1>
                         <super::Alerts />
-                        <super::form::Register on_submit=self.link.callback(|info| Self::Message::Create(info)) />
+                        <super::form::Register on_submit=self.link.callback(Self::Message::Create) />
                         { "Already have login and password?" }
                         <a href="#" onclick=self.link.callback(|_| Self::Message::Cancel)>{ "Log in" }</a>
                     </form>

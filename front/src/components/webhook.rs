@@ -94,7 +94,7 @@ impl yew::Component for Component {
                 <super::form::Webhook
                     webhook=self.value.clone()
                     on_cancel=self.link.callback(|_| Self::Message::Cancel)
-                    on_submit=self.link.callback(|webhook| Self::Message::Save(webhook))
+                    on_submit=self.link.callback(Self::Message::Save)
                 />
             },
             Scene::View => {

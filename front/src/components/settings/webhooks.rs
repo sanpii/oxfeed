@@ -110,7 +110,7 @@ impl yew::Component for Component {
                             <crate::components::form::Webhook
                                 webhook=oxfeed_common::webhook::Entity::default()
                                 on_cancel=self.link.callback(|_| Self::Message::Cancel)
-                                on_submit=self.link.callback(|webhook| Self::Message::Create(webhook))
+                                on_submit=self.link.callback(Self::Message::Create)
                             />
                         </li>
                     }

@@ -56,7 +56,7 @@ impl<R: 'static + crate::Render> yew::Component for Component<R> {
                 </ul>
                 <elephantry_extras::yew::Pager
                     value=value
-                    onclick=self.link.callback(|page| Self::Message::Page(page))
+                    onclick=self.link.callback(Self::Message::Page)
                 />
             </>
         }

@@ -34,7 +34,7 @@ impl Pagination {
         }
     }
 
-    pub fn to_sql(&self) -> String {
+    pub fn to_sql(self) -> String {
         format!(
             "offset {} fetch first {} rows only",
             (self.page - 1) * self.limit,
@@ -42,7 +42,7 @@ impl Pagination {
         )
     }
 
-    pub fn to_query(&self) -> String {
+    pub fn to_query(self) -> String {
         format!("page={}&limit={}", self.page, self.limit)
     }
 }

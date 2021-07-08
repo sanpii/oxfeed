@@ -68,7 +68,7 @@ impl yew::Component for Component {
                 }
                 <super::Autocomplete
                     what="tags"
-                    on_select=self.link.callback(|value| Self::Message::Add(value))
+                    on_select=self.link.callback(Self::Message::Add)
                     on_delete=self.link.callback(|_| Self::Message::Delete)
                 />
             </div>

@@ -103,7 +103,7 @@ impl yew::Component for Component {
                 <super::form::Source
                     source=self.props.value.clone()
                     on_cancel=self.link.callback(|_| Message::Cancel)
-                    on_submit=self.link.callback(|source| Message::Save(source))
+                    on_submit=self.link.callback(Message::Save)
                 />
             },
             Scene::View => {

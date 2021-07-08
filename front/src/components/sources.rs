@@ -125,7 +125,7 @@ impl yew::Component for Component {
                         <super::form::Source
                             source=oxfeed_common::source::Entity::default()
                             on_cancel=self.link.callback(|_| Message::Cancel)
-                            on_submit=self.link.callback(|source| Message::Create(source))
+                            on_submit=self.link.callback(Message::Create)
                         />
                     </li>
                 </ul>
