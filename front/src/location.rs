@@ -48,7 +48,7 @@ impl Location {
             let mut tokens = args.split('=');
             let v = tokens.next().unwrap().to_string();
             let k = tokens.next().unwrap_or_default().to_string();
-            map.insert(v, urlencoding::decode(&k).unwrap_or_default());
+            map.insert(v, urlencoding::decode(&k).unwrap_or_default().to_string());
         }
 
         map
