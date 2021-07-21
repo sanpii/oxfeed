@@ -1,20 +1,10 @@
-#[derive(Clone)]
 pub(crate) enum Message {
+    Error(oxfeed_common::Error),
     Content(String),
     ToggleContent,
     ToggleRead,
     ToggleFavorite,
     Toggled,
-}
-
-impl From<crate::event::Api> for Message {
-    fn from(event: crate::event::Api) -> Self {
-        match event {
-            crate::event::Api::ItemContent(content) => Self::Content(content),
-            crate::event::Api::ItemPatch => Self::Toggled,
-            _ => unreachable!(),
-        }
-    }
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -40,8 +30,8 @@ pub(crate) struct Properties {
 }
 
 pub(crate) struct Component {
-    api: crate::Api<Self>,
     content: Option<String>,
+    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
     link: yew::ComponentLink<Self>,
     scene: Scene,
     item: oxfeed_common::item::Item,
@@ -52,9 +42,11 @@ impl yew::Component for Component {
     type Properties = Properties;
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+        use yew::Dispatched;
+
         Self {
-            api: crate::Api::new(link.clone()),
             content: None,
+            event_bus: crate::event::Bus::dispatcher(),
             item: props.value,
             link,
             scene: Scene::Hidden,
@@ -62,21 +54,43 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        use yewtil::future::LinkFuture;
+
         match msg {
+            Self::Message::Error(err) => self.event_bus.send(err.into()),
             Self::Message::Content(content) => self.content = Some(content),
             Self::Message::ToggleContent => {
                 self.scene = !self.scene;
 
                 if self.scene == Scene::Expanded && self.content.is_none() {
-                    self.api.items_content(&self.item.id);
+                    let item_id = self.item.id;
+
+                    self.link.send_future(async move {
+                        crate::Api::items_content(&item_id)
+                            .await
+                            .map_or_else(Self::Message::Error, Self::Message::Content)
+                    });
                 }
             }
             Self::Message::ToggleFavorite => {
-                self.api
-                    .items_tag(&self.item.id, "favorite", !self.item.favorite)
+                let item = self.item.clone();
+
+                self.link.send_future(async move {
+                    crate::Api::items_tag(&item.id, "favorite", !item.favorite)
+                        .await
+                        .map_or_else(Self::Message::Error, |_| Self::Message::Toggled)
+                });
             }
-            Self::Message::ToggleRead => self.api.items_tag(&self.item.id, "read", !self.item.read),
-            Self::Message::Toggled => (),
+            Self::Message::ToggleRead => {
+                let item = self.item.clone();
+
+                self.link.send_future(async move {
+                    crate::Api::items_tag(&item.id, "read", !item.read)
+                        .await
+                        .map_or_else(Self::Message::Error, |_| Self::Message::Toggled)
+                });
+            }
+            Self::Message::Toggled => self.event_bus.send(crate::event::Event::ItemUpdate),
         }
 
         true

@@ -2,19 +2,9 @@
 pub(crate) enum Message {
     Event(crate::event::Event),
     NeedUpdate,
-    Read,
     ReadAll,
+    Redraw,
     Update(oxfeed_common::Counts),
-}
-
-impl From<crate::event::Api> for Message {
-    fn from(event: crate::event::Api) -> Self {
-        match event {
-            crate::event::Api::Counts(counts) => Self::Update(counts),
-            crate::event::Api::ItemsRead => Self::Read,
-            _ => unreachable!(),
-        }
-    }
 }
 
 #[derive(Clone, yew::Properties)]
@@ -31,7 +21,6 @@ struct Link {
 }
 
 pub(crate) struct Component {
-    api: crate::Api<Self>,
     current_route: super::app::Route,
     event_bus: yew::agent::Dispatcher<crate::event::Bus>,
     link: yew::ComponentLink<Self>,
@@ -97,7 +86,6 @@ impl yew::Component for Component {
         }
 
         let component = Self {
-            api: crate::Api::new(link.clone()),
             current_route: props.current_route,
             event_bus: crate::event::Bus::dispatcher(),
             link,
@@ -114,6 +102,8 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        use yewtil::future::LinkFuture;
+
         match msg {
             Self::Message::Event(event) => match event {
                 crate::event::Event::ItemUpdate
@@ -123,7 +113,12 @@ impl yew::Component for Component {
                 }
                 _ => (),
             },
-            Self::Message::NeedUpdate => self.api.counts(),
+            Self::Message::NeedUpdate => self.link.send_future(async {
+                crate::Api::counts().await.map_or_else(
+                    |err| Self::Message::Event(err.into()),
+                    Self::Message::Update,
+                )
+            }),
             Self::Message::Update(counts) => {
                 self.links[0].count = counts.all;
                 self.links[1].count = counts.unread;
@@ -133,8 +128,17 @@ impl yew::Component for Component {
 
                 return true;
             }
-            Self::Message::Read => self.event_bus.send(crate::event::Event::ItemUpdate),
-            Self::Message::ReadAll => self.api.items_read(),
+            Self::Message::ReadAll => {
+                self.link.send_future(async {
+                    crate::Api::items_read().await.map_or_else(
+                        |err| Self::Message::Event(err.into()),
+                        |_| Self::Message::Redraw,
+                    )
+                });
+
+                self.event_bus.send(crate::event::Event::ItemUpdate);
+            }
+            Self::Message::Redraw => return true,
         }
 
         false

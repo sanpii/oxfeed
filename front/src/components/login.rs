@@ -1,20 +1,11 @@
 pub(crate) enum Message {
     Cancel,
     Create(super::form::register::Info),
+    Error(oxfeed_common::Error),
     Login(super::form::login::Info),
     Logged,
     Register,
     UserCreated,
-}
-
-impl From<crate::event::Api> for Message {
-    fn from(event: crate::event::Api) -> Self {
-        match event {
-            crate::event::Api::Auth => Self::Logged,
-            crate::event::Api::UserCreate => Self::UserCreated,
-            _ => unreachable!(),
-        }
-    }
 }
 
 enum Scene {
@@ -23,7 +14,6 @@ enum Scene {
 }
 
 pub(crate) struct Component {
-    api: crate::Api<Self>,
     event_bus: yew::agent::Dispatcher<crate::event::Bus>,
     link: yew::ComponentLink<Self>,
     scene: Scene,
@@ -37,7 +27,6 @@ impl yew::Component for Component {
         use yew::agent::Dispatched;
 
         Self {
-            api: crate::Api::new(link.clone()),
             event_bus: crate::event::Bus::dispatcher(),
             link,
             scene: Scene::Login,
@@ -45,28 +34,38 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        use yewtil::future::LinkFuture;
+
         match msg {
             Self::Message::Cancel => {
                 self.scene = Scene::Login;
                 return true;
             }
+            Self::Message::Error(err) => self.event_bus.send(err.into()),
             Self::Message::UserCreated => {
                 let alert = crate::event::Alert::info("User created");
                 self.event_bus.send(crate::event::Event::Alert(alert));
                 self.link.send_message(Self::Message::Cancel);
             }
             Self::Message::Create(info) => {
-                let user = oxfeed_common::new_user::Entity {
-                    password: info.password,
-                    email: info.email,
-                };
-                self.api.user_create(&user);
+                self.link.send_future(async {
+                    let user = oxfeed_common::new_user::Entity {
+                        password: info.password,
+                        email: info.email,
+                    };
+                    crate::Api::user_create(&user)
+                        .await
+                        .map_or_else(Self::Message::Error, |_| Self::Message::UserCreated)
+                });
             }
             Self::Message::Login(info) => {
-                self.api
-                    .auth_login(&info.email, &info.password, info.remember_me)
+                self.link.send_future(async move {
+                    crate::Api::auth_login(&info.email, &info.password, info.remember_me)
+                        .await
+                        .map_or_else(Self::Message::Error, |_| Self::Message::Logged)
+                });
             }
-            Self::Message::Logged => (),
+            Self::Message::Logged => self.event_bus.send(crate::event::Event::Logged),
             Self::Message::Register => {
                 self.scene = Scene::Register;
                 return true;

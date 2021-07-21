@@ -1,15 +1,7 @@
 pub(crate) enum Message {
+    Error(oxfeed_common::Error),
     Logout,
     Loggedout,
-}
-
-impl From<crate::event::Api> for Message {
-    fn from(event: crate::event::Api) -> Self {
-        match event {
-            crate::event::Api::Auth => Self::Loggedout,
-            _ => unreachable!(),
-        }
-    }
 }
 
 #[derive(Clone, yew::Properties)]
@@ -18,7 +10,6 @@ pub(crate) struct Properties {
 }
 
 pub(crate) struct Component {
-    api: crate::Api<Self>,
     current_route: super::app::Route,
     event_bus: yew::agent::Dispatcher<crate::event::Bus>,
     link: yew::ComponentLink<Self>,
@@ -32,7 +23,6 @@ impl yew::Component for Component {
         use yew::agent::Dispatched;
 
         Self {
-            api: crate::Api::new(link.clone()),
             current_route: props.current_route,
             event_bus: crate::event::Bus::dispatcher(),
             link,
@@ -40,8 +30,17 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        use yewtil::future::LinkFuture;
+
         match msg {
-            Self::Message::Logout => self.api.auth_logout(),
+            Self::Message::Error(err) => self.event_bus.send(err.into()),
+            Self::Message::Logout => {
+                self.link.send_future(async {
+                    crate::Api::auth_logout()
+                        .await
+                        .map_or_else(Self::Message::Error, |_| Self::Message::Loggedout)
+                });
+            }
             Self::Message::Loggedout => {
                 let alert = crate::event::Alert::info("Logged out");
                 self.event_bus.send(crate::event::Event::Alert(alert));

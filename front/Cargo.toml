@@ -34,11 +34,20 @@ features = ["wasmbind"]
 
 [dependencies.oxfeed-common]
 version = "0.1"
+features = ["front"]
 path = "../common/"
+
+[dependencies.reqwest]
+version = "0.11"
+features = ["json"]
 
 [dependencies.web-sys]
 version = "0.3"
 features = ["HtmlDocument", "Performance"]
+
+[dependencies.yewtil]
+version = "0.4"
+features = ["future"]
 
 [build-dependencies]
 dotenv = "0.15"

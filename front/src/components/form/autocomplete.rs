@@ -1,23 +1,13 @@
-#[derive(Clone)]
 pub(crate) enum Message {
     Choose(usize),
+    Error(oxfeed_common::Error),
     Input(String),
     Key(String),
     Terms(Vec<String>),
 }
 
-impl From<crate::event::Api> for Message {
-    fn from(event: crate::event::Api) -> Self {
-        match event {
-            crate::event::Api::SearchTags(tags) => Self::Terms(tags.iterator),
-            _ => unreachable!(),
-        }
-    }
-}
-
 #[derive(Clone, yew::Properties)]
 pub(crate) struct Properties {
-    pub what: String,
     #[prop_or_default]
     pub on_select: yew::Callback<String>,
     #[prop_or_default]
@@ -26,11 +16,10 @@ pub(crate) struct Properties {
 
 pub(crate) struct Component {
     active: Option<usize>,
-    api: crate::Api<Self>,
+    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
     link: yew::ComponentLink<Self>,
     terms: Vec<String>,
     value: String,
-    what: String,
     on_select: yew::Callback<String>,
     on_delete: yew::Callback<()>,
 }
@@ -49,27 +38,35 @@ impl yew::Component for Component {
     type Properties = Properties;
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+        use yew::Dispatched;
+
         Self {
             active: None,
-            api: crate::Api::new(link.clone()),
+            event_bus: crate::event::Bus::dispatcher(),
             link,
             terms: Vec::new(),
             value: String::new(),
-            what: props.what,
             on_select: props.on_select,
             on_delete: props.on_delete,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        use yewtil::future::LinkFuture;
+
         match msg {
             Self::Message::Choose(idx) => self.select(self.terms[idx].clone()),
+            Self::Message::Error(error) => self.event_bus.send(error.into()),
             Self::Message::Input(input) => {
                 self.value = input.clone();
 
                 if !input.is_empty() {
-                    self.api
-                        .search(&self.what, &input.into(), &oxfeed_common::Pagination::new());
+                    self.link.send_future(async move {
+                        crate::Api::tags_search(&input.into(), &oxfeed_common::Pagination::new())
+                            .await
+                            .map_or_else(Self::Message::Error, Self::Message::Terms)
+                    });
+
                     return false;
                 } else {
                     self.terms = Vec::new();

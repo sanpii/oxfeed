@@ -2,10 +2,10 @@ use std::collections::HashSet;
 
 #[derive(Clone)]
 pub(crate) enum Event {
-    Api(Api),
     Alert(Alert),
     AuthRequire,
     ItemUpdate,
+    Logged,
     SettingUpdate,
     SourceUpdate,
     Redirect(String),
@@ -13,11 +13,17 @@ pub(crate) enum Event {
     WebhookUpdate,
 }
 
-impl From<oxfeed_common::Error> for Event {
-    fn from(error: oxfeed_common::Error) -> Self {
+impl From<&oxfeed_common::Error> for Event {
+    fn from(error: &oxfeed_common::Error) -> Self {
         let alert = crate::event::Alert::error(&error.to_string());
 
         Self::Alert(alert)
+    }
+}
+
+impl From<oxfeed_common::Error> for Event {
+    fn from(error: oxfeed_common::Error) -> Self {
+        error.into()
     }
 }
 
@@ -54,30 +60,6 @@ impl Alert {
 
         severity.to_string()
     }
-}
-
-#[derive(Clone)]
-pub(crate) enum Api {
-    Auth,
-    Counts(oxfeed_common::Counts),
-    Items(crate::Pager<oxfeed_common::item::Item>),
-    ItemsRead,
-    ItemContent(String),
-    ItemPatch,
-    OpmlImport,
-    SearchItems(crate::Pager<oxfeed_common::item::Item>),
-    SearchSources(crate::Pager<oxfeed_common::source::Entity>),
-    SearchTags(crate::Pager<String>),
-    Sources(crate::Pager<oxfeed_common::source::Entity>),
-    SourceCreate(oxfeed_common::source::Entity),
-    SourceDelete(oxfeed_common::source::Entity),
-    SourceUpdate(oxfeed_common::source::Entity),
-    Tags(Vec<oxfeed_common::Tag>),
-    UserCreate,
-    Webhooks(Vec<oxfeed_common::webhook::Entity>),
-    WebhookCreate(oxfeed_common::webhook::Entity),
-    WebhookDelete(oxfeed_common::webhook::Entity),
-    WebhookUpdate(oxfeed_common::webhook::Entity),
 }
 
 pub(crate) struct Bus {

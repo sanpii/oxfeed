@@ -43,6 +43,10 @@ pub enum Error {
     #[error("{0}")]
     Opml(#[from] opml::Error),
 
+    #[cfg(feature = "reqwest")]
+    #[error("{0}")]
+    Reqwest(#[from] reqwest::Error),
+
     #[error("{0}")]
     Utf8(#[from] std::string::FromUtf8Error),
 

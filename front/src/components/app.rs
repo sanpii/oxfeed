@@ -25,12 +25,6 @@ pub(crate) enum Message {
     Websocket(WebsocketAction),
 }
 
-impl From<crate::event::Api> for Message {
-    fn from(_: crate::event::Api) -> Self {
-        unreachable!()
-    }
-}
-
 pub(crate) enum WebsocketAction {
     Ready(Result<String, anyhow::Error>),
     Status(yew::services::websocket::WebSocketStatus),
@@ -45,6 +39,28 @@ pub(crate) struct Component {
     _websocket: Option<yew::services::websocket::WebSocketTask>,
 }
 
+impl Component {
+    fn websocket(
+        link: &yew::ComponentLink<Self>,
+    ) -> Option<yew::services::websocket::WebSocketTask> {
+        let url = env!("API_URL")
+            .replace("http://", "ws://")
+            .replace("https://", "wss://");
+
+        let ws_url = format!("{}/ws?token={}", url, crate::Api::token());
+        let ws_cb = link.callback(|data| Message::Websocket(WebsocketAction::Ready(data)));
+        let ws_notif = link.callback(|status| Message::Websocket(WebsocketAction::Status(status)));
+
+        match yew::services::websocket::WebSocketService::connect_text(&ws_url, ws_cb, ws_notif) {
+            Ok(websocket) => Some(websocket),
+            Err(err) => {
+                log::error!("Unable to connect to websocket: {}", err);
+                None
+            }
+        }
+    }
+}
+
 impl yew::Component for Component {
     type Message = Message;
     type Properties = ();
@@ -54,39 +70,24 @@ impl yew::Component for Component {
 
         let event_cb = link.callback(Self::Message::Event);
 
-        let url = env!("API_URL")
-            .replace("http://", "ws://")
-            .replace("https://", "wss://");
-
-        let ws_url = format!("{}/ws?token={}", url, crate::Api::<Self>::token());
-        let ws_cb = link.callback(|data| Self::Message::Websocket(WebsocketAction::Ready(data)));
-        let ws_notif =
-            link.callback(|status| Self::Message::Websocket(WebsocketAction::Status(status)));
-        let websocket = match yew::services::websocket::WebSocketService::connect_text(
-            &ws_url, ws_cb, ws_notif,
-        ) {
-            Ok(websocket) => Some(websocket),
-            Err(err) => {
-                log::error!("Unable to connect to websocket: {}", err);
-                None
-            }
-        };
-
         Self {
-            auth: true,
+            _websocket: Self::websocket(&link),
+            auth: !crate::Api::token().is_empty(),
             event_bus: crate::event::Bus::dispatcher(),
             link,
             location: crate::Location::new(),
             _producer: crate::event::Bus::bridge(event_cb),
-            _websocket: websocket,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Self::Message::Event(event) => match event {
-                crate::event::Event::Api(crate::event::Api::Auth) => self.auth = true,
                 crate::event::Event::AuthRequire => self.auth = false,
+                crate::event::Event::Logged => {
+                    self.auth = true;
+                    self._websocket = Self::websocket(&self.link);
+                }
                 crate::event::Event::Redirect(route) => self.location.set_path(&route),
                 crate::event::Event::Redirected(_) => (),
                 _ => return false,

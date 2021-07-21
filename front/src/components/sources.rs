@@ -9,17 +9,6 @@ pub(crate) enum Message {
     NeedUpdate,
 }
 
-impl From<crate::event::Api> for Message {
-    fn from(event: crate::event::Api) -> Self {
-        match event {
-            crate::event::Api::Sources(sources) => Self::Update(sources),
-            crate::event::Api::SearchSources(sources) => Self::Update(sources),
-            crate::event::Api::SourceCreate(sources) => Self::Create(sources),
-            _ => unreachable!(),
-        }
-    }
-}
-
 enum Scene {
     Add,
     View,
@@ -33,7 +22,6 @@ pub(crate) struct Properties {
 }
 
 pub(crate) struct Component {
-    api: crate::Api<Self>,
     filter: crate::Filter,
     link: yew::ComponentLink<Self>,
     scene: Scene,
@@ -52,7 +40,6 @@ impl yew::Component for Component {
         let callback = link.callback(Self::Message::Event);
 
         let component = Self {
-            api: crate::Api::new(link.clone()),
             filter: props.filter,
             link,
             scene: Scene::View,
@@ -67,6 +54,8 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        use yewtil::future::LinkFuture;
+
         match &self.scene {
             Scene::View => match msg {
                 Self::Message::Add => self.scene = Scene::Add,
@@ -75,18 +64,21 @@ impl yew::Component for Component {
             },
             Scene::Add => match msg {
                 Self::Message::Cancel => self.scene = Scene::View,
-                Self::Message::Create(ref source) => self.api.sources_create(source),
+                Self::Message::Create(ref source) => {
+                    let source = source.clone();
+
+                    self.link.send_future(async move {
+                        crate::Api::sources_create(&source).await.map_or_else(
+                            |err| Self::Message::Event(err.into()),
+                            |_| Self::Message::NeedUpdate,
+                        )
+                    });
+                }
                 _ => (),
             },
         };
 
-        if let Self::Message::Event(ref event) = msg {
-            if matches!(event, crate::event::Event::SourceUpdate) {
-                self.link.send_message(Self::Message::NeedUpdate);
-            }
-
-            return false;
-        } else if let Self::Message::PageChange(page) = msg {
+        if let Self::Message::PageChange(page) = msg {
             self.pagination.page = page;
             yew::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
             self.link.send_message(Self::Message::NeedUpdate);
@@ -94,12 +86,24 @@ impl yew::Component for Component {
             return false;
         } else if matches!(msg, Self::Message::NeedUpdate) {
             self.scene = Scene::View;
+            let pagination = self.pagination;
+            let filter = self.filter.clone();
 
-            if self.filter.is_empty() {
-                self.api.sources_all(&self.pagination);
-            } else {
-                self.api.search("sources", &self.filter, &self.pagination);
-            }
+            self.link.send_future(async move {
+                if filter.is_empty() {
+                    crate::Api::sources_all(&pagination).await.map_or_else(
+                        |err| Self::Message::Event(err.into()),
+                        Self::Message::Update,
+                    )
+                } else {
+                    crate::Api::sources_search(&filter, &pagination)
+                        .await
+                        .map_or_else(
+                            |err| Self::Message::Event(err.into()),
+                            Self::Message::Update,
+                        )
+                }
+            });
 
             return false;
         }

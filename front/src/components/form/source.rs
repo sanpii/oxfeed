@@ -1,5 +1,6 @@
 pub(crate) enum Message {
     Cancel,
+    Error(oxfeed_common::Error),
     Submit,
     ToggleActive(bool),
     ToggleWebhook(uuid::Uuid, bool),
@@ -7,15 +8,6 @@ pub(crate) enum Message {
     UpdateTitle(String),
     UpdateUrl(String),
     Webhooks(Vec<oxfeed_common::webhook::Entity>),
-}
-
-impl From<crate::event::Api> for Message {
-    fn from(event: crate::event::Api) -> Self {
-        match event {
-            crate::event::Api::Webhooks(webhooks) => Self::Webhooks(webhooks),
-            _ => unreachable!(),
-        }
-    }
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
@@ -26,7 +18,7 @@ pub(crate) struct Properties {
 }
 
 pub(crate) struct Component {
-    api: crate::Api<Self>,
+    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
     link: yew::ComponentLink<Self>,
     props: Properties,
     webhooks: Vec<oxfeed_common::webhook::Entity>,
@@ -37,14 +29,21 @@ impl yew::Component for Component {
     type Properties = Properties;
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        let mut component = Self {
-            api: crate::Api::new(link.clone()),
+        use yew::agent::Dispatched;
+        use yewtil::future::LinkFuture;
+
+        let component = Self {
+            event_bus: crate::event::Bus::dispatcher(),
             link,
             props,
             webhooks: Vec::new(),
         };
 
-        component.api.webhooks_all();
+        component.link.send_future(async move {
+            crate::Api::webhooks_all()
+                .await
+                .map_or_else(Self::Message::Error, Self::Message::Webhooks)
+        });
 
         component
     }
@@ -52,6 +51,7 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Self::Message::Cancel => self.props.on_cancel.emit(()),
+            Self::Message::Error(err) => self.event_bus.send(err.into()),
             Self::Message::Submit => self.props.on_submit.emit(self.props.source.clone()),
             Self::Message::ToggleActive(active) => self.props.source.active = active,
             Self::Message::ToggleWebhook(id, active) => {

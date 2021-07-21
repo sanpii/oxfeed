@@ -6,16 +6,6 @@ pub(crate) enum Message {
     Update(crate::Pager<oxfeed_common::item::Item>),
 }
 
-impl From<crate::event::Api> for Message {
-    fn from(event: crate::event::Api) -> Self {
-        match event {
-            crate::event::Api::Items(items) => Self::Update(items),
-            crate::event::Api::SearchItems(items) => Self::Update(items),
-            _ => unreachable!(),
-        }
-    }
-}
-
 #[derive(Clone, yew::Properties)]
 pub(crate) struct Properties {
     #[prop_or_default]
@@ -25,7 +15,6 @@ pub(crate) struct Properties {
 }
 
 pub(crate) struct Component {
-    api: crate::Api<Self>,
     kind: String,
     filter: crate::Filter,
     link: yew::ComponentLink<Self>,
@@ -36,11 +25,23 @@ pub(crate) struct Component {
 
 impl Component {
     fn fetch(&mut self) {
-        if self.filter.is_empty() {
-            self.api.items_all(&self.kind, &self.pagination);
-        } else {
-            self.api.search(&self.kind, &self.filter, &self.pagination);
-        }
+        use yewtil::future::LinkFuture;
+
+        let filter = self.filter.clone();
+        let kind = self.kind.clone();
+        let pagination = self.pagination;
+
+        self.link.send_future(async move {
+            if filter.is_empty() {
+                crate::Api::items_all(&kind, &pagination)
+                    .await
+                    .map_or_else(|err| Message::Event(err.into()), Message::Update)
+            } else {
+                crate::Api::items_search(&kind, &filter, &pagination)
+                    .await
+                    .map_or_else(|err| Message::Event(err.into()), Message::Update)
+            }
+        });
     }
 }
 
@@ -54,7 +55,6 @@ impl yew::Component for Component {
         let callback = link.callback(Self::Message::Event);
 
         let component = Self {
-            api: crate::Api::new(link.clone()),
             kind: props.kind,
             filter: props.filter,
             link,

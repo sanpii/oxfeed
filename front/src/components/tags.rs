@@ -1,16 +1,7 @@
-#[derive(Clone)]
 pub(crate) enum Message {
+    Error(oxfeed_common::Error),
     Update(Vec<oxfeed_common::Tag>),
     NeedUpdate,
-}
-
-impl From<crate::event::Api> for Message {
-    fn from(event: crate::event::Api) -> Self {
-        match event {
-            crate::event::Api::Tags(tags) => Self::Update(tags),
-            _ => unreachable!(),
-        }
-    }
 }
 
 #[derive(Clone, yew::Properties)]
@@ -19,7 +10,7 @@ pub(crate) struct Properties {
 }
 
 pub(crate) struct Component {
-    api: crate::Api<Self>,
+    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
     link: yew::ComponentLink<Self>,
     tags: Vec<oxfeed_common::Tag>,
     pagination: oxfeed_common::Pagination,
@@ -30,8 +21,10 @@ impl yew::Component for Component {
     type Message = Message;
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+        use yew::agent::Dispatched;
+
         let component = Self {
-            api: crate::Api::new(link.clone()),
+            event_bus: crate::event::Bus::dispatcher(),
             link,
             tags: Vec::new(),
             pagination: props.pagination,
@@ -43,8 +36,19 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        use yewtil::future::LinkFuture;
+
         match msg {
-            Self::Message::NeedUpdate => self.api.tags_all(&self.pagination),
+            Self::Message::Error(err) => self.event_bus.send(err.into()),
+            Self::Message::NeedUpdate => {
+                let pagination = self.pagination;
+
+                self.link.send_future(async move {
+                    crate::Api::tags_all(&pagination)
+                        .await
+                        .map_or_else(Self::Message::Error, Self::Message::Update)
+                });
+            }
             Self::Message::Update(tags) => {
                 self.tags = tags;
                 return true;

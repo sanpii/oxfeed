@@ -30,7 +30,7 @@ async fn login(
         None => return Ok(actix_web::HttpResponse::Forbidden().finish()),
     };
 
-    let response = actix_web::HttpResponse::Ok().body(&token.to_string());
+    let response = actix_web::HttpResponse::Ok().json(&token.to_string());
 
     Ok(response)
 }

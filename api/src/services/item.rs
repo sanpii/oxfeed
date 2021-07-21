@@ -82,7 +82,7 @@ async fn content(
         .query::<Option<String>>(sql, &[&item_id, &token])?
         .next();
     let response = match content {
-        Some(content) => actix_web::HttpResponse::Ok().body(&content.unwrap_or_default()),
+        Some(content) => actix_web::HttpResponse::Ok().json(&content.unwrap_or_default()),
         None => actix_web::HttpResponse::NotFound().finish(),
     };
 

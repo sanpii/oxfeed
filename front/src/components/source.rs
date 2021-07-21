@@ -1,22 +1,12 @@
-#[derive(Clone)]
 pub(crate) enum Message {
     Cancel,
     Delete,
     Deleted,
     Edit,
+    Error(oxfeed_common::Error),
     ToggleActive(bool),
     Save(oxfeed_common::source::Entity),
     Saved(oxfeed_common::source::Entity),
-}
-
-impl From<crate::event::Api> for Message {
-    fn from(event: crate::event::Api) -> Self {
-        match event {
-            crate::event::Api::SourceDelete(_) => Self::Deleted,
-            crate::event::Api::SourceUpdate(source) => Self::Saved(source),
-            _ => unreachable!(),
-        }
-    }
 }
 
 enum Scene {
@@ -30,7 +20,7 @@ pub(crate) struct Properties {
 }
 
 pub(crate) struct Component {
-    api: crate::Api<Self>,
+    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
     scene: Scene,
     link: yew::ComponentLink<Self>,
     props: Properties,
@@ -41,8 +31,10 @@ impl yew::Component for Component {
     type Properties = Properties;
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+        use yew::agent::Dispatched;
+
         Self {
-            api: crate::Api::new(link.clone()),
+            event_bus: crate::event::Bus::dispatcher(),
             scene: Scene::View,
             link,
             props,
@@ -50,6 +42,8 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        use yewtil::future::LinkFuture;
+
         if let Self::Message::Saved(source) = msg {
             self.props.value = source;
             self.scene = Scene::View;
@@ -63,18 +57,32 @@ impl yew::Component for Component {
                         format!("Would you like delete '{}' source?", self.props.value.title);
 
                     if yew::services::dialog::DialogService::confirm(&message) {
-                        self.api.sources_delete(&self.props.value.id.unwrap());
+                        let id = self.props.value.id;
+
+                        self.link.send_future(async move {
+                            crate::Api::sources_delete(&id.unwrap())
+                                .await
+                                .map_or_else(Self::Message::Error, |_| Self::Message::Deleted)
+                        });
                     }
                 }
-                Self::Message::Deleted => (),
+                Self::Message::Deleted => self.event_bus.send(crate::event::Event::SourceUpdate),
                 Self::Message::Edit => {
                     self.scene = Scene::Edit;
                     return true;
                 }
+                Self::Message::Saved(_) => self.event_bus.send(crate::event::Event::SourceUpdate),
                 Self::Message::ToggleActive(active) => {
+                    let value = self.props.value.clone();
+
                     self.props.value.active = active;
-                    self.api
-                        .sources_update(&self.props.value.id.unwrap(), &self.props.value);
+
+                    self.link.send_future(async move {
+                        crate::Api::sources_update(&value.id.unwrap(), &value)
+                            .await
+                            .map_or_else(Self::Message::Error, Self::Message::Saved)
+                    });
+
                     return true;
                 }
                 _ => (),
@@ -85,9 +93,16 @@ impl yew::Component for Component {
                     return true;
                 }
                 Self::Message::Save(source) => {
+                    let value = self.props.value.clone();
+
                     self.props.value = source;
-                    self.api
-                        .sources_update(&self.props.value.id.unwrap(), &self.props.value);
+
+                    self.link.send_future(async move {
+                        crate::Api::sources_update(&value.id.unwrap(), &value)
+                            .await
+                            .map_or_else(Self::Message::Error, Self::Message::Saved)
+                    });
+
                     return true;
                 }
                 _ => unreachable!(),

@@ -1,21 +1,11 @@
-#[derive(Clone)]
 pub(crate) enum Message {
     Cancel,
     Delete,
     Deleted,
     Edit,
+    Error(oxfeed_common::Error),
     Save(oxfeed_common::webhook::Entity),
     Saved(oxfeed_common::webhook::Entity),
-}
-
-impl From<crate::event::Api> for Message {
-    fn from(event: crate::event::Api) -> Self {
-        match event {
-            crate::event::Api::WebhookDelete(_) => Self::Deleted,
-            crate::event::Api::WebhookUpdate(webhook) => Self::Saved(webhook),
-            _ => unreachable!(),
-        }
-    }
 }
 
 enum Scene {
@@ -29,8 +19,8 @@ pub(crate) struct Properties {
 }
 
 pub(crate) struct Component {
-    api: crate::Api<Self>,
     scene: Scene,
+    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
     link: yew::ComponentLink<Self>,
     value: oxfeed_common::webhook::Entity,
 }
@@ -40,25 +30,35 @@ impl yew::Component for Component {
     type Properties = Properties;
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+        use yew::agent::Dispatched;
+
         Self {
-            api: crate::Api::new(link.clone()),
             scene: Scene::View,
+            event_bus: crate::event::Bus::dispatcher(),
             link,
             value: props.value,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        use yewtil::future::LinkFuture;
+
         match self.scene {
             Scene::View => match msg {
                 Self::Message::Delete => {
                     let message = format!("Would you like delete '{}' webhook?", self.value.name);
 
                     if yew::services::dialog::DialogService::confirm(&message) {
-                        self.api.webhooks_delete(&self.value.id.unwrap());
+                        let id = self.value.id;
+
+                        self.link.send_future(async move {
+                            crate::Api::webhooks_delete(&id.unwrap())
+                                .await
+                                .map_or_else(Self::Message::Error, |_| Self::Message::Deleted)
+                        });
                     }
                 }
-                Self::Message::Deleted => (),
+                Self::Message::Deleted => self.event_bus.send(crate::event::Event::WebhookUpdate),
                 Self::Message::Edit => {
                     self.scene = Scene::Edit;
                     return true;
@@ -71,14 +71,20 @@ impl yew::Component for Component {
                     return true;
                 }
                 Self::Message::Save(webhook) => {
-                    self.value = webhook;
-                    self.api
-                        .webhooks_update(&self.value.id.unwrap(), &self.value);
+                    self.value = webhook.clone();
+
+                    self.link.send_future(async move {
+                        crate::Api::webhooks_update(&webhook.id.unwrap(), &webhook)
+                            .await
+                            .map_or_else(Self::Message::Error, Self::Message::Saved)
+                    });
+
                     return true;
                 }
                 Self::Message::Saved(webhook) => {
                     self.value = webhook;
                     self.scene = Scene::View;
+                    self.event_bus.send(crate::event::Event::WebhookUpdate);
                     return true;
                 }
                 _ => unreachable!(),
