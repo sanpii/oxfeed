@@ -157,7 +157,7 @@ impl Task {
         if href.starts_with("http") {
             Some(href)
         } else {
-            let mut url = match url::Url::parse(&link) {
+            let mut url = match url::Url::parse(link) {
                 Ok(url) => url,
                 Err(_) => return None,
             };
@@ -175,7 +175,7 @@ impl Task {
         let mut read = false;
 
         for webhook in webhooks {
-            match Self::call_webhook(&webhook, &item) {
+            match Self::call_webhook(webhook, item) {
                 Ok(_) => read |= webhook.mark_read,
                 Err(err) => {
                     let last_error = err.to_string();

@@ -94,7 +94,7 @@ impl yew::Component for Component {
         title.set_inner_html(&self.item.title);
 
         let content = yew::utils::document().create_element("div").unwrap();
-        content.set_inner_html(&self.content.as_ref().unwrap_or(&"Loading...".to_string()));
+        content.set_inner_html(self.content.as_ref().unwrap_or(&"Loading...".to_string()));
 
         let icon = if let Some(icon) = &self.item.icon {
             format!("{}{}", env!("API_URL"), icon)

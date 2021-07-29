@@ -148,7 +148,7 @@ impl yew::Component for Component {
         };
 
         if let Ok(Some(element)) = yew::utils::document().query_selector("link[rel=icon]") {
-            element.set_attribute("href", &favicon).ok();
+            element.set_attribute("href", favicon).ok();
         }
 
         yew::html! {

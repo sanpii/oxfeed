@@ -65,7 +65,7 @@ fn search(
         clause.and_where("$* = any(tags)", vec![tag]);
     }
 
-    let token = identity.token(&elephantry)?;
+    let token = identity.token(elephantry)?;
     clause.and_where("token = $*", vec![&token]);
 
     sql.push_str(&format!("where {}\n", clause.to_string()));
@@ -75,7 +75,7 @@ fn search(
     }
 
     let pager =
-        count::<oxfeed_common::item::Item>(&elephantry, &sql, &clause.params(), &query.pagination)?;
+        count::<oxfeed_common::item::Item>(elephantry, &sql, &clause.params(), &query.pagination)?;
     let response = actix_web::HttpResponse::Ok().json(pager);
 
     Ok(response)

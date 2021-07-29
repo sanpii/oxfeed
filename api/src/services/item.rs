@@ -60,7 +60,7 @@ pub(crate) fn fetch(
     filter: &elephantry::Where,
     pagination: &oxfeed_common::Pagination,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let token = identity.token(&elephantry)?;
+    let token = identity.token(elephantry)?;
 
     let model = elephantry.model::<Model>();
     let items = model.all(&token, filter, pagination)?;

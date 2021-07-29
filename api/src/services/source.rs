@@ -32,7 +32,7 @@ pub(crate) fn fetch(
     pagination: &oxfeed_common::Pagination,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let model = elephantry.model::<Model>();
-    let token = identity.token(&elephantry)?;
+    let token = identity.token(elephantry)?;
     let sources = model.all(&token, filter, pagination)?;
     let response = actix_web::HttpResponse::Ok().json(sources);
 

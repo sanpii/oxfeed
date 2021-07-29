@@ -39,7 +39,7 @@ fn save(
     user: &oxfeed_common::user::Entity,
 ) {
     for outline in &outline.outlines {
-        save(&elephantry, outline, user);
+        save(elephantry, outline, user);
     }
 
     let source = match source_try_from(outline, user) {
