@@ -75,13 +75,17 @@ li.list-group-item .actions svg:hover {
     color: var(--bs-primary);
 }
 
-li.list-group-item .float-end .favorite {
+li.list-group-item .actions .favorite svg:hover {
+    color: var(--bs-yellow);
+}
+
+li.list-group-item .float-end > .favorite {
     display: block;
     color: var(--bs-yellow);
     margin-right: .5rem;
 }
 
-li.list-group-item:hover .float-end .favorite {
+li.list-group-item:hover .float-end > .favorite {
     display: none;
 }
 
