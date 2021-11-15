@@ -23,8 +23,8 @@ async fn icon(url: actix_web::web::Path<String>) -> oxfeed_common::Result<actix_
     }
 
     let response = actix_web::HttpResponse::Ok()
-        .header("Content-Type", mime)
-        .header("Cache-Control", "public, max-age=604800, immutable")
+        .append_header(("Content-Type", mime))
+        .append_header(("Cache-Control", "public, max-age=604800, immutable"))
         .body(body);
 
     Ok(response)

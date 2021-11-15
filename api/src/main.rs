@@ -30,10 +30,10 @@ async fn main() -> oxfeed_common::Result {
 
         actix_web::App::new()
             .wrap(actix_web::middleware::NormalizePath::new(
-                actix_web::middleware::normalize::TrailingSlash::Trim,
+                actix_web::middleware::TrailingSlash::Trim,
             ))
-            .data(actor.clone())
-            .data(elephantry.clone())
+            .app_data(actix_web::web::Data::new(actor.clone()))
+            .app_data(actix_web::web::Data::new(elephantry.clone()))
             .wrap(cors)
             .service(services::auth::scope())
             .service(services::icon::scope())

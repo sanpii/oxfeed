@@ -89,11 +89,11 @@ async fn export(
     }
 
     let response = actix_web::HttpResponse::Ok()
-        .header("Content-Type", "text/xml; charset=utf-8")
-        .header(
+        .append_header(("Content-Type", "text/xml; charset=utf-8"))
+        .append_header((
             "Content-Disposition",
             "attachment; filename=\"oxfeed-subscriptions.xml\"",
-        )
+        ))
         .body(opml.to_string()?);
 
     Ok(response)

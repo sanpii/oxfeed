@@ -10,7 +10,7 @@ pub(crate) mod webhook;
 pub(crate) mod websocket;
 
 pub(crate) fn scope() -> actix_web::Scope {
-    actix_web::web::scope("/").service(counts)
+    actix_web::web::scope("").service(counts)
 }
 
 #[actix_web::get("/counts")]
