@@ -34,7 +34,7 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Click => self.on_click.emit(()),
+            Message::Click => self.on_click.emit(()),
         }
 
         false
@@ -58,7 +58,7 @@ impl yew::Component for Component {
                             <crate::components::Svg
                                 icon="x"
                                 size=16
-                                on_click=self.link.callback(move |_| Self::Message::Click)
+                                on_click=self.link.callback(move |_| Message::Click)
                             />
                         }
                     } else {

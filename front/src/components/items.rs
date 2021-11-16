@@ -30,7 +30,7 @@ impl yew::Component for Component {
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         use yew::Bridged;
 
-        let callback = link.callback(Self::Message::Event);
+        let callback = link.callback(Message::Event);
 
         let component = Self {
             kind: props.kind,
@@ -41,24 +41,24 @@ impl yew::Component for Component {
             _producer: crate::event::Bus::bridge(callback),
         };
 
-        component.link.send_message(Self::Message::NeedUpdate);
+        component.link.send_message(Message::NeedUpdate);
 
         component
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Event(event) => {
+            Message::Event(event) => {
                 if matches!(event, crate::event::Event::ItemUpdate) {
-                    self.link.send_message(Self::Message::NeedUpdate);
+                    self.link.send_message(Message::NeedUpdate);
                 }
             }
-            Self::Message::PageChange(page) => {
+            Message::PageChange(page) => {
                 self.pagination.page = page;
                 yew::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
-                self.link.send_message(Self::Message::NeedUpdate);
+                self.link.send_message(Message::NeedUpdate);
             }
-            Self::Message::NeedUpdate => {
+            Message::NeedUpdate => {
                 let filter = &self.filter;
                 let kind = &self.kind;
                 let pagination = self.pagination;
@@ -75,7 +75,7 @@ impl yew::Component for Component {
                     );
                 }
             }
-            Self::Message::Update(pager) => {
+            Message::Update(pager) => {
                 self.pager = Some(pager);
                 return true;
             }
@@ -97,7 +97,7 @@ impl yew::Component for Component {
         yew::html! {
             <super::List<oxfeed_common::item::Item>
                 value=pager.clone()
-                on_page_change=self.link.callback(Self::Message::PageChange)
+                on_page_change=self.link.callback(Message::PageChange)
             />
         }
     }
@@ -108,7 +108,7 @@ impl yew::Component for Component {
             || self.pagination != props.pagination;
 
         if should_render {
-            self.link.send_message(Self::Message::NeedUpdate);
+            self.link.send_message(Message::NeedUpdate);
         }
 
         self.kind = props.kind;

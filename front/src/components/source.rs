@@ -42,7 +42,7 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
-        if let Self::Message::Saved(source) = msg {
+        if let Message::Saved(source) = msg {
             self.props.value = source;
             self.scene = Scene::View;
             return true;
@@ -50,7 +50,7 @@ impl yew::Component for Component {
 
         match self.scene {
             Scene::View => match msg {
-                Self::Message::Delete => {
+                Message::Delete => {
                     let message =
                         format!("Would you like delete '{}' source?", self.props.value.title);
 
@@ -59,17 +59,17 @@ impl yew::Component for Component {
 
                         crate::api!(
                             self.link,
-                            sources_delete(id) -> |_| Self::Message::Deleted, Self::Message::Error
+                            sources_delete(id) -> |_| Message::Deleted, Message::Error
                         );
                     }
                 }
-                Self::Message::Deleted => self.event_bus.send(crate::event::Event::SourceUpdate),
-                Self::Message::Edit => {
+                Message::Deleted => self.event_bus.send(crate::event::Event::SourceUpdate),
+                Message::Edit => {
                     self.scene = Scene::Edit;
                     return true;
                 }
-                Self::Message::Saved(_) => self.event_bus.send(crate::event::Event::SourceUpdate),
-                Self::Message::ToggleActive(active) => {
+                Message::Saved(_) => self.event_bus.send(crate::event::Event::SourceUpdate),
+                Message::ToggleActive(active) => {
                     let value = &mut self.props.value;
                     let id = &value.id.unwrap();
 
@@ -77,7 +77,7 @@ impl yew::Component for Component {
 
                     crate::api!(
                         self.link,
-                        sources_update(id, value) -> Self::Message::Saved, Self::Message::Error
+                        sources_update(id, value) -> Message::Saved, Message::Error
                     );
 
                     return true;
@@ -85,18 +85,18 @@ impl yew::Component for Component {
                 _ => (),
             },
             Scene::Edit => match msg {
-                Self::Message::Cancel => {
+                Message::Cancel => {
                     self.scene = Scene::View;
                     return true;
                 }
-                Self::Message::Save(source) => {
+                Message::Save(source) => {
                     let id = &self.props.value.id.unwrap();
 
                     self.props.value = source.clone();
 
                     crate::api!(
                         self.link,
-                        sources_update(id, source) -> Self::Message::Saved, Self::Message::Error
+                        sources_update(id, source) -> Message::Saved, Message::Error
                     );
 
                     return true;
@@ -126,7 +126,7 @@ impl yew::Component for Component {
                             <super::Switch
                                 id=format!("active-{}", source.id.unwrap_or_default().to_string())
                                 active=source.active
-                                on_toggle=self.link.callback(Self::Message::ToggleActive)
+                                on_toggle=self.link.callback(Message::ToggleActive)
                             />
 
                             { source.title }

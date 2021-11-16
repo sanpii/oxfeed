@@ -36,15 +36,15 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Submit => {
+            Message::Submit => {
                 let info = Info {
                     email: self.email.clone(),
                     password: self.password.clone(),
                 };
                 self.on_submit.emit(info);
             }
-            Self::Message::UpdateEmail(email) => self.email = email,
-            Self::Message::UpdatePassword(password) => self.password = password,
+            Message::UpdateEmail(email) => self.email = email,
+            Message::UpdatePassword(password) => self.password = password,
         }
 
         false
@@ -60,7 +60,7 @@ impl yew::Component for Component {
                         class="form-control"
                         placeholder="Email"
                         required=true
-                        oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateEmail(e.value))
+                        oninput=self.link.callback(|e: yew::InputData| Message::UpdateEmail(e.value))
                     />
                     <label for="email" class="form-label sr-only">{ "Email" }</label>
                 </div>
@@ -72,13 +72,13 @@ impl yew::Component for Component {
                         class="form-control"
                         placeholder="Password"
                         required=true
-                        oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdatePassword(e.value))
+                        oninput=self.link.callback(|e: yew::InputData| Message::UpdatePassword(e.value))
                     />
                 </div>
                 <a
                     class=yew::classes!("btn", "btn-lg", "btn-primary", "w-100")
                     type="submit"
-                    onclick=self.link.callback(|_| Self::Message::Submit)
+                    onclick=self.link.callback(|_| Message::Submit)
                 >{ "Register" }</a>
             </>
         }

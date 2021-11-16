@@ -26,7 +26,7 @@ impl yew::Component for Component {
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         use yew::agent::Bridged;
 
-        let callback = link.callback(Self::Message::Event);
+        let callback = link.callback(Message::Event);
 
         Self {
             pagination: props.pagination,
@@ -37,13 +37,11 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
-        match msg {
-            Self::Message::Event(event) => {
-                if let crate::event::Event::Redirected(_) = event {
-                    self.filter = crate::Filter::new();
-                    return true;
-                }
-            }
+        let Message::Event(event) = msg;
+
+        if let crate::event::Event::Redirected(_) = event {
+            self.filter = crate::Filter::new();
+            return true;
         }
 
         false

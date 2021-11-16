@@ -28,11 +28,11 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Cancel => self.props.on_cancel.emit(()),
-            Self::Message::Submit => self.props.on_submit.emit(self.props.webhook.clone()),
-            Self::Message::UpdateMarkRead(mark_read) => self.props.webhook.mark_read = mark_read,
-            Self::Message::UpdateName(name) => self.props.webhook.name = name,
-            Self::Message::UpdateUrl(url) => self.props.webhook.url = url,
+            Message::Cancel => self.props.on_cancel.emit(()),
+            Message::Submit => self.props.on_submit.emit(self.props.webhook.clone()),
+            Message::UpdateMarkRead(mark_read) => self.props.webhook.mark_read = mark_read,
+            Message::UpdateName(name) => self.props.webhook.name = name,
+            Message::UpdateUrl(url) => self.props.webhook.url = url,
         }
 
         true
@@ -49,7 +49,7 @@ impl yew::Component for Component {
                             name="name"
                             required=true
                             value=self.props.webhook.name.clone()
-                            oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateName(e.value))
+                            oninput=self.link.callback(|e: yew::InputData| Message::UpdateName(e.value))
                         />
                     </div>
                 </div>
@@ -62,7 +62,7 @@ impl yew::Component for Component {
                             name="url"
                             required=true
                             value=self.props.webhook.url.clone()
-                            oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateUrl(e.value))
+                            oninput=self.link.callback(|e: yew::InputData| Message::UpdateUrl(e.value))
                         />
                     </div>
                 </div>
@@ -73,7 +73,7 @@ impl yew::Component for Component {
                             id="mark_read"
                             label="Mark item as read after webhook call"
                             active=self.props.webhook.mark_read
-                            on_toggle=self.link.callback(Self::Message::UpdateMarkRead)
+                            on_toggle=self.link.callback(Message::UpdateMarkRead)
                         />
                     </div>
                 </div>
@@ -81,7 +81,7 @@ impl yew::Component for Component {
                 <a
                     class=yew::classes!("btn", "btn-primary")
                     title="Save"
-                    onclick=self.link.callback(|_| Self::Message::Submit)
+                    onclick=self.link.callback(|_| Message::Submit)
                 >
                     <crate::components::Svg icon="check" size=24 />
                     { "Save" }
@@ -90,7 +90,7 @@ impl yew::Component for Component {
                 <a
                     class=yew::classes!("btn", "btn-secondary")
                     title="Cancel"
-                    onclick=self.link.callback(|_| Self::Message::Cancel)
+                    onclick=self.link.callback(|_| Message::Cancel)
                 >
                     <crate::components::Svg icon="x" size=24 />
                     { "Cancel" }

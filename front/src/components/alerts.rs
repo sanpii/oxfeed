@@ -16,7 +16,7 @@ impl yew::Component for Component {
     fn create(_: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         use yew::Bridged;
 
-        let callback = link.callback(Self::Message::Event);
+        let callback = link.callback(Message::Event);
 
         Self {
             link,
@@ -27,13 +27,13 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Event(event) => {
+            Message::Event(event) => {
                 if let crate::event::Event::Alert(alert) = event {
                     self.messages.push(alert);
                     return true;
                 }
             }
-            Self::Message::Close(idx) => {
+            Message::Close(idx) => {
                 self.messages.remove(idx);
                 return true;
             }
@@ -52,7 +52,7 @@ impl yew::Component for Component {
 
                             <button
                                 class="btn-close"
-                                onclick=self.link.callback(move |_| Self::Message::Close(idx))
+                                onclick=self.link.callback(move |_| Message::Close(idx))
                             >
                             </button>
                         </div>

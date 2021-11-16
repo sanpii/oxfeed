@@ -40,7 +40,7 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Submit => {
+            Message::Submit => {
                 let info = Info {
                     email: self.email.clone(),
                     password: self.password.clone(),
@@ -49,9 +49,9 @@ impl yew::Component for Component {
 
                 self.on_submit.emit(info);
             }
-            Self::Message::ToggleRemember => self.remember_me = !self.remember_me,
-            Self::Message::UpdateEmail(email) => self.email = email,
-            Self::Message::UpdatePassword(password) => self.password = password,
+            Message::ToggleRemember => self.remember_me = !self.remember_me,
+            Message::UpdateEmail(email) => self.email = email,
+            Message::UpdatePassword(password) => self.password = password,
         }
 
         false
@@ -68,7 +68,7 @@ impl yew::Component for Component {
                         placeholder="Email"
                         required=true
                         autofocus=true
-                        oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateEmail(e.value))
+                        oninput=self.link.callback(|e: yew::InputData| Message::UpdateEmail(e.value))
                     />
                     <label for="email" class="form-label sr-only">{ "Email" }</label>
                 </div>
@@ -79,7 +79,7 @@ impl yew::Component for Component {
                         class="form-control"
                         placeholder="Password"
                         required=true
-                        oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdatePassword(e.value))
+                        oninput=self.link.callback(|e: yew::InputData| Message::UpdatePassword(e.value))
                     />
                     <label for="password" class="form-label sr-only">{ "Password" }</label>
                 </div>
@@ -88,14 +88,14 @@ impl yew::Component for Component {
                         <input
                             type="checkbox"
                             checked=self.remember_me
-                            onclick=self.link.callback(|_| Self::Message::ToggleRemember)
+                            onclick=self.link.callback(|_| Message::ToggleRemember)
                         />{ " Remember me" }
                     </label>
                 </div>
                 <a
                     class=yew::classes!("btn", "btn-lg", "btn-primary", "w-100")
                     type="submit"
-                    onclick=self.link.callback(|_| Self::Message::Submit)
+                    onclick=self.link.callback(|_| Message::Submit)
                 >{ "Sign in" }</a>
             </>
         }

@@ -36,7 +36,7 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Click => self.on_click.emit(()),
+            Message::Click => self.on_click.emit(()),
         }
 
         false
@@ -60,7 +60,7 @@ impl yew::Component for Component {
         let node = yew::virtual_dom::VNode::VRef(span.into());
 
         yew::html! {
-            <span class=&self.class onclick=self.link.callback(|_| Self::Message::Click)>
+            <span class=&self.class onclick=self.link.callback(|_| Message::Click)>
             { node }
             </span>
         }

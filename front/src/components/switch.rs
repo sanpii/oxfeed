@@ -28,7 +28,7 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Toggle => {
+            Message::Toggle => {
                 self.props.active = !self.props.active;
                 self.props.on_toggle.emit(self.props.active);
             }
@@ -45,7 +45,7 @@ impl yew::Component for Component {
                     type="checkbox"
                     class="form-check-input"
                     checked=self.props.active
-                    onclick=self.link.callback(|_| Self::Message::Toggle)
+                    onclick=self.link.callback(|_| Message::Toggle)
                 />
                 <label class="form-check-label" for=self.props.id.clone()>{ &self.props.label }</label>
             </div>

@@ -68,7 +68,7 @@ impl yew::Component for Component {
     fn create(_: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         use yew::agent::{Bridged, Dispatched};
 
-        let event_cb = link.callback(Self::Message::Event);
+        let event_cb = link.callback(Message::Event);
 
         Self {
             _websocket: Self::websocket(&link),
@@ -82,7 +82,7 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Event(event) => match event {
+            Message::Event(event) => match event {
                 crate::event::Event::AuthRequire => self.auth = false,
                 crate::event::Event::Logged => {
                     self.auth = true;
@@ -92,12 +92,12 @@ impl yew::Component for Component {
                 crate::event::Event::Redirected(_) => (),
                 _ => return false,
             },
-            Self::Message::Index => {
+            Message::Index => {
                 self.event_bus
                     .send(crate::event::Event::Redirect("/unread".to_string()));
                 return false;
             }
-            Self::Message::Websocket(event) => match event {
+            Message::Websocket(event) => match event {
                 WebsocketAction::Ready(_) => {
                     self.event_bus.send(crate::event::Event::ItemUpdate);
                     return false;
@@ -117,7 +117,7 @@ impl yew::Component for Component {
         }
 
         if self.location.path() == "/" {
-            self.link.send_message(Self::Message::Index);
+            self.link.send_message(Message::Index);
             return "Redirecting...".into();
         }
 

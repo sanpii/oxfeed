@@ -53,9 +53,9 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Choose(idx) => self.select(self.terms[idx].clone()),
-            Self::Message::Error(error) => self.event_bus.send(error.into()),
-            Self::Message::Input(input) => {
+            Message::Choose(idx) => self.select(self.terms[idx].clone()),
+            Message::Error(error) => self.event_bus.send(error.into()),
+            Message::Input(input) => {
                 self.value = input.clone();
 
                 let pagination = oxfeed_common::Pagination::new();
@@ -73,7 +73,7 @@ impl yew::Component for Component {
                     self.active = None;
                 }
             }
-            Self::Message::Key(key) => match key.as_str() {
+            Message::Key(key) => match key.as_str() {
                 "ArrowDown" => {
                     self.active = if let Some(active) = self.active {
                         Some((active + 1) % self.terms.len())
@@ -106,7 +106,7 @@ impl yew::Component for Component {
                 }
                 _ => (),
             },
-            Self::Message::Terms(terms) => self.terms = terms,
+            Message::Terms(terms) => self.terms = terms,
         }
 
         true
@@ -118,8 +118,8 @@ impl yew::Component for Component {
                 <input
                     type="text"
                     value=self.value.clone()
-                    oninput=self.link.callback(|e: yew::InputData| Self::Message::Input(e.value))
-                    onkeydown=self.link.callback(|e: yew::KeyboardEvent| Self::Message::Key(e.key()))
+                    oninput=self.link.callback(|e: yew::InputData| Message::Input(e.value))
+                    onkeydown=self.link.callback(|e: yew::KeyboardEvent| Message::Key(e.key()))
                 />
                 {
                     if !self.terms.is_empty() {
@@ -130,7 +130,7 @@ impl yew::Component for Component {
                                     yew::html! {
                                         <div
                                             class=yew::classes!("list-group-item", "list-group-item-action", if self.active == Some(idx) { "active" } else { "" })
-                                            onclick=self.link.callback(move |_| Self::Message::Choose(idx))
+                                            onclick=self.link.callback(move |_| Message::Choose(idx))
                                         >{ term }</div>
                                     }
                                 })

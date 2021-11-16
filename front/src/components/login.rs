@@ -35,17 +35,17 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Cancel => {
+            Message::Cancel => {
                 self.scene = Scene::Login;
                 return true;
             }
-            Self::Message::Error(err) => self.event_bus.send(err.into()),
-            Self::Message::UserCreated => {
+            Message::Error(err) => self.event_bus.send(err.into()),
+            Message::UserCreated => {
                 let alert = crate::event::Alert::info("User created");
                 self.event_bus.send(crate::event::Event::Alert(alert));
-                self.link.send_message(Self::Message::Cancel);
+                self.link.send_message(Message::Cancel);
             }
-            Self::Message::Create(info) => {
+            Message::Create(info) => {
                 let user = oxfeed_common::new_user::Entity {
                     password: info.password,
                     email: info.email,
@@ -56,18 +56,18 @@ impl yew::Component for Component {
                     user_create(user) -> |_| Message::UserCreated, Message::Error
                 );
             }
-            Self::Message::Login(info) => {
+            Message::Login(info) => {
                 let email = &info.email;
                 let password = &info.password;
                 let remember_me = &info.remember_me;
 
                 crate::api!(
                     self.link,
-                    auth_login(email, password, remember_me) -> |_| Self::Message::Logged, Self::Message::Error
+                    auth_login(email, password, remember_me) -> |_| Message::Logged, Message::Error
                 );
             }
-            Self::Message::Logged => self.event_bus.send(crate::event::Event::Logged),
-            Self::Message::Register => {
+            Message::Logged => self.event_bus.send(crate::event::Event::Logged),
+            Message::Register => {
                 self.scene = Scene::Register;
                 return true;
             }
@@ -84,9 +84,9 @@ impl yew::Component for Component {
                         <img class="mb-4" src="/logo" alt="" width="72px" height="72px" />
                         <h1 class="h3 mb-3 fw-normal">{ "Please sign in" }</h1>
                         <super::Alerts />
-                        <super::form::Login on_submit=self.link.callback(Self::Message::Login) />
+                        <super::form::Login on_submit=self.link.callback(Message::Login) />
                         { "Don't have an account yet?" }
-                        <a href="#" onclick=self.link.callback(|_| Self::Message::Register)>{ "Register now" }</a>
+                        <a href="#" onclick=self.link.callback(|_| Message::Register)>{ "Register now" }</a>
                     </form>
                 </div>
             },
@@ -96,9 +96,9 @@ impl yew::Component for Component {
                         <img class="mb-4" src="/logo" alt="" width="72px" height="72px" />
                         <h1 class="h3 mb-3 fw-normal">{ "Register" }</h1>
                         <super::Alerts />
-                        <super::form::Register on_submit=self.link.callback(Self::Message::Create) />
+                        <super::form::Register on_submit=self.link.callback(Message::Create) />
                         { "Already have login and password?" }
-                        <a href="#" onclick=self.link.callback(|_| Self::Message::Cancel)>{ "Log in" }</a>
+                        <a href="#" onclick=self.link.callback(|_| Message::Cancel)>{ "Log in" }</a>
                     </form>
                 </div>
             },

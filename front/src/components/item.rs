@@ -55,9 +55,9 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Error(err) => self.event_bus.send(err.into()),
-            Self::Message::Content(content) => self.content = Some(content),
-            Self::Message::ToggleContent => {
+            Message::Error(err) => self.event_bus.send(err.into()),
+            Message::Content(content) => self.content = Some(content),
+            Message::ToggleContent => {
                 self.scene = !self.scene;
 
                 if self.scene == Scene::Expanded && self.content.is_none() {
@@ -69,7 +69,7 @@ impl yew::Component for Component {
                     );
                 }
             }
-            Self::Message::ToggleFavorite => {
+            Message::ToggleFavorite => {
                 let item_id = &self.item.id;
                 let key = "favorite";
                 let value = !self.item.favorite;
@@ -79,7 +79,7 @@ impl yew::Component for Component {
                     items_tag(item_id, key, value) -> |_| Message::Toggled, Message::Error
                 );
             }
-            Self::Message::ToggleRead => {
+            Message::ToggleRead => {
                 let item_id = &self.item.id;
                 let key = "read";
                 let value = !self.item.read;
@@ -89,7 +89,7 @@ impl yew::Component for Component {
                     items_tag(item_id, key, value) -> |_| Message::Toggled, Message::Error
                 );
             }
-            Self::Message::Toggled => self.event_bus.send(crate::event::Event::ItemUpdate),
+            Message::Toggled => self.event_bus.send(crate::event::Event::ItemUpdate),
         }
 
         true
@@ -140,9 +140,9 @@ impl yew::Component for Component {
                                 <super::Actions
                                     inline=true
                                     read=self.item.read
-                                    on_read=self.link.callback(|_| Self::Message::ToggleRead)
+                                    on_read=self.link.callback(|_| Message::ToggleRead)
                                     favorite=self.item.favorite
-                                    on_favorite=self.link.callback(|_| Self::Message::ToggleFavorite)
+                                    on_favorite=self.link.callback(|_| Message::ToggleFavorite)
                                 />
                             }
                         } else {
@@ -170,9 +170,9 @@ impl yew::Component for Component {
                                 <hr />
                                 <super::Actions
                                     read=self.item.read
-                                    on_read=self.link.callback(|_| Self::Message::ToggleRead)
+                                    on_read=self.link.callback(|_| Message::ToggleRead)
                                     favorite=self.item.favorite
-                                    on_favorite=self.link.callback(|_| Self::Message::ToggleFavorite)
+                                    on_favorite=self.link.callback(|_| Message::ToggleFavorite)
                                 />
                             </>
                         }

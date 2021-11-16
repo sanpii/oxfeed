@@ -33,7 +33,7 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Input(value) => {
+            Message::Input(value) => {
                 self.filter = value.into();
 
                 let location = crate::Location::new();
@@ -63,7 +63,7 @@ impl yew::Component for Component {
                     value=self.filter.to_string()
                     placeholder="Search"
                     aria-label="Search"
-                    oninput=self.link.callback(|e: yew::InputData| Self::Message::Input(e.value))
+                    oninput=self.link.callback(|e: yew::InputData| Message::Input(e.value))
                 />
             }
         }

@@ -31,15 +31,15 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Add(value) => {
+            Message::Add(value) => {
                 if !self.values.contains(&value) {
                     self.values.push(value);
                 }
             }
-            Self::Message::Delete => {
+            Message::Delete => {
                 self.values.pop();
             }
-            Self::Message::Remove(idx) => {
+            Message::Remove(idx) => {
                 self.values.remove(idx);
             }
         }
@@ -61,14 +61,14 @@ impl yew::Component for Component {
                             <crate::components::Tag
                                 value=tag.clone()
                                 editable=true
-                                on_click=self.link.callback(move |_| Self::Message::Remove(idx))
+                                on_click=self.link.callback(move |_| Message::Remove(idx))
                             />
                         }
                     })
                 }
                 <super::Autocomplete
-                    on_select=self.link.callback(Self::Message::Add)
-                    on_delete=self.link.callback(|_| Self::Message::Delete)
+                    on_select=self.link.callback(Message::Add)
+                    on_delete=self.link.callback(|_| Message::Delete)
                 />
             </div>
         }

@@ -37,7 +37,7 @@ impl yew::Component for Component {
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         use yew::agent::Bridged;
 
-        let callback = link.callback(Self::Message::Event);
+        let callback = link.callback(Message::Event);
 
         let component = Self {
             filter: props.filter,
@@ -48,7 +48,7 @@ impl yew::Component for Component {
             _producer: crate::event::Bus::bridge(callback),
         };
 
-        component.link.send_message(Self::Message::NeedUpdate);
+        component.link.send_message(Message::NeedUpdate);
 
         component
     }
@@ -56,29 +56,29 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match &self.scene {
             Scene::View => match msg {
-                Self::Message::Add => self.scene = Scene::Add,
-                Self::Message::Update(ref pager) => self.pager = Some(pager.clone()),
+                Message::Add => self.scene = Scene::Add,
+                Message::Update(ref pager) => self.pager = Some(pager.clone()),
                 _ => (),
             },
             Scene::Add => match msg {
-                Self::Message::Cancel => self.scene = Scene::View,
-                Self::Message::Create(ref source) => {
+                Message::Cancel => self.scene = Scene::View,
+                Message::Create(ref source) => {
                     crate::api!(
                         self.link,
-                        sources_create(source) -> |_| Self::Message::NeedUpdate
+                        sources_create(source) -> |_| Message::NeedUpdate
                     );
                 }
                 _ => (),
             },
         };
 
-        if let Self::Message::PageChange(page) = msg {
+        if let Message::PageChange(page) = msg {
             self.pagination.page = page;
             yew::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
-            self.link.send_message(Self::Message::NeedUpdate);
+            self.link.send_message(Message::NeedUpdate);
 
             return false;
-        } else if matches!(msg, Self::Message::NeedUpdate) {
+        } else if matches!(msg, Message::NeedUpdate) {
             self.scene = Scene::View;
             let pagination = &self.pagination;
             let filter = &self.filter;
@@ -86,12 +86,12 @@ impl yew::Component for Component {
             if filter.is_empty() {
                 crate::api!(
                     self.link,
-                    sources_all(pagination) -> Self::Message::Update
+                    sources_all(pagination) -> Message::Update
                 );
             } else {
                 crate::api!(
                     self.link,
-                    sources_search(filter, pagination) -> Self::Message::Update
+                    sources_search(filter, pagination) -> Message::Update
                 );
             }
 
@@ -140,7 +140,7 @@ impl yew::Component for Component {
                 { add }
                 <super::List<oxfeed_common::source::Entity>
                     value=pager.clone()
-                    on_page_change=self.link.callback(Self::Message::PageChange)
+                    on_page_change=self.link.callback(Message::PageChange)
                 />
             </>
         }
@@ -150,7 +150,7 @@ impl yew::Component for Component {
         let should_render = self.pagination != props.pagination || self.filter != props.filter;
 
         if should_render {
-            self.link.send_message(Self::Message::NeedUpdate);
+            self.link.send_message(Message::NeedUpdate);
         }
 
         self.pagination = props.pagination;

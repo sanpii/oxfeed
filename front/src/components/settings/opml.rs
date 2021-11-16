@@ -43,22 +43,22 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Error(err) => self.event_bus.send(err.into()),
-            Self::Message::Files(files) => self.files = files,
-            Self::Message::Import => self.load(),
-            Self::Message::Imported => {
+            Message::Error(err) => self.event_bus.send(err.into()),
+            Message::Files(files) => self.files = files,
+            Message::Import => self.load(),
+            Message::Imported => {
                 let alert = crate::event::Alert::info("Import done");
                 self.event_bus.send(crate::event::Event::Alert(alert));
                 self.event_bus.send(crate::event::Event::SettingUpdate);
             }
-            Self::Message::Loaded(content) => {
+            Message::Loaded(content) => {
                 use yewtil::future::LinkFuture;
 
                 self.link.send_future(async move {
                     let opml = String::from_utf8(content.to_vec()).map_err(anyhow::Error::new);
                     crate::Api::opml_import(opml)
                         .await
-                        .map_or_else(Self::Message::Error, |_| Self::Message::Imported)
+                        .map_or_else(Message::Error, |_| Message::Imported)
                 });
             }
         }
@@ -83,12 +83,12 @@ impl yew::Component for Component {
                             }
                         }
 
-                        Self::Message::Files(files)
+                        Message::Files(files)
                     }) />
                     <button
                         class=yew::classes!("btn", "btn-outline-primary")
                         type="button"
-                        onclick=self.link.callback(|_| Self::Message::Import)
+                        onclick=self.link.callback(|_| Message::Import)
                     >{ "Import" }</button>
                 </div>
                 <div class="input-group">

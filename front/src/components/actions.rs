@@ -28,8 +28,8 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::ToggleFavorite => self.props.on_favorite.emit(()),
-            Self::Message::ToggleRead => self.props.on_read.emit(()),
+            Message::ToggleFavorite => self.props.on_favorite.emit(()),
+            Message::ToggleRead => self.props.on_read.emit(()),
         }
 
         true
@@ -51,10 +51,10 @@ impl yew::Component for Component {
         if self.props.inline {
             yew::html! {
                 <div class=yew::classes!("actions", "inline")>
-                    <span class="read" onclick=self.link.callback(|_| Self::Message::ToggleRead) title=read_label>
+                    <span class="read" onclick=self.link.callback(|_| Message::ToggleRead) title=read_label>
                         <super::Svg icon=eye size=24 />
                     </span>
-                    <span class="favorite" onclick=self.link.callback(|_| Self::Message::ToggleFavorite) title=favorite_label>
+                    <span class="favorite" onclick=self.link.callback(|_| Message::ToggleFavorite) title=favorite_label>
                         <super::Svg icon=star size=24 />
                     </span>
                 </div>
@@ -62,11 +62,11 @@ impl yew::Component for Component {
         } else {
             yew::html! {
                 <div class="actions">
-                    <button class=yew::classes!("btn", "btn-outline-secondary") onclick=self.link.callback(|_| Self::Message::ToggleRead)>
+                    <button class=yew::classes!("btn", "btn-outline-secondary") onclick=self.link.callback(|_| Message::ToggleRead)>
                         <super::Svg icon=eye size=24 />
                         { read_label }
                     </button>
-                    <button class=yew::classes!("btn", "btn-outline-warning") onclick=self.link.callback(|_| Self::Message::ToggleFavorite)>
+                    <button class=yew::classes!("btn", "btn-outline-warning") onclick=self.link.callback(|_| Message::ToggleFavorite)>
                         <super::Svg icon=star size=24 />
                         { favorite_label }
                     </button>

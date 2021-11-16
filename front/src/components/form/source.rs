@@ -40,7 +40,7 @@ impl yew::Component for Component {
 
         crate::api!(
             component.link,
-            webhooks_all() -> Self::Message::Webhooks, Self::Message::Error
+            webhooks_all() -> Message::Webhooks, Message::Error
         );
 
         component
@@ -48,11 +48,11 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Cancel => self.props.on_cancel.emit(()),
-            Self::Message::Error(err) => self.event_bus.send(err.into()),
-            Self::Message::Submit => self.props.on_submit.emit(self.props.source.clone()),
-            Self::Message::ToggleActive(active) => self.props.source.active = active,
-            Self::Message::ToggleWebhook(id, active) => {
+            Message::Cancel => self.props.on_cancel.emit(()),
+            Message::Error(err) => self.event_bus.send(err.into()),
+            Message::Submit => self.props.on_submit.emit(self.props.source.clone()),
+            Message::ToggleActive(active) => self.props.source.active = active,
+            Message::ToggleWebhook(id, active) => {
                 if active {
                     if !self.props.source.webhooks.contains(&id) {
                         self.props.source.webhooks.push(id)
@@ -61,10 +61,10 @@ impl yew::Component for Component {
                     self.props.source.webhooks.retain(|x| x != &id);
                 }
             }
-            Self::Message::UpdateTags(tags) => self.props.source.tags = tags,
-            Self::Message::UpdateTitle(title) => self.props.source.title = title,
-            Self::Message::UpdateUrl(url) => self.props.source.url = url,
-            Self::Message::Webhooks(webhooks) => self.webhooks = webhooks,
+            Message::UpdateTags(tags) => self.props.source.tags = tags,
+            Message::UpdateTitle(title) => self.props.source.title = title,
+            Message::UpdateUrl(url) => self.props.source.url = url,
+            Message::Webhooks(webhooks) => self.webhooks = webhooks,
         }
 
         true
@@ -80,7 +80,7 @@ impl yew::Component for Component {
                             class="form-control"
                             name="title"
                             value=self.props.source.title.clone()
-                            oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateTitle(e.value))
+                            oninput=self.link.callback(|e: yew::InputData| Message::UpdateTitle(e.value))
                         />
                         <small class="form-text text-muted">{ "Leave empty to use the feed title." }</small>
                     </div>
@@ -94,7 +94,7 @@ impl yew::Component for Component {
                             name="url"
                             required=true
                             value=self.props.source.url.clone()
-                            oninput=self.link.callback(|e: yew::InputData| Self::Message::UpdateUrl(e.value))
+                            oninput=self.link.callback(|e: yew::InputData| Message::UpdateUrl(e.value))
                         />
                     </div>
                 </div>
@@ -104,7 +104,7 @@ impl yew::Component for Component {
                     <div class="col-sm-11">
                         <super::Tags
                             values=self.props.source.tags.clone()
-                            on_change=self.link.callback(Self::Message::UpdateTags)
+                            on_change=self.link.callback(Message::UpdateTags)
                         />
                     </div>
                 </div>
@@ -114,7 +114,7 @@ impl yew::Component for Component {
                         <crate::components::Switch
                             id="active"
                             active=self.props.source.active
-                            on_toggle=self.link.callback(Self::Message::ToggleActive)
+                            on_toggle=self.link.callback(Message::ToggleActive)
                             label="active"
                         />
                     </div>
@@ -136,7 +136,7 @@ impl yew::Component for Component {
                                                 id=id.to_string()
                                                 label=webhook.name.clone()
                                                 active=active
-                                                on_toggle=self.link.callback(move |active| Self::Message::ToggleWebhook(id, active))
+                                                on_toggle=self.link.callback(move |active| Message::ToggleWebhook(id, active))
                                             />
                                         }
                                     })
@@ -152,7 +152,7 @@ impl yew::Component for Component {
                 <a
                     class=yew::classes!("btn", "btn-primary")
                     title="Save"
-                    onclick=self.link.callback(|_| Self::Message::Submit)
+                    onclick=self.link.callback(|_| Message::Submit)
                 >
                     <crate::components::Svg icon="check" size=24 />
                     { "Save" }
@@ -161,7 +161,7 @@ impl yew::Component for Component {
                 <a
                     class=yew::classes!("btn", "btn-secondary")
                     title="Cancel"
-                    onclick=self.link.callback(|_| Self::Message::Cancel)
+                    onclick=self.link.callback(|_| Message::Cancel)
                 >
                     <crate::components::Svg icon="x" size=24 />
                     { "Cancel" }

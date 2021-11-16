@@ -30,15 +30,15 @@ impl yew::Component for Component {
             pagination: props.pagination,
         };
 
-        component.link.send_message(Self::Message::NeedUpdate);
+        component.link.send_message(Message::NeedUpdate);
 
         component
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Error(err) => self.event_bus.send(err.into()),
-            Self::Message::NeedUpdate => {
+            Message::Error(err) => self.event_bus.send(err.into()),
+            Message::NeedUpdate => {
                 let pagination = &self.pagination;
 
                 crate::api!(
@@ -46,7 +46,7 @@ impl yew::Component for Component {
                     tags_all(pagination) -> Message::Update, Message::Error
                 );
             }
-            Self::Message::Update(tags) => {
+            Message::Update(tags) => {
                 self.tags = tags;
                 return true;
             }

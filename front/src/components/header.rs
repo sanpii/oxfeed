@@ -31,14 +31,14 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Error(err) => self.event_bus.send(err.into()),
-            Self::Message::Logout => {
+            Message::Error(err) => self.event_bus.send(err.into()),
+            Message::Logout => {
                 crate::api!(
                     self.link,
-                    auth_logout() -> |_| Self::Message::Loggedout, Self::Message::Error
+                    auth_logout() -> |_| Message::Loggedout, Message::Error
                 );
             }
-            Self::Message::Loggedout => {
+            Message::Loggedout => {
                 let alert = crate::event::Alert::info("Logged out");
                 self.event_bus.send(crate::event::Event::Alert(alert));
                 crate::Location::new().reload();
@@ -61,7 +61,7 @@ impl yew::Component for Component {
                 <button
                     class=yew::classes!("btn", "btn-secondary", "logout")
                     title="Logout"
-                    onclick=self.link.callback(|_| Self::Message::Logout)
+                    onclick=self.link.callback(|_| Message::Logout)
                 >
                     <super::Svg icon="door-closed" size=24 />
                 </button>

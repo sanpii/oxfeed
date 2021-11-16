@@ -43,7 +43,7 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match self.scene {
             Scene::View => match msg {
-                Self::Message::Delete => {
+                Message::Delete => {
                     let message = format!("Would you like delete '{}' webhook?", self.value.name);
 
                     if yew::services::dialog::DialogService::confirm(&message) {
@@ -55,19 +55,19 @@ impl yew::Component for Component {
                         );
                     }
                 }
-                Self::Message::Deleted => self.event_bus.send(crate::event::Event::WebhookUpdate),
-                Self::Message::Edit => {
+                Message::Deleted => self.event_bus.send(crate::event::Event::WebhookUpdate),
+                Message::Edit => {
                     self.scene = Scene::Edit;
                     return true;
                 }
                 _ => unreachable!(),
             },
             Scene::Edit => match msg {
-                Self::Message::Cancel => {
+                Message::Cancel => {
                     self.scene = Scene::View;
                     return true;
                 }
-                Self::Message::Save(webhook) => {
+                Message::Save(webhook) => {
                     let id = &webhook.id.unwrap();
                     self.value = webhook.clone();
 
@@ -78,7 +78,7 @@ impl yew::Component for Component {
 
                     return true;
                 }
-                Self::Message::Saved(webhook) => {
+                Message::Saved(webhook) => {
                     self.value = webhook;
                     self.scene = Scene::View;
                     self.event_bus.send(crate::event::Event::WebhookUpdate);
@@ -96,8 +96,8 @@ impl yew::Component for Component {
             Scene::Edit => yew::html! {
                 <super::form::Webhook
                     webhook=self.value.clone()
-                    on_cancel=self.link.callback(|_| Self::Message::Cancel)
-                    on_submit=self.link.callback(Self::Message::Save)
+                    on_cancel=self.link.callback(|_| Message::Cancel)
+                    on_submit=self.link.callback(Message::Save)
                 />
             },
             Scene::View => {
@@ -123,7 +123,7 @@ impl yew::Component for Component {
                             <button
                                 class=yew::classes!("btn", "btn-primary")
                                 title="Edit"
-                                onclick=self.link.callback(move |_| Self::Message::Edit)
+                                onclick=self.link.callback(move |_| Message::Edit)
                             >
                                 <super::Svg icon="pencil-square" size=16 />
                             </button>

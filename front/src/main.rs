@@ -120,7 +120,7 @@ macro_rules! change {
 #[macro_export]
 macro_rules! api {
     ($link:expr, $api:ident ( $($args:ident),* ) -> $fn:expr) => {
-        $crate::api!($link, $api ( $($args),* ) -> $fn, |err| Self::Message::Event(err.into()))
+        $crate::api!($link, $api ( $($args),* ) -> $fn, |err| Message::Event(err.into()))
     };
 
     ($link:expr, $api:ident ( $($args:ident),* ) -> $ok:expr, $err:expr) => {{

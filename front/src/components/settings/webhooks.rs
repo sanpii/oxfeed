@@ -26,7 +26,7 @@ impl yew::Component for Component {
     fn create(_: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         use yew::agent::Bridged;
 
-        let callback = link.callback(Self::Message::Event);
+        let callback = link.callback(Message::Event);
 
         let component = Self {
             link,
@@ -35,7 +35,7 @@ impl yew::Component for Component {
             _producer: crate::event::Bus::bridge(callback),
         };
 
-        component.link.send_message(Self::Message::NeedUpdate);
+        component.link.send_message(Message::NeedUpdate);
 
         component
     }
@@ -43,13 +43,13 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match &self.scene {
             Scene::View => match msg {
-                Self::Message::Add => self.scene = Scene::Add,
-                Self::Message::Update(ref webhooks) => self.webhooks = webhooks.clone(),
+                Message::Add => self.scene = Scene::Add,
+                Message::Update(ref webhooks) => self.webhooks = webhooks.clone(),
                 _ => (),
             },
             Scene::Add => match msg {
-                Self::Message::Cancel => self.scene = Scene::View,
-                Self::Message::Create(ref webhook) => {
+                Message::Cancel => self.scene = Scene::View,
+                Message::Create(ref webhook) => {
                     crate::api!(
                         self.link,
                         webhooks_create(webhook) -> |_| Message::Event(crate::event::Event::WebhookUpdate)
@@ -59,11 +59,11 @@ impl yew::Component for Component {
             },
         }
 
-        if let Self::Message::Event(ref event) = msg {
+        if let Message::Event(ref event) = msg {
             if matches!(event, crate::event::Event::WebhookUpdate) {
-                self.link.send_message(Self::Message::NeedUpdate);
+                self.link.send_message(Message::NeedUpdate);
             }
-        } else if matches!(msg, Self::Message::NeedUpdate) {
+        } else if matches!(msg, Message::NeedUpdate) {
             self.scene = Scene::View;
 
             crate::api!(
@@ -105,8 +105,8 @@ impl yew::Component for Component {
                         <li class="list-group-item">
                             <crate::components::form::Webhook
                                 webhook=oxfeed_common::webhook::Entity::default()
-                                on_cancel=self.link.callback(|_| Self::Message::Cancel)
-                                on_submit=self.link.callback(Self::Message::Create)
+                                on_cancel=self.link.callback(|_| Message::Cancel)
+                                on_submit=self.link.callback(Message::Create)
                             />
                         </li>
                     }

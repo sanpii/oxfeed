@@ -35,7 +35,7 @@ impl yew::Component for Component {
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         use yew::agent::{Bridged, Dispatched};
 
-        let callback = link.callback(Self::Message::Event);
+        let callback = link.callback(Message::Event);
 
         let mut links = vec![
             Link {
@@ -93,31 +93,26 @@ impl yew::Component for Component {
             _producer: crate::event::Bus::bridge(callback),
         };
 
-        component
-            .link
-            .callback(|_| Self::Message::NeedUpdate)
-            .emit(());
+        component.link.callback(|_| Message::NeedUpdate).emit(());
 
         component
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Self::Message::Event(event) => match event {
+            Message::Event(event) => match event {
                 crate::event::Event::ItemUpdate
                 | crate::event::Event::SettingUpdate
-                | crate::event::Event::SourceUpdate => {
-                    self.link.send_message(Self::Message::NeedUpdate)
-                }
+                | crate::event::Event::SourceUpdate => self.link.send_message(Message::NeedUpdate),
                 _ => (),
             },
-            Self::Message::NeedUpdate => {
+            Message::NeedUpdate => {
                 crate::api!(
                     self.link,
-                    counts() -> Self::Message::Update
+                    counts() -> Message::Update
                 );
             }
-            Self::Message::Update(counts) => {
+            Message::Update(counts) => {
                 self.links[0].count = counts.all;
                 self.links[1].count = counts.unread;
                 self.links[2].count = counts.favorites;
@@ -126,15 +121,15 @@ impl yew::Component for Component {
 
                 return true;
             }
-            Self::Message::ReadAll => {
+            Message::ReadAll => {
                 crate::api!(
                     self.link,
-                    items_read() -> |_| Self::Message::Redraw
+                    items_read() -> |_| Message::Redraw
                 );
 
                 self.event_bus.send(crate::event::Event::ItemUpdate);
             }
-            Self::Message::Redraw => return true,
+            Message::Redraw => return true,
         }
 
         false
@@ -155,7 +150,7 @@ impl yew::Component for Component {
             <>
                 <button
                     class=yew::classes!("btn", "btn-primary")
-                    onclick=self.link.callback(|_| Self::Message::ReadAll)
+                    onclick=self.link.callback(|_| Message::ReadAll)
                 >{ "Mark all as read" }</button>
                 <ul class="nav flex-column">
                 {
