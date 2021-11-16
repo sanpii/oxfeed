@@ -30,16 +30,14 @@ impl yew::Component for Component {
             Message::Event(event) => {
                 if let crate::Event::Alert(alert) = event {
                     self.messages.push(alert);
-                    return true;
                 }
             }
             Message::Close(idx) => {
                 self.messages.remove(idx);
-                return true;
             }
-        };
+        }
 
-        false
+        true
     }
 
     fn view(&self) -> yew::Html {
