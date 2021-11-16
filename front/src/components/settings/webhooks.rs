@@ -41,8 +41,6 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
-        use yewtil::future::LinkFuture;
-
         match &self.scene {
             Scene::View => match msg {
                 Self::Message::Add => self.scene = Scene::Add,
@@ -52,14 +50,10 @@ impl yew::Component for Component {
             Scene::Add => match msg {
                 Self::Message::Cancel => self.scene = Scene::View,
                 Self::Message::Create(ref webhook) => {
-                    let webhook = webhook.clone();
-
-                    self.link.send_future(async move {
-                        crate::Api::webhooks_create(&webhook).await.map_or_else(
-                            |err| Self::Message::Event(err.into()),
-                            |_| Self::Message::Event(crate::event::Event::WebhookUpdate),
-                        )
-                    });
+                    crate::api!(
+                        self.link,
+                        webhooks_create(webhook) -> |_| Message::Event(crate::event::Event::WebhookUpdate)
+                    );
                 }
                 _ => (),
             },
@@ -72,12 +66,11 @@ impl yew::Component for Component {
         } else if matches!(msg, Self::Message::NeedUpdate) {
             self.scene = Scene::View;
 
-            self.link.send_future(async {
-                crate::Api::webhooks_all().await.map_or_else(
-                    |err| Self::Message::Event(err.into()),
-                    Self::Message::Update,
-                )
-            });
+            crate::api!(
+                self.link,
+                webhooks_all() -> Message::Update
+            );
+
             return false;
         }
 

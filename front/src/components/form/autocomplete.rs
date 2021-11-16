@@ -52,20 +52,20 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
-        use yewtil::future::LinkFuture;
-
         match msg {
             Self::Message::Choose(idx) => self.select(self.terms[idx].clone()),
             Self::Message::Error(error) => self.event_bus.send(error.into()),
             Self::Message::Input(input) => {
                 self.value = input.clone();
 
+                let pagination = oxfeed_common::Pagination::new();
+                let filter: crate::Filter = input.clone().into();
+
                 if !input.is_empty() {
-                    self.link.send_future(async move {
-                        crate::Api::tags_search(&input.into(), &oxfeed_common::Pagination::new())
-                            .await
-                            .map_or_else(Self::Message::Error, Self::Message::Terms)
-                    });
+                    crate::api!(
+                        self.link,
+                        tags_search(filter, pagination) -> Message::Terms, Message::Error
+                    );
 
                     return false;
                 } else {

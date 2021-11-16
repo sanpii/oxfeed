@@ -34,8 +34,6 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
-        use yewtil::future::LinkFuture;
-
         match msg {
             Self::Message::Cancel => {
                 self.scene = Scene::Login;
@@ -48,22 +46,25 @@ impl yew::Component for Component {
                 self.link.send_message(Self::Message::Cancel);
             }
             Self::Message::Create(info) => {
-                self.link.send_future(async {
-                    let user = oxfeed_common::new_user::Entity {
-                        password: info.password,
-                        email: info.email,
-                    };
-                    crate::Api::user_create(&user)
-                        .await
-                        .map_or_else(Self::Message::Error, |_| Self::Message::UserCreated)
-                });
+                let user = oxfeed_common::new_user::Entity {
+                    password: info.password,
+                    email: info.email,
+                };
+
+                crate::api!(
+                    self.link,
+                    user_create(user) -> |_| Message::UserCreated, Message::Error
+                );
             }
             Self::Message::Login(info) => {
-                self.link.send_future(async move {
-                    crate::Api::auth_login(&info.email, &info.password, info.remember_me)
-                        .await
-                        .map_or_else(Self::Message::Error, |_| Self::Message::Logged)
-                });
+                let email = &info.email;
+                let password = &info.password;
+                let remember_me = &info.remember_me;
+
+                crate::api!(
+                    self.link,
+                    auth_login(email, password, remember_me) -> |_| Self::Message::Logged, Self::Message::Error
+                );
             }
             Self::Message::Logged => self.event_bus.send(crate::event::Event::Logged),
             Self::Message::Register => {

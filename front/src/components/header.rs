@@ -30,16 +30,13 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
-        use yewtil::future::LinkFuture;
-
         match msg {
             Self::Message::Error(err) => self.event_bus.send(err.into()),
             Self::Message::Logout => {
-                self.link.send_future(async {
-                    crate::Api::auth_logout()
-                        .await
-                        .map_or_else(Self::Message::Error, |_| Self::Message::Loggedout)
-                });
+                crate::api!(
+                    self.link,
+                    auth_logout() -> |_| Self::Message::Loggedout, Self::Message::Error
+                );
             }
             Self::Message::Loggedout => {
                 let alert = crate::event::Alert::info("Logged out");

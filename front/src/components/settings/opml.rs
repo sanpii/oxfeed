@@ -42,8 +42,6 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
-        use yewtil::future::LinkFuture;
-
         match msg {
             Self::Message::Error(err) => self.event_bus.send(err.into()),
             Self::Message::Files(files) => self.files = files,
@@ -54,6 +52,8 @@ impl yew::Component for Component {
                 self.event_bus.send(crate::event::Event::SettingUpdate);
             }
             Self::Message::Loaded(content) => {
+                use yewtil::future::LinkFuture;
+
                 self.link.send_future(async move {
                     let opml = String::from_utf8(content.to_vec()).map_err(anyhow::Error::new);
                     crate::Api::opml_import(opml)

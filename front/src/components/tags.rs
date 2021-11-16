@@ -36,18 +36,15 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
-        use yewtil::future::LinkFuture;
-
         match msg {
             Self::Message::Error(err) => self.event_bus.send(err.into()),
             Self::Message::NeedUpdate => {
-                let pagination = self.pagination;
+                let pagination = &self.pagination;
 
-                self.link.send_future(async move {
-                    crate::Api::tags_all(&pagination)
-                        .await
-                        .map_or_else(Self::Message::Error, Self::Message::Update)
-                });
+                crate::api!(
+                    self.link,
+                    tags_all(pagination) -> Message::Update, Message::Error
+                );
             }
             Self::Message::Update(tags) => {
                 self.tags = tags;

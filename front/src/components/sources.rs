@@ -54,8 +54,6 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
-        use yewtil::future::LinkFuture;
-
         match &self.scene {
             Scene::View => match msg {
                 Self::Message::Add => self.scene = Scene::Add,
@@ -65,14 +63,10 @@ impl yew::Component for Component {
             Scene::Add => match msg {
                 Self::Message::Cancel => self.scene = Scene::View,
                 Self::Message::Create(ref source) => {
-                    let source = source.clone();
-
-                    self.link.send_future(async move {
-                        crate::Api::sources_create(&source).await.map_or_else(
-                            |err| Self::Message::Event(err.into()),
-                            |_| Self::Message::NeedUpdate,
-                        )
-                    });
+                    crate::api!(
+                        self.link,
+                        sources_create(source) -> |_| Self::Message::NeedUpdate
+                    );
                 }
                 _ => (),
             },
@@ -86,24 +80,20 @@ impl yew::Component for Component {
             return false;
         } else if matches!(msg, Self::Message::NeedUpdate) {
             self.scene = Scene::View;
-            let pagination = self.pagination;
-            let filter = self.filter.clone();
+            let pagination = &self.pagination;
+            let filter = &self.filter;
 
-            self.link.send_future(async move {
-                if filter.is_empty() {
-                    crate::Api::sources_all(&pagination).await.map_or_else(
-                        |err| Self::Message::Event(err.into()),
-                        Self::Message::Update,
-                    )
-                } else {
-                    crate::Api::sources_search(&filter, &pagination)
-                        .await
-                        .map_or_else(
-                            |err| Self::Message::Event(err.into()),
-                            Self::Message::Update,
-                        )
-                }
-            });
+            if filter.is_empty() {
+                crate::api!(
+                    self.link,
+                    sources_all(pagination) -> Self::Message::Update
+                );
+            } else {
+                crate::api!(
+                    self.link,
+                    sources_search(filter, pagination) -> Self::Message::Update
+                );
+            }
 
             return false;
         }

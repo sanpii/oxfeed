@@ -30,7 +30,6 @@ impl yew::Component for Component {
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
         use yew::agent::Dispatched;
-        use yewtil::future::LinkFuture;
 
         let component = Self {
             event_bus: crate::event::Bus::dispatcher(),
@@ -39,11 +38,10 @@ impl yew::Component for Component {
             webhooks: Vec::new(),
         };
 
-        component.link.send_future(async move {
-            crate::Api::webhooks_all()
-                .await
-                .map_or_else(Self::Message::Error, Self::Message::Webhooks)
-        });
+        crate::api!(
+            component.link,
+            webhooks_all() -> Self::Message::Webhooks, Self::Message::Error
+        );
 
         component
     }

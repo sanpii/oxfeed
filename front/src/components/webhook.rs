@@ -41,21 +41,18 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
-        use yewtil::future::LinkFuture;
-
         match self.scene {
             Scene::View => match msg {
                 Self::Message::Delete => {
                     let message = format!("Would you like delete '{}' webhook?", self.value.name);
 
                     if yew::services::dialog::DialogService::confirm(&message) {
-                        let id = self.value.id;
+                        let id = &self.value.id.unwrap();
 
-                        self.link.send_future(async move {
-                            crate::Api::webhooks_delete(&id.unwrap())
-                                .await
-                                .map_or_else(Self::Message::Error, |_| Self::Message::Deleted)
-                        });
+                        crate::api!(
+                            self.link,
+                            webhooks_delete(id) -> |_| Message::Deleted, Message::Error
+                        );
                     }
                 }
                 Self::Message::Deleted => self.event_bus.send(crate::event::Event::WebhookUpdate),
@@ -71,13 +68,13 @@ impl yew::Component for Component {
                     return true;
                 }
                 Self::Message::Save(webhook) => {
+                    let id = &webhook.id.unwrap();
                     self.value = webhook.clone();
 
-                    self.link.send_future(async move {
-                        crate::Api::webhooks_update(&webhook.id.unwrap(), &webhook)
-                            .await
-                            .map_or_else(Self::Message::Error, Self::Message::Saved)
-                    });
+                    crate::api!(
+                        self.link,
+                        webhooks_update(id, webhook) -> Message::Saved, Message::Error
+                    );
 
                     return true;
                 }

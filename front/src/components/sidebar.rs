@@ -102,8 +102,6 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
-        use yewtil::future::LinkFuture;
-
         match msg {
             Self::Message::Event(event) => match event {
                 crate::event::Event::ItemUpdate
@@ -113,12 +111,12 @@ impl yew::Component for Component {
                 }
                 _ => (),
             },
-            Self::Message::NeedUpdate => self.link.send_future(async {
-                crate::Api::counts().await.map_or_else(
-                    |err| Self::Message::Event(err.into()),
-                    Self::Message::Update,
-                )
-            }),
+            Self::Message::NeedUpdate => {
+                crate::api!(
+                    self.link,
+                    counts() -> Self::Message::Update
+                );
+            }
             Self::Message::Update(counts) => {
                 self.links[0].count = counts.all;
                 self.links[1].count = counts.unread;
@@ -129,12 +127,10 @@ impl yew::Component for Component {
                 return true;
             }
             Self::Message::ReadAll => {
-                self.link.send_future(async {
-                    crate::Api::items_read().await.map_or_else(
-                        |err| Self::Message::Event(err.into()),
-                        |_| Self::Message::Redraw,
-                    )
-                });
+                crate::api!(
+                    self.link,
+                    items_read() -> |_| Self::Message::Redraw
+                );
 
                 self.event_bus.send(crate::event::Event::ItemUpdate);
             }

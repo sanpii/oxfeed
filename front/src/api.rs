@@ -32,7 +32,7 @@ impl Api {
     pub async fn auth_login(
         email: &str,
         password: &str,
-        remember_me: bool,
+        remember_me: &bool,
     ) -> oxfeed_common::Result {
         use hmac::NewMac;
         use jwt::SignWithKey;
@@ -48,7 +48,7 @@ impl Api {
         let data: String =
             Self::fetch(Method::POST, "/auth/login", yew::format::Json(&token)).await?;
 
-        Self::set_token(&data, remember_me);
+        Self::set_token(&data, *remember_me);
 
         Ok(())
     }
@@ -86,11 +86,11 @@ impl Api {
         Self::fetch(Method::POST, "/items/read", yew::format::Nothing).await
     }
 
-    pub async fn items_tag(id: &uuid::Uuid, key: &str, value: bool) -> oxfeed_common::Result {
+    pub async fn items_tag(id: &uuid::Uuid, key: &str, value: &bool) -> oxfeed_common::Result {
         let url = format!("/items/{}", id);
 
         let json = serde_json::json!({
-            key: value,
+            key: *value,
         });
 
         Self::fetch(Method::PATCH, &url, yew::format::Json(&json)).await

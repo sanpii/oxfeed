@@ -54,8 +54,6 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
-        use yewtil::future::LinkFuture;
-
         match msg {
             Self::Message::Error(err) => self.event_bus.send(err.into()),
             Self::Message::Content(content) => self.content = Some(content),
@@ -63,32 +61,33 @@ impl yew::Component for Component {
                 self.scene = !self.scene;
 
                 if self.scene == Scene::Expanded && self.content.is_none() {
-                    let item_id = self.item.id;
+                    let item_id = &self.item.id;
 
-                    self.link.send_future(async move {
-                        crate::Api::items_content(&item_id)
-                            .await
-                            .map_or_else(Self::Message::Error, Self::Message::Content)
-                    });
+                    crate::api!(
+                        self.link,
+                        items_content(item_id) -> Message::Content, Message::Error
+                    );
                 }
             }
             Self::Message::ToggleFavorite => {
-                let item = self.item.clone();
+                let item_id = &self.item.id;
+                let key = "favorite";
+                let value = !self.item.favorite;
 
-                self.link.send_future(async move {
-                    crate::Api::items_tag(&item.id, "favorite", !item.favorite)
-                        .await
-                        .map_or_else(Self::Message::Error, |_| Self::Message::Toggled)
-                });
+                crate::api!(
+                    self.link,
+                    items_tag(item_id, key, value) -> |_| Message::Toggled, Message::Error
+                );
             }
             Self::Message::ToggleRead => {
-                let item = self.item.clone();
+                let item_id = &self.item.id;
+                let key = "read";
+                let value = !self.item.read;
 
-                self.link.send_future(async move {
-                    crate::Api::items_tag(&item.id, "read", !item.read)
-                        .await
-                        .map_or_else(Self::Message::Error, |_| Self::Message::Toggled)
-                });
+                crate::api!(
+                    self.link,
+                    items_tag(item_id, key, value) -> |_| Message::Toggled, Message::Error
+                );
             }
             Self::Message::Toggled => self.event_bus.send(crate::event::Event::ItemUpdate),
         }

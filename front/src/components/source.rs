@@ -42,8 +42,6 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
-        use yewtil::future::LinkFuture;
-
         if let Self::Message::Saved(source) = msg {
             self.props.value = source;
             self.scene = Scene::View;
@@ -57,13 +55,12 @@ impl yew::Component for Component {
                         format!("Would you like delete '{}' source?", self.props.value.title);
 
                     if yew::services::dialog::DialogService::confirm(&message) {
-                        let id = self.props.value.id;
+                        let id = self.props.value.id.unwrap();
 
-                        self.link.send_future(async move {
-                            crate::Api::sources_delete(&id.unwrap())
-                                .await
-                                .map_or_else(Self::Message::Error, |_| Self::Message::Deleted)
-                        });
+                        crate::api!(
+                            self.link,
+                            sources_delete(id) -> |_| Self::Message::Deleted, Self::Message::Error
+                        );
                     }
                 }
                 Self::Message::Deleted => self.event_bus.send(crate::event::Event::SourceUpdate),
@@ -73,15 +70,15 @@ impl yew::Component for Component {
                 }
                 Self::Message::Saved(_) => self.event_bus.send(crate::event::Event::SourceUpdate),
                 Self::Message::ToggleActive(active) => {
-                    let value = self.props.value.clone();
+                    let value = &mut self.props.value;
+                    let id = &value.id.unwrap();
 
-                    self.props.value.active = active;
+                    value.active = active;
 
-                    self.link.send_future(async move {
-                        crate::Api::sources_update(&value.id.unwrap(), &value)
-                            .await
-                            .map_or_else(Self::Message::Error, Self::Message::Saved)
-                    });
+                    crate::api!(
+                        self.link,
+                        sources_update(id, value) -> Self::Message::Saved, Self::Message::Error
+                    );
 
                     return true;
                 }
@@ -93,15 +90,14 @@ impl yew::Component for Component {
                     return true;
                 }
                 Self::Message::Save(source) => {
-                    let value = self.props.value.clone();
+                    let id = &self.props.value.id.unwrap();
 
-                    self.props.value = source;
+                    self.props.value = source.clone();
 
-                    self.link.send_future(async move {
-                        crate::Api::sources_update(&value.id.unwrap(), &value)
-                            .await
-                            .map_or_else(Self::Message::Error, Self::Message::Saved)
-                    });
+                    crate::api!(
+                        self.link,
+                        sources_update(id, source) -> Self::Message::Saved, Self::Message::Error
+                    );
 
                     return true;
                 }

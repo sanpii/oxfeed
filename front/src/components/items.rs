@@ -23,28 +23,6 @@ pub(crate) struct Component {
     _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
 }
 
-impl Component {
-    fn fetch(&mut self) {
-        use yewtil::future::LinkFuture;
-
-        let filter = self.filter.clone();
-        let kind = self.kind.clone();
-        let pagination = self.pagination;
-
-        self.link.send_future(async move {
-            if filter.is_empty() {
-                crate::Api::items_all(&kind, &pagination)
-                    .await
-                    .map_or_else(|err| Message::Event(err.into()), Message::Update)
-            } else {
-                crate::Api::items_search(&kind, &filter, &pagination)
-                    .await
-                    .map_or_else(|err| Message::Event(err.into()), Message::Update)
-            }
-        });
-    }
-}
-
 impl yew::Component for Component {
     type Message = Message;
     type Properties = Properties;
@@ -80,7 +58,23 @@ impl yew::Component for Component {
                 yew::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
                 self.link.send_message(Self::Message::NeedUpdate);
             }
-            Self::Message::NeedUpdate => self.fetch(),
+            Self::Message::NeedUpdate => {
+                let filter = &self.filter;
+                let kind = &self.kind;
+                let pagination = self.pagination;
+
+                if filter.is_empty() {
+                    crate::api!(
+                        self.link,
+                        items_all(kind, pagination) -> Message::Update
+                    );
+                } else {
+                    crate::api!(
+                        self.link,
+                        items_search(kind, filter, pagination) -> Message::Update
+                    );
+                }
+            }
             Self::Message::Update(pager) => {
                 self.pager = Some(pager);
                 return true;
