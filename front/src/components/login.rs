@@ -42,7 +42,7 @@ impl yew::Component for Component {
             Message::Error(err) => self.event_bus.send(err.into()),
             Message::UserCreated => {
                 let alert = crate::event::Alert::info("User created");
-                self.event_bus.send(crate::event::Event::Alert(alert));
+                self.event_bus.send(crate::Event::Alert(alert));
                 self.link.send_message(Message::Cancel);
             }
             Message::Create(info) => {
@@ -66,7 +66,7 @@ impl yew::Component for Component {
                     auth_login(email, password, remember_me) -> |_| Message::Logged, Message::Error
                 );
             }
-            Message::Logged => self.event_bus.send(crate::event::Event::Logged),
+            Message::Logged => self.event_bus.send(crate::Event::Logged),
             Message::Register => {
                 self.scene = Scene::Register;
                 return true;

@@ -9,6 +9,7 @@ mod location;
 mod render;
 
 pub(crate) use api::Api;
+pub(crate) use event::Event;
 pub(crate) use filter::*;
 pub(crate) use location::Location;
 pub(crate) use render::*;

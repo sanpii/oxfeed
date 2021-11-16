@@ -2,7 +2,7 @@ pub(crate) enum Message {
     Add,
     Cancel,
     Create(oxfeed_common::webhook::Entity),
-    Event(crate::event::Event),
+    Event(crate::Event),
     NeedUpdate,
     Update(Vec<oxfeed_common::webhook::Entity>),
 }
@@ -52,7 +52,7 @@ impl yew::Component for Component {
                 Message::Create(ref webhook) => {
                     crate::api!(
                         self.link,
-                        webhooks_create(webhook) -> |_| Message::Event(crate::event::Event::WebhookUpdate)
+                        webhooks_create(webhook) -> |_| Message::Event(crate::Event::WebhookUpdate)
                     );
                 }
                 _ => (),
@@ -60,7 +60,7 @@ impl yew::Component for Component {
         }
 
         if let Message::Event(ref event) = msg {
-            if matches!(event, crate::event::Event::WebhookUpdate) {
+            if matches!(event, crate::Event::WebhookUpdate) {
                 self.link.send_message(Message::NeedUpdate);
             }
         } else if matches!(msg, Message::NeedUpdate) {

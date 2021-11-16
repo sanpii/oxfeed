@@ -45,7 +45,7 @@ impl yew::Component for Component {
 
                 route = format!("/search{}?{}", route, self.filter.to_url_param());
 
-                self.event_bus.send(crate::event::Event::Redirect(route));
+                self.event_bus.send(crate::Event::Redirect(route));
             }
         }
 

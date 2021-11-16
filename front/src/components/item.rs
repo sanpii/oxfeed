@@ -89,7 +89,7 @@ impl yew::Component for Component {
                     items_tag(item_id, key, value) -> |_| Message::Toggled, Message::Error
                 );
             }
-            Message::Toggled => self.event_bus.send(crate::event::Event::ItemUpdate),
+            Message::Toggled => self.event_bus.send(crate::Event::ItemUpdate),
         }
 
         true

@@ -55,7 +55,7 @@ impl yew::Component for Component {
                         );
                     }
                 }
-                Message::Deleted => self.event_bus.send(crate::event::Event::WebhookUpdate),
+                Message::Deleted => self.event_bus.send(crate::Event::WebhookUpdate),
                 Message::Edit => {
                     self.scene = Scene::Edit;
                     return true;
@@ -81,7 +81,7 @@ impl yew::Component for Component {
                 Message::Saved(webhook) => {
                     self.value = webhook;
                     self.scene = Scene::View;
-                    self.event_bus.send(crate::event::Event::WebhookUpdate);
+                    self.event_bus.send(crate::Event::WebhookUpdate);
                     return true;
                 }
                 _ => unreachable!(),

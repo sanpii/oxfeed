@@ -48,8 +48,8 @@ impl yew::Component for Component {
             Message::Import => self.load(),
             Message::Imported => {
                 let alert = crate::event::Alert::info("Import done");
-                self.event_bus.send(crate::event::Event::Alert(alert));
-                self.event_bus.send(crate::event::Event::SettingUpdate);
+                self.event_bus.send(crate::Event::Alert(alert));
+                self.event_bus.send(crate::Event::SettingUpdate);
             }
             Message::Loaded(content) => {
                 use yewtil::future::LinkFuture;

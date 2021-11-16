@@ -1,6 +1,6 @@
 #[derive(Clone)]
 pub(crate) enum Message {
-    Event(crate::event::Event),
+    Event(crate::Event),
     NeedUpdate,
     PageChange(usize),
     Update(crate::Pager<oxfeed_common::item::Item>),
@@ -49,7 +49,7 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Message::Event(event) => {
-                if matches!(event, crate::event::Event::ItemUpdate) {
+                if matches!(event, crate::Event::ItemUpdate) {
                     self.link.send_message(Message::NeedUpdate);
                 }
             }

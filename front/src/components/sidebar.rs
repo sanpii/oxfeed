@@ -1,6 +1,6 @@
 #[derive(Clone)]
 pub(crate) enum Message {
-    Event(crate::event::Event),
+    Event(crate::Event),
     NeedUpdate,
     ReadAll,
     Redraw,
@@ -101,9 +101,9 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Message::Event(event) => match event {
-                crate::event::Event::ItemUpdate
-                | crate::event::Event::SettingUpdate
-                | crate::event::Event::SourceUpdate => self.link.send_message(Message::NeedUpdate),
+                crate::Event::ItemUpdate
+                | crate::Event::SettingUpdate
+                | crate::Event::SourceUpdate => self.link.send_message(Message::NeedUpdate),
                 _ => (),
             },
             Message::NeedUpdate => {

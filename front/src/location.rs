@@ -29,7 +29,7 @@ impl Location {
         dispatcher.send(yew_router::agent::RouteRequest::ChangeRoute(route));
 
         let mut event_bus = crate::event::Bus::dispatcher();
-        event_bus.send(crate::event::Event::Redirected(path.to_string()));
+        event_bus.send(crate::Event::Redirected(path.to_string()));
     }
 
     pub fn q(&self) -> String {

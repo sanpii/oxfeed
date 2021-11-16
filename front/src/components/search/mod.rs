@@ -1,7 +1,7 @@
 mod bar;
 
 pub(crate) enum Message {
-    Event(crate::event::Event),
+    Event(crate::Event),
 }
 
 pub(crate) use bar::Component as Bar;
@@ -39,7 +39,7 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         let Message::Event(event) = msg;
 
-        if let crate::event::Event::Redirected(_) = event {
+        if let crate::Event::Redirected(_) = event {
             self.filter = crate::Filter::new();
             return true;
         }

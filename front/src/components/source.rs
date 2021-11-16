@@ -63,12 +63,12 @@ impl yew::Component for Component {
                         );
                     }
                 }
-                Message::Deleted => self.event_bus.send(crate::event::Event::SourceUpdate),
+                Message::Deleted => self.event_bus.send(crate::Event::SourceUpdate),
                 Message::Edit => {
                     self.scene = Scene::Edit;
                     return true;
                 }
-                Message::Saved(_) => self.event_bus.send(crate::event::Event::SourceUpdate),
+                Message::Saved(_) => self.event_bus.send(crate::Event::SourceUpdate),
                 Message::ToggleActive(active) => {
                     let value = &mut self.props.value;
                     let id = &value.id.unwrap();

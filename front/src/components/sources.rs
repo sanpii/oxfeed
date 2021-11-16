@@ -3,7 +3,7 @@ pub(crate) enum Message {
     Add,
     Cancel,
     Create(oxfeed_common::source::Entity),
-    Event(crate::event::Event),
+    Event(crate::Event),
     PageChange(usize),
     Update(crate::Pager<oxfeed_common::source::Entity>),
     NeedUpdate,

@@ -1,6 +1,6 @@
 pub(crate) enum Message {
     Close(usize),
-    Event(crate::event::Event),
+    Event(crate::Event),
 }
 
 pub(crate) struct Component {
@@ -28,7 +28,7 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Message::Event(event) => {
-                if let crate::event::Event::Alert(alert) = event {
+                if let crate::Event::Alert(alert) = event {
                     self.messages.push(alert);
                     return true;
                 }

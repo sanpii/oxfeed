@@ -20,7 +20,7 @@ pub(crate) enum Route {
 }
 
 pub(crate) enum Message {
-    Event(crate::event::Event),
+    Event(crate::Event),
     Index,
     Websocket(WebsocketAction),
 }
@@ -83,23 +83,23 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Message::Event(event) => match event {
-                crate::event::Event::AuthRequire => self.auth = false,
-                crate::event::Event::Logged => {
+                crate::Event::AuthRequire => self.auth = false,
+                crate::Event::Logged => {
                     self.auth = true;
                     self._websocket = Self::websocket(&self.link);
                 }
-                crate::event::Event::Redirect(route) => self.location.set_path(&route),
-                crate::event::Event::Redirected(_) => (),
+                crate::Event::Redirect(route) => self.location.set_path(&route),
+                crate::Event::Redirected(_) => (),
                 _ => return false,
             },
             Message::Index => {
                 self.event_bus
-                    .send(crate::event::Event::Redirect("/unread".to_string()));
+                    .send(crate::Event::Redirect("/unread".to_string()));
                 return false;
             }
             Message::Websocket(event) => match event {
                 WebsocketAction::Ready(_) => {
-                    self.event_bus.send(crate::event::Event::ItemUpdate);
+                    self.event_bus.send(crate::Event::ItemUpdate);
                     return false;
                 }
                 WebsocketAction::Status(_) => return false,
