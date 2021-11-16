@@ -56,12 +56,10 @@ impl yew::Component for Component {
             },
             Scene::Add => match msg {
                 Message::Cancel => self.scene = Scene::View,
-                Message::Create(ref source) => {
-                    crate::api!(
-                        self.link,
-                        sources_create(source) -> |_| Message::NeedUpdate
-                    );
-                }
+                Message::Create(ref source) => crate::api!(
+                    self.link,
+                    sources_create(source) -> |_| Message::NeedUpdate
+                ),
                 _ => (),
             },
         };

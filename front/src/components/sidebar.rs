@@ -107,12 +107,10 @@ impl yew::Component for Component {
                 _ => (),
             },
             Message::Error(_) => (),
-            Message::NeedUpdate => {
-                crate::api!(
-                    self.link,
-                    counts() -> Message::Update
-                );
-            }
+            Message::NeedUpdate => crate::api!(
+                self.link,
+                counts() -> Message::Update
+            ),
             Message::Update(counts) => {
                 self.links[0].count = counts.all;
                 self.links[1].count = counts.unread;

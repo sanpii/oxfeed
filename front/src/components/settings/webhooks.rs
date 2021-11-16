@@ -50,12 +50,10 @@ impl yew::Component for Component {
             },
             Scene::Add => match msg {
                 Message::Cancel => self.scene = Scene::View,
-                Message::Create(ref webhook) => {
-                    crate::api!(
-                        self.link,
-                        webhooks_create(webhook) -> |_| Message::Event(crate::Event::WebhookUpdate)
-                    );
-                }
+                Message::Create(ref webhook) => crate::api!(
+                    self.link,
+                    webhooks_create(webhook) -> |_| Message::Event(crate::Event::WebhookUpdate)
+                ),
                 _ => (),
             },
         }

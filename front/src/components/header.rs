@@ -32,12 +32,10 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Message::Error(_) => (),
-            Message::Logout => {
-                crate::api!(
-                    self.link,
-                    auth_logout() -> |_| Message::Loggedout
-                );
-            }
+            Message::Logout => crate::api!(
+                self.link,
+                auth_logout() -> |_| Message::Loggedout
+            ),
             Message::Loggedout => {
                 let alert = crate::event::Alert::info("Logged out");
                 self.event_bus.send(crate::Event::Alert(alert));
