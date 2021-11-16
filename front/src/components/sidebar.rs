@@ -3,7 +3,6 @@ pub(crate) enum Message {
     Event(crate::Event),
     NeedUpdate,
     ReadAll,
-    Redraw,
     Update(oxfeed_common::Counts),
 }
 
@@ -124,12 +123,11 @@ impl yew::Component for Component {
             Message::ReadAll => {
                 crate::api!(
                     self.link,
-                    items_read() -> |_| Message::Redraw
+                    items_read() -> |_| Message::NeedUpdate
                 );
 
                 self.event_bus.send(crate::event::Event::ItemUpdate);
             }
-            Message::Redraw => return true,
         }
 
         false
