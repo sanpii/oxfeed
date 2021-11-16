@@ -3,7 +3,7 @@ pub(crate) enum Message {
     Delete,
     Deleted,
     Edit,
-    Error(oxfeed_common::Error),
+    Error(String),
     Save(oxfeed_common::webhook::Entity),
     Saved(oxfeed_common::webhook::Entity),
 }
@@ -51,7 +51,7 @@ impl yew::Component for Component {
 
                         crate::api!(
                             self.link,
-                            webhooks_delete(id) -> |_| Message::Deleted, Message::Error
+                            webhooks_delete(id) -> |_| Message::Deleted
                         );
                     }
                 }
@@ -73,7 +73,7 @@ impl yew::Component for Component {
 
                     crate::api!(
                         self.link,
-                        webhooks_update(id, webhook) -> Message::Saved, Message::Error
+                        webhooks_update(id, webhook) -> Message::Saved
                     );
 
                     return true;

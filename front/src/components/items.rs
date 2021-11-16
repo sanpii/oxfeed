@@ -1,5 +1,6 @@
 #[derive(Clone)]
 pub(crate) enum Message {
+    Error(String),
     Event(crate::Event),
     NeedUpdate,
     PageChange(usize),
@@ -48,6 +49,7 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
+            Message::Error(_) => (),
             Message::Event(event) => {
                 if matches!(event, crate::Event::ItemUpdate) {
                     self.link.send_message(Message::NeedUpdate);

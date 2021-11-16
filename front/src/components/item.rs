@@ -1,6 +1,6 @@
 pub(crate) enum Message {
-    Error(oxfeed_common::Error),
     Content(String),
+    Error(String),
     ToggleContent,
     ToggleRead,
     ToggleFavorite,
@@ -55,7 +55,7 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Message::Error(err) => self.event_bus.send(err.into()),
+            Message::Error(_) => (),
             Message::Content(content) => self.content = Some(content),
             Message::ToggleContent => {
                 self.scene = !self.scene;
@@ -65,7 +65,7 @@ impl yew::Component for Component {
 
                     crate::api!(
                         self.link,
-                        items_content(item_id) -> Message::Content, Message::Error
+                        items_content(item_id) -> Message::Content
                     );
                 }
             }
@@ -76,7 +76,7 @@ impl yew::Component for Component {
 
                 crate::api!(
                     self.link,
-                    items_tag(item_id, key, value) -> |_| Message::Toggled, Message::Error
+                    items_tag(item_id, key, value) -> |_| Message::Toggled
                 );
             }
             Message::ToggleRead => {
@@ -86,7 +86,7 @@ impl yew::Component for Component {
 
                 crate::api!(
                     self.link,
-                    items_tag(item_id, key, value) -> |_| Message::Toggled, Message::Error
+                    items_tag(item_id, key, value) -> |_| Message::Toggled
                 );
             }
             Message::Toggled => self.event_bus.send(crate::Event::ItemUpdate),

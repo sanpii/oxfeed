@@ -120,17 +120,16 @@ macro_rules! change {
 
 #[macro_export]
 macro_rules! api {
-    ($link:expr, $api:ident ( $($args:ident),* ) -> $fn:expr) => {
-        $crate::api!($link, $api ( $($args),* ) -> $fn, |err| Message::Event(err.into()))
-    };
-
-    ($link:expr, $api:ident ( $($args:ident),* ) -> $ok:expr, $err:expr) => {{
+    ($link:expr, $api:ident ( $($args:ident),* ) -> $fn:expr) => {{
         use yewtil::future::LinkFuture;
 
         $( let $args = $args.clone(); )*
 
         $link.send_future(async move {
-            crate::Api::$api($( &$args ),*).await.map_or_else($err, $ok)
+            crate::Api::$api($( &$args ),*).await.map_or_else(
+                |err| Message::Error(err.to_string()),
+                $fn
+            )
         });
-    }};
+    }}
 }

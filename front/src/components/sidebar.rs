@@ -1,5 +1,6 @@
 #[derive(Clone)]
 pub(crate) enum Message {
+    Error(String),
     Event(crate::Event),
     NeedUpdate,
     ReadAll,
@@ -105,6 +106,7 @@ impl yew::Component for Component {
                 | crate::Event::SourceUpdate => self.link.send_message(Message::NeedUpdate),
                 _ => (),
             },
+            Message::Error(_) => (),
             Message::NeedUpdate => {
                 crate::api!(
                     self.link,

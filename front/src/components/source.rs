@@ -3,7 +3,7 @@ pub(crate) enum Message {
     Delete,
     Deleted,
     Edit,
-    Error(oxfeed_common::Error),
+    Error(String),
     ToggleActive(bool),
     Save(oxfeed_common::source::Entity),
     Saved(oxfeed_common::source::Entity),
@@ -59,7 +59,7 @@ impl yew::Component for Component {
 
                         crate::api!(
                             self.link,
-                            sources_delete(id) -> |_| Message::Deleted, Message::Error
+                            sources_delete(id) -> |_| Message::Deleted
                         );
                     }
                 }
@@ -77,7 +77,7 @@ impl yew::Component for Component {
 
                     crate::api!(
                         self.link,
-                        sources_update(id, value) -> Message::Saved, Message::Error
+                        sources_update(id, value) -> Message::Saved
                     );
 
                     return true;
@@ -96,7 +96,7 @@ impl yew::Component for Component {
 
                     crate::api!(
                         self.link,
-                        sources_update(id, source) -> Message::Saved, Message::Error
+                        sources_update(id, source) -> Message::Saved
                     );
 
                     return true;

@@ -3,7 +3,7 @@ pub(crate) enum Message {
     Add,
     Cancel,
     Create(oxfeed_common::source::Entity),
-    Event(crate::Event),
+    Error(String),
     PageChange(usize),
     Update(crate::Pager<oxfeed_common::source::Entity>),
     NeedUpdate,
@@ -27,7 +27,6 @@ pub(crate) struct Component {
     scene: Scene,
     pager: Option<crate::Pager<oxfeed_common::source::Entity>>,
     pagination: oxfeed_common::Pagination,
-    _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
 }
 
 impl yew::Component for Component {
@@ -35,17 +34,12 @@ impl yew::Component for Component {
     type Message = Message;
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        use yew::agent::Bridged;
-
-        let callback = link.callback(Message::Event);
-
         let component = Self {
             filter: props.filter,
             link,
             scene: Scene::View,
             pager: None,
             pagination: props.pagination,
-            _producer: crate::event::Bus::bridge(callback),
         };
 
         component.link.send_message(Message::NeedUpdate);

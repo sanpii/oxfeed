@@ -1,6 +1,6 @@
 pub(crate) enum Message {
     Cancel,
-    Error(oxfeed_common::Error),
+    Error(String),
     Submit,
     ToggleActive(bool),
     ToggleWebhook(uuid::Uuid, bool),
@@ -18,7 +18,6 @@ pub(crate) struct Properties {
 }
 
 pub(crate) struct Component {
-    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
     link: yew::ComponentLink<Self>,
     props: Properties,
     webhooks: Vec<oxfeed_common::webhook::Entity>,
@@ -29,10 +28,7 @@ impl yew::Component for Component {
     type Properties = Properties;
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        use yew::agent::Dispatched;
-
         let component = Self {
-            event_bus: crate::event::Bus::dispatcher(),
             link,
             props,
             webhooks: Vec::new(),
@@ -40,7 +36,7 @@ impl yew::Component for Component {
 
         crate::api!(
             component.link,
-            webhooks_all() -> Message::Webhooks, Message::Error
+            webhooks_all() -> Message::Webhooks
         );
 
         component
@@ -49,7 +45,7 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Message::Cancel => self.props.on_cancel.emit(()),
-            Message::Error(err) => self.event_bus.send(err.into()),
+            Message::Error(_) => (),
             Message::Submit => self.props.on_submit.emit(self.props.source.clone()),
             Message::ToggleActive(active) => self.props.source.active = active,
             Message::ToggleWebhook(id, active) => {

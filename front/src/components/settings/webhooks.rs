@@ -2,6 +2,7 @@ pub(crate) enum Message {
     Add,
     Cancel,
     Create(oxfeed_common::webhook::Entity),
+    Error(String),
     Event(crate::Event),
     NeedUpdate,
     Update(Vec<oxfeed_common::webhook::Entity>),

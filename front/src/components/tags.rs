@@ -1,5 +1,5 @@
 pub(crate) enum Message {
-    Error(oxfeed_common::Error),
+    Error(String),
     Update(Vec<oxfeed_common::Tag>),
     NeedUpdate,
 }
@@ -10,7 +10,6 @@ pub(crate) struct Properties {
 }
 
 pub(crate) struct Component {
-    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
     link: yew::ComponentLink<Self>,
     tags: Vec<oxfeed_common::Tag>,
     pagination: oxfeed_common::Pagination,
@@ -21,10 +20,7 @@ impl yew::Component for Component {
     type Message = Message;
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        use yew::agent::Dispatched;
-
         let component = Self {
-            event_bus: crate::event::Bus::dispatcher(),
             link,
             tags: Vec::new(),
             pagination: props.pagination,
@@ -37,13 +33,13 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Message::Error(err) => self.event_bus.send(err.into()),
+            Message::Error(_) => (),
             Message::NeedUpdate => {
                 let pagination = &self.pagination;
 
                 crate::api!(
                     self.link,
-                    tags_all(pagination) -> Message::Update, Message::Error
+                    tags_all(pagination) -> Message::Update
                 );
             }
             Message::Update(tags) => {

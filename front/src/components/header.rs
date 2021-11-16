@@ -1,5 +1,5 @@
 pub(crate) enum Message {
-    Error(oxfeed_common::Error),
+    Error(String),
     Logout,
     Loggedout,
 }
@@ -31,11 +31,11 @@ impl yew::Component for Component {
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
-            Message::Error(err) => self.event_bus.send(err.into()),
+            Message::Error(_) => (),
             Message::Logout => {
                 crate::api!(
                     self.link,
-                    auth_logout() -> |_| Message::Loggedout, Message::Error
+                    auth_logout() -> |_| Message::Loggedout
                 );
             }
             Message::Loggedout => {

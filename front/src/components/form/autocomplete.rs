@@ -1,6 +1,6 @@
 pub(crate) enum Message {
     Choose(usize),
-    Error(oxfeed_common::Error),
+    Error(String),
     Input(String),
     Key(String),
     Terms(Vec<String>),
@@ -16,7 +16,6 @@ pub(crate) struct Properties {
 
 pub(crate) struct Component {
     active: Option<usize>,
-    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
     link: yew::ComponentLink<Self>,
     terms: Vec<String>,
     value: String,
@@ -38,11 +37,8 @@ impl yew::Component for Component {
     type Properties = Properties;
 
     fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        use yew::Dispatched;
-
         Self {
             active: None,
-            event_bus: crate::event::Bus::dispatcher(),
             link,
             terms: Vec::new(),
             value: String::new(),
@@ -54,7 +50,7 @@ impl yew::Component for Component {
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
         match msg {
             Message::Choose(idx) => self.select(self.terms[idx].clone()),
-            Message::Error(error) => self.event_bus.send(error.into()),
+            Message::Error(_) => (),
             Message::Input(input) => {
                 self.value = input.clone();
 
@@ -64,7 +60,7 @@ impl yew::Component for Component {
                 if !input.is_empty() {
                     crate::api!(
                         self.link,
-                        tags_search(filter, pagination) -> Message::Terms, Message::Error
+                        tags_search(filter, pagination) -> Message::Terms
                     );
 
                     return false;

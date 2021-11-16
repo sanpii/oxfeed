@@ -1,7 +1,7 @@
 pub(crate) enum Message {
     Cancel,
     Create(super::form::register::Info),
-    Error(oxfeed_common::Error),
+    Error(String),
     Login(super::form::login::Info),
     Logged,
     Register,
@@ -39,7 +39,7 @@ impl yew::Component for Component {
                 self.scene = Scene::Login;
                 return true;
             }
-            Message::Error(err) => self.event_bus.send(err.into()),
+            Message::Error(_) => (),
             Message::UserCreated => {
                 let alert = crate::event::Alert::info("User created");
                 self.event_bus.send(crate::Event::Alert(alert));
@@ -53,7 +53,7 @@ impl yew::Component for Component {
 
                 crate::api!(
                     self.link,
-                    user_create(user) -> |_| Message::UserCreated, Message::Error
+                    user_create(user) -> |_| Message::UserCreated
                 );
             }
             Message::Login(info) => {
@@ -63,7 +63,7 @@ impl yew::Component for Component {
 
                 crate::api!(
                     self.link,
-                    auth_login(email, password, remember_me) -> |_| Message::Logged, Message::Error
+                    auth_login(email, password, remember_me) -> |_| Message::Logged
                 );
             }
             Message::Logged => self.event_bus.send(crate::Event::Logged),
