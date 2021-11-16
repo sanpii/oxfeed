@@ -130,8 +130,6 @@ where
 
         let callback = self.link.batch_callback(
             move |response: yew::services::fetch::Response<yew::format::Text>| {
-                use std::convert::TryFrom;
-
                 let event = match Self::on_response(kind, response) {
                     Ok(event) => event,
                     Err(err) => {
