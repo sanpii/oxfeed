@@ -99,6 +99,8 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        let mut should_render = false;
+
         match msg {
             Message::Event(event) => match event {
                 crate::Event::ItemUpdate
@@ -118,7 +120,7 @@ impl yew::Component for Component {
                 self.links[3].count = counts.tags;
                 self.links[4].count = counts.sources;
 
-                return true;
+                should_render = true;
             }
             Message::ReadAll => {
                 crate::api!(
@@ -130,7 +132,7 @@ impl yew::Component for Component {
             }
         }
 
-        false
+        should_render
     }
 
     fn view(&self) -> yew::Html {

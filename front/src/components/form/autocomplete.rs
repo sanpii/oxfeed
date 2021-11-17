@@ -48,6 +48,8 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        let mut should_render = true;
+
         match msg {
             Message::Choose(idx) => self.select(self.terms[idx].clone()),
             Message::Error(_) => (),
@@ -63,7 +65,7 @@ impl yew::Component for Component {
                         tags_search(filter, pagination) -> Message::Terms
                     );
 
-                    return false;
+                    should_render = false;
                 } else {
                     self.terms = Vec::new();
                     self.active = None;
@@ -105,7 +107,7 @@ impl yew::Component for Component {
             Message::Terms(terms) => self.terms = terms,
         }
 
-        true
+        should_render
     }
 
     fn view(&self) -> yew::Html {

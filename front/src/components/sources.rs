@@ -48,28 +48,37 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        let mut should_render = false;
+
         match &self.scene {
             Scene::View => match msg {
-                Message::Add => self.scene = Scene::Add,
-                Message::Update(ref pager) => self.pager = Some(pager.clone()),
+                Message::Add => {
+                    self.scene = Scene::Add;
+                    should_render = true;
+                }
+                Message::Update(ref pager) => {
+                    self.pager = Some(pager.clone());
+                    should_render = true;
+                }
                 _ => (),
-            },
+            }
             Scene::Add => match msg {
-                Message::Cancel => self.scene = Scene::View,
+                Message::Cancel => {
+                    self.scene = Scene::View;
+                    should_render = true;
+                }
                 Message::Create(ref source) => crate::api!(
                     self.link,
                     sources_create(source) -> |_| Message::NeedUpdate
                 ),
                 _ => (),
-            },
+            }
         };
 
         if let Message::PageChange(page) = msg {
             self.pagination.page = page;
             yew::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
             self.link.send_message(Message::NeedUpdate);
-
-            return false;
         } else if matches!(msg, Message::NeedUpdate) {
             self.scene = Scene::View;
             let pagination = &self.pagination;
@@ -86,11 +95,9 @@ impl yew::Component for Component {
                     sources_search(filter, pagination) -> Message::Update
                 );
             }
-
-            return false;
         }
 
-        true
+        should_render
     }
 
     fn view(&self) -> yew::Html {

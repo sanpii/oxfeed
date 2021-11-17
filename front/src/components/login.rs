@@ -34,10 +34,12 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        let mut should_render = false;
+
         match msg {
             Message::Cancel => {
                 self.scene = Scene::Login;
-                return true;
+                should_render = true;
             }
             Message::Error(_) => (),
             Message::UserCreated => {
@@ -69,11 +71,11 @@ impl yew::Component for Component {
             Message::Logged => self.event_bus.send(crate::Event::Logged),
             Message::Register => {
                 self.scene = Scene::Register;
-                return true;
+                should_render = true;
             }
         }
 
-        false
+        should_render
     }
 
     fn view(&self) -> yew::Html {

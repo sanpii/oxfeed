@@ -32,6 +32,8 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        let mut should_render = false;
+
         match msg {
             Message::Error(_) => (),
             Message::NeedUpdate => {
@@ -44,11 +46,11 @@ impl yew::Component for Component {
             }
             Message::Update(tags) => {
                 self.tags = tags;
-                return true;
+                should_render = true;
             }
         }
 
-        false
+        should_render
     }
 
     fn view(&self) -> yew::Html {

@@ -81,32 +81,33 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        let mut should_render = false;
+
         match msg {
             Message::Event(event) => match event {
-                crate::Event::AuthRequire => self.auth = false,
+                crate::Event::AuthRequire => {
+                    self.auth = false;
+                    should_render = true;
+                }
                 crate::Event::Logged => {
                     self.auth = true;
                     self._websocket = Self::websocket(&self.link);
+                    should_render = true;
                 }
-                crate::Event::Redirect(route) => self.location.set_path(&route),
-                crate::Event::Redirected(_) => (),
-                _ => return false,
+                crate::Event::Redirect(route) => {
+                    self.location.set_path(&route);
+                    should_render = true;
+                }
+                _ => (),
             },
-            Message::Index => {
-                self.event_bus
-                    .send(crate::Event::Redirect("/unread".to_string()));
-                return false;
-            }
+            Message::Index =>  self.event_bus.send(crate::Event::Redirect("/unread".to_string())),
             Message::Websocket(event) => match event {
-                WebsocketAction::Ready(_) => {
-                    self.event_bus.send(crate::Event::ItemUpdate);
-                    return false;
-                }
-                WebsocketAction::Status(_) => return false,
+                WebsocketAction::Ready(_) => self.event_bus.send(crate::Event::ItemUpdate),
+                WebsocketAction::Status(_) => (),
             },
         }
 
-        true
+        should_render
     }
 
     fn view(&self) -> yew::Html {

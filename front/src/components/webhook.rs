@@ -41,6 +41,8 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        let mut should_render = false;
+
         match self.scene {
             Scene::View => match msg {
                 Message::Delete => {
@@ -58,14 +60,14 @@ impl yew::Component for Component {
                 Message::Deleted => self.event_bus.send(crate::Event::WebhookUpdate),
                 Message::Edit => {
                     self.scene = Scene::Edit;
-                    return true;
+                    should_render = true;
                 }
                 _ => unreachable!(),
             },
             Scene::Edit => match msg {
                 Message::Cancel => {
                     self.scene = Scene::View;
-                    return true;
+                    should_render = true;
                 }
                 Message::Save(webhook) => {
                     let id = &webhook.id.unwrap();
@@ -76,19 +78,19 @@ impl yew::Component for Component {
                         webhooks_update(id, webhook) -> Message::Saved
                     );
 
-                    return true;
+                    should_render = true;
                 }
                 Message::Saved(webhook) => {
                     self.value = webhook;
                     self.scene = Scene::View;
                     self.event_bus.send(crate::Event::WebhookUpdate);
-                    return true;
+                    should_render = true;
                 }
                 _ => unreachable!(),
             },
         }
 
-        false
+        should_render
     }
 
     fn view(&self) -> yew::Html {

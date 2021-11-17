@@ -42,6 +42,8 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        let mut should_render = true;
+
         match &self.scene {
             Scene::View => match msg {
                 Message::Add => self.scene = Scene::Add,
@@ -70,10 +72,10 @@ impl yew::Component for Component {
                 webhooks_all() -> Message::Update
             );
 
-            return false;
+            should_render = false;
         }
 
-        true
+        should_render
     }
 
     fn view(&self) -> yew::Html {

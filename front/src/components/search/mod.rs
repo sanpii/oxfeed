@@ -41,10 +41,11 @@ impl yew::Component for Component {
 
         if let crate::Event::Redirected(_) = event {
             self.filter = crate::Filter::new();
-            return true;
-        }
 
-        false
+            true
+        } else {
+            false
+        }
     }
 
     fn view(&self) -> yew::Html {

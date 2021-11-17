@@ -48,6 +48,8 @@ impl yew::Component for Component {
             return true;
         }
 
+        let mut should_render = false;
+
         match self.scene {
             Scene::View => match msg {
                 Message::Delete => {
@@ -66,7 +68,7 @@ impl yew::Component for Component {
                 Message::Deleted => self.event_bus.send(crate::Event::SourceUpdate),
                 Message::Edit => {
                     self.scene = Scene::Edit;
-                    return true;
+                    should_render = true;
                 }
                 Message::Saved(_) => self.event_bus.send(crate::Event::SourceUpdate),
                 Message::ToggleActive(active) => {
@@ -80,14 +82,14 @@ impl yew::Component for Component {
                         sources_update(id, value) -> Message::Saved
                     );
 
-                    return true;
+                    should_render = true;
                 }
                 _ => (),
-            },
+            }
             Scene::Edit => match msg {
                 Message::Cancel => {
                     self.scene = Scene::View;
-                    return true;
+                    should_render = true;
                 }
                 Message::Save(source) => {
                     let id = &self.props.value.id.unwrap();
@@ -99,13 +101,13 @@ impl yew::Component for Component {
                         sources_update(id, source) -> Message::Saved
                     );
 
-                    return true;
+                    should_render = true;
                 }
                 _ => unreachable!(),
-            },
+            }
         }
 
-        false
+        should_render
     }
 
     fn view(&self) -> yew::Html {

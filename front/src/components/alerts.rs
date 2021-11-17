@@ -26,18 +26,22 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+        let mut should_render = false;
+
         match msg {
             Message::Event(event) => {
                 if let crate::Event::Alert(alert) = event {
                     self.messages.push(alert);
+                    should_render = true;
                 }
             }
             Message::Close(idx) => {
                 self.messages.remove(idx);
+                should_render = true;
             }
         }
 
-        true
+        should_render
     }
 
     fn view(&self) -> yew::Html {
