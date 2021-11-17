@@ -42,7 +42,7 @@ async fn logout(
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = identity.token(&elephantry)?;
     let sql = include_str!("../../sql/logout.sql");
-    elephantry.query_one::<()>(sql, &[&token])?;
+    elephantry.query::<()>(sql, &[&token])?;
 
     Ok(actix_web::HttpResponse::NoContent().finish())
 }

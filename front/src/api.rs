@@ -246,6 +246,12 @@ impl Api {
             .send()
             .await?;
 
+        if response.status().is_server_error() {
+            let error = response.text().await?;
+
+            return Err(oxfeed_common::Error::Api(error));
+        }
+
         match response.status() {
             http::status::StatusCode::UNAUTHORIZED => {
                 let mut event_bus = crate::event::Bus::dispatcher();

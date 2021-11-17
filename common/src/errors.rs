@@ -2,6 +2,9 @@ pub type Result<T = ()> = std::result::Result<T, Error>;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
+    #[error("API error: {0}")]
+    Api(String),
+
     #[error("Auth require")]
     Auth,
 
