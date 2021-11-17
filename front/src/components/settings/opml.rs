@@ -92,7 +92,7 @@ impl yew::Component for Component {
                     >{ "Import" }</button>
                 </div>
                 <div class="input-group">
-                    <a href=export_url class=yew::classes!("btn", "btn-outline-primary")>{ "Export" }</a>
+                    <a href=export_url target="_blank" class=yew::classes!("btn", "btn-outline-primary")>{ "Export" }</a>
                 </div>
             </>
         }
