@@ -31,7 +31,7 @@ api:
 front: yarn wasm
 .PHONY: front
 
-wasm:
+wasm: yarn
 	RUST_LOG=info $(TRUNK) build $(TRUNK_FLAGS) front/index.html
 .PHONY: wasm
 
