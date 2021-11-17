@@ -63,7 +63,7 @@ select item.item_id, item.link, item.published, item.title,
     join source using (source_id)
     join "user" using (user_id)
     where {}
-    order by published desc
+    order by published desc, title
     {}
         "#,
             clause.to_string(),
