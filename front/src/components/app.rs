@@ -100,7 +100,9 @@ impl yew::Component for Component {
                 }
                 _ => (),
             },
-            Message::Index =>  self.event_bus.send(crate::Event::Redirect("/unread".to_string())),
+            Message::Index => self
+                .event_bus
+                .send(crate::Event::Redirect("/unread".to_string())),
             Message::Websocket(event) => match event {
                 WebsocketAction::Ready(_) => self.event_bus.send(crate::Event::ItemUpdate),
                 WebsocketAction::Status(_) => (),

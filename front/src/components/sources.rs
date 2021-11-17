@@ -61,7 +61,7 @@ impl yew::Component for Component {
                     should_render = true;
                 }
                 _ => (),
-            }
+            },
             Scene::Add => match msg {
                 Message::Cancel => {
                     self.scene = Scene::View;
@@ -72,7 +72,7 @@ impl yew::Component for Component {
                     sources_create(source) -> |_| Message::NeedUpdate
                 ),
                 _ => (),
-            }
+            },
         };
 
         if let Message::PageChange(page) = msg {

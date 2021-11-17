@@ -85,7 +85,7 @@ impl yew::Component for Component {
                     should_render = true;
                 }
                 _ => (),
-            }
+            },
             Scene::Edit => match msg {
                 Message::Cancel => {
                     self.scene = Scene::View;
@@ -104,7 +104,7 @@ impl yew::Component for Component {
                     should_render = true;
                 }
                 _ => unreachable!(),
-            }
+            },
         }
 
         should_render
