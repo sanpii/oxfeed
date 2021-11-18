@@ -13,31 +13,11 @@ pub(crate) struct Properties {
 }
 
 #[derive(Clone)]
-struct Link {
-    count: i64,
-    icon: &'static str,
-    label: &'static str,
-    route: super::app::Route,
-}
+struct Links(Vec<Link>);
 
-pub(crate) struct Component {
-    current_route: super::app::Route,
-    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
-    link: yew::ComponentLink<Self>,
-    links: Vec<Link>,
-    _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
-}
-
-impl yew::Component for Component {
-    type Message = Message;
-    type Properties = Properties;
-
-    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        use yew::agent::{Bridged, Dispatched};
-
-        let callback = link.callback(Message::Event);
-
-        let mut links = vec![
+impl Links {
+    fn new() -> Self {
+        let links = vec![
             Link {
                 count: 0,
                 icon: "collection",
@@ -76,14 +56,79 @@ impl yew::Component for Component {
             },
         ];
 
-        if let super::app::Route::Search(_) = props.current_route {
-            links.push(Link {
-                count: 0,
-                icon: "search",
-                label: "Search",
-                route: props.current_route.clone(),
-            });
-        }
+        Self(links)
+    }
+
+    fn with_search(search_route: &super::app::Route) -> Self {
+        let mut links = Self::new();
+
+        links.push(Link {
+            count: 0,
+            icon: "search",
+            label: "Search",
+            route: search_route.clone(),
+        });
+
+        links
+    }
+
+    fn update_count(&mut self, counts: &oxfeed_common::Counts) {
+        self.0[0].count = counts.all;
+        self.0[1].count = counts.unread;
+        self.0[2].count = counts.favorites;
+        self.0[3].count = counts.tags;
+        self.0[4].count = counts.sources;
+    }
+
+    fn has_unread(&self) -> bool {
+        self.0[1].count == 0
+    }
+}
+
+impl std::ops::Deref for Links {
+    type Target = Vec<Link>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl std::ops::DerefMut for Links {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+#[derive(Clone)]
+struct Link {
+    count: i64,
+    icon: &'static str,
+    label: &'static str,
+    route: super::app::Route,
+}
+
+pub(crate) struct Component {
+    current_route: super::app::Route,
+    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
+    link: yew::ComponentLink<Self>,
+    links: Links,
+    _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
+}
+
+impl yew::Component for Component {
+    type Message = Message;
+    type Properties = Properties;
+
+    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+        use yew::agent::{Bridged, Dispatched};
+
+        let callback = link.callback(Message::Event);
+
+        let links = if let super::app::Route::Search(_) = props.current_route {
+            Links::with_search(&props.current_route)
+        } else {
+            Links::new()
+        };
 
         let component = Self {
             current_route: props.current_route,
@@ -114,12 +159,7 @@ impl yew::Component for Component {
                 counts() -> Message::Update
             ),
             Message::Update(counts) => {
-                self.links[0].count = counts.all;
-                self.links[1].count = counts.unread;
-                self.links[2].count = counts.favorites;
-                self.links[3].count = counts.tags;
-                self.links[4].count = counts.sources;
-
+                self.links.update_count(&counts);
                 should_render = true;
             }
             Message::ReadAll => {
@@ -136,7 +176,7 @@ impl yew::Component for Component {
     }
 
     fn view(&self) -> yew::Html {
-        let favicon = if self.links[1].count == 0 {
+        let favicon = if self.links.has_unread() {
             "/favicon.ico"
         } else {
             "/favicon-unread.ico"
