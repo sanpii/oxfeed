@@ -76,12 +76,12 @@ li.list-group-item .actions svg:hover {
 }
 
 li.list-group-item .actions .favorite svg:hover {
-    color: var(--bs-yellow);
+    color: var(--bs-orange);
 }
 
 li.list-group-item .float-end > .favorite {
     display: block;
-    color: var(--bs-yellow);
+    color: var(--bs-orange);
     margin-right: .5rem;
 }
 
