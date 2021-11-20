@@ -1,3 +1,5 @@
+#![warn(warnings)]
+
 mod cache;
 mod form;
 mod identity;
