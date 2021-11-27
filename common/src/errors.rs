@@ -8,9 +8,6 @@ pub enum Error {
     #[error("Auth require")]
     Auth,
 
-    #[error("{0}")]
-    Any(#[from] anyhow::Error),
-
     #[cfg(feature = "base64")]
     #[error("{0}")]
     Base64(#[from] base64::DecodeError),

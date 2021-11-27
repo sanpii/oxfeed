@@ -4,28 +4,26 @@ pub(crate) enum Message {
 }
 
 pub(crate) struct Component {
-    link: yew::ComponentLink<Self>,
     messages: Vec<crate::event::Alert>,
-    _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
+    _producer: Box<dyn yew_agent::Bridge<crate::event::Bus>>,
 }
 
 impl yew::Component for Component {
     type Message = Message;
     type Properties = ();
 
-    fn create(_: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        use yew::Bridged;
+    fn create(ctx: &yew::Context<Self>) -> Self {
+        use yew_agent::Bridged;
 
-        let callback = link.callback(Message::Event);
+        let callback = ctx.link().callback(Message::Event);
 
         Self {
-            link,
             messages: Vec::new(),
             _producer: crate::event::Bus::bridge(callback),
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+    fn update(&mut self, _: &yew::Context<Self>, msg: Self::Message) -> bool {
         let mut should_render = false;
 
         match msg {
@@ -44,17 +42,17 @@ impl yew::Component for Component {
         should_render
     }
 
-    fn view(&self) -> yew::Html {
+    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
         yew::html! {
             {
                 for self.messages.iter().enumerate().map(|(idx, alert)| {
                     yew::html! {
-                        <div class=yew::classes!("alert", format!("alert-{}", alert.severity()), "alert-dismissible") role="alert">
+                        <div class={ yew::classes!("alert", format!("alert-{}", alert.severity()), "alert-dismissible") } role="alert">
                             { &alert.message }
 
                             <button
                                 class="btn-close"
-                                onclick=self.link.callback(move |_| Message::Close(idx))
+                                onclick={ ctx.link().callback(move |_| Message::Close(idx)) }
                             >
                             </button>
                         </div>

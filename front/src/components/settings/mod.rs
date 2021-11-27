@@ -7,15 +7,11 @@ impl yew::Component for Component {
     type Message = ();
     type Properties = ();
 
-    fn create(_: Self::Properties, _: yew::ComponentLink<Self>) -> Self {
+    fn create(_: &yew::Context<Self>) -> Self {
         Self
     }
 
-    fn update(&mut self, _: Self::Message) -> yew::ShouldRender {
-        false
-    }
-
-    fn view(&self) -> yew::Html {
+    fn view(&self, _: &yew::Context<Self>) -> yew::Html {
         yew::html! {
             <>
                 <div class="card">
@@ -24,7 +20,7 @@ impl yew::Component for Component {
                         <span class="help">
                             <crate::components::Svg icon="question-circle" size=16 />
                             <crate::components::Popover
-                                title="What is a webhook?".to_string()
+                                title={ "What is a webhook?".to_string() }
                                 text="
                                 A webhook is an URL called when a new item is fetched.<br />
                                 This URL is called via POST method and the new item will be pass as json body.

@@ -2,7 +2,7 @@ pub(crate) enum Message {
     Input(String),
 }
 
-#[derive(Clone, yew::Properties)]
+#[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     pub current_route: crate::components::app::Route,
     #[prop_or_default]
@@ -11,27 +11,25 @@ pub(crate) struct Properties {
 
 pub(crate) struct Component {
     current_route: crate::components::app::Route,
-    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
+    event_bus: yew_agent::Dispatcher<crate::event::Bus>,
     filter: crate::Filter,
-    link: yew::ComponentLink<Self>,
 }
 
 impl yew::Component for Component {
     type Message = Message;
     type Properties = Properties;
 
-    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        use yew::agent::Dispatched;
+    fn create(ctx: &yew::Context<Self>) -> Self {
+        use yew_agent::Dispatched;
 
         Self {
-            current_route: props.current_route,
+            current_route: ctx.props().current_route.clone(),
             filter: crate::Filter::new(),
             event_bus: crate::event::Bus::dispatcher(),
-            link,
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+    fn update(&mut self, _: &yew::Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Message::Input(value) => {
                 self.filter = value.into();
@@ -52,18 +50,23 @@ impl yew::Component for Component {
         true
     }
 
-    fn view(&self) -> yew::Html {
+    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
         if matches!(self.current_route, crate::components::app::Route::Settings) {
             "".into()
         } else {
             yew::html! {
                 <input
-                    class=yew::classes!("form-control", "form-control-dark")
+                    class={ yew::classes!("form-control", "form-control-dark") }
                     type="text"
-                    value=self.filter.to_string()
+                    value={ self.filter.to_string() }
                     placeholder="Search"
                     aria-label="Search"
-                    oninput=self.link.callback(|e: yew::InputData| Message::Input(e.value))
+                    oninput={ ctx.link().callback(|e: yew::InputEvent| {
+                        use yew::TargetCast;
+
+                        let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
+                        Message::Input(input.value())
+                    }) }
                 />
             }
         }

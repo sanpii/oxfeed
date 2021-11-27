@@ -6,7 +6,7 @@ pub(crate) enum Message {
     Terms(Vec<String>),
 }
 
-#[derive(Clone, yew::Properties)]
+#[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     #[prop_or_default]
     pub on_select: yew::Callback<String>,
@@ -16,7 +16,6 @@ pub(crate) struct Properties {
 
 pub(crate) struct Component {
     active: Option<usize>,
-    link: yew::ComponentLink<Self>,
     terms: Vec<String>,
     value: String,
     on_select: yew::Callback<String>,
@@ -36,10 +35,11 @@ impl yew::Component for Component {
     type Message = Message;
     type Properties = Properties;
 
-    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+    fn create(ctx: &yew::Context<Self>) -> Self {
+        let props = ctx.props().clone();
+
         Self {
             active: None,
-            link,
             terms: Vec::new(),
             value: String::new(),
             on_select: props.on_select,
@@ -47,7 +47,7 @@ impl yew::Component for Component {
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
         let mut should_render = true;
 
         match msg {
@@ -61,7 +61,7 @@ impl yew::Component for Component {
 
                 if !input.is_empty() {
                     crate::api!(
-                        self.link,
+                        ctx.link(),
                         tags_search(filter, pagination) -> Message::Terms
                     );
 
@@ -110,14 +110,19 @@ impl yew::Component for Component {
         should_render
     }
 
-    fn view(&self) -> yew::Html {
+    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
         yew::html! {
             <div class="autocomplete">
                 <input
                     type="text"
-                    value=self.value.clone()
-                    oninput=self.link.callback(|e: yew::InputData| Message::Input(e.value))
-                    onkeydown=self.link.callback(|e: yew::KeyboardEvent| Message::Key(e.key()))
+                    value={ self.value.clone() }
+                    oninput={ ctx.link().callback(|e: yew::InputEvent| {
+                        use yew::TargetCast;
+
+                        let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
+                        Message::Input(input.value())
+                    }) }
+                    onkeydown={ ctx.link().callback(|e: yew::KeyboardEvent| Message::Key(e.key())) }
                 />
                 {
                     if !self.terms.is_empty() {
@@ -127,8 +132,8 @@ impl yew::Component for Component {
                                 for self.terms.iter().enumerate().map(|(idx, term)| {
                                     yew::html! {
                                         <div
-                                            class=yew::classes!("list-group-item", "list-group-item-action", if self.active == Some(idx) { "active" } else { "" })
-                                            onclick=self.link.callback(move |_| Message::Choose(idx))
+                                            class={ yew::classes!("list-group-item", "list-group-item-action", if self.active == Some(idx) { "active" } else { "" }) }
+                                            onclick={ ctx.link().callback(move |_| Message::Choose(idx)) }
                                         >{ term }</div>
                                     }
                                 })

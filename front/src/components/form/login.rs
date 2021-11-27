@@ -11,13 +11,12 @@ pub(crate) struct Info {
     pub remember_me: bool,
 }
 
-#[derive(Clone, yew::Properties)]
+#[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     pub on_submit: yew::Callback<Info>,
 }
 
 pub(crate) struct Component {
-    link: yew::ComponentLink<Self>,
     email: String,
     password: String,
     remember_me: bool,
@@ -28,17 +27,16 @@ impl yew::Component for Component {
     type Message = Message;
     type Properties = Properties;
 
-    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+    fn create(ctx: &yew::Context<Self>) -> Self {
         Self {
-            link,
             email: String::new(),
             password: String::new(),
             remember_me: false,
-            on_submit: props.on_submit,
+            on_submit: ctx.props().on_submit.clone(),
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+    fn update(&mut self, _: &yew::Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Message::Submit => {
                 let info = Info {
@@ -57,7 +55,9 @@ impl yew::Component for Component {
         false
     }
 
-    fn view(&self) -> yew::Html {
+    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
+        use yew::TargetCast;
+
         yew::html! {
             <>
                 <div class="form-floating">
@@ -68,7 +68,10 @@ impl yew::Component for Component {
                         placeholder="Email"
                         required=true
                         autofocus=true
-                        oninput=self.link.callback(|e: yew::InputData| Message::UpdateEmail(e.value))
+                        oninput={ ctx.link().callback(|e: yew::InputEvent| {
+                            let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
+                            Message::UpdateEmail(input.value())
+                        }) }
                     />
                     <label for="email" class="form-label sr-only">{ "Email" }</label>
                 </div>
@@ -79,7 +82,10 @@ impl yew::Component for Component {
                         class="form-control"
                         placeholder="Password"
                         required=true
-                        oninput=self.link.callback(|e: yew::InputData| Message::UpdatePassword(e.value))
+                        oninput={ ctx.link().callback(|e: yew::InputEvent| {
+                            let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
+                            Message::UpdatePassword(input.value())
+                        }) }
                     />
                     <label for="password" class="form-label sr-only">{ "Password" }</label>
                 </div>
@@ -87,22 +93,22 @@ impl yew::Component for Component {
                     <label class="form-label">
                         <input
                             type="checkbox"
-                            checked=self.remember_me
-                            onclick=self.link.callback(|_| Message::ToggleRemember)
+                            checked={ self.remember_me }
+                            onclick={ ctx.link().callback(|_| Message::ToggleRemember) }
                         />{ " Remember me" }
                     </label>
                 </div>
                 <a
-                    class=yew::classes!("btn", "btn-lg", "btn-primary", "w-100")
+                    class={yew::classes!("btn", "btn-lg", "btn-primary", "w-100")}
                     type="submit"
-                    onclick=self.link.callback(|_| Message::Submit)
+                    onclick={ ctx.link().callback(|_| Message::Submit) }
                 >{ "Sign in" }</a>
             </>
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-        self.on_submit = props.on_submit;
+    fn changed(&mut self, ctx: &yew::Context<Self>) -> bool {
+        self.on_submit = ctx.props().on_submit.clone();
 
         false
     }

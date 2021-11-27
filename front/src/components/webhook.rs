@@ -13,15 +13,14 @@ enum Scene {
     View,
 }
 
-#[derive(yew::Properties, Clone)]
+#[derive(yew::Properties, Clone, PartialEq)]
 pub(crate) struct Properties {
     pub value: oxfeed_common::webhook::Entity,
 }
 
 pub(crate) struct Component {
     scene: Scene,
-    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
-    link: yew::ComponentLink<Self>,
+    event_bus: yew_agent::Dispatcher<crate::event::Bus>,
     value: oxfeed_common::webhook::Entity,
 }
 
@@ -29,18 +28,17 @@ impl yew::Component for Component {
     type Message = Message;
     type Properties = Properties;
 
-    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        use yew::agent::Dispatched;
+    fn create(ctx: &yew::Context<Self>) -> Self {
+        use yew_agent::Dispatched;
 
         Self {
             scene: Scene::View,
             event_bus: crate::event::Bus::dispatcher(),
-            link,
-            value: props.value,
+            value: ctx.props().value.clone(),
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
         let mut should_render = false;
 
         match self.scene {
@@ -48,11 +46,11 @@ impl yew::Component for Component {
                 Message::Delete => {
                     let message = format!("Would you like delete '{}' webhook?", self.value.name);
 
-                    if yew::services::dialog::DialogService::confirm(&message) {
+                    if gloo::dialogs::confirm(&message) {
                         let id = &self.value.id.unwrap();
 
                         crate::api!(
-                            self.link,
+                            ctx.link(),
                             webhooks_delete(id) -> |_| Message::Deleted
                         );
                     }
@@ -74,7 +72,7 @@ impl yew::Component for Component {
                     self.value = webhook.clone();
 
                     crate::api!(
-                        self.link,
+                        ctx.link(),
                         webhooks_update(id, webhook) -> Message::Saved
                     );
 
@@ -93,13 +91,13 @@ impl yew::Component for Component {
         should_render
     }
 
-    fn view(&self) -> yew::Html {
+    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
         match &self.scene {
             Scene::Edit => yew::html! {
                 <super::form::Webhook
-                    webhook=self.value.clone()
-                    on_cancel=self.link.callback(|_| Message::Cancel)
-                    on_submit=self.link.callback(Message::Save)
+                    webhook={ self.value.clone() }
+                    on_cancel={ ctx.link().callback(|_| Message::Cancel) }
+                    on_submit={ ctx.link().callback(Message::Save) }
                 />
             },
             Scene::View => {
@@ -112,7 +110,7 @@ impl yew::Component for Component {
                             {
                                 if let Some(last_error) = webhook.last_error {
                                     yew::html! {
-                                        <super::Error text=last_error />
+                                        <super::Error text={ last_error } />
                                     }
                                 }
                                 else {
@@ -121,18 +119,18 @@ impl yew::Component for Component {
                             }
                         </div>
 
-                        <div class=yew::classes!("btn-group", "float-end")>
+                        <div class={ yew::classes!("btn-group", "float-end") }>
                             <button
-                                class=yew::classes!("btn", "btn-primary")
+                                class={ yew::classes!("btn", "btn-primary") }
                                 title="Edit"
-                                onclick=self.link.callback(move |_| Message::Edit)
+                                onclick={ ctx.link().callback(move |_| Message::Edit) }
                             >
                                 <super::Svg icon="pencil-square" size=16 />
                             </button>
                             <button
-                                class=yew::classes!("btn", "btn-danger")
+                                class={ yew::classes!("btn", "btn-danger") }
                                 title="Delete"
-                                onclick=self.link.callback(|_| Message::Delete)
+                                onclick={ ctx.link().callback(|_| Message::Delete) }
                             >
                                 <super::Svg icon="trash" size=16 />
                             </button>

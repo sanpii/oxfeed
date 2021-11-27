@@ -14,14 +14,6 @@ pub struct Entity {
     pub mark_read: bool,
 }
 
-impl From<&Entity> for std::result::Result<std::string::String, anyhow::Error> {
-    fn from(entity: &Entity) -> Self {
-        let json = serde_json::to_string(entity)?;
-
-        Ok(json)
-    }
-}
-
 #[cfg(feature = "elephantry")]
 impl<'a> Model<'a> {
     pub fn delete(

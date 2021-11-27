@@ -6,7 +6,7 @@ pub(crate) enum Message {
     UpdateUrl(String),
 }
 
-#[derive(Clone, yew::Properties)]
+#[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     pub webhook: oxfeed_common::webhook::Entity,
     pub on_cancel: yew::Callback<()>,
@@ -14,7 +14,6 @@ pub(crate) struct Properties {
 }
 
 pub(crate) struct Component {
-    link: yew::ComponentLink<Self>,
     props: Properties,
 }
 
@@ -22,11 +21,13 @@ impl yew::Component for Component {
     type Message = Message;
     type Properties = Properties;
 
-    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        Self { link, props }
+    fn create(ctx: &yew::Context<Self>) -> Self {
+        Self {
+            props: ctx.props().clone(),
+        }
     }
 
-    fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+    fn update(&mut self, _: &yew::Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Message::Cancel => self.props.on_cancel.emit(()),
             Message::Submit => self.props.on_submit.emit(self.props.webhook.clone()),
@@ -38,7 +39,7 @@ impl yew::Component for Component {
         true
     }
 
-    fn view(&self) -> yew::Html {
+    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
         yew::html! {
             <form>
                 <div class="row mb-3">
@@ -48,8 +49,13 @@ impl yew::Component for Component {
                             class="form-control"
                             name="name"
                             required=true
-                            value=self.props.webhook.name.clone()
-                            oninput=self.link.callback(|e: yew::InputData| Message::UpdateName(e.value))
+                            value={ self.props.webhook.name.clone() }
+                            oninput={ ctx.link().callback(|e: yew::InputEvent| {
+                                use yew::TargetCast;
+
+                                let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
+                                Message::UpdateName(input.value())
+                            }) }
                         />
                     </div>
                 </div>
@@ -61,8 +67,13 @@ impl yew::Component for Component {
                             class="form-control"
                             name="url"
                             required=true
-                            value=self.props.webhook.url.clone()
-                            oninput=self.link.callback(|e: yew::InputData| Message::UpdateUrl(e.value))
+                            value={ self.props.webhook.url.clone() }
+                            oninput={ ctx.link().callback(|e: yew::InputEvent| {
+                                use yew::TargetCast;
+
+                                let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
+                                Message::UpdateUrl(input.value())
+                            }) }
                         />
                     </div>
                 </div>
@@ -72,25 +83,25 @@ impl yew::Component for Component {
                         <crate::components::Switch
                             id="mark_read"
                             label="Mark item as read after webhook call"
-                            active=self.props.webhook.mark_read
-                            on_toggle=self.link.callback(Message::UpdateMarkRead)
+                            active={ self.props.webhook.mark_read }
+                            on_toggle={ ctx.link().callback(Message::UpdateMarkRead) }
                         />
                     </div>
                 </div>
 
                 <a
-                    class=yew::classes!("btn", "btn-primary")
+                    class={ yew::classes!("btn", "btn-primary") }
                     title="Save"
-                    onclick=self.link.callback(|_| Message::Submit)
+                    onclick={ ctx.link().callback(|_| Message::Submit) }
                 >
                     <crate::components::Svg icon="check" size=24 />
                     { "Save" }
                 </a>
 
                 <a
-                    class=yew::classes!("btn", "btn-secondary")
+                    class={ yew::classes!("btn", "btn-secondary") }
                     title="Cancel"
-                    onclick=self.link.callback(|_| Message::Cancel)
+                    onclick={ ctx.link().callback(|_| Message::Cancel) }
                 >
                     <crate::components::Svg icon="x" size=24 />
                     { "Cancel" }

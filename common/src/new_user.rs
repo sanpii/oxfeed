@@ -8,11 +8,3 @@ pub struct Entity {
     pub email: String,
     pub password: String,
 }
-
-impl From<&Entity> for std::result::Result<std::string::String, anyhow::Error> {
-    fn from(entity: &Entity) -> Self {
-        let json = serde_json::to_string(entity)?;
-
-        Ok(json)
-    }
-}

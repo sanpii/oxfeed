@@ -14,7 +14,6 @@ pub(crate) struct Properties {
 }
 
 pub(crate) struct Component {
-    link: yew::ComponentLink<Self>,
     props: Properties,
 }
 
@@ -22,11 +21,13 @@ impl yew::Component for Component {
     type Message = Message;
     type Properties = Properties;
 
-    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        Self { link, props }
+    fn create(ctx: &yew::Context<Self>) -> Self {
+        Self {
+            props: ctx.props().clone(),
+        }
     }
 
-    fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+    fn update(&mut self, _: &yew::Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Message::ToggleFavorite => self.props.on_favorite.emit(()),
             Message::ToggleRead => self.props.on_read.emit(()),
@@ -35,7 +36,7 @@ impl yew::Component for Component {
         true
     }
 
-    fn view(&self) -> yew::Html {
+    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
         let (read_label, eye) = if self.props.read {
             ("Mark as unread", "eye-slash")
         } else {
@@ -50,24 +51,24 @@ impl yew::Component for Component {
 
         if self.props.inline {
             yew::html! {
-                <div class=yew::classes!("actions", "inline")>
-                    <span class="read" onclick=self.link.callback(|_| Message::ToggleRead) title=read_label>
-                        <super::Svg icon=eye size=24 />
+                <div class={ yew::classes!("actions", "inline") }>
+                    <span class="read" onclick={ ctx.link().callback(|_| Message::ToggleRead) } title={ read_label }>
+                        <super::Svg icon={ eye } size=24 />
                     </span>
-                    <span class="favorite" onclick=self.link.callback(|_| Message::ToggleFavorite) title=favorite_label>
-                        <super::Svg icon=star size=24 />
+                    <span class="favorite" onclick={ ctx.link().callback(|_| Message::ToggleFavorite) } title={ favorite_label }>
+                        <super::Svg icon={ star } size=24 />
                     </span>
                 </div>
             }
         } else {
             yew::html! {
                 <div class="actions">
-                    <button class=yew::classes!("btn", "btn-outline-secondary") onclick=self.link.callback(|_| Message::ToggleRead)>
-                        <super::Svg icon=eye size=24 />
+                    <button class={ yew::classes!("btn", "btn-outline-secondary") } onclick={ ctx.link().callback(|_| Message::ToggleRead) }>
+                        <super::Svg icon={ eye } size=24 />
                         { read_label }
                     </button>
-                    <button class=yew::classes!("btn", "btn-outline-warning") onclick=self.link.callback(|_| Message::ToggleFavorite)>
-                        <super::Svg icon=star size=24 />
+                    <button class={ yew::classes!("btn", "btn-outline-warning") } onclick={ ctx.link().callback(|_| Message::ToggleFavorite) }>
+                        <super::Svg icon={ star } size=24 />
                         { favorite_label }
                     </button>
                 </div>

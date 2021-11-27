@@ -14,8 +14,7 @@ enum Scene {
 }
 
 pub(crate) struct Component {
-    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
-    link: yew::ComponentLink<Self>,
+    event_bus: yew_agent::Dispatcher<crate::event::Bus>,
     scene: Scene,
 }
 
@@ -23,17 +22,16 @@ impl yew::Component for Component {
     type Message = Message;
     type Properties = ();
 
-    fn create(_: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        use yew::agent::Dispatched;
+    fn create(_: &yew::Context<Self>) -> Self {
+        use yew_agent::Dispatched;
 
         Self {
             event_bus: crate::event::Bus::dispatcher(),
-            link,
             scene: Scene::Login,
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
         let mut should_render = false;
 
         match msg {
@@ -45,7 +43,7 @@ impl yew::Component for Component {
             Message::UserCreated => {
                 let alert = crate::event::Alert::info("User created");
                 self.event_bus.send(crate::Event::Alert(alert));
-                self.link.send_message(Message::Cancel);
+                ctx.link().send_message(Message::Cancel);
             }
             Message::Create(info) => {
                 let user = oxfeed_common::new_user::Entity {
@@ -54,7 +52,7 @@ impl yew::Component for Component {
                 };
 
                 crate::api!(
-                    self.link,
+                    ctx.link(),
                     user_create(user) -> |_| Message::UserCreated
                 );
             }
@@ -64,7 +62,7 @@ impl yew::Component for Component {
                 let remember_me = &info.remember_me;
 
                 crate::api!(
-                    self.link,
+                    ctx.link(),
                     auth_login(email, password, remember_me) -> |_| Message::Logged
                 );
             }
@@ -78,7 +76,7 @@ impl yew::Component for Component {
         should_render
     }
 
-    fn view(&self) -> yew::Html {
+    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
         match self.scene {
             Scene::Login => yew::html! {
                 <div class="login">
@@ -86,9 +84,9 @@ impl yew::Component for Component {
                         <img class="mb-4" src="/logo" alt="" width="72px" height="72px" />
                         <h1 class="h3 mb-3 fw-normal">{ "Please sign in" }</h1>
                         <super::Alerts />
-                        <super::form::Login on_submit=self.link.callback(Message::Login) />
+                        <super::form::Login on_submit={ ctx.link().callback(Message::Login) } />
                         { "Don't have an account yet?" }
-                        <a href="#" onclick=self.link.callback(|_| Message::Register)>{ "Register now" }</a>
+                        <a href="#" onclick={ ctx.link().callback(|_| Message::Register) }>{ "Register now" }</a>
                     </form>
                 </div>
             },
@@ -98,9 +96,9 @@ impl yew::Component for Component {
                         <img class="mb-4" src="/logo" alt="" width="72px" height="72px" />
                         <h1 class="h3 mb-3 fw-normal">{ "Register" }</h1>
                         <super::Alerts />
-                        <super::form::Register on_submit=self.link.callback(Message::Create) />
+                        <super::form::Register on_submit={ ctx.link().callback(Message::Create) } />
                         { "Already have login and password?" }
-                        <a href="#" onclick=self.link.callback(|_| Message::Cancel)>{ "Log in" }</a>
+                        <a href="#" onclick={ ctx.link().callback(|_| Message::Cancel) }>{ "Log in" }</a>
                     </form>
                 </div>
             },

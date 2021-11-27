@@ -1,4 +1,4 @@
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Default, Eq, PartialEq)]
 pub(crate) struct Filter {
     q: String,
     tag: String,
@@ -32,12 +32,6 @@ impl Filter {
         }
 
         params.join("&")
-    }
-}
-
-impl Default for Filter {
-    fn default() -> Self {
-        Self::new()
     }
 }
 

@@ -1,4 +1,4 @@
-#[derive(Clone, yew::Properties)]
+#[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     pub text: String,
 }
@@ -11,22 +11,20 @@ impl yew::Component for Component {
     type Message = ();
     type Properties = Properties;
 
-    fn create(props: Self::Properties, _: yew::ComponentLink<Self>) -> Self {
-        Self { text: props.text }
+    fn create(context: &yew::Context<Self>) -> Self {
+        Self {
+            text: context.props().text.clone(),
+        }
     }
 
-    fn update(&mut self, _: Self::Message) -> yew::ShouldRender {
-        false
-    }
-
-    fn view(&self) -> yew::Html {
+    fn view(&self, _: &yew::Context<Self>) -> yew::Html {
         yew::html! {
             <span class="help">
                 {" "}
                 <crate::components::Svg icon="exclamation-octagon" size=16 class="text-danger" />
                 <crate::components::Popover
-                    title="Last error".to_string()
-                    text=self.text.clone()
+                    title={ "Last error".to_string() }
+                    text={ self.text.clone() }
                     position="end"
                 />
             </span>

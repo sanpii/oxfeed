@@ -14,7 +14,7 @@ enum Scene {
     View,
 }
 
-#[derive(Clone, yew::Properties)]
+#[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     #[prop_or_default]
     pub filter: crate::Filter,
@@ -23,7 +23,6 @@ pub(crate) struct Properties {
 
 pub(crate) struct Component {
     filter: crate::Filter,
-    link: yew::ComponentLink<Self>,
     scene: Scene,
     pager: Option<crate::Pager<oxfeed_common::source::Entity>>,
     pagination: oxfeed_common::Pagination,
@@ -33,21 +32,22 @@ impl yew::Component for Component {
     type Properties = Properties;
     type Message = Message;
 
-    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+    fn create(ctx: &yew::Context<Self>) -> Self {
+        let props = ctx.props().clone();
+
         let component = Self {
             filter: props.filter,
-            link,
             scene: Scene::View,
             pager: None,
             pagination: props.pagination,
         };
 
-        component.link.send_message(Message::NeedUpdate);
+        ctx.link().send_message(Message::NeedUpdate);
 
         component
     }
 
-    fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
         let mut should_render = false;
 
         match &self.scene {
@@ -68,7 +68,7 @@ impl yew::Component for Component {
                     should_render = true;
                 }
                 Message::Create(ref source) => crate::api!(
-                    self.link,
+                    ctx.link(),
                     sources_create(source) -> |_| Message::NeedUpdate
                 ),
                 _ => (),
@@ -77,8 +77,8 @@ impl yew::Component for Component {
 
         if let Message::PageChange(page) = msg {
             self.pagination.page = page;
-            yew::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
-            self.link.send_message(Message::NeedUpdate);
+            gloo::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
+            ctx.link().send_message(Message::NeedUpdate);
         } else if matches!(msg, Message::NeedUpdate) {
             self.scene = Scene::View;
             let pagination = &self.pagination;
@@ -86,12 +86,12 @@ impl yew::Component for Component {
 
             if filter.is_empty() {
                 crate::api!(
-                    self.link,
+                    ctx.link(),
                     sources_all(pagination) -> Message::Update
                 );
             } else {
                 crate::api!(
-                    self.link,
+                    ctx.link(),
                     sources_search(filter, pagination) -> Message::Update
                 );
             }
@@ -100,13 +100,13 @@ impl yew::Component for Component {
         should_render
     }
 
-    fn view(&self) -> yew::Html {
+    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
         let add = match &self.scene {
             Scene::View => yew::html! {
                 <a
-                    class=yew::classes!("btn", "btn-primary")
+                    class={ yew::classes!("btn", "btn-primary") }
                     title="Add"
-                    onclick=self.link.callback(|_| Message::Add)
+                    onclick={ ctx.link().callback(|_| Message::Add) }
                 >
                     <super::Svg icon="plus" size=24 />
                     { "Add" }
@@ -116,9 +116,9 @@ impl yew::Component for Component {
                 <ul class="list-group">
                     <li class="list-group-item">
                         <super::form::Source
-                            source=oxfeed_common::source::Entity::default()
-                            on_cancel=self.link.callback(|_| Message::Cancel)
-                            on_submit=self.link.callback(Message::Create)
+                            source={ oxfeed_common::source::Entity::default() }
+                            on_cancel={ ctx.link().callback(|_| Message::Cancel) }
+                            on_submit={ ctx.link().callback(Message::Create) }
                         />
                     </li>
                 </ul>
@@ -138,18 +138,20 @@ impl yew::Component for Component {
             <>
                 { add }
                 <super::List<oxfeed_common::source::Entity>
-                    value=pager.clone()
-                    on_page_change=self.link.callback(Message::PageChange)
+                    value={ pager.clone() }
+                    on_page_change={ ctx.link().callback(Message::PageChange) }
                 />
             </>
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
+    fn changed(&mut self, ctx: &yew::Context<Self>) -> bool {
+        let props = ctx.props().clone();
+
         let should_render = self.pagination != props.pagination || self.filter != props.filter;
 
         if should_render {
-            self.link.send_message(Message::NeedUpdate);
+            ctx.link().send_message(Message::NeedUpdate);
         }
 
         self.pagination = props.pagination;

@@ -7,7 +7,7 @@ pub(crate) enum Message {
     Update(oxfeed_common::Counts),
 }
 
-#[derive(Clone, yew::Properties)]
+#[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     pub current_route: super::app::Route,
 }
@@ -59,17 +59,25 @@ impl Links {
         Self(links)
     }
 
-    fn with_search(search_route: &super::app::Route) -> Self {
-        let mut links = Self::new();
+    fn add_search(&mut self, search_route: &super::app::Route) {
+        if !self.has_search() {
+            self.0.push(Link {
+                count: 0,
+                icon: "search",
+                label: "Search",
+                route: search_route.clone(),
+            });
+        }
+    }
 
-        links.push(Link {
-            count: 0,
-            icon: "search",
-            label: "Search",
-            route: search_route.clone(),
-        });
+    fn remove_search(&mut self) {
+        if self.has_search() {
+            self.0.pop();
+        }
+    }
 
-        links
+    fn has_search(&self) -> bool {
+        self.0.len() != Self::new().0.len()
     }
 
     fn update_count(&mut self, counts: &oxfeed_common::Counts) {
@@ -109,53 +117,54 @@ struct Link {
 
 pub(crate) struct Component {
     current_route: super::app::Route,
-    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
-    link: yew::ComponentLink<Self>,
+    event_bus: yew_agent::Dispatcher<crate::event::Bus>,
     links: Links,
-    _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
+    _producer: Box<dyn yew_agent::Bridge<crate::event::Bus>>,
 }
 
 impl yew::Component for Component {
     type Message = Message;
     type Properties = Properties;
 
-    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        use yew::agent::{Bridged, Dispatched};
+    fn create(ctx: &yew::Context<Self>) -> Self {
+        use yew_agent::{Bridged, Dispatched};
 
-        let callback = link.callback(Message::Event);
-
-        let links = if let super::app::Route::Search(_) = props.current_route {
-            Links::with_search(&props.current_route)
-        } else {
-            Links::new()
-        };
+        let callback = ctx.link().callback(Message::Event);
 
         let component = Self {
-            current_route: props.current_route,
+            current_route: ctx.props().current_route.clone(),
             event_bus: crate::event::Bus::dispatcher(),
-            link,
-            links,
+            links: Links::new(),
             _producer: crate::event::Bus::bridge(callback),
         };
 
-        component.link.callback(|_| Message::NeedUpdate).emit(());
+        ctx.link().callback(|_| Message::NeedUpdate).emit(());
 
         component
     }
 
-    fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
         let mut should_render = false;
 
         match msg {
             Message::Event(event) => match event {
                 crate::Event::ItemUpdate
                 | crate::Event::SettingUpdate
-                | crate::Event::SourceUpdate => self.link.send_message(Message::NeedUpdate),
+                | crate::Event::SourceUpdate => ctx.link().send_message(Message::NeedUpdate),
+                crate::Event::Redirected(route) => {
+                    if route.starts_with("/search") {
+                        self.links.add_search(&ctx.props().current_route);
+                    } else {
+                        self.links.remove_search();
+                    }
+
+                    should_render = true;
+                },
                 _ => (),
             },
             Message::Error(_) => (),
             Message::NeedUpdate => crate::api!(
-                self.link,
+                ctx.link(),
                 counts() -> Message::Update
             ),
             Message::Update(counts) => {
@@ -164,7 +173,7 @@ impl yew::Component for Component {
             }
             Message::ReadAll => {
                 crate::api!(
-                    self.link,
+                    ctx.link(),
                     items_read() -> |_| Message::NeedUpdate
                 );
 
@@ -175,45 +184,45 @@ impl yew::Component for Component {
         should_render
     }
 
-    fn view(&self) -> yew::Html {
+    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
         let favicon = if self.links.has_unread() {
             "/favicon.ico"
         } else {
             "/favicon-unread.ico"
         };
 
-        if let Ok(Some(element)) = yew::utils::document().query_selector("link[rel=icon]") {
+        if let Ok(Some(element)) = gloo::utils::document().query_selector("link[rel=icon]") {
             element.set_attribute("href", favicon).ok();
         }
 
         yew::html! {
             <>
                 <button
-                    class=yew::classes!("btn", "btn-primary")
-                    onclick=self.link.callback(|_| Message::ReadAll)
+                    class={ yew::classes!("btn", "btn-primary") }
+                    onclick={ ctx.link().callback(|_| Message::ReadAll) }
                 >{ "Mark all as read" }</button>
                 <ul class="nav flex-column">
                 {
                     for self.links.iter().map(move |link| yew::html! {
                         <li class="nav-item">
-                            <yew_router::components::RouterAnchor<super::app::Route>
-                                route=link.route.clone()
-                                classes=if link.route == self.current_route { "nav-link active" } else { "nav-link" }
+                            <yew_router::components::Link<super::app::Route>
+                                to={ link.route.clone() }
+                                classes={ if link.route == self.current_route { "nav-link active" } else { "nav-link" } }
                             >
-                                <super::Svg icon=link.icon size=16 />
+                                <super::Svg icon={ link.icon } size=16 />
                                 { link.label }
                                 {
                                     if link.count > 0 {
                                         yew::html! {
                                             <span
-                                                class=if link.route == self.current_route { "badge bg-primary" } else { "badge bg-secondary" }
+                                                class={ if link.route == self.current_route { "badge bg-primary" } else { "badge bg-secondary" } }
                                             >{ link.count }</span>
                                         }
                                     } else {
                                         "".into()
                                     }
                                 }
-                            </yew_router::components::RouterAnchor<super::app::Route>>
+                            </yew_router::components::Link<super::app::Route>>
                         </li>
                     })
                 }

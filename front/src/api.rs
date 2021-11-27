@@ -1,5 +1,5 @@
 use reqwest::Method;
-use yew::agent::Dispatched;
+use yew_agent::Dispatched;
 
 pub(crate) struct Api;
 
@@ -26,7 +26,7 @@ impl Api {
     }
 
     pub async fn counts() -> oxfeed_common::Result<oxfeed_common::Counts> {
-        Self::fetch(Method::GET, "/counts", yew::format::Nothing).await
+        Self::fetch(Method::GET, "/counts", ()).await
     }
 
     pub async fn auth_login(
@@ -45,8 +45,7 @@ impl Api {
 
         let token = claims.sign_with_key(&key).unwrap();
 
-        let data: String =
-            Self::fetch(Method::POST, "/auth/login", yew::format::Json(&token)).await?;
+        let data: String = Self::fetch(Method::POST, "/auth/login", token).await?;
 
         Self::set_token(&data, *remember_me);
 
@@ -54,7 +53,7 @@ impl Api {
     }
 
     pub async fn auth_logout() -> oxfeed_common::Result {
-        Self::fetch(Method::POST, "/auth/logout", yew::format::Nothing).await?;
+        Self::fetch(Method::POST, "/auth/logout", ()).await?;
 
         Self::clear_token();
 
@@ -73,17 +72,17 @@ impl Api {
 
         let url = format!("/items/{}?{}", kind, pagination.to_query());
 
-        Self::fetch(Method::GET, &url, yew::format::Nothing).await
+        Self::fetch(Method::GET, &url, ()).await
     }
 
     pub async fn items_content(id: &uuid::Uuid) -> oxfeed_common::Result<String> {
         let url = format!("/items/{}/content", id);
 
-        Self::fetch(Method::GET, &url, yew::format::Nothing).await
+        Self::fetch(Method::GET, &url, ()).await
     }
 
     pub async fn items_read() -> oxfeed_common::Result {
-        Self::fetch(Method::POST, "/items/read", yew::format::Nothing).await
+        Self::fetch(Method::POST, "/items/read", ()).await
     }
 
     pub async fn items_tag(id: &uuid::Uuid, key: &str, value: &bool) -> oxfeed_common::Result {
@@ -93,7 +92,7 @@ impl Api {
             key: *value,
         });
 
-        Self::fetch(Method::PATCH, &url, yew::format::Json(&json)).await
+        Self::fetch(Method::PATCH, &url, Body::Json(json)).await
     }
 
     pub async fn items_search(
@@ -108,12 +107,10 @@ impl Api {
             pagination.to_query()
         );
 
-        Self::fetch(Method::GET, &url, yew::format::Nothing).await
+        Self::fetch(Method::GET, &url, ()).await
     }
 
-    pub async fn opml_import(
-        opml: Result<std::string::String, anyhow::Error>,
-    ) -> oxfeed_common::Result {
+    pub async fn opml_import(opml: String) -> oxfeed_common::Result {
         Self::fetch(Method::POST, "/opml", opml).await
     }
 
@@ -122,7 +119,7 @@ impl Api {
     ) -> oxfeed_common::Result<crate::Pager<oxfeed_common::source::Entity>> {
         let url = format!("/sources?{}", pagination.to_query());
 
-        Self::fetch(Method::GET, &url, yew::format::Nothing).await
+        Self::fetch(Method::GET, &url, ()).await
     }
 
     pub async fn sources_create(
@@ -141,12 +138,7 @@ impl Api {
     pub async fn sources_delete(
         id: &uuid::Uuid,
     ) -> oxfeed_common::Result<oxfeed_common::source::Entity> {
-        Self::fetch(
-            Method::DELETE,
-            &format!("/sources/{}", id),
-            yew::format::Nothing,
-        )
-        .await
+        Self::fetch(Method::DELETE, &format!("/sources/{}", id), ()).await
     }
 
     pub async fn sources_search(
@@ -159,7 +151,7 @@ impl Api {
             pagination.to_query()
         );
 
-        Self::fetch(Method::GET, &url, yew::format::Nothing).await
+        Self::fetch(Method::GET, &url, ()).await
     }
 
     pub async fn tags_all(
@@ -167,7 +159,7 @@ impl Api {
     ) -> oxfeed_common::Result<Vec<oxfeed_common::Tag>> {
         let url = format!("/tags?{}", pagination.to_query());
 
-        Self::fetch(Method::GET, &url, yew::format::Nothing).await
+        Self::fetch(Method::GET, &url, ()).await
     }
 
     pub async fn tags_search(
@@ -180,7 +172,7 @@ impl Api {
             pagination.to_query()
         );
 
-        Self::fetch(Method::GET, &url, yew::format::Nothing).await
+        Self::fetch(Method::GET, &url, ()).await
     }
 
     pub async fn user_create(user: &oxfeed_common::new_user::Entity) -> oxfeed_common::Result {
@@ -188,7 +180,7 @@ impl Api {
     }
 
     pub async fn webhooks_all() -> oxfeed_common::Result<Vec<oxfeed_common::webhook::Entity>> {
-        Self::fetch(Method::GET, "/webhooks", yew::format::Nothing).await
+        Self::fetch(Method::GET, "/webhooks", ()).await
     }
 
     pub async fn webhooks_create(
@@ -207,17 +199,12 @@ impl Api {
     pub async fn webhooks_delete(
         id: &uuid::Uuid,
     ) -> oxfeed_common::Result<oxfeed_common::webhook::Entity> {
-        Self::fetch(
-            Method::DELETE,
-            &format!("/webhooks/{}", id),
-            yew::format::Nothing,
-        )
-        .await
+        Self::fetch(Method::DELETE, &format!("/webhooks/{}", id), ()).await
     }
 
     async fn fetch<B, R>(method: Method, url: &str, body: B) -> oxfeed_common::Result<R>
     where
-        B: Into<Result<String, anyhow::Error>>,
+        B: Into<Body>,
         R: serde::de::DeserializeOwned,
     {
         let result = Self::try_fetch(method, url, body).await;
@@ -233,16 +220,15 @@ impl Api {
 
     async fn try_fetch<B, R>(method: Method, url: &str, body: B) -> oxfeed_common::Result<R>
     where
-        B: Into<Result<String, anyhow::Error>>,
+        B: Into<Body>,
         R: serde::de::DeserializeOwned,
     {
-        let body: String = body.into().unwrap_or_default();
         let client = reqwest::Client::new();
         let response = client
             .request(method, &format!("{}{}", env!("API_URL"), url))
             .header("Content-Type", "application/json")
             .header("Authorization", &format!("Bearer {}", Self::token()))
-            .body(body)
+            .body(body.into().to_string())
             .send()
             .await?;
 
@@ -268,5 +254,49 @@ impl Api {
                 Ok(data)
             }
         }
+    }
+}
+
+pub enum Body {
+    Empty,
+    Json(serde_json::Value),
+}
+
+impl ToString for Body {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Empty => String::new(),
+            Self::Json(json) => json.to_string(),
+        }
+    }
+}
+
+impl From<String> for Body {
+    fn from(s: String) -> Self {
+        Self::Json(serde_json::Value::String(s))
+    }
+}
+
+impl From<()> for Body {
+    fn from(_: ()) -> Self {
+        Self::Empty
+    }
+}
+
+impl From<&oxfeed_common::new_user::Entity> for Body {
+    fn from(entity: &oxfeed_common::new_user::Entity) -> Self {
+        Body::Json(serde_json::to_value(entity).unwrap())
+    }
+}
+
+impl From<&oxfeed_common::source::Entity> for Body {
+    fn from(entity: &oxfeed_common::source::Entity) -> Self {
+        Body::Json(serde_json::to_value(entity).unwrap())
+    }
+}
+
+impl From<&oxfeed_common::webhook::Entity> for Body {
+    fn from(entity: &oxfeed_common::webhook::Entity) -> Self {
+        Body::Json(serde_json::to_value(entity).unwrap())
     }
 }

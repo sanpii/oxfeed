@@ -2,7 +2,7 @@ pub(crate) enum Message {
     Toggle,
 }
 
-#[derive(Clone, yew::Properties)]
+#[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     pub id: String,
     #[prop_or_default]
@@ -14,7 +14,6 @@ pub(crate) struct Properties {
 }
 
 pub(crate) struct Component {
-    link: yew::ComponentLink<Self>,
     props: Properties,
 }
 
@@ -22,11 +21,13 @@ impl yew::Component for Component {
     type Message = Message;
     type Properties = Properties;
 
-    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        Self { link, props }
+    fn create(context: &yew::Context<Self>) -> Self {
+        Self {
+            props: context.props().clone(),
+        }
     }
 
-    fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+    fn update(&mut self, _: &yew::Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Message::Toggle => {
                 self.props.active = !self.props.active;
@@ -37,17 +38,17 @@ impl yew::Component for Component {
         true
     }
 
-    fn view(&self) -> yew::Html {
+    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
         yew::html! {
-            <div class=yew::classes!("form-check", "form-switch")>
+            <div class={ yew::classes!("form-check", "form-switch") }>
                 <input
-                    id=self.props.id.clone()
+                    id={ self.props.id.clone() }
                     type="checkbox"
                     class="form-check-input"
-                    checked=self.props.active
-                    onclick=self.link.callback(|_| Message::Toggle)
+                    checked={ self.props.active }
+                    onclick={ ctx.link().callback(|_| Message::Toggle )}
                 />
-                <label class="form-check-label" for=self.props.id.clone()>{ &self.props.label }</label>
+                <label class="form-check-label" for={ self.props.id.clone() }>{ &self.props.label }</label>
             </div>
         }
     }

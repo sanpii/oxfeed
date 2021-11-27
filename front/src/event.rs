@@ -63,17 +63,17 @@ impl Alert {
 }
 
 pub(crate) struct Bus {
-    link: yew::agent::AgentLink<Self>,
-    subscribers: HashSet<yew::agent::HandlerId>,
+    link: yew_agent::AgentLink<Self>,
+    subscribers: HashSet<yew_agent::HandlerId>,
 }
 
-impl yew::agent::Agent for Bus {
-    type Reach = yew::worker::Context<Self>;
+impl yew_agent::Agent for Bus {
+    type Reach = yew_agent::Context<Self>;
     type Message = ();
     type Input = Event;
     type Output = Event;
 
-    fn create(link: yew::agent::AgentLink<Self>) -> Self {
+    fn create(link: yew_agent::AgentLink<Self>) -> Self {
         Self {
             link,
             subscribers: HashSet::new(),
@@ -82,17 +82,17 @@ impl yew::agent::Agent for Bus {
 
     fn update(&mut self, _: Self::Message) {}
 
-    fn handle_input(&mut self, msg: Self::Input, _: yew::agent::HandlerId) {
+    fn handle_input(&mut self, msg: Self::Input, _: yew_agent::HandlerId) {
         for sub in self.subscribers.iter() {
             self.link.respond(*sub, msg.clone());
         }
     }
 
-    fn connected(&mut self, id: yew::agent::HandlerId) {
+    fn connected(&mut self, id: yew_agent::HandlerId) {
         self.subscribers.insert(id);
     }
 
-    fn disconnected(&mut self, id: yew::agent::HandlerId) {
+    fn disconnected(&mut self, id: yew_agent::HandlerId) {
         self.subscribers.remove(&id);
     }
 }

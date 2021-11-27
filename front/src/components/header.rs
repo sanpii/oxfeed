@@ -4,49 +4,47 @@ pub(crate) enum Message {
     Loggedout,
 }
 
-#[derive(Clone, yew::Properties)]
+#[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     pub current_route: super::app::Route,
 }
 
 pub(crate) struct Component {
     current_route: super::app::Route,
-    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
-    link: yew::ComponentLink<Self>,
+    event_bus: yew_agent::Dispatcher<crate::event::Bus>,
 }
 
 impl yew::Component for Component {
     type Message = Message;
     type Properties = Properties;
 
-    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        use yew::agent::Dispatched;
+    fn create(ctx: &yew::Context<Self>) -> Self {
+        use yew_agent::Dispatched;
 
         Self {
-            current_route: props.current_route,
+            current_route: ctx.props().current_route.clone(),
             event_bus: crate::event::Bus::dispatcher(),
-            link,
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Message::Error(_) => (),
             Message::Logout => crate::api!(
-                self.link,
+                ctx.link(),
                 auth_logout() -> |_| Message::Loggedout
             ),
             Message::Loggedout => {
                 let alert = crate::event::Alert::info("Logged out");
                 self.event_bus.send(crate::Event::Alert(alert));
-                crate::Location::new().reload();
+                self.event_bus.send(crate::Event::Redirect("/".to_string()));
             }
         }
 
         false
     }
 
-    fn view(&self) -> yew::Html {
+    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
         let filter = crate::Filter::new();
 
         yew::html! {
@@ -55,11 +53,11 @@ impl yew::Component for Component {
                 <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <super::search::Bar current_route=self.current_route.clone() filter=filter />
+                <super::search::Bar current_route={ self.current_route.clone() } filter={ filter } />
                 <button
-                    class=yew::classes!("btn", "btn-secondary", "logout")
+                    class={ yew::classes!("btn", "btn-secondary", "logout") }
                     title="Logout"
-                    onclick=self.link.callback(|_| Message::Logout)
+                    onclick={ ctx.link().callback(|_| Message::Logout) }
                 >
                     <super::Svg icon="door-closed" size=24 />
                 </button>

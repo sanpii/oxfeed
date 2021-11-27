@@ -14,34 +14,32 @@ enum Scene {
 }
 
 pub(crate) struct Component {
-    link: yew::ComponentLink<Self>,
     scene: Scene,
     webhooks: Vec<oxfeed_common::webhook::Entity>,
-    _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
+    _producer: Box<dyn yew_agent::Bridge<crate::event::Bus>>,
 }
 
 impl yew::Component for Component {
     type Message = Message;
     type Properties = ();
 
-    fn create(_: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        use yew::agent::Bridged;
+    fn create(ctx: &yew::Context<Self>) -> Self {
+        use yew_agent::Bridged;
 
-        let callback = link.callback(Message::Event);
+        let callback = ctx.link().callback(Message::Event);
 
         let component = Self {
-            link,
             scene: Scene::View,
             webhooks: Vec::new(),
             _producer: crate::event::Bus::bridge(callback),
         };
 
-        component.link.send_message(Message::NeedUpdate);
+        ctx.link().send_message(Message::NeedUpdate);
 
         component
     }
 
-    fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
         let mut should_render = true;
 
         match &self.scene {
@@ -53,7 +51,7 @@ impl yew::Component for Component {
             Scene::Add => match msg {
                 Message::Cancel => self.scene = Scene::View,
                 Message::Create(ref webhook) => crate::api!(
-                    self.link,
+                    ctx.link(),
                     webhooks_create(webhook) -> |_| Message::Event(crate::Event::WebhookUpdate)
                 ),
                 _ => (),
@@ -62,13 +60,13 @@ impl yew::Component for Component {
 
         if let Message::Event(ref event) = msg {
             if matches!(event, crate::Event::WebhookUpdate) {
-                self.link.send_message(Message::NeedUpdate);
+                ctx.link().send_message(Message::NeedUpdate);
             }
         } else if matches!(msg, Message::NeedUpdate) {
             self.scene = Scene::View;
 
             crate::api!(
-                self.link,
+                ctx.link(),
                 webhooks_all() -> Message::Update
             );
 
@@ -78,7 +76,7 @@ impl yew::Component for Component {
         should_render
     }
 
-    fn view(&self) -> yew::Html {
+    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
         use crate::Render;
 
         yew::html! {
@@ -87,9 +85,9 @@ impl yew::Component for Component {
                 if matches!(self.scene, Scene::View) {
                     yew::html! {
                         <a
-                            class=yew::classes!("btn", "btn-primary")
+                            class={ yew::classes!("btn", "btn-primary") }
                             title="Add"
-                            onclick=self.link.callback(|_| Message::Add)
+                            onclick={ ctx.link().callback(|_| Message::Add) }
                         >
                             <crate::components::Svg icon="plus" size=24 />
                             { "Add" }
@@ -105,9 +103,9 @@ impl yew::Component for Component {
                     yew::html! {
                         <li class="list-group-item">
                             <crate::components::form::Webhook
-                                webhook=oxfeed_common::webhook::Entity::default()
-                                on_cancel=self.link.callback(|_| Message::Cancel)
-                                on_submit=self.link.callback(Message::Create)
+                                webhook={ oxfeed_common::webhook::Entity::default() }
+                                on_cancel={ ctx.link().callback(|_| Message::Cancel) }
+                                on_submit={ ctx.link().callback(Message::Create) }
                             />
                         </li>
                     }

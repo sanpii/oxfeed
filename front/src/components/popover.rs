@@ -14,23 +14,21 @@ impl yew::Component for Component {
     type Message = ();
     type Properties = Properties;
 
-    fn create(props: Self::Properties, _: yew::ComponentLink<Self>) -> Self {
-        Self { props }
+    fn create(context: &yew::Context<Self>) -> Self {
+        Self {
+            props: context.props().clone(),
+        }
     }
 
-    fn update(&mut self, _: Self::Message) -> yew::ShouldRender {
-        false
-    }
-
-    fn view(&self) -> yew::Html {
+    fn view(&self, _: &yew::Context<Self>) -> yew::Html {
         let position_class = format!("bs-popover-{}", self.props.position);
 
-        let span = yew::utils::document().create_element("span").unwrap();
+        let span = gloo::utils::document().create_element("span").unwrap();
         span.set_inner_html(&self.props.text);
         let node = yew::virtual_dom::VNode::VRef(span.into());
 
         yew::html! {
-            <div class=yew::classes!("popover", position_class)>
+            <div class={ yew::classes!("popover", position_class) }>
                 {
                     if let Some(title) = &self.props.title {
                         yew::html! {

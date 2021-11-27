@@ -7,7 +7,7 @@ pub(crate) enum Message {
     Update(crate::Pager<oxfeed_common::item::Item>),
 }
 
-#[derive(Clone, yew::Properties)]
+#[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     #[prop_or_default]
     pub filter: crate::Filter,
@@ -18,49 +18,48 @@ pub(crate) struct Properties {
 pub(crate) struct Component {
     kind: String,
     filter: crate::Filter,
-    link: yew::ComponentLink<Self>,
     pager: Option<crate::Pager<oxfeed_common::item::Item>>,
     pagination: oxfeed_common::Pagination,
-    _producer: Box<dyn yew::agent::Bridge<crate::event::Bus>>,
+    _producer: Box<dyn yew_agent::Bridge<crate::event::Bus>>,
 }
 
 impl yew::Component for Component {
     type Message = Message;
     type Properties = Properties;
 
-    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        use yew::Bridged;
+    fn create(ctx: &yew::Context<Self>) -> Self {
+        use yew_agent::Bridged;
 
-        let callback = link.callback(Message::Event);
+        let props = ctx.props().clone();
+        let callback = ctx.link().callback(Message::Event);
 
         let component = Self {
             kind: props.kind,
             filter: props.filter,
-            link,
             pager: None,
             pagination: props.pagination,
             _producer: crate::event::Bus::bridge(callback),
         };
 
-        component.link.send_message(Message::NeedUpdate);
+        ctx.link().send_message(Message::NeedUpdate);
 
         component
     }
 
-    fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
         let mut should_render = false;
 
         match msg {
             Message::Error(_) => (),
             Message::Event(event) => {
                 if matches!(event, crate::Event::ItemUpdate) {
-                    self.link.send_message(Message::NeedUpdate);
+                    ctx.link().send_message(Message::NeedUpdate);
                 }
             }
             Message::PageChange(page) => {
                 self.pagination.page = page;
-                yew::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
-                self.link.send_message(Message::NeedUpdate);
+                gloo::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
+                ctx.link().send_message(Message::NeedUpdate);
             }
             Message::NeedUpdate => {
                 let filter = &self.filter;
@@ -69,12 +68,12 @@ impl yew::Component for Component {
 
                 if filter.is_empty() {
                     crate::api!(
-                        self.link,
+                        ctx.link(),
                         items_all(kind, pagination) -> Message::Update
                     );
                 } else {
                     crate::api!(
-                        self.link,
+                        ctx.link(),
                         items_search(kind, filter, pagination) -> Message::Update
                     );
                 }
@@ -88,7 +87,7 @@ impl yew::Component for Component {
         should_render
     }
 
-    fn view(&self) -> yew::Html {
+    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
         let pager = match &self.pager {
             Some(pager) => pager,
             None => {
@@ -100,19 +99,21 @@ impl yew::Component for Component {
 
         yew::html! {
             <super::List<oxfeed_common::item::Item>
-                value=pager.clone()
-                on_page_change=self.link.callback(Message::PageChange)
+                value={ pager.clone() }
+                on_page_change={ ctx.link().callback(Message::PageChange) }
             />
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
+    fn changed(&mut self, ctx: &yew::Context<Self>) -> bool {
+        let props = ctx.props().clone();
+
         let should_render = self.kind != props.kind
             || self.filter != props.filter
             || self.pagination != props.pagination;
 
         if should_render {
-            self.link.send_message(Message::NeedUpdate);
+            ctx.link().send_message(Message::NeedUpdate);
         }
 
         self.kind = props.kind;

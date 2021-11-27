@@ -47,19 +47,15 @@ impl yew::Component for App {
     type Message = ();
     type Properties = ();
 
-    fn create(_: Self::Properties, _: yew::ComponentLink<Self>) -> Self {
+    fn create(_: &yew::Context<Self>) -> Self {
         Self
     }
 
-    fn update(&mut self, _: Self::Message) -> yew::ShouldRender {
+    fn update(&mut self, _: &yew::Context<Self>, _: Self::Message) -> bool {
         false
     }
 
-    fn change(&mut self, _: Self::Properties) -> yew::ShouldRender {
-        false
-    }
-
-    fn view(&self) -> yew::Html {
+    fn view(&self, _: &yew::Context<Self>) -> yew::Html {
         yew::html! {
             <components::App />
         }
@@ -68,43 +64,45 @@ impl yew::Component for App {
 
 fn main() {
     wasm_logger::init(wasm_logger::Config::new(log::Level::Debug));
-    yew::initialize();
-    yew::App::<App>::new().mount_to_body();
+
+    yew::start_app::<App>();
 }
 
 #[macro_export]
 macro_rules! change {
     () => {
-        fn change(&mut self, _: Self::Properties) -> yew::ShouldRender {
+        fn changed(&mut self, _: &yew::Context<Self>) -> bool {
             false
         }
     };
 
     (props) => {
-        fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-            let should_render = self.props != props;
+        fn changed(&mut self, ctx: &yew::Context<Self>) -> bool {
+            let should_render = &self.props != ctx.props();
 
-            self.props = props;
+            self.props = ctx.props().clone();
 
             should_render
         }
     };
 
     ($(props.$prop: ident),+) => {
-        fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
+        fn changed(&mut self, ctx: &yew::Context<Self>) -> bool {
             let should_render = false
                 $(
-                    || self.props.$prop != props.$prop
+                    || self.props.$prop != ctx.props().$prop
                 )*;
 
-            self.props = props;
+            self.props = ctx.props().clone();
 
             should_render
         }
     };
 
     ($($prop: ident),+) => {
-        fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
+        fn changed(&mut self, ctx: &yew::Context<Self>) -> bool {
+            let props = ctx.props().clone();
+
             let should_render = false
                 $(
                     || self.$prop != props.$prop
@@ -122,8 +120,6 @@ macro_rules! change {
 #[macro_export]
 macro_rules! api {
     ($link:expr, $api:ident ( $($args:ident),* ) -> $fn:expr) => {{
-        use yewtil::future::LinkFuture;
-
         $( let $args = $args.clone(); )*
 
         $link.send_future(async move {

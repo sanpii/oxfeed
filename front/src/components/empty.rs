@@ -4,15 +4,11 @@ impl yew::Component for Component {
     type Message = ();
     type Properties = ();
 
-    fn create(_: Self::Properties, _: yew::ComponentLink<Self>) -> Self {
+    fn create(_: &yew::Context<Self>) -> Self {
         Self
     }
 
-    fn update(&mut self, _: Self::Message) -> yew::ShouldRender {
-        false
-    }
-
-    fn view(&self) -> yew::Html {
+    fn view(&self, _: &yew::Context<Self>) -> yew::Html {
         let contents = [
             ("book", "You really want to read something? Take a book!"),
             (
@@ -30,7 +26,7 @@ impl yew::Component for Component {
 
         yew::html! {
             <div class="full-page">
-                <super::Svg icon=contents[choice].0 size=256 />
+                <super::Svg icon={ contents[choice].0 } size=256 />
                 <h2>{ contents[choice].1 }</h2>
             </div>
         }

@@ -18,7 +18,6 @@ pub(crate) struct Properties {
 }
 
 pub(crate) struct Component {
-    link: yew::ComponentLink<Self>,
     props: Properties,
     webhooks: Vec<oxfeed_common::webhook::Entity>,
 }
@@ -27,22 +26,21 @@ impl yew::Component for Component {
     type Message = Message;
     type Properties = Properties;
 
-    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+    fn create(ctx: &yew::Context<Self>) -> Self {
         let component = Self {
-            link,
-            props,
+            props: ctx.props().clone(),
             webhooks: Vec::new(),
         };
 
         crate::api!(
-            component.link,
+            ctx.link(),
             webhooks_all() -> Message::Webhooks
         );
 
         component
     }
 
-    fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+    fn update(&mut self, _: &yew::Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Message::Cancel => self.props.on_cancel.emit(()),
             Message::Error(_) => (),
@@ -66,7 +64,9 @@ impl yew::Component for Component {
         true
     }
 
-    fn view(&self) -> yew::Html {
+    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
+        use yew::TargetCast;
+
         yew::html! {
             <form>
                 <div class="row mb-3">
@@ -75,8 +75,11 @@ impl yew::Component for Component {
                         <input
                             class="form-control"
                             name="title"
-                            value=self.props.source.title.clone()
-                            oninput=self.link.callback(|e: yew::InputData| Message::UpdateTitle(e.value))
+                            value={ self.props.source.title.clone() }
+                            oninput={ ctx.link().callback(|e: yew::InputEvent| {
+                                let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
+                                Message::UpdateTitle(input.value())
+                            }) }
                         />
                         <small class="form-text text-muted">{ "Leave empty to use the feed title." }</small>
                     </div>
@@ -89,8 +92,11 @@ impl yew::Component for Component {
                             class="form-control"
                             name="url"
                             required=true
-                            value=self.props.source.url.clone()
-                            oninput=self.link.callback(|e: yew::InputData| Message::UpdateUrl(e.value))
+                            value={ self.props.source.url.clone() }
+                            oninput={ ctx.link().callback(|e: yew::InputEvent| {
+                                let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
+                                Message::UpdateUrl(input.value())
+                            }) }
                         />
                     </div>
                 </div>
@@ -99,8 +105,8 @@ impl yew::Component for Component {
                     <label class="col-sm-1 col-form-label" for="tags">{ "Tags" }</label>
                     <div class="col-sm-11">
                         <super::Tags
-                            values=self.props.source.tags.clone()
-                            on_change=self.link.callback(Message::UpdateTags)
+                            values={ self.props.source.tags.clone() }
+                            on_change={ ctx.link().callback(Message::UpdateTags) }
                         />
                     </div>
                 </div>
@@ -109,8 +115,8 @@ impl yew::Component for Component {
                     <div class="col-sm-11 offset-sm-1">
                         <crate::components::Switch
                             id="active"
-                            active=self.props.source.active
-                            on_toggle=self.link.callback(Message::ToggleActive)
+                            active={ self.props.source.active }
+                            on_toggle={ ctx.link().callback(Message::ToggleActive) }
                             label="active"
                         />
                     </div>
@@ -129,10 +135,10 @@ impl yew::Component for Component {
 
                                         yew::html! {
                                             <crate::components::Switch
-                                                id=id.to_string()
-                                                label=webhook.name.clone()
-                                                active=active
-                                                on_toggle=self.link.callback(move |active| Message::ToggleWebhook(id, active))
+                                                id={ id.to_string() }
+                                                label={ webhook.name.clone() }
+                                                active={ active }
+                                                on_toggle={ ctx.link().callback(move |active| Message::ToggleWebhook(id, active)) }
                                             />
                                         }
                                     })
@@ -146,18 +152,18 @@ impl yew::Component for Component {
                 }
 
                 <a
-                    class=yew::classes!("btn", "btn-primary")
+                    class={ yew::classes!("btn", "btn-primary") }
                     title="Save"
-                    onclick=self.link.callback(|_| Message::Submit)
+                    onclick={ ctx.link().callback(|_| Message::Submit) }
                 >
                     <crate::components::Svg icon="check" size=24 />
                     { "Save" }
                 </a>
 
                 <a
-                    class=yew::classes!("btn", "btn-secondary")
+                    class={ yew::classes!("btn", "btn-secondary") }
                     title="Cancel"
-                    onclick=self.link.callback(|_| Message::Cancel)
+                    onclick={ ctx.link().callback(|_| Message::Cancel) }
                 >
                     <crate::components::Svg icon="x" size=24 />
                     { "Cancel" }

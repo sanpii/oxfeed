@@ -14,7 +14,6 @@ pub(crate) struct Properties {
 
 pub(crate) struct Component {
     icon: String,
-    link: yew::ComponentLink<Self>,
     on_click: yew::Callback<()>,
     size: u32,
     class: String,
@@ -24,17 +23,18 @@ impl yew::Component for Component {
     type Message = Message;
     type Properties = Properties;
 
-    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+    fn create(ctx: &yew::Context<Self>) -> Self {
+        let props = ctx.props().clone();
+
         Self {
             icon: props.icon,
-            link,
             on_click: props.on_click,
             size: props.size,
             class: props.class,
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+    fn update(&mut self, _: &yew::Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Message::Click => self.on_click.emit(()),
         }
@@ -42,8 +42,8 @@ impl yew::Component for Component {
         false
     }
 
-    fn view(&self) -> yew::Html {
-        let span = yew::utils::document().create_element("span").unwrap();
+    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
+        let span = gloo::utils::document().create_element("span").unwrap();
 
         let svg = format!(
             r#"
@@ -60,7 +60,7 @@ impl yew::Component for Component {
         let node = yew::virtual_dom::VNode::VRef(span.into());
 
         yew::html! {
-            <span class=&self.class onclick=self.link.callback(|_| Message::Click)>
+            <span class={ &self.class } onclick={ ctx.link().callback(|_| Message::Click) }>
             { node }
             </span>
         }

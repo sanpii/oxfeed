@@ -13,14 +13,6 @@ pub struct Item {
     pub tags: Vec<String>,
 }
 
-impl From<&Item> for std::result::Result<std::string::String, anyhow::Error> {
-    fn from(item: &Item) -> Self {
-        let json = serde_json::to_string(item)?;
-
-        Ok(json)
-    }
-}
-
 #[derive(serde::Serialize)]
 #[cfg_attr(feature = "elephantry", derive(elephantry::Entity))]
 #[cfg_attr(

@@ -24,15 +24,14 @@ impl std::ops::Not for Scene {
     }
 }
 
-#[derive(Clone, yew::Properties)]
+#[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     pub value: oxfeed_common::item::Item,
 }
 
 pub(crate) struct Component {
     content: Option<String>,
-    event_bus: yew::agent::Dispatcher<crate::event::Bus>,
-    link: yew::ComponentLink<Self>,
+    event_bus: yew_agent::Dispatcher<crate::event::Bus>,
     scene: Scene,
     item: oxfeed_common::item::Item,
 }
@@ -41,19 +40,18 @@ impl yew::Component for Component {
     type Message = Message;
     type Properties = Properties;
 
-    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
-        use yew::Dispatched;
+    fn create(ctx: &yew::Context<Self>) -> Self {
+        use yew_agent::Dispatched;
 
         Self {
             content: None,
             event_bus: crate::event::Bus::dispatcher(),
-            item: props.value,
-            link,
+            item: ctx.props().value.clone(),
             scene: Scene::Hidden,
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Message::Error(_) => (),
             Message::Content(content) => self.content = Some(content),
@@ -64,7 +62,7 @@ impl yew::Component for Component {
                     let item_id = &self.item.id;
 
                     crate::api!(
-                        self.link,
+                        ctx.link(),
                         items_content(item_id) -> Message::Content
                     );
                 }
@@ -75,7 +73,7 @@ impl yew::Component for Component {
                 let value = !self.item.favorite;
 
                 crate::api!(
-                    self.link,
+                    ctx.link(),
                     items_tag(item_id, key, value) -> |_| Message::Toggled
                 );
             }
@@ -85,7 +83,7 @@ impl yew::Component for Component {
                 let value = !self.item.read;
 
                 crate::api!(
-                    self.link,
+                    ctx.link(),
                     items_tag(item_id, key, value) -> |_| Message::Toggled
                 );
             }
@@ -95,7 +93,7 @@ impl yew::Component for Component {
         true
     }
 
-    fn view(&self) -> yew::Html {
+    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
         let published_ago = chrono_humanize::HumanTime::from(self.item.published);
 
         let caret = match self.scene {
@@ -103,10 +101,10 @@ impl yew::Component for Component {
             Scene::Hidden => "chevron-down",
         };
 
-        let title = yew::utils::document().create_element("span").unwrap();
+        let title = gloo::utils::document().create_element("span").unwrap();
         title.set_inner_html(&self.item.title);
 
-        let content = yew::utils::document().create_element("div").unwrap();
+        let content = gloo::utils::document().create_element("div").unwrap();
         content.set_inner_html(self.content.as_ref().unwrap_or(&"Loading...".to_string()));
 
         let icon = if let Some(icon) = &self.item.icon {
@@ -117,20 +115,20 @@ impl yew::Component for Component {
 
         yew::html! {
             <>
-                <img src=icon width="16" height="16" />
-                <a href=self.item.link.clone() target="_blank">
+                <img src={ icon } width="16" height="16" />
+                <a href={ self.item.link.clone() } target="_blank">
                     { yew::virtual_dom::VNode::VRef(title.into()) }
                 </a>
                 {
                     for self.item.tags.iter().map(|tag| {
-                        yew::html! { <super::Tag value=tag.clone() /> }
+                        yew::html! { <super::Tag value={ tag.clone() } /> }
                     })
                 }
                 <span class="text-muted">{ "· " }{ &self.item.source }</span>
                 <div class="float-end">
                     <span class="text-muted">{ &published_ago }</span>
-                    <span onclick=self.link.callback(|_| Message::ToggleContent)>
-                        <super::Svg icon=caret size=24 />
+                    <span onclick={ ctx.link().callback(|_| Message::ToggleContent) }>
+                        <super::Svg icon={ caret } size=24 />
                     </span>
                 </div>
                 <div class="float-end">
@@ -139,10 +137,10 @@ impl yew::Component for Component {
                             yew::html! {
                                 <super::Actions
                                     inline=true
-                                    read=self.item.read
-                                    on_read=self.link.callback(|_| Message::ToggleRead)
-                                    favorite=self.item.favorite
-                                    on_favorite=self.link.callback(|_| Message::ToggleFavorite)
+                                    read={ self.item.read }
+                                    on_read={ ctx.link().callback(|_| Message::ToggleRead) }
+                                    favorite={ self.item.favorite }
+                                    on_favorite={ ctx.link().callback(|_| Message::ToggleFavorite) }
                                 />
                             }
                         } else {
@@ -169,10 +167,10 @@ impl yew::Component for Component {
 
                                 <hr />
                                 <super::Actions
-                                    read=self.item.read
-                                    on_read=self.link.callback(|_| Message::ToggleRead)
-                                    favorite=self.item.favorite
-                                    on_favorite=self.link.callback(|_| Message::ToggleFavorite)
+                                    read={ self.item.read }
+                                    on_read={ ctx.link().callback(|_| Message::ToggleRead) }
+                                    favorite={ self.item.favorite }
+                                    on_favorite={ ctx.link().callback(|_| Message::ToggleFavorite) }
                                 />
                             </>
                         }
@@ -184,10 +182,10 @@ impl yew::Component for Component {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> yew::ShouldRender {
-        let should_render = self.item != props.value;
+    fn changed(&mut self, ctx: &yew::Context<Self>) -> bool {
+        let should_render = self.item != ctx.props().value;
 
-        self.item = props.value;
+        self.item = ctx.props().value.clone();
 
         if should_render {
             self.content = None;

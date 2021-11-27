@@ -5,14 +5,13 @@ pub(crate) enum Message {
     Remove(usize),
 }
 
-#[derive(Clone, yew::Properties)]
+#[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     pub values: Vec<String>,
     pub on_change: yew::Callback<Vec<String>>,
 }
 
 pub(crate) struct Component {
-    link: yew::ComponentLink<Self>,
     values: Vec<String>,
     on_change: yew::Callback<Vec<String>>,
 }
@@ -21,15 +20,16 @@ impl yew::Component for Component {
     type Message = Message;
     type Properties = Properties;
 
-    fn create(props: Self::Properties, link: yew::ComponentLink<Self>) -> Self {
+    fn create(ctx: &yew::Context<Self>) -> Self {
+        let props = ctx.props().clone();
+
         Self {
-            link,
             values: props.values,
             on_change: props.on_change,
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> yew::ShouldRender {
+    fn update(&mut self, _: &yew::Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Message::Add(value) => {
                 if !self.values.contains(&value) {
@@ -52,23 +52,23 @@ impl yew::Component for Component {
         true
     }
 
-    fn view(&self) -> yew::Html {
+    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
         yew::html! {
             <div class="form-control tags-input">
                 {
                     for self.values.iter().enumerate().map(|(idx, tag)| {
                         yew::html! {
                             <crate::components::Tag
-                                value=tag.clone()
+                                value={ tag.clone() }
                                 editable=true
-                                on_click=self.link.callback(move |_| Message::Remove(idx))
+                                on_click={ ctx.link().callback(move |_| Message::Remove(idx)) }
                             />
                         }
                     })
                 }
                 <super::Autocomplete
-                    on_select=self.link.callback(Message::Add)
-                    on_delete=self.link.callback(|_| Message::Delete)
+                    on_select={ ctx.link().callback(Message::Add) }
+                    on_delete={ ctx.link().callback(|_| Message::Delete) }
                 />
             </div>
         }
