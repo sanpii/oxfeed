@@ -22,7 +22,7 @@ wasm-bindgen = "0.2"
 wasm-cookies = "0.1"
 wasm-logger = "0.2"
 yew = "0.18"
-yew-router = "0.15"
+yew-router = "0.16"
 
 [dependencies.elephantry-extras]
 version = "0.2"
