@@ -34,7 +34,7 @@ impl Api {
         password: &str,
         remember_me: &bool,
     ) -> oxfeed_common::Result {
-        use hmac::NewMac;
+        use hmac::Mac;
         use jwt::SignWithKey;
 
         let key: hmac::Hmac<sha2::Sha256> =

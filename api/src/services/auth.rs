@@ -11,7 +11,7 @@ async fn login(
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let secret = crate::env("SECRET")?;
 
-    use hmac::NewMac;
+    use hmac::Mac;
     use jwt::VerifyWithKey;
 
     let key: hmac::Hmac<sha2::Sha256> = hmac::Hmac::new_from_slice(secret.as_bytes()).unwrap();
