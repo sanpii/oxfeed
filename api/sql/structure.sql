@@ -10,7 +10,7 @@ create table if not exists "user" (
     token uuid
 );
 
-create index if not exists user_read on "user"(token);
+create index if not exists user_token on "user"(token);
 
 create table if not exists source (
     source_id uuid primary key default uuid_generate_v4(),
