@@ -283,20 +283,16 @@ impl From<()> for Body {
     }
 }
 
-impl From<&oxfeed_common::new_user::Entity> for Body {
-    fn from(entity: &oxfeed_common::new_user::Entity) -> Self {
-        Body::Json(serde_json::to_value(entity).unwrap())
+macro_rules! body_impl {
+    ($ty:ty) => {
+        impl From<&$ty> for Body {
+            fn from(entity: &$ty) -> Self {
+                Body::Json(serde_json::to_value(entity).unwrap())
+            }
+        }
     }
 }
 
-impl From<&oxfeed_common::source::Entity> for Body {
-    fn from(entity: &oxfeed_common::source::Entity) -> Self {
-        Body::Json(serde_json::to_value(entity).unwrap())
-    }
-}
-
-impl From<&oxfeed_common::webhook::Entity> for Body {
-    fn from(entity: &oxfeed_common::webhook::Entity) -> Self {
-        Body::Json(serde_json::to_value(entity).unwrap())
-    }
-}
+body_impl!(oxfeed_common::new_user::Entity);
+body_impl!(oxfeed_common::source::Entity);
+body_impl!(oxfeed_common::webhook::Entity);
