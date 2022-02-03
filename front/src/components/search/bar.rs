@@ -30,22 +30,22 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, _: &yew::Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            Message::Input(value) => {
-                self.filter = value.into();
+        let Message::Input(value) = msg;
 
-                let location = crate::Location::new();
-                let mut route = location.path();
+        self.filter = value.into();
 
-                if route.starts_with("/search") {
-                    route = route.trim_start_matches("/search").to_string();
-                }
+        let location = crate::Location::new();
+        let mut route = location.path();
 
-                route = format!("/search{}?{}", route, self.filter.to_url_param());
-
-                self.event_bus.send(crate::Event::Redirect(route));
-            }
+        if route.starts_with("/search") {
+            route = route.trim_start_matches("/search").to_string();
         }
+
+        if !self.filter.is_empty() {
+            route = format!("/search{route}?{}", self.filter.to_url_param());
+        }
+
+        self.event_bus.send(crate::Event::Redirect(route));
 
         true
     }
