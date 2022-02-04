@@ -302,7 +302,7 @@ macro_rules! body_impl {
                 Body::Json(serde_json::to_value(entity).unwrap())
             }
         }
-    }
+    };
 }
 
 body_impl!(oxfeed_common::account::Entity);

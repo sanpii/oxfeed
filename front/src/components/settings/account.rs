@@ -17,9 +17,7 @@ impl yew::Component for Component {
     type Properties = ();
 
     fn create(ctx: &yew::Context<Self>) -> Self {
-        let component = Self {
-            account: None,
-        };
+        let component = Self { account: None };
 
         ctx.link().send_message(Self::Message::NeedUpdate);
 

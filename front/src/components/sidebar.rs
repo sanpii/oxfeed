@@ -159,7 +159,7 @@ impl yew::Component for Component {
                     }
 
                     should_render = true;
-                },
+                }
                 _ => (),
             },
             Message::Error(_) => (),

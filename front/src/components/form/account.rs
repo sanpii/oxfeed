@@ -19,7 +19,9 @@ impl yew::Component for Component {
     type Properties = Properties;
 
     fn create(ctx: &yew::Context<Self>) -> Self {
-        Self { props: ctx.props().clone() }
+        Self {
+            props: ctx.props().clone(),
+        }
     }
 
     fn update(&mut self, _: &yew::Context<Self>, msg: Self::Message) -> bool {

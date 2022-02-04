@@ -29,7 +29,10 @@ async fn update(
         Some(user) => user,
         None => return Err(oxfeed_common::Error::Auth),
     };
-    elephantry.update_one::<oxfeed_common::account::Model>(&elephantry::pk!{user_id => user.id}, &data)?;
+    elephantry.update_one::<oxfeed_common::account::Model>(
+        &elephantry::pk! {user_id => user.id},
+        &data,
+    )?;
     let response = actix_web::HttpResponse::NoContent().finish();
 
     Ok(response)
@@ -45,7 +48,7 @@ async fn delete(
         Some(user) => user,
         None => return Err(oxfeed_common::Error::Auth),
     };
-    elephantry.delete_by_pk::<Model>(&elephantry::pk!{user_id => user.id})?;
+    elephantry.delete_by_pk::<Model>(&elephantry::pk! {user_id => user.id})?;
     let response = actix_web::HttpResponse::NoContent().finish();
 
     Ok(response)

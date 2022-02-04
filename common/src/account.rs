@@ -5,10 +5,7 @@
     elephantry(model = "Model", structure = "Structure", relation = "public.user")
 )]
 pub struct Entity {
-    #[cfg_attr(
-        feature = "elephantry",
-        elephantry(pk, column = "user_id")
-    )]
+    #[cfg_attr(feature = "elephantry", elephantry(pk, column = "user_id"))]
     pub id: Option<uuid::Uuid>,
     pub email: String,
     pub password: String,
