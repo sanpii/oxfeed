@@ -12,6 +12,9 @@ pub enum Error {
     #[error("{0}")]
     Base64(#[from] base64::DecodeError),
 
+    #[error("Bad request")]
+    BadRequest,
+
     #[cfg(feature = "elephantry")]
     #[error("{0}")]
     Database(#[from] elephantry::Error),
@@ -30,6 +33,9 @@ pub enum Error {
     #[error("{0}")]
     Http(#[from] http::Error),
 
+    #[error("Invalid email or password")]
+    InvalidLogin,
+
     #[error("{0}")]
     Json(#[from] serde_json::Error),
 
@@ -38,6 +44,9 @@ pub enum Error {
 
     #[error("{0}")]
     Io(#[from] std::io::Error),
+
+    #[error("Not found")]
+    NotFound,
 
     #[cfg(feature = "opml")]
     #[error("{0}")]
@@ -65,6 +74,9 @@ impl From<&Error> for actix_web::http::StatusCode {
 
         match error {
             Error::Auth => StatusCode::UNAUTHORIZED,
+            Error::BadRequest => StatusCode::BAD_REQUEST,
+            Error::InvalidLogin => StatusCode::FORBIDDEN,
+            Error::NotFound => StatusCode::NOT_FOUND,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

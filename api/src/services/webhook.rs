@@ -31,13 +31,10 @@ async fn create(
 
     let token = identity.token(&elephantry)?;
 
-    let user = match elephantry
+    let user = elephantry
         .model::<oxfeed_common::user::Model>()
         .find_from_token(&token)
-    {
-        Some(user) => user,
-        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
-    };
+        .ok_or(oxfeed_common::Error::Auth)?;
 
     data.user_id = Some(user.id);
     let webhook = elephantry.insert_one::<Model>(&data.into_inner().try_into()?)?;
@@ -73,23 +70,16 @@ async fn update(
 
     let token = identity.token(&elephantry)?;
 
-    let user = match elephantry
+    let user = elephantry
         .model::<oxfeed_common::user::Model>()
         .find_from_token(&token)
-    {
-        Some(user) => user,
-        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
-    };
+        .ok_or(oxfeed_common::Error::Auth)?;
 
     data.user_id = Some(user.id);
     let webhook_id = Some(path.into_inner());
     let pk = elephantry::pk!(webhook_id);
-    let webhook = elephantry.update_one::<Model>(&pk, &data.into_inner().try_into()?)?;
+    let webhook = elephantry.update_one::<Model>(&pk, &data.into_inner().try_into()?)?
+        .ok_or(oxfeed_common::Error::NotFound)?;
 
-    let response = match webhook {
-        Some(webhook) => actix_web::HttpResponse::Ok().json(webhook),
-        None => actix_web::HttpResponse::NotFound().finish(),
-    };
-
-    Ok(response)
+    Ok(actix_web::HttpResponse::Ok().json(webhook))
 }

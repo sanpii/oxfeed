@@ -14,13 +14,10 @@ async fn import(
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = identity.token(&elephantry)?;
 
-    let user = match elephantry
+    let user = elephantry
         .model::<oxfeed_common::user::Model>()
         .find_from_token(&token)
-    {
-        Some(user) => user,
-        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
-    };
+        .ok_or(oxfeed_common::Error::Auth)?;
 
     let opml = opml::OPML::from_str(&xml).unwrap();
 

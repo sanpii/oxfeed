@@ -11,7 +11,8 @@ async fn get(
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = identity.token(&elephantry)?;
-    let user = elephantry.model::<oxfeed_common::user::Model>()
+    let user = elephantry
+        .model::<oxfeed_common::user::Model>()
         .find_from_token(&token);
 
     let response = actix_web::HttpResponse::Ok().json(&user);
@@ -33,17 +34,14 @@ async fn login(
     let claims: std::collections::BTreeMap<String, String> = token.verify_with_key(&key)?;
 
     if claims.get("email").is_none() || claims.get("password").is_none() {
-        return Ok(actix_web::HttpResponse::BadRequest().finish());
+        return Err(oxfeed_common::Error::BadRequest);
     }
 
     let sql = include_str!("../../sql/login.sql");
-    let token = match elephantry
+    let token = elephantry
         .query::<uuid::Uuid>(sql, &[&claims["email"], &claims["password"]])?
         .try_get(0)
-    {
-        Some(token) => token,
-        None => return Ok(actix_web::HttpResponse::Forbidden().finish()),
-    };
+        .ok_or(oxfeed_common::Error::InvalidLogin)?;
 
     let response = actix_web::HttpResponse::Ok().json(&token.to_string());
 

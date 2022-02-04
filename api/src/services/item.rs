@@ -80,13 +80,10 @@ async fn content(
     let sql = include_str!("../../sql/item_content.sql");
     let content = elephantry
         .query::<Option<String>>(sql, &[&item_id, &token])?
-        .next();
-    let response = match content {
-        Some(content) => actix_web::HttpResponse::Ok().json(&content.unwrap_or_default()),
-        None => actix_web::HttpResponse::NotFound().finish(),
-    };
+        .next()
+        .ok_or(oxfeed_common::Error::NotFound)?;
 
-    Ok(response)
+    Ok(actix_web::HttpResponse::Ok().json(&content.unwrap_or_default()))
 }
 
 #[actix_web::patch("/{item_id}")]
@@ -99,10 +96,8 @@ async fn patch(
     let token = identity.token(&elephantry)?;
     let item_id = path.into_inner();
 
-    match elephantry.model::<Model>().one(&token, &item_id)? {
-        Some(_) => (),
-        None => return Ok(actix_web::HttpResponse::NotFound().finish()),
-    }
+    elephantry.model::<Model>().one(&token, &item_id)?
+        .ok_or(oxfeed_common::Error::NotFound)?;
 
     let mut data = HashMap::new();
 
@@ -115,18 +110,12 @@ async fn patch(
         data.insert(k.clone(), v);
     }
 
-    let mut response = if !data.is_empty() {
-        let item = elephantry.update_by_pk::<Model>(&elephantry::pk!(item_id), &data)?;
+    if !data.is_empty() {
+        elephantry.update_by_pk::<Model>(&elephantry::pk!(item_id), &data)?
+            .ok_or(oxfeed_common::Error::NotFound)?;
+    }
 
-        match item {
-            Some(_) => actix_web::HttpResponse::NoContent(),
-            None => actix_web::HttpResponse::NotFound(),
-        }
-    } else {
-        actix_web::HttpResponse::NoContent()
-    };
-
-    Ok(response.finish())
+    Ok(actix_web::HttpResponse::NoContent().finish())
 }
 
 #[actix_web::post("/read")]
