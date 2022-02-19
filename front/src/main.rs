@@ -16,7 +16,7 @@ pub(crate) use location::Location;
 pub(crate) use render::*;
 
 #[derive(Clone, Eq, PartialEq, serde::Deserialize)]
-struct Pager<R: Render> {
+struct Pager<T> {
     result_count: usize,
     result_min: usize,
     result_max: usize,
@@ -28,11 +28,11 @@ struct Pager<R: Render> {
     max_per_page: usize,
     #[serde(default = "location::base_url")]
     base_url: String,
-    iterator: Vec<R>,
+    iterator: Vec<T>,
 }
 
-impl<R: crate::Render> From<Pager<R>> for elephantry_extras::Pager {
-    fn from(pager: Pager<R>) -> Self {
+impl<T: crate::Render> From<Pager<T>> for elephantry_extras::Pager {
+    fn from(pager: Pager<T>) -> Self {
         elephantry_extras::Pager {
             count: pager.count,
             page: pager.page,

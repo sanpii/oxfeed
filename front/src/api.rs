@@ -169,7 +169,7 @@ impl Api {
     pub async fn tags_search(
         filter: &crate::Filter,
         pagination: &oxfeed_common::Pagination,
-    ) -> oxfeed_common::Result<Vec<String>> {
+    ) -> oxfeed_common::Result<crate::Pager<String>> {
         let url = format!(
             "/search/tags?{}&{}",
             filter.to_url_param(),

@@ -3,7 +3,7 @@ pub(crate) enum Message {
     Error(String),
     Input(String),
     Key(String),
-    Terms(Vec<String>),
+    Terms(crate::Pager<String>),
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
@@ -104,7 +104,7 @@ impl yew::Component for Component {
                 }
                 _ => (),
             },
-            Message::Terms(terms) => self.terms = terms,
+            Message::Terms(pager) => self.terms = pager.iterator,
         }
 
         should_render
