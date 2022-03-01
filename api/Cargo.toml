@@ -6,7 +6,7 @@ edition = "2021"
 license = "MIT"
 
 [dependencies]
-actix = "0.12"
+actix = "0.13"
 actix-cors = "0.6"
 actix-web = "4.0"
 actix-web-actors = "4.0"
