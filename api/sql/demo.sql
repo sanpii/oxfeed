@@ -33,6 +33,6 @@ grant select on all tables in schema public to demo;
 grant select on all tables in schema fts to demo;
 grant usage on schema fts to demo;
 grant insert, update on item to demo;
-grant update on "user" to demo;
+grant update(token) on "user" to demo.token;
 
 commit;
