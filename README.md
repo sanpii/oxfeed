@@ -33,11 +33,15 @@ Here an example of systemd service:
 ```
 [Unit]
 Description=oxfeed
+After=network.target
+After=postgresql.target
+Requires=postgresql.service
 
 [Service]
 ExecStart=/home/git/public_repositories/oxfeed/current/target/release/oxfeed-api
 WorkingDirectory=/home/git/public_repositories/oxfeed/current
 Restart=on-failure
+RestartSec=10s
 Environment="LISTEN_IP=127.0.0.1"
 Environment="LISTEN_PORT=8003"
 Environment="DATABASE_URL=postgresql://localhost/oxfeed"
