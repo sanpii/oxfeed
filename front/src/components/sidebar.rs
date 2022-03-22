@@ -204,7 +204,7 @@ impl yew::Component for Component {
                 <ul class="nav flex-column">
                 {
                     for self.links.iter().map(move |link| yew::html! {
-                        <li class="nav-item">
+                        <li class="nav-item" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
                             <yew_router::components::Link<super::app::Route>
                                 to={ link.route.clone() }
                                 classes={ if link.route == self.current_route { "nav-link active" } else { "nav-link" } }
