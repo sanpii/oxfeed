@@ -53,7 +53,7 @@ struct Task;
 impl Task {
     fn run(elephantry: &elephantry::Connection) -> oxfeed_common::Result {
         let sources = elephantry
-            .find_where::<SourceModel>("active = $*", &[&true], None)?
+            .find_where::<SourceModel>("active", &[], None)?
             .collect::<Vec<_>>();
 
         sources.par_iter().for_each(|source| {
