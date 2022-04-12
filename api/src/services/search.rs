@@ -4,6 +4,7 @@ use actix_web::web::{Data, Query};
 struct Request {
     q: Option<String>,
     tag: Option<String>,
+    source: Option<String>,
     #[serde(flatten)]
     pagination: oxfeed_common::Pagination,
 }
@@ -63,6 +64,10 @@ fn search(
 
     if let Some(tag) = &query.tag {
         clause.and_where("$* = any(tags)", vec![tag]);
+    }
+
+    if let Some(source) = &query.source {
+        clause.and_where("(s.title ~* $* or s.url ~* $*)", vec![source, source]);
     }
 
     let token = identity.token(elephantry)?;
