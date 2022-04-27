@@ -62,8 +62,8 @@ impl Websocket {
 
     fn notify(&self, context: &mut <Self as actix::Actor>::Context) -> elephantry::Result {
         while let Some(notify) = self.elephantry.notifies()? {
-            if notify.extra() == self.token.to_string() {
-                context.text(notify.relname());
+            if notify.extra()? == self.token.to_string() {
+                context.text(notify.relname()?);
             }
         }
 

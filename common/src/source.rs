@@ -33,7 +33,7 @@ impl Default for Entity {
 }
 
 #[cfg(feature = "elephantry")]
-impl<'a> Model<'a> {
+impl Model {
     pub fn all(
         &self,
         token: &uuid::Uuid,

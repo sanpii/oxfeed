@@ -30,7 +30,7 @@ impl From<crate::user::Entity> for Entity {
 }
 
 #[cfg(feature = "elephantry")]
-impl<'a> Model<'a> {
+impl Model {
     pub fn find_from_token(&self, token: &uuid::Uuid) -> Option<Entity> {
         self.connection
             .find_where::<Self>("token = $*", &[token], None)
