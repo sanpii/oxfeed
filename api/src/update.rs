@@ -112,7 +112,6 @@ impl Task {
 
                 let mut item = Item {
                     id: None,
-                    feed_id: entry.id,
                     icon: feed_icon.clone().or_else(|| Self::icon(&link)),
                     content,
                     title,

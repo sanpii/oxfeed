@@ -43,7 +43,6 @@ create index if not exists webhook_user_id on source(user_id);
 create table if not exists item (
     item_id uuid primary key default uuid_generate_v4(),
     source_id uuid references source(source_id) not null,
-    id text not null,
     icon text,
     link text not null,
     title text not null,
@@ -52,7 +51,6 @@ create table if not exists item (
     favorite bool default false,
     published timestamptz not null default now(),
 
-    unique(source_id, id),
     unique(source_id, link)
 );
 

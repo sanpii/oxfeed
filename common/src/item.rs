@@ -23,8 +23,6 @@ pub struct Entity {
     #[cfg_attr(feature = "elephantry", elephantry(pk, column = "item_id"))]
     pub id: Option<uuid::Uuid>,
     pub source_id: uuid::Uuid,
-    #[cfg_attr(feature = "elephantry", elephantry(column = "id"))]
-    pub feed_id: String,
     pub link: String,
     pub title: String,
     pub content: Option<String>,
