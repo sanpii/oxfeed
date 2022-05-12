@@ -16,6 +16,7 @@ pub(crate) struct Properties {
 
 pub(crate) struct Component {
     active: Option<usize>,
+    input_ref: yew::NodeRef,
     terms: Vec<String>,
     value: String,
     on_select: yew::Callback<String>,
@@ -26,8 +27,8 @@ impl Component {
     fn select(&mut self, value: String) {
         self.on_select.emit(value);
         self.active = None;
-        self.value = String::new();
         self.terms = Vec::new();
+        self.value = String::new();
     }
 }
 
@@ -40,6 +41,7 @@ impl yew::Component for Component {
 
         Self {
             active: None,
+            input_ref: yew::NodeRef::default(),
             terms: Vec::new(),
             value: String::new(),
             on_select: props.on_select,
@@ -110,11 +112,22 @@ impl yew::Component for Component {
         should_render
     }
 
+    fn rendered(&mut self, _ctx: &yew::Context<Self>, _first_render: bool) {
+        if !self.terms.is_empty() {
+            return;
+        }
+
+        if let Some(input) = self.input_ref.cast::<web_sys::HtmlInputElement>() {
+            input.focus().unwrap();
+        }
+    }
+
     fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
         yew::html! {
             <div class="autocomplete">
                 <input
                     type="text"
+                    ref={ self.input_ref.clone() }
                     value={ self.value.clone() }
                     oninput={ ctx.link().callback(|e: yew::InputEvent| {
                         use yew::TargetCast;
