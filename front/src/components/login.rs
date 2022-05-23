@@ -82,7 +82,7 @@ impl yew::Component for Component {
             Scene::Login => yew::html! {
                 <div class="login">
                     <form>
-                        <img class="mb-4" src="/logo" alt="" width="72px" height="72px" />
+                        <img class="mb-4" src="/logo.png" alt="" width="72px" height="72px" />
                         <h1 class="h3 mb-3 fw-normal">{ "Please sign in" }</h1>
                         <super::Alerts />
                         <super::form::Login on_submit={ ctx.link().callback(Message::Login) } />
