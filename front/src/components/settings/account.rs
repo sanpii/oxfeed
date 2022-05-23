@@ -77,7 +77,7 @@ impl yew::Component for Component {
 
                 <a
                     class="btn btn-danger"
-                    title="Save"
+                    title="Delete"
                     onclick={ ctx.link().callback(|_| Message::Delete) }
                 >
                     <crate::components::Svg icon="trash" size=24 />
