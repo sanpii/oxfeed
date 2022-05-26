@@ -86,6 +86,7 @@ impl Task {
             .into_vec();
 
         let contents = attohttpc::RequestBuilder::try_new(attohttpc::Method::GET, &source.url)?
+            .timeout(std::time::Duration::from_secs(5 * 60))
             .send()?
             .text()?;
         let feed = feed_rs::parser::parse(contents.as_bytes())?;
@@ -195,6 +196,7 @@ impl Task {
         log::info!("call webhook '{}'", webhook.name);
 
         let response = attohttpc::RequestBuilder::try_new(attohttpc::Method::POST, &webhook.url)?
+            .timeout(std::time::Duration::from_secs(5 * 60))
             .json(item)?
             .send()?;
 
