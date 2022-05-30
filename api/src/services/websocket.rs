@@ -45,7 +45,7 @@ impl Websocket {
         context.run_interval(HEARTBEAT_INTERVAL, |actor, context| {
             actor.ping(context);
             if let Err(err) = actor.notify(context) {
-                log::error!("{}", err);
+                log::error!("{err}");
             }
         });
     }
@@ -77,7 +77,7 @@ impl actix::Actor for Websocket {
     fn started(&mut self, context: &mut Self::Context) {
         match self.elephantry.listen("item_new") {
             Ok(_) => (),
-            Err(err) => log::error!("Unable to listen postgresql: {}", err),
+            Err(err) => log::error!("Unable to listen postgresql: {err}"),
         }
 
         self.hb(context);

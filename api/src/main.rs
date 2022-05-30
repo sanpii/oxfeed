@@ -18,7 +18,7 @@ async fn main() -> oxfeed_common::Result {
     let database_url = env("DATABASE_URL")?;
     let ip = env("LISTEN_IP")?;
     let port = env("LISTEN_PORT")?;
-    let bind = format!("{}:{}", ip, port);
+    let bind = format!("{ip}:{port}");
 
     let elephantry = elephantry::Pool::new(&database_url)?;
 

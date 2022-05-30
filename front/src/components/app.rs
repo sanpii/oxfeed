@@ -39,7 +39,7 @@ impl Component {
             .replace("http://", "ws://")
             .replace("https://", "wss://");
 
-        let ws_url = format!("{}/ws?token={}", url, crate::Api::token());
+        let ws_url = format!("{url}/ws?token={}", crate::Api::token());
 
         match wasm_sockets::EventClient::new(&ws_url) {
             Ok(mut websocket) => {
@@ -52,7 +52,7 @@ impl Component {
                 Some(websocket)
             }
             Err(err) => {
-                log::error!("Unable to connect to websocket: {}", err);
+                log::error!("Unable to connect to websocket: {err}");
                 None
             }
         }

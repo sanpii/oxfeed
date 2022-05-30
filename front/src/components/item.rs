@@ -108,7 +108,7 @@ impl yew::Component for Component {
         content.set_inner_html(self.content.as_ref().unwrap_or(&"Loading...".to_string()));
 
         let icon = if let Some(icon) = &self.item.icon {
-            format!("{}{}", env!("API_URL"), icon)
+            format!("{}{icon}", env!("API_URL"))
         } else {
             "/1px.png".to_string()
         };

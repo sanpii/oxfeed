@@ -45,7 +45,7 @@ fn save(
     };
 
     if let Err(error) = elephantry.insert_one::<oxfeed_common::source::Model>(&source) {
-        log::error!("Unable to import outline '{}': {}", source.title, error);
+        log::error!("Unable to import outline '{}': {error}", source.title);
     }
 }
 

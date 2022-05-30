@@ -23,7 +23,7 @@ impl Actor {
 
     fn run(&self) {
         if let Err(error) = Task::run(&self.elephantry) {
-            log::error!("{}", error);
+            log::error!("{error}");
         }
     }
 }
@@ -62,7 +62,7 @@ impl Task {
             let last_error = match Self::fetch(elephantry, source) {
                 Ok(_) => None,
                 Err(err) => {
-                    log::error!("{}", err);
+                    log::error!("{err}");
                     Some(err.to_string())
                 }
             };
@@ -71,7 +71,7 @@ impl Task {
                 &elephantry::pk! { source_id => source.id },
                 &elephantry::values!(last_error),
             ) {
-                log::error!("{}", err);
+                log::error!("{err}");
             }
         });
 
@@ -165,7 +165,7 @@ impl Task {
             };
             url.set_path("");
 
-            Some(format!("{}{}", url, href.trim_start_matches('/')))
+            Some(format!("{url}{}", href.trim_start_matches('/')))
         }
     }
 

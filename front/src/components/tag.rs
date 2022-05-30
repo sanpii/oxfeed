@@ -44,9 +44,8 @@ impl yew::Component for Component {
         let bg_color = crate::cha::Color::from(&self.value);
         let color = if bg_color.is_dark() { "white" } else { "black" };
         let style = format!(
-            "background-color: {}; color: {}",
+            "background-color: {}; color: {color}",
             bg_color.to_color_string(),
-            color
         );
 
         yew::html! {

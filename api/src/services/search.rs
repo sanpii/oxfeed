@@ -96,7 +96,7 @@ async fn tags(
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = identity.token(&elephantry)?;
     let sql = include_str!("../../sql/search_tags.sql");
-    let q = query.q.as_ref().map(|x| format!("^{}", x));
+    let q = query.q.as_ref().map(|x| format!("^{x}"));
 
     let pager = count::<String>(&elephantry, sql, &[&token, &q], &query.pagination)?;
     let response = actix_web::HttpResponse::Ok().json(pager);
@@ -130,7 +130,7 @@ fn count<T: elephantry::Entity>(
     params: &[&dyn elephantry::ToSql],
     pagination: &oxfeed_common::Pagination,
 ) -> oxfeed_common::Result<elephantry::Pager<T>> {
-    let sql_count = format!("with items as ({}) select count(items) from items", sql);
+    let sql_count = format!("with items as ({sql}) select count(items) from items");
     let count = elephantry.query_one::<i64>(&sql_count, params)?;
 
     let mut sql = sql.to_string();

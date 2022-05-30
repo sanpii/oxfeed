@@ -90,7 +90,7 @@ impl actix_web::ResponseError for Error {
         let message = self.to_string();
 
         if status.is_server_error() {
-            log::error!("{}", message);
+            log::error!("{message}");
         }
 
         actix_web::HttpResponse::build(status).json(message)

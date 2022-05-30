@@ -33,7 +33,7 @@ fn path(url: &str) -> std::path::PathBuf {
         .chunks(4)
         .map(|x| {
             x.iter()
-                .fold(String::new(), |acc, b| format!("{}{:02x}", acc, b))
+                .fold(String::new(), |acc, b| format!("{acc}{b:02x}"))
         })
         .collect::<Vec<_>>();
 

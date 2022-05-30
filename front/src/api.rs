@@ -74,13 +74,13 @@ impl Api {
             kind.to_string()
         };
 
-        let url = format!("/items/{}?{}", kind, pagination.to_query());
+        let url = format!("/items/{kind}?{}", pagination.to_query());
 
         Self::fetch(Method::GET, &url, ()).await
     }
 
     pub async fn items_content(id: &uuid::Uuid) -> oxfeed_common::Result<String> {
-        let url = format!("/items/{}/content", id);
+        let url = format!("/items/{id}/content");
 
         Self::fetch(Method::GET, &url, ()).await
     }
@@ -90,7 +90,7 @@ impl Api {
     }
 
     pub async fn items_tag(id: &uuid::Uuid, key: &str, value: &bool) -> oxfeed_common::Result {
-        let url = format!("/items/{}", id);
+        let url = format!("/items/{id}");
 
         let json = serde_json::json!({
             key: *value,
@@ -105,8 +105,7 @@ impl Api {
         pagination: &oxfeed_common::Pagination,
     ) -> oxfeed_common::Result<crate::Pager<oxfeed_common::item::Item>> {
         let url = format!(
-            "/search/{}?{}&{}",
-            what,
+            "/search/{what}?{}&{}",
             filter.to_url_param(),
             pagination.to_query()
         );
@@ -136,13 +135,13 @@ impl Api {
         id: &uuid::Uuid,
         source: &oxfeed_common::source::Entity,
     ) -> oxfeed_common::Result<oxfeed_common::source::Entity> {
-        Self::fetch(Method::PUT, &format!("/sources/{}", id), source).await
+        Self::fetch(Method::PUT, &format!("/sources/{id}"), source).await
     }
 
     pub async fn sources_delete(
         id: &uuid::Uuid,
     ) -> oxfeed_common::Result<oxfeed_common::source::Entity> {
-        Self::fetch(Method::DELETE, &format!("/sources/{}", id), ()).await
+        Self::fetch(Method::DELETE, &format!("/sources/{id}"), ()).await
     }
 
     pub async fn sources_search(
@@ -205,13 +204,13 @@ impl Api {
         id: &uuid::Uuid,
         webhook: &oxfeed_common::webhook::Entity,
     ) -> oxfeed_common::Result<oxfeed_common::webhook::Entity> {
-        Self::fetch(Method::PUT, &format!("/webhooks/{}", id), webhook).await
+        Self::fetch(Method::PUT, &format!("/webhooks/{id}"), webhook).await
     }
 
     pub async fn webhooks_delete(
         id: &uuid::Uuid,
     ) -> oxfeed_common::Result<oxfeed_common::webhook::Entity> {
-        Self::fetch(Method::DELETE, &format!("/webhooks/{}", id), ()).await
+        Self::fetch(Method::DELETE, &format!("/webhooks/{id}"), ()).await
     }
 
     async fn fetch<B, R>(method: Method, url: &str, body: B) -> oxfeed_common::Result<R>
@@ -237,7 +236,7 @@ impl Api {
     {
         let client = reqwest::Client::new();
         let response = client
-            .request(method, &format!("{}{}", env!("API_URL"), url))
+            .request(method, &format!("{}{url}", env!("API_URL")))
             .header("Content-Type", "application/json")
             .header("Authorization", &format!("Bearer {}", Self::token()))
             .body(body.into().to_string())
