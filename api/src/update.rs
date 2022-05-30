@@ -41,7 +41,9 @@ impl actix::Actor for Actor {
         let interval = std::time::Duration::from_secs(60 * minutes);
 
         ctx.run_interval(interval, |act, _| {
+            log::warn!("Start update");
             act.run();
+            log::warn!("Update finished");
         });
     }
 }
@@ -104,7 +106,7 @@ impl Task {
                     .map(|x| x.content)
                     .unwrap_or_else(|| "&lt;no title&gt;".to_string());
 
-                log::info!("Adding '{}'", title);
+                log::info!("Adding '{title}'");
 
                 let content = match entry.content {
                     Some(content) => content.body,
