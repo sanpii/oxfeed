@@ -10,7 +10,18 @@ pub(crate) mod webhook;
 pub(crate) mod websocket;
 
 pub(crate) fn scope() -> actix_web::Scope {
-    actix_web::web::scope("").service(counts)
+    actix_web::web::scope("")
+        .service(index)
+        .service(counts)
+}
+
+#[actix_web::get("/")]
+async fn index(
+    elephantry: actix_web::web::Data<elephantry::Pool>,
+) ->oxfeed_common::Result<actix_web::HttpResponse> {
+    elephantry.ping()?;
+
+    Ok(actix_web::HttpResponse::NoContent().finish())
 }
 
 #[actix_web::get("/counts")]
