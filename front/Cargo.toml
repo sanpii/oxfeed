@@ -8,7 +8,7 @@ license = "MIT"
 [dependencies]
 anyhow = "1.0"
 futures = "0.3"
-gloo = "0.7"
+gloo = "0.8"
 hmac = "0.12"
 http = "0.2"
 jwt = "0.16"
