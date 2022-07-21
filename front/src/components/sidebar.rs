@@ -5,6 +5,7 @@ pub(crate) enum Message {
     NeedUpdate,
     ReadAll,
     Update(oxfeed_common::Counts),
+    UpdateAll(oxfeed_common::Counts),
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
@@ -172,12 +173,20 @@ impl yew::Component for Component {
                 should_render = true;
             }
             Message::ReadAll => {
-                crate::api!(
-                    ctx.link(),
-                    items_read() -> |_| Message::NeedUpdate
-                );
+                ctx.link().send_future(async move {
+                    if let Err(err) = crate::Api::items_read().await {
+                        return Message::Error(err.to_string());
+                    }
 
+                    match crate::Api::counts().await {
+                        Ok(count) => Message::UpdateAll(count),
+                        Err(err) =>  Message::Error(err.to_string()),
+                    }
+                });
+            }
+            Message::UpdateAll(counts) => {
                 self.event_bus.send(crate::event::Event::ItemUpdate);
+                ctx.link().send_message(Message::Update(counts));
             }
         }
 
