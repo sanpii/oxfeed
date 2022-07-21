@@ -123,7 +123,7 @@ macro_rules! api {
         $( let $args = $args.clone(); )*
 
         $link.send_future(async move {
-            crate::Api::$api($( &$args ),*).await.map_or_else(
+            $crate::Api::$api($( &$args ),*).await.map_or_else(
                 |err| Message::Error(err.to_string()),
                 $fn
             )

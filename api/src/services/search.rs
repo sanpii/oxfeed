@@ -53,6 +53,8 @@ fn search(
     clause: &elephantry::Where,
     query: &Request,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
+    use std::fmt::Write;
+
     let mut clause = clause.clone();
 
     let mut sql = if let Some(q) = &query.q {
@@ -73,7 +75,7 @@ fn search(
     let token = identity.token(elephantry)?;
     clause.and_where("token = $*", vec![&token]);
 
-    sql.push_str(&format!("where {}\n", clause.to_string()));
+    writeln!(sql, "where {}", clause.to_string()).ok();
 
     if query.q.is_some() {
         sql.push_str("order by ts_rank_cd(f.document, websearch_to_tsquery($1)) desc, i.published desc\n");

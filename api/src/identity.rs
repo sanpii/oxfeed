@@ -31,8 +31,7 @@ impl actix_web::FromRequest for Identity {
         let authorization = match request
             .headers()
             .get("Authorization")
-            .map(|x| x.to_str().ok())
-            .flatten()
+            .and_then(|x| x.to_str().ok())
         {
             Some(authorization) => authorization,
             None => return Self::unauthorized(),

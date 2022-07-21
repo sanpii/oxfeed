@@ -46,13 +46,11 @@ impl From<Location> for oxfeed_common::Pagination {
         Self {
             page: query
                 .get("page")
-                .map(|x| x.parse().ok())
-                .flatten()
+                .and_then(|x| x.parse().ok())
                 .unwrap_or(1),
             limit: query
                 .get("limit")
-                .map(|x| x.parse().ok())
-                .flatten()
+                .and_then(|x| x.parse().ok())
                 .unwrap_or(25),
         }
     }

@@ -207,7 +207,7 @@ impl Task {
         } else {
             let error = format!(
                 "{} · {}",
-                response.status().to_string(),
+                response.status(),
                 response.text().unwrap_or_default(),
             );
             Err(oxfeed_common::Error::Webhook(error))
