@@ -30,7 +30,7 @@ tree_magic = "0.2"
 url = "2.2"
 
 [dependencies.attohttpc]
-version = "0.22"
+version = "0.23"
 features = ["json"]
 
 [dependencies.chrono]
