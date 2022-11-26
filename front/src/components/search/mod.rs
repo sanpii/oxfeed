@@ -27,13 +27,16 @@ impl yew::Component for Component {
         use yew_agent::Bridged;
 
         let props = ctx.props().clone();
-        let callback = ctx.link().callback(Message::Event);
+        let callback = {
+            let link = ctx.link().clone();
+            move |e| link.send_message(Message::Event(e))
+        };
 
         Self {
             pagination: props.pagination,
             kind: props.kind,
             filter: crate::Filter::new(),
-            _producer: crate::event::Bus::bridge(callback),
+            _producer: crate::event::Bus::bridge(std::rc::Rc::new(callback)),
         }
     }
 

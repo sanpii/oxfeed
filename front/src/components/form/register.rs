@@ -90,7 +90,7 @@ impl yew::Component for Component {
         }
     }
 
-    fn changed(&mut self, ctx: &yew::Context<Self>) -> bool {
+    fn changed(&mut self, ctx: &yew::Context<Self>, _: &Self::Properties) -> bool {
         self.on_submit = ctx.props().on_submit.clone();
 
         false

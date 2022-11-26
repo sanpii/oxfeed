@@ -65,19 +65,19 @@ impl yew::Component for App {
 fn main() {
     wasm_logger::init(wasm_logger::Config::new(log::Level::Debug));
 
-    yew::start_app::<App>();
+    yew::Renderer::<App>::new().render();
 }
 
 #[macro_export]
 macro_rules! change {
     () => {
-        fn changed(&mut self, _: &yew::Context<Self>) -> bool {
+        fn changed(&mut self, _: &yew::Context<Self>, _: &Self::Properties) -> bool {
             false
         }
     };
 
     (props) => {
-        fn changed(&mut self, ctx: &yew::Context<Self>) -> bool {
+        fn changed(&mut self, ctx: &yew::Context<Self>, _: &Self::Properties) -> bool {
             let should_render = &self.props != ctx.props();
 
             self.props = ctx.props().clone();
@@ -87,7 +87,7 @@ macro_rules! change {
     };
 
     ($(props.$prop: ident),+) => {
-        fn changed(&mut self, ctx: &yew::Context<Self>) -> bool {
+        fn changed(&mut self, ctx: &yew::Context<Self>, _: &Self::Properties) -> bool {
             let should_render = false
                 $(
                     || self.props.$prop != ctx.props().$prop
@@ -100,7 +100,7 @@ macro_rules! change {
     };
 
     ($($prop: ident),+) => {
-        fn changed(&mut self, ctx: &yew::Context<Self>) -> bool {
+        fn changed(&mut self, ctx: &yew::Context<Self>, _: &Self::Properties) -> bool {
             let props = ctx.props().clone();
 
             let should_render = false

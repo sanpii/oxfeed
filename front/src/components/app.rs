@@ -66,13 +66,16 @@ impl yew::Component for Component {
     fn create(ctx: &yew::Context<Self>) -> Self {
         use yew_agent::{Bridged, Dispatched};
 
-        let event_cb = ctx.link().callback(Message::Event);
+        let callback = {
+            let link = ctx.link().clone();
+            move |e| link.send_message(Message::Event(e))
+        };
 
         Self {
             _websocket: Self::websocket(ctx.link()),
             auth: !crate::Api::token().is_empty(),
             event_bus: crate::event::Bus::dispatcher(),
-            _producer: crate::event::Bus::bridge(event_cb),
+            _producer: crate::event::Bus::bridge(std::rc::Rc::new(callback)),
         }
     }
 
@@ -109,47 +112,47 @@ impl yew::Component for Component {
             };
         }
 
-        let pagination: oxfeed_common::Pagination = crate::Location::new().into();
-
         yew::html! {
             <yew_router::router::BrowserRouter>
-                <yew_router::Switch<Route>
-                    render={ yew_router::Switch::render(move |route: &Route| {
-                        yew::html! {
-                            <>
-                                <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-                                    <super::Header current_route={ route.clone() } />
-                                </nav>
-                                <div class="container-fluid">
-                                    <div class="row">
-                                        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-                                            <super::Sidebar current_route={ route.clone() } />
-                                        </nav>
-                                        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                                        <super::Alerts />
-                                            {
-                                                match route {
-                                                    Route::All => yew::html!{<super::Items kind="all" pagination={ pagination } />},
-                                                    Route::Favorites => yew::html!{<super::Items kind="favorites" pagination={ pagination } />},
-                                                    Route::Settings => yew::html!{<super::Settings />},
-                                                    Route::Sources => yew::html!{<super::Sources pagination={ pagination } />},
-                                                    Route::Tags => yew::html!{<super::Tags pagination={ pagination } />},
-                                                    Route::Unread => yew::html!{<super::Items kind="unread" pagination={ pagination } />},
-                                                    Route::Search { kind } => yew::html!{<super::Search kind={ kind.clone() } pagination={ pagination } />},
-                                                    Route::NotFound => yew::html!{<super::NotFound />},
-                                                    Route::Index => yew::html!{<yew_router::prelude::Redirect<Route> to={ Route::Unread } />},
-                                                }
-                                            }
-                                        </main>
-                                    </div>
-                                </div>
-                            </>
-                        }
-                    }) }
-                />
+                <yew_router::Switch<Route> render={switch} />
             </yew_router::router::BrowserRouter>
         }
     }
 
     crate::change!();
+}
+
+fn switch(route: Route) -> yew::Html {
+    let pagination: oxfeed_common::Pagination = crate::Location::new().into();
+
+    yew::html! {
+        <>
+            <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+                <super::Header current_route={ route.clone() } />
+            </nav>
+            <div class="container-fluid">
+                <div class="row">
+                    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                        <super::Sidebar current_route={ route.clone() } />
+                    </nav>
+                    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                    <super::Alerts />
+                        {
+                            match route {
+                                Route::All => yew::html!{<super::Items kind="all" pagination={ pagination } />},
+                                Route::Favorites => yew::html!{<super::Items kind="favorites" pagination={ pagination } />},
+                                Route::Settings => yew::html!{<super::Settings />},
+                                Route::Sources => yew::html!{<super::Sources pagination={ pagination } />},
+                                Route::Tags => yew::html!{<super::Tags pagination={ pagination } />},
+                                Route::Unread => yew::html!{<super::Items kind="unread" pagination={ pagination } />},
+                                Route::Search { kind } => yew::html!{<super::Search kind={ kind.clone() } pagination={ pagination } />},
+                                Route::NotFound => yew::html!{<super::NotFound />},
+                                Route::Index => yew::html!{<yew_router::prelude::Redirect<Route> to={ Route::Unread } />},
+                            }
+                        }
+                    </main>
+                </div>
+            </div>
+        </>
+    }
 }

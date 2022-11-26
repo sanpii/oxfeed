@@ -182,7 +182,7 @@ impl yew::Component for Component {
         }
     }
 
-    fn changed(&mut self, ctx: &yew::Context<Self>) -> bool {
+    fn changed(&mut self, ctx: &yew::Context<Self>, _: &Self::Properties) -> bool {
         let should_render = self.item != ctx.props().value;
 
         self.item = ctx.props().value.clone();

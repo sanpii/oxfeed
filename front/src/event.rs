@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-#[derive(Clone)]
+#[derive(Clone, serde::Deserialize, serde::Serialize)]
 pub(crate) enum Event {
     Alert(Alert),
     AuthRequire,
@@ -27,7 +27,7 @@ impl From<oxfeed_common::Error> for Event {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, serde::Deserialize, serde::Serialize)]
 pub(crate) struct Alert {
     pub level: log::Level,
     pub message: String,
@@ -63,17 +63,17 @@ impl Alert {
 }
 
 pub(crate) struct Bus {
-    link: yew_agent::AgentLink<Self>,
+    link: yew_agent::WorkerLink<Self>,
     subscribers: HashSet<yew_agent::HandlerId>,
 }
 
-impl yew_agent::Agent for Bus {
-    type Reach = yew_agent::Context<Self>;
+impl yew_agent::Worker for Bus {
+    type Reach = yew_agent::Public<Self>;
     type Message = ();
     type Input = Event;
     type Output = Event;
 
-    fn create(link: yew_agent::AgentLink<Self>) -> Self {
+    fn create(link: yew_agent::WorkerLink<Self>) -> Self {
         Self {
             link,
             subscribers: HashSet::new(),

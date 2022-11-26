@@ -15,11 +15,14 @@ impl yew::Component for Component {
     fn create(ctx: &yew::Context<Self>) -> Self {
         use yew_agent::Bridged;
 
-        let callback = ctx.link().callback(Message::Event);
+        let callback = {
+            let link = ctx.link().clone();
+            move |e| link.send_message(Message::Event(e))
+        };
 
         Self {
             messages: Vec::new(),
-            _producer: crate::event::Bus::bridge(callback),
+            _producer: crate::event::Bus::bridge(std::rc::Rc::new(callback)),
         }
     }
 

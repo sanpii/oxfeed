@@ -130,13 +130,16 @@ impl yew::Component for Component {
     fn create(ctx: &yew::Context<Self>) -> Self {
         use yew_agent::{Bridged, Dispatched};
 
-        let callback = ctx.link().callback(Message::Event);
+        let callback = {
+            let link = ctx.link().clone();
+            move |e| link.send_message(Message::Event(e))
+        };
 
         let component = Self {
             current_route: ctx.props().current_route.clone(),
             event_bus: crate::event::Bus::dispatcher(),
             links: Links::new(),
-            _producer: crate::event::Bus::bridge(callback),
+            _producer: crate::event::Bus::bridge(std::rc::Rc::new(callback)),
         };
 
         ctx.link().callback(|_| Message::NeedUpdate).emit(());
