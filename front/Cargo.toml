@@ -26,7 +26,7 @@ wasm-logger = "0.2"
 wasm-sockets = "0.2"
 yew = "0.19"
 yew-agent = "0.1"
-yew-router = "0.16"
+yew-router = "0.17"
 
 [dependencies.elephantry-extras]
 version = "0.3"
