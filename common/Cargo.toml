@@ -20,7 +20,7 @@ version = "0.24"
 optional = true
 
 [dependencies.base64]
-version = "0.13"
+version = "0.20"
 optional = true
 
 [dependencies.chrono]
