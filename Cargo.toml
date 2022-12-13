@@ -4,3 +4,31 @@ members = [
     "common",
     "front",
 ]
+
+[workspace.dependencies]
+actix-web = "4.0"
+base64 = "0.20"
+feed-rs = "1.0"
+http = "0.2"
+hmac = "0.12"
+jwt = "0.16"
+log = "0.4"
+opml = "1.0"
+reqwest = "0.11"
+ring = "0.17.0-alpha.7"
+serde = "1.0"
+serde_json = "1.0"
+sha2 = "0.10"
+uuid = "1.0"
+
+[workspace.dependencies.attohttpc]
+version = "0.24"
+features = ["json"]
+
+[workspace.dependencies.chrono]
+version = "0.4"
+features = ["serde"]
+
+[workspace.dependencies.elephantry]
+version = "3.0"
+features = ["date", "uuid"]

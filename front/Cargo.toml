@@ -9,16 +9,16 @@ license = "MIT"
 anyhow = "1.0"
 futures = "0.3"
 gloo = "0.8"
-hmac = "0.12"
-http = "0.2"
-jwt = "0.16"
+hmac.workspace = true
+http.workspace = true
+jwt.workspace = true
 regex = "1.4"
-ring = "0.17.0-alpha.7"
-serde = "1.0"
-serde_json = "1.0"
-sha2 = "0.10"
+ring.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
 urlencoding = "2.0"
-uuid = "1.0"
+uuid.workspace = true
 wasm-bindgen = "0.2"
 wasm-cookies = "0.1"
 wasm-logger = "0.2"
@@ -35,7 +35,7 @@ version = "0.2"
 features = ["wasmbind"]
 
 [dependencies.log]
-version = "0.4"
+workspace = true
 features = ["serde"]
 
 [dependencies.oxfeed-common]
@@ -44,7 +44,7 @@ features = ["front"]
 path = "../common/"
 
 [dependencies.reqwest]
-version = "0.11"
+workspace = true
 features = ["json"]
 
 [dependencies.web-sys]

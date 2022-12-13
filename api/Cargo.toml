@@ -8,34 +8,31 @@ license = "MIT"
 [dependencies]
 actix = "0.13"
 actix-cors = "0.6"
-actix-web = "4.0"
+actix-web.workspace = true
 actix-web-actors = "4.0"
-base64 = "0.20"
+base64.workspace = true
 bigdecimal = "0.3"
+chrono.workspace = true
 dotenv = "0.15"
 env_logger = "0.10"
-feed-rs = "1.0"
+feed-rs.workspace = true
 futures-util = "0.3"
-hmac = "0.12"
-jwt = "0.16"
-log = "0.4"
-opml = "1.0"
+hmac.workspace = true
+jwt.workspace = true
+log.workspace = true
+opml.workspace = true
 rayon = "1.5"
-ring = "0.17.0-alpha.7"
+ring.workspace = true
 scraper = "0.13"
-serde = "1.0"
-serde_json = "1.0"
-sha2 = "0.10"
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
 tree_magic = "0.2"
 url = "2.2"
 
 [dependencies.attohttpc]
-version = "0.24"
+workspace = true
 features = ["json"]
-
-[dependencies.chrono]
-version = "0.4"
-features = ["serde"]
 
 [dependencies.oxfeed-common]
 version = "0.1"
@@ -43,9 +40,9 @@ path = "../common/"
 features = ["back"]
 
 [dependencies.elephantry]
-version = "3.0"
-features = ["date", "numeric", "uuid", "serde"]
+workspace = true
+features = ["numeric", "serde"]
 
 [dependencies.uuid]
-version = "1.0"
+workspace = true
 features = ["serde"]
