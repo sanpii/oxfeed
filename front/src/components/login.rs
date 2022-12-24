@@ -1,4 +1,4 @@
-pub(crate) enum Message {
+pub enum Message {
     Cancel,
     Create(super::form::register::Info),
     Error(String),
@@ -13,7 +13,7 @@ enum Scene {
     Register,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     event_bus: yew_agent::Dispatcher<crate::event::Bus>,
     scene: Scene,
 }

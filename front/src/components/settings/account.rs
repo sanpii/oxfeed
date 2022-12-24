@@ -1,5 +1,5 @@
 #[derive(Clone)]
-pub(crate) enum Message {
+pub enum Message {
     Delete,
     Error(String),
     Logout,
@@ -8,7 +8,7 @@ pub(crate) enum Message {
     Save(oxfeed_common::account::Entity),
 }
 
-pub(crate) struct Component {
+pub struct Component {
     account: Option<oxfeed_common::account::Entity>,
 }
 

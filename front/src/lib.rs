@@ -3,20 +3,21 @@
 
 mod api;
 mod cha;
-mod components;
-mod event;
 mod filter;
 mod location;
 mod render;
 
-pub(crate) use api::Api;
-pub(crate) use event::Event;
-pub(crate) use filter::*;
-pub(crate) use location::Location;
-pub(crate) use render::*;
+pub mod components;
+pub mod event;
+
+pub use api::Api;
+pub use event::Event;
+pub use filter::*;
+pub use location::Location;
+pub use render::*;
 
 #[derive(Clone, Eq, PartialEq, serde::Deserialize)]
-struct Pager<T> {
+pub struct Pager<T> {
     result_count: usize,
     result_min: usize,
     result_max: usize,
@@ -39,33 +40,6 @@ impl<T: crate::Render> From<Pager<T>> for elephantry_extras::Pager {
             max_per_page: pager.max_per_page,
         }
     }
-}
-
-struct App;
-
-impl yew::Component for App {
-    type Message = ();
-    type Properties = ();
-
-    fn create(_: &yew::Context<Self>) -> Self {
-        Self
-    }
-
-    fn update(&mut self, _: &yew::Context<Self>, _: Self::Message) -> bool {
-        false
-    }
-
-    fn view(&self, _: &yew::Context<Self>) -> yew::Html {
-        yew::html! {
-            <components::App />
-        }
-    }
-}
-
-fn main() {
-    wasm_logger::init(wasm_logger::Config::new(log::Level::Debug));
-
-    yew::Renderer::<App>::new().render();
 }
 
 #[macro_export]

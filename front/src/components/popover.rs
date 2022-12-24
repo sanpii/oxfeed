@@ -1,12 +1,12 @@
 #[derive(Clone, PartialEq, Eq, yew::Properties)]
-pub(crate) struct Properties {
+pub struct Properties {
     #[prop_or_default]
     pub title: Option<String>,
     pub text: String,
     pub position: String,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     props: Properties,
 }
 

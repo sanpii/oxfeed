@@ -1,4 +1,4 @@
-pub(crate) trait Render: Clone + Eq + PartialEq {
+pub trait Render: Clone + Eq + PartialEq {
     fn render(&self) -> yew::Html;
 }
 

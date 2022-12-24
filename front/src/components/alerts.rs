@@ -1,9 +1,9 @@
-pub(crate) enum Message {
+pub enum Message {
     Close(usize),
     Event(crate::Event),
 }
 
-pub(crate) struct Component {
+pub struct Component {
     messages: Vec<crate::event::Alert>,
     _producer: Box<dyn yew_agent::Bridge<crate::event::Bus>>,
 }

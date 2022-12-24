@@ -1,4 +1,4 @@
-pub(crate) enum Message {
+pub enum Message {
     Content(String),
     Error(String),
     ToggleContent,
@@ -25,11 +25,11 @@ impl std::ops::Not for Scene {
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties {
+pub struct Properties {
     pub value: oxfeed_common::item::Item,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     content: Option<String>,
     event_bus: yew_agent::Dispatcher<crate::event::Bus>,
     scene: Scene,

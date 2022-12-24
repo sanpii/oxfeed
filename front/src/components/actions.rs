@@ -1,10 +1,10 @@
-pub(crate) enum Message {
+pub enum Message {
     ToggleFavorite,
     ToggleRead,
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties {
+pub struct Properties {
     #[prop_or_default]
     pub inline: bool,
     pub favorite: bool,
@@ -13,7 +13,7 @@ pub(crate) struct Properties {
     pub on_read: yew::Callback<()>,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     props: Properties,
 }
 

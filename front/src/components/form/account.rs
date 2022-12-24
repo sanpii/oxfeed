@@ -1,16 +1,16 @@
-pub(crate) enum Message {
+pub enum Message {
     Save,
     UpdateEmail(String),
     UpdatePassword(String),
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties {
+pub struct Properties {
     pub account: oxfeed_common::account::Entity,
     pub on_save: yew::Callback<oxfeed_common::account::Entity>,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     props: Properties,
 }
 

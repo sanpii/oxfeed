@@ -1,5 +1,5 @@
 #[derive(Clone, PartialEq, Eq, yew_router::Routable)]
-pub(crate) enum Route {
+pub enum Route {
     #[at("/favorites")]
     Favorites,
     #[at("/settings")]
@@ -21,12 +21,12 @@ pub(crate) enum Route {
     NotFound,
 }
 
-pub(crate) enum Message {
+pub enum Message {
     Event(crate::Event),
     Websocket(wasm_sockets::Message),
 }
 
-pub(crate) struct Component {
+pub struct Component {
     auth: bool,
     event_bus: yew_agent::Dispatcher<crate::event::Bus>,
     _producer: Box<dyn yew_agent::Bridge<crate::event::Bus>>,

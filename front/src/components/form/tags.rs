@@ -1,17 +1,17 @@
 #[derive(Clone)]
-pub(crate) enum Message {
+pub enum Message {
     Add(String),
     Delete,
     Remove(usize),
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties {
+pub struct Properties {
     pub values: Vec<String>,
     pub on_change: yew::Callback<Vec<String>>,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     values: Vec<String>,
     on_change: yew::Callback<Vec<String>>,
 }

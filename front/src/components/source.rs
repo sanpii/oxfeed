@@ -1,4 +1,4 @@
-pub(crate) enum Message {
+pub enum Message {
     Cancel,
     Delete,
     Deleted,
@@ -15,11 +15,11 @@ enum Scene {
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties {
+pub struct Properties {
     pub value: oxfeed_common::source::Entity,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     event_bus: yew_agent::Dispatcher<crate::event::Bus>,
     scene: Scene,
     props: Properties,

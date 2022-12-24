@@ -1,9 +1,9 @@
-pub(crate) enum Message {
+pub enum Message {
     Toggle,
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties {
+pub struct Properties {
     pub id: String,
     #[prop_or_default]
     pub label: String,
@@ -13,7 +13,7 @@ pub(crate) struct Properties {
     pub on_toggle: yew::Callback<bool>,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     props: Properties,
 }
 

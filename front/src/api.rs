@@ -1,7 +1,7 @@
 use reqwest::Method;
 use yew_agent::Dispatched;
 
-pub(crate) struct Api;
+pub struct Api;
 
 impl Api {
     pub fn token() -> String {

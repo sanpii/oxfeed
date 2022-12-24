@@ -1,5 +1,5 @@
 #[derive(Clone)]
-pub(crate) enum Message {
+pub enum Message {
     Error(String),
     Event(crate::Event),
     NeedUpdate,
@@ -8,14 +8,14 @@ pub(crate) enum Message {
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties {
+pub struct Properties {
     #[prop_or_default]
     pub filter: crate::Filter,
     pub kind: String,
     pub pagination: oxfeed_common::Pagination,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     kind: String,
     filter: crate::Filter,
     pager: Option<crate::Pager<oxfeed_common::item::Item>>,

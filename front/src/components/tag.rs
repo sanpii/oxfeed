@@ -1,10 +1,10 @@
 #[derive(Clone)]
-pub(crate) enum Message {
+pub enum Message {
     Click,
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties {
+pub struct Properties {
     pub value: String,
     #[prop_or_default]
     pub editable: bool,
@@ -12,7 +12,7 @@ pub(crate) struct Properties {
     pub on_click: yew::Callback<()>,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     editable: bool,
     value: String,
     on_click: yew::Callback<()>,
