@@ -78,7 +78,8 @@ async fn update(
     data.user_id = Some(user.id);
     let webhook_id = Some(path.into_inner());
     let pk = elephantry::pk!(webhook_id);
-    let webhook = elephantry.update_one::<Model>(&pk, &data.into_inner().try_into()?)?
+    let webhook = elephantry
+        .update_one::<Model>(&pk, &data.into_inner().try_into()?)?
         .ok_or(oxfeed_common::Error::NotFound)?;
 
     Ok(actix_web::HttpResponse::Ok().json(webhook))

@@ -96,7 +96,9 @@ async fn patch(
     let token = identity.token(&elephantry)?;
     let item_id = path.into_inner();
 
-    elephantry.model::<Model>().one(&token, &item_id)?
+    elephantry
+        .model::<Model>()
+        .one(&token, &item_id)?
         .ok_or(oxfeed_common::Error::NotFound)?;
 
     let mut data = HashMap::new();
@@ -111,7 +113,8 @@ async fn patch(
     }
 
     if !data.is_empty() {
-        elephantry.update_by_pk::<Model>(&elephantry::pk!(item_id), &data)?
+        elephantry
+            .update_by_pk::<Model>(&elephantry::pk!(item_id), &data)?
             .ok_or(oxfeed_common::Error::NotFound)?;
     }
 

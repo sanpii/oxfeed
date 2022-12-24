@@ -50,10 +50,7 @@ impl From<Location> for oxfeed_common::Pagination {
         let query = location.query();
 
         Self {
-            page: query
-                .get("page")
-                .and_then(|x| x.parse().ok())
-                .unwrap_or(1),
+            page: query.get("page").and_then(|x| x.parse().ok()).unwrap_or(1),
             limit: query
                 .get("limit")
                 .and_then(|x| x.parse().ok())

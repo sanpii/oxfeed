@@ -47,7 +47,9 @@ impl From<String> for Filter {
         let mut source = String::new();
         let mut tag = String::new();
 
-        let regex = regex::Regex::new(r#"(:?source=(?P<source>[^ ]+) )?(tag=(?P<tag>[^ ]+) )?(?P<q>.*)"#).unwrap();
+        let regex =
+            regex::Regex::new(r#"(:?source=(?P<source>[^ ]+) )?(tag=(?P<tag>[^ ]+) )?(?P<q>.*)"#)
+                .unwrap();
 
         if let Some(captures) = regex.captures(&query) {
             q = captures

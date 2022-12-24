@@ -183,7 +183,7 @@ impl yew::Component for Component {
 
                     match crate::Api::counts().await {
                         Ok(count) => Message::UpdateAll(count),
-                        Err(err) =>  Message::Error(err.to_string()),
+                        Err(err) => Message::Error(err.to_string()),
                     }
                 });
             }

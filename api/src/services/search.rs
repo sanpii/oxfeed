@@ -78,7 +78,9 @@ fn search(
     writeln!(sql, "where {}", clause.to_string()).ok();
 
     if query.q.is_some() {
-        sql.push_str("order by ts_rank_cd(f.document, websearch_to_tsquery($1)) desc, i.published desc\n");
+        sql.push_str(
+            "order by ts_rank_cd(f.document, websearch_to_tsquery($1)) desc, i.published desc\n",
+        );
     } else {
         sql.push_str("order by i.published desc\n");
     }

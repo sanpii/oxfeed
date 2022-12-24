@@ -68,7 +68,9 @@ async fn get(
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = identity.token(&elephantry)?;
-    let source = elephantry.model::<Model>().one(&source_id, &token)?
+    let source = elephantry
+        .model::<Model>()
+        .one(&source_id, &token)?
         .ok_or(oxfeed_common::Error::NotFound)?;
 
     Ok(actix_web::HttpResponse::Ok().json(source))
@@ -121,7 +123,8 @@ async fn update(
     data.user_id = Some(user.id);
     let source_id = Some(path.into_inner());
     let pk = elephantry::pk!(source_id);
-    let source = elephantry.update_one::<Model>(&pk, &data.into_inner().try_into()?)?
+    let source = elephantry
+        .update_one::<Model>(&pk, &data.into_inner().try_into()?)?
         .ok_or(oxfeed_common::Error::NotFound)?;
 
     Ok(actix_web::HttpResponse::Ok().json(source))
