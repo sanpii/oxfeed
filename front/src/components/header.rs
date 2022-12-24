@@ -1,9 +1,3 @@
-pub enum Message {
-    Error(String),
-    Logout,
-    Loggedout,
-}
-
 #[derive(Clone, PartialEq, yew::Properties)]
 pub struct Properties {
     pub current_route: super::app::Route,
@@ -11,40 +5,23 @@ pub struct Properties {
 
 pub struct Component {
     current_route: super::app::Route,
-    event_bus: yew_agent::Dispatcher<crate::event::Bus>,
 }
 
 impl yew::Component for Component {
-    type Message = Message;
+    type Message = ();
     type Properties = Properties;
 
     fn create(ctx: &yew::Context<Self>) -> Self {
-        use yew_agent::Dispatched;
-
         Self {
             current_route: ctx.props().current_route.clone(),
-            event_bus: crate::event::Bus::dispatcher(),
         }
     }
 
-    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            Message::Error(_) => (),
-            Message::Logout => crate::api!(
-                ctx.link(),
-                auth_logout() -> |_| Message::Loggedout
-            ),
-            Message::Loggedout => {
-                let alert = crate::event::Alert::info("Logged out");
-                self.event_bus.send(crate::Event::Alert(alert));
-                self.event_bus.send(crate::Event::Redirect("/".to_string()));
-            }
-        }
-
+    fn update(&mut self, _: &yew::Context<Self>, _: Self::Message) -> bool {
         false
     }
 
-    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
+    fn view(&self, _: &yew::Context<Self>) -> yew::Html {
         let filter = crate::Filter::new();
 
         yew::html! {
@@ -54,13 +31,7 @@ impl yew::Component for Component {
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <super::search::Bar current_route={ self.current_route.clone() } filter={ filter } />
-                <button
-                    class={ yew::classes!("btn", "btn-secondary", "logout") }
-                    title="Logout"
-                    onclick={ ctx.link().callback(|_| Message::Logout) }
-                >
-                    <super::Svg icon="door-closed" size=24 />
-                </button>
+                <super::Logout button=true />
             </>
         }
     }

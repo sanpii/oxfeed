@@ -238,6 +238,9 @@ impl yew::Component for Component {
                         </li>
                     })
                 }
+                    <li class={ yew::classes!("nav-item", "d-md-none") } data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+                        <super::Logout button=false />
+                    </li>
                 </ul>
             </>
         }
