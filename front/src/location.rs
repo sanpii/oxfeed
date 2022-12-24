@@ -5,11 +5,17 @@ pub struct Location {
     history: gloo::history::BrowserHistory,
 }
 
-impl Location {
-    pub fn new() -> Self {
+impl Default for Location {
+    fn default() -> Self {
         Self {
             history: gloo::history::BrowserHistory::new(),
         }
+    }
+}
+
+impl Location {
+    pub fn new() -> Self {
+        Self::default()
     }
 
     pub fn path(&self) -> String {

@@ -136,7 +136,7 @@ impl Task {
     fn icon(link: &str) -> Option<String> {
         let selector = scraper::Selector::parse("link[rel=\"icon\"]").unwrap();
 
-        let request = match attohttpc::RequestBuilder::try_new(attohttpc::Method::GET, &link) {
+        let request = match attohttpc::RequestBuilder::try_new(attohttpc::Method::GET, link) {
             Ok(request) => request,
             Err(_) => return None,
         };
