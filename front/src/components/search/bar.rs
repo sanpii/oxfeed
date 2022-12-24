@@ -1,15 +1,15 @@
-pub(crate) enum Message {
+pub enum Message {
     Input(String),
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties {
+pub struct Properties {
     pub current_route: crate::components::app::Route,
     #[prop_or_default]
     pub filter: crate::Filter,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     current_route: crate::components::app::Route,
     event_bus: yew_agent::Dispatcher<crate::event::Bus>,
     filter: crate::Filter,

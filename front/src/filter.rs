@@ -1,5 +1,5 @@
 #[derive(Clone, Default, Eq, PartialEq)]
-pub(crate) struct Filter {
+pub struct Filter {
     q: String,
     source: String,
     tag: String,

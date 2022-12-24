@@ -2,7 +2,7 @@ mod account;
 mod opml;
 mod webhooks;
 
-pub(crate) struct Component;
+pub struct Component;
 
 impl yew::Component for Component {
     type Message = ();

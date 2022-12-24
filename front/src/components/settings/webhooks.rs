@@ -1,4 +1,4 @@
-pub(crate) enum Message {
+pub enum Message {
     Add,
     Cancel,
     Create(oxfeed_common::webhook::Entity),
@@ -13,7 +13,7 @@ enum Scene {
     View,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     scene: Scene,
     webhooks: Vec<oxfeed_common::webhook::Entity>,
     _producer: Box<dyn yew_agent::Bridge<crate::event::Bus>>,

@@ -1,22 +1,22 @@
-pub(crate) enum Message {
+pub enum Message {
     ToggleRemember,
     UpdateEmail(String),
     UpdatePassword(String),
     Submit,
 }
 
-pub(crate) struct Info {
+pub struct Info {
     pub email: String,
     pub password: String,
     pub remember_me: bool,
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties {
+pub struct Properties {
     pub on_submit: yew::Callback<Info>,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     email: String,
     password: String,
     remember_me: bool,

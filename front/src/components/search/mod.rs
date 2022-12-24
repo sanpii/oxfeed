@@ -1,18 +1,18 @@
 mod bar;
 
-pub(crate) enum Message {
+pub enum Message {
     Event(crate::Event),
 }
 
-pub(crate) use bar::Component as Bar;
+pub use bar::Component as Bar;
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties {
+pub struct Properties {
     pub kind: String,
     pub pagination: oxfeed_common::Pagination,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     kind: String,
     pagination: oxfeed_common::Pagination,
     filter: crate::Filter,

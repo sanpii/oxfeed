@@ -1,9 +1,9 @@
-pub(crate) enum Message {
+pub enum Message {
     Click,
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties {
+pub struct Properties {
     pub icon: String,
     pub size: u32,
     #[prop_or_default]
@@ -12,7 +12,7 @@ pub(crate) struct Properties {
     pub on_click: yew::Callback<()>,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     icon: String,
     on_click: yew::Callback<()>,
     size: u32,

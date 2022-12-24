@@ -3,13 +3,13 @@ pub enum Message {
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties<R: crate::Render> {
+pub struct Properties<R: crate::Render> {
     pub value: crate::Pager<R>,
     #[prop_or_default]
     pub on_page_change: yew::Callback<usize>,
 }
 
-pub(crate) struct Component<R: 'static + crate::Render> {
+pub struct Component<R: 'static + crate::Render> {
     value: crate::Pager<R>,
     on_page_change: yew::Callback<usize>,
 }

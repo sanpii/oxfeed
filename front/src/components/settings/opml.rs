@@ -1,4 +1,4 @@
-pub(crate) enum Message {
+pub enum Message {
     Error(oxfeed_common::Error),
     Import,
     Imported,
@@ -6,7 +6,7 @@ pub(crate) enum Message {
     Files(Vec<gloo::file::File>),
 }
 
-pub(crate) struct Component {
+pub struct Component {
     event_bus: yew_agent::Dispatcher<crate::event::Bus>,
     files: Vec<gloo::file::File>,
 }

@@ -1,5 +1,5 @@
 #[derive(Clone)]
-pub(crate) enum Message {
+pub enum Message {
     Error(String),
     Event(crate::Event),
     NeedUpdate,
@@ -9,7 +9,7 @@ pub(crate) enum Message {
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties {
+pub struct Properties {
     pub current_route: super::app::Route,
 }
 
@@ -116,7 +116,7 @@ struct Link {
     route: super::app::Route,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     current_route: super::app::Route,
     event_bus: yew_agent::Dispatcher<crate::event::Bus>,
     links: Links,

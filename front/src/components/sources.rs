@@ -1,5 +1,5 @@
 #[derive(Clone)]
-pub(crate) enum Message {
+pub enum Message {
     Add,
     Cancel,
     Create(oxfeed_common::source::Entity),
@@ -16,13 +16,13 @@ enum Scene {
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties {
+pub struct Properties {
     #[prop_or_default]
     pub filter: crate::Filter,
     pub pagination: oxfeed_common::Pagination,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     filter: crate::Filter,
     scene: Scene,
     pager: Option<crate::Pager<oxfeed_common::source::Entity>>,

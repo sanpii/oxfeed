@@ -1,7 +1,7 @@
 use gloo::history::History;
 use std::collections::HashMap;
 
-pub(crate) struct Location {
+pub struct Location {
     history: gloo::history::BrowserHistory,
 }
 

@@ -1,4 +1,4 @@
-pub(crate) enum Message {
+pub enum Message {
     Cancel,
     Error(String),
     Submit,
@@ -11,13 +11,13 @@ pub(crate) enum Message {
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties {
+pub struct Properties {
     pub source: oxfeed_common::source::Entity,
     pub on_cancel: yew::Callback<()>,
     pub on_submit: yew::Callback<oxfeed_common::source::Entity>,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     props: Properties,
     webhooks: Vec<oxfeed_common::webhook::Entity>,
 }

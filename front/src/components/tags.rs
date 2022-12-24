@@ -1,15 +1,15 @@
-pub(crate) enum Message {
+pub enum Message {
     Error(String),
     Update(Vec<oxfeed_common::Tag>),
     NeedUpdate,
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties {
+pub struct Properties {
     pub pagination: oxfeed_common::Pagination,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     tags: Vec<oxfeed_common::Tag>,
     pagination: oxfeed_common::Pagination,
 }

@@ -1,4 +1,4 @@
-pub(crate) enum Message {
+pub enum Message {
     Choose(usize),
     Error(String),
     Input(String),
@@ -7,14 +7,14 @@ pub(crate) enum Message {
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties {
+pub struct Properties {
     #[prop_or_default]
     pub on_select: yew::Callback<String>,
     #[prop_or_default]
     pub on_delete: yew::Callback<()>,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     active: Option<usize>,
     input_ref: yew::NodeRef,
     terms: Vec<String>,

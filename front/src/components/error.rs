@@ -1,9 +1,9 @@
 #[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties {
+pub struct Properties {
     pub text: String,
 }
 
-pub(crate) struct Component {
+pub struct Component {
     text: String,
 }
 
