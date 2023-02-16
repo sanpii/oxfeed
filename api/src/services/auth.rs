@@ -25,11 +25,10 @@ async fn login(
     elephantry: actix_web::web::Data<elephantry::Pool>,
     token: actix_web::web::Json<String>,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
-    let secret = crate::env("SECRET")?;
-
     use hmac::Mac;
     use jwt::VerifyWithKey;
 
+    let secret = crate::env("SECRET")?;
     let key: hmac::Hmac<sha2::Sha256> = hmac::Hmac::new_from_slice(secret.as_bytes()).unwrap();
     let claims: std::collections::BTreeMap<String, String> = token.verify_with_key(&key)?;
 

@@ -61,9 +61,8 @@ impl yew::Component for Component {
     }
 
     fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        let account = match &self.account {
-            Some(account) => account,
-            None => return "".into(),
+        let Some(account) = &self.account else {
+            return "".into();
         };
 
         yew::html! {

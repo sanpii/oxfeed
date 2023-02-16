@@ -86,9 +86,8 @@ async fn delete(
 
     let token = identity.token(&elephantry)?;
 
-    let source = match elephantry.model::<Model>().one(&token, &source_id)? {
-        Some(source) => source,
-        None => return Ok(actix_web::HttpResponse::NoContent().finish()),
+    let Some(source) = elephantry.model::<Model>().one(&token, &source_id)? else {
+        return Ok(actix_web::HttpResponse::NoContent().finish());
     };
 
     elephantry.delete_where::<ItemModel>("source_id = $*", &[&source_id])?;
@@ -112,13 +111,10 @@ async fn update(
 
     let token = identity.token(&elephantry)?;
 
-    let user = match elephantry
+    let user = elephantry
         .model::<oxfeed_common::user::Model>()
         .find_from_token(&token)
-    {
-        Some(user) => user,
-        None => return Ok(actix_web::HttpResponse::Unauthorized().finish()),
-    };
+        .ok_or(oxfeed_common::Error::Auth)?;
 
     data.user_id = Some(user.id);
     let source_id = Some(path.into_inner());

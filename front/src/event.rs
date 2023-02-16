@@ -34,10 +34,12 @@ pub struct Alert {
 }
 
 impl Alert {
+    #[must_use]
     pub fn info(message: &str) -> Self {
         Self::new(log::Level::Info, message)
     }
 
+    #[must_use]
     pub fn error(message: &str) -> Self {
         Self::new(log::Level::Error, message)
     }
@@ -49,6 +51,7 @@ impl Alert {
         }
     }
 
+    #[must_use]
     pub fn severity(&self) -> String {
         let severity = match self.level {
             log::Level::Trace => "light",
@@ -83,7 +86,7 @@ impl yew_agent::Worker for Bus {
     fn update(&mut self, _: Self::Message) {}
 
     fn handle_input(&mut self, msg: Self::Input, _: yew_agent::HandlerId) {
-        for sub in self.subscribers.iter() {
+        for sub in &self.subscribers {
             self.link.respond(*sub, msg.clone());
         }
     }

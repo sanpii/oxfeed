@@ -27,6 +27,7 @@ where
 }
 
 impl Pagination {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             page: default_page(),
@@ -34,6 +35,7 @@ impl Pagination {
         }
     }
 
+    #[must_use]
     pub fn to_sql(self) -> String {
         format!(
             "offset {} fetch first {} rows only",
@@ -42,6 +44,7 @@ impl Pagination {
         )
     }
 
+    #[must_use]
     pub fn to_query(self) -> String {
         format!("page={}&limit={}", self.page, self.limit)
     }

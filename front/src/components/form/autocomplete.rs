@@ -61,16 +61,16 @@ impl yew::Component for Component {
                 let pagination = oxfeed_common::Pagination::new();
                 let filter: crate::Filter = input.clone().into();
 
-                if !input.is_empty() {
+                if input.is_empty() {
+                    self.terms = Vec::new();
+                    self.active = None;
+                } else {
                     crate::api!(
                         ctx.link(),
                         tags_search(filter, pagination) -> Message::Terms
                     );
 
                     should_render = false;
-                } else {
-                    self.terms = Vec::new();
-                    self.active = None;
                 }
             }
             Message::Key(key) => match key.as_str() {
@@ -138,7 +138,9 @@ impl yew::Component for Component {
                     onkeydown={ ctx.link().callback(|e: yew::KeyboardEvent| Message::Key(e.key())) }
                 />
                 {
-                    if !self.terms.is_empty() {
+                    if self.terms.is_empty() {
+                        "".into()
+                    } else {
                         yew::html! {
                             <div class="list-group">
                             {
@@ -153,8 +155,6 @@ impl yew::Component for Component {
                             }
                             </div>
                         }
-                    } else {
-                        "".into()
                     }
                 }
             </div>

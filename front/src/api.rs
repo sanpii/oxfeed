@@ -4,6 +4,7 @@ use yew_agent::Dispatched;
 pub struct Api;
 
 impl Api {
+    #[must_use]
     pub fn token() -> String {
         wasm_cookies::get("token")
             .unwrap_or_else(|| Ok(String::new()))

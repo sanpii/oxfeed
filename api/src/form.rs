@@ -16,15 +16,11 @@ impl std::convert::TryInto<oxfeed_common::source::Entity> for Source {
     type Error = oxfeed_common::Error;
 
     fn try_into(self) -> oxfeed_common::Result<oxfeed_common::source::Entity> {
-        let user_id = match self.user_id {
-            Some(user_id) => user_id,
-            None => return Err(oxfeed_common::Error::Auth),
-        };
+        let user_id = self.user_id.ok_or(oxfeed_common::Error::Auth)?;
 
-        let title = match self.title {
-            Some(title) => title,
-            None => self.title().unwrap_or_else(|| "<no title>".to_string()),
-        };
+        let title = self.title.clone()
+            .or_else(|| self.title())
+            .unwrap_or_else(|| "<no title>".to_string());
 
         let entity = oxfeed_common::source::Entity {
             last_error: None,
@@ -34,7 +30,7 @@ impl std::convert::TryInto<oxfeed_common::source::Entity> for Source {
             url: self.url.clone(),
             user_id,
             active: self.active,
-            webhooks: self.webhooks.clone(),
+            webhooks: self.webhooks,
         };
 
         Ok(entity)
@@ -43,23 +39,20 @@ impl std::convert::TryInto<oxfeed_common::source::Entity> for Source {
 
 impl Source {
     fn title(&self) -> Option<String> {
-        let contents = match Self::fetch(&self.url) {
-            Ok(contents) => contents,
-            Err(_) => return None,
+        let Ok(contents) = Self::fetch(&self.url) else {
+            return None;
         };
 
-        let feed = match feed_rs::parser::parse(contents.as_bytes()) {
-            Ok(feed) => feed,
-            Err(_) => return None,
+        let Ok(feed) = feed_rs::parser::parse(contents.as_bytes()) else {
+            return None;
         };
 
         let mut title = feed.title.map(|x| x.content);
 
         if title.is_none() {
             for link in feed.links {
-                let contents = match Self::fetch(&link.href) {
-                    Ok(contents) => contents,
-                    Err(_) => continue,
+                let Ok(contents) = Self::fetch(&link.href) else {
+                    continue;
                 };
 
                 let html = scraper::Html::parse_document(&contents);

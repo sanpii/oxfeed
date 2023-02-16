@@ -14,22 +14,27 @@ impl Default for Location {
 }
 
 impl Location {
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
 
+    #[must_use]
     pub fn path(&self) -> String {
         self.history.location().path().to_string()
     }
 
+    #[must_use]
     pub fn q(&self) -> String {
         self.param("q")
     }
 
+    #[must_use]
     pub fn param(&self, name: &str) -> String {
         self.query().get(name).cloned().unwrap_or_default()
     }
 
+    #[must_use]
     pub fn query(&self) -> HashMap<String, String> {
         let mut map = HashMap::new();
         let query = self.history.location().query_str().to_string();

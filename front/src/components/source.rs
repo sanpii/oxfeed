@@ -145,14 +145,14 @@ impl yew::Component for Component {
 
                         <div class={ yew::classes!("btn-group", "float-end") }>
                             {
-                                if !source.webhooks.is_empty() {
+                                if source.webhooks.is_empty() {
+                                    "".into()
+                                } else {
                                     yew::html! {
                                         <button class={ yew::classes!("btn", "btn-warning") } disabled=true>
                                             <super::Svg icon="plug" size=16 />
                                         </button>
                                     }
-                                } else {
-                                    "".into()
                                 }
                             }
                             <button

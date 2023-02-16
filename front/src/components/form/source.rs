@@ -49,7 +49,7 @@ impl yew::Component for Component {
             Message::ToggleWebhook(id, active) => {
                 if active {
                     if !self.props.source.webhooks.contains(&id) {
-                        self.props.source.webhooks.push(id)
+                        self.props.source.webhooks.push(id);
                     }
                 } else {
                     self.props.source.webhooks.retain(|x| x != &id);
@@ -123,7 +123,9 @@ impl yew::Component for Component {
                 </div>
 
                 {
-                    if !self.webhooks.is_empty() {
+                    if self.webhooks.is_empty() {
+                        "".into()
+                    } else {
                         yew::html! {
                             <div class="row mb-3">
                                 <label class="col-sm-1 col-form-label" for="webhooks">{ "Webhooks" }</label>
@@ -146,8 +148,6 @@ impl yew::Component for Component {
                                 </div>
                             </div>
                         }
-                    } else {
-                        "".into()
                     }
                 }
 

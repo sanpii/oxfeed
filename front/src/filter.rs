@@ -6,10 +6,12 @@ pub struct Filter {
 }
 
 impl Filter {
+    #[must_use]
     pub fn new() -> Self {
         Self::from(&crate::Location::new())
     }
 
+    #[must_use]
     pub fn from(location: &crate::Location) -> Self {
         Self {
             q: location.q(),
@@ -18,10 +20,12 @@ impl Filter {
         }
     }
 
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.q.is_empty() && self.tag.is_empty() && self.source.is_empty()
     }
 
+    #[must_use]
     pub fn to_url_param(&self) -> String {
         let mut params = Vec::new();
 
@@ -54,8 +58,7 @@ impl From<String> for Filter {
         if let Some(captures) = regex.captures(&query) {
             q = captures
                 .name("q")
-                .map(|x| x.as_str().to_string())
-                .unwrap_or_else(|| query.clone());
+                .map_or_else(|| query.clone(), |x| x.as_str().to_string());
             source = captures
                 .name("source")
                 .map(|x| x.as_str().to_string())

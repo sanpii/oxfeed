@@ -140,9 +140,8 @@ impl yew::Component for Component {
             },
         };
 
-        let pager = match &self.pager {
-            Some(pager) => pager,
-            None => return add,
+        let Some(pager) = &self.pager else {
+            return add;
         };
 
         if pager.iterator.is_empty() {

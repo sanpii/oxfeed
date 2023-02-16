@@ -39,9 +39,8 @@ fn save(
         save(elephantry, outline, user);
     }
 
-    let source = match source_try_from(outline, user) {
-        Ok(source) => source,
-        Err(_) => return,
+    let Ok(source) = source_try_from(outline, user) else {
+        return;
     };
 
     if let Err(error) = elephantry.insert_one::<oxfeed_common::source::Model>(&source) {

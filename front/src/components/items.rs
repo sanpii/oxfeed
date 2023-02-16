@@ -91,12 +91,9 @@ impl yew::Component for Component {
     }
 
     fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        let pager = match &self.pager {
-            Some(pager) => pager,
-            None => {
-                return yew::html! {
-                    <super::Empty />
-                }
+        let Some(pager) = &self.pager else {
+            return yew::html! {
+                <super::Empty />
             }
         };
 

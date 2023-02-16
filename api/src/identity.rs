@@ -28,18 +28,15 @@ impl actix_web::FromRequest for Identity {
         request: &actix_web::HttpRequest,
         _: &mut actix_web::dev::Payload,
     ) -> Self::Future {
-        let authorization = match request
+        let Some(authorization) = request
             .headers()
             .get("Authorization")
-            .and_then(|x| x.to_str().ok())
-        {
-            Some(authorization) => authorization,
-            None => return Self::unauthorized(),
+            .and_then(|x| x.to_str().ok()) else {
+            return Self::unauthorized();
         };
 
-        let mid = match authorization.find(' ') {
-            Some(mid) => mid,
-            None => return Self::unauthorized(),
+        let Some(mid) = authorization.find(' ') else {
+            return Self::unauthorized();
         };
 
         let (ty, token) = authorization.split_at(mid);

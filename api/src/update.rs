@@ -103,8 +103,7 @@ impl Task {
             if !exist {
                 let title = entry
                     .title
-                    .map(|x| x.content)
-                    .unwrap_or_else(|| "&lt;no title&gt;".to_string());
+                    .map_or_else(|| "&lt;no title&gt;".to_string(), |x| x.content);
 
                 log::info!("Adding '{title}'");
 
@@ -136,9 +135,8 @@ impl Task {
     fn icon(link: &str) -> Option<String> {
         let selector = scraper::Selector::parse("link[rel=\"icon\"]").unwrap();
 
-        let request = match attohttpc::RequestBuilder::try_new(attohttpc::Method::GET, link) {
-            Ok(request) => request,
-            Err(_) => return None,
+        let Ok(request) = attohttpc::RequestBuilder::try_new(attohttpc::Method::GET, link) else {
+            return None;
         };
 
         let contents = match request.send() {
@@ -147,9 +145,8 @@ impl Task {
         };
 
         let html = scraper::Html::parse_document(&contents);
-        let icon = match html.select(&selector).next() {
-            Some(icon) => icon,
-            None => return None,
+        let Some(icon) = html.select(&selector).next() else {
+            return None;
         };
         let href = match icon.value().attr("href") {
             Some(href) => href.to_string(),
@@ -159,9 +156,8 @@ impl Task {
         if href.starts_with("http") {
             Some(href)
         } else {
-            let mut url = match url::Url::parse(link) {
-                Ok(url) => url,
-                Err(_) => return None,
+            let Ok(mut url) = url::Url::parse(link) else {
+                return None;
             };
             url.set_path("");
 

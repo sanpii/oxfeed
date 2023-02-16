@@ -30,7 +30,7 @@ pub struct Component {
     auth: bool,
     event_bus: yew_agent::Dispatcher<crate::event::Bus>,
     _producer: Box<dyn yew_agent::Bridge<crate::event::Bus>>,
-    _websocket: Option<wasm_sockets::EventClient>,
+    websocket: Option<wasm_sockets::EventClient>,
 }
 
 impl Component {
@@ -72,7 +72,7 @@ impl yew::Component for Component {
         };
 
         Self {
-            _websocket: Self::websocket(ctx.link()),
+            websocket: Self::websocket(ctx.link()),
             auth: !crate::Api::token().is_empty(),
             event_bus: crate::event::Bus::dispatcher(),
             _producer: crate::event::Bus::bridge(std::rc::Rc::new(callback)),
@@ -90,7 +90,7 @@ impl yew::Component for Component {
                 }
                 crate::Event::Logged => {
                     self.auth = true;
-                    self._websocket = Self::websocket(ctx.link());
+                    self.websocket = Self::websocket(ctx.link());
                     should_render = true;
                 }
                 crate::Event::Redirect(route) => {
