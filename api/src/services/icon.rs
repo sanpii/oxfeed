@@ -19,9 +19,9 @@ async fn icon(url: actix_web::web::Path<String>) -> oxfeed_common::Result<actix_
         Err(_) => EMPTY_IMG.to_vec(),
     };
 
-    let mut mime = tree_magic::from_u8(&body);
+    let mut mime = tree_magic_mini::from_u8(&body);
     if mime == "text/plain" {
-        mime = "image/svg+xml".to_string();
+        mime = "image/svg+xml";
     }
 
     let response = actix_web::HttpResponse::Ok()

@@ -27,7 +27,7 @@ scraper = "0.16"
 serde.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
-tree_magic = "0.2"
+tree_magic_mini = "3.0"
 url = "2.2"
 
 [dependencies.attohttpc]
