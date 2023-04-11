@@ -11,7 +11,7 @@ use identity::*;
 #[actix_web::main]
 async fn main() -> oxfeed_common::Result {
     #[cfg(debug_assertions)]
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     env_logger::init();
 

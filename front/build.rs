@@ -1,6 +1,6 @@
 fn main() {
     #[cfg(debug_assertions)]
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     println!(
         "cargo:rustc-env=API_URL={}",

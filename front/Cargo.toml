@@ -56,4 +56,4 @@ version = "0.20"
 features = ["csr"]
 
 [build-dependencies]
-dotenv = "0.15"
+dotenvy = "0.15"
