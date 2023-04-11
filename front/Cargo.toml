@@ -56,4 +56,4 @@ version = "0.20"
 features = ["csr"]
 
 [build-dependencies]
-dotenvy = "0.15"
+envir.workspace = true

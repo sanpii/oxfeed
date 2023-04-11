@@ -19,8 +19,8 @@ pub enum Error {
     #[error("{0}")]
     Database(#[from] elephantry::Error),
 
-    #[error("Missing {0} env variable")]
-    Env(String),
+    #[error("{0}")]
+    Env(#[from] envir::Error),
 
     #[cfg(feature = "feed-rs")]
     #[error("{0}")]

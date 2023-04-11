@@ -11,13 +11,13 @@ use identity::*;
 #[actix_web::main]
 async fn main() -> oxfeed_common::Result {
     #[cfg(debug_assertions)]
-    dotenvy::dotenv().ok();
+    envir::dotenv();
 
     env_logger::init();
 
-    let database_url = env("DATABASE_URL")?;
-    let ip = env("LISTEN_IP")?;
-    let port = env("LISTEN_PORT")?;
+    let database_url = envir::get("DATABASE_URL")?;
+    let ip = envir::get("LISTEN_IP")?;
+    let port = envir::get("LISTEN_PORT")?;
     let bind = format!("{ip}:{port}");
 
     let elephantry = elephantry::Pool::new(&database_url)?;
@@ -52,8 +52,4 @@ async fn main() -> oxfeed_common::Result {
     .await?;
 
     Ok(())
-}
-
-fn env(name: &str) -> oxfeed_common::Result<String> {
-    std::env::var(name).map_err(|_| oxfeed_common::Error::Env(name.to_string()))
 }

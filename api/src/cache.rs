@@ -37,7 +37,7 @@ fn path(url: &str) -> std::path::PathBuf {
         })
         .collect::<Vec<_>>();
 
-    path.insert(0, crate::env("CACHE_DIR").unwrap());
+    path.insert(0, envir::get("CACHE_DIR").unwrap());
 
     path.iter().collect()
 }

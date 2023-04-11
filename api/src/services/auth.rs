@@ -28,7 +28,7 @@ async fn login(
     use hmac::Mac;
     use jwt::VerifyWithKey;
 
-    let secret = crate::env("SECRET")?;
+    let secret = envir::get("SECRET")?;
     let key: hmac::Hmac<sha2::Sha256> = hmac::Hmac::new_from_slice(secret.as_bytes()).unwrap();
     let claims: std::collections::BTreeMap<String, String> = token.verify_with_key(&key)?;
 
