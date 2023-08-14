@@ -8,7 +8,7 @@ license = "MIT"
 [dependencies]
 anyhow = "1.0"
 futures = "0.3"
-gloo = "0.9"
+gloo = "0.10"
 hmac.workspace = true
 http.workspace = true
 jwt.workspace = true
