@@ -23,11 +23,3 @@ impl Render for oxfeed_common::source::Entity {
         }
     }
 }
-
-impl Render for oxfeed_common::webhook::Entity {
-    fn render(&self) -> yew::Html {
-        yew::html! {
-            <crate::components::Webhook value={ self.clone() } />
-        }
-    }
-}

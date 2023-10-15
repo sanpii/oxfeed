@@ -16,12 +16,14 @@ enum Scene {
 #[derive(yew::Properties, Clone, PartialEq)]
 pub struct Properties {
     pub value: oxfeed_common::webhook::Entity,
+    #[prop_or_default]
+    pub on_delete: yew::Callback<()>,
 }
 
 pub struct Component {
     scene: Scene,
-    event_bus: yew_agent::Dispatcher<crate::event::Bus>,
     value: oxfeed_common::webhook::Entity,
+    on_delete: yew::Callback<()>,
 }
 
 impl yew::Component for Component {
@@ -29,12 +31,10 @@ impl yew::Component for Component {
     type Properties = Properties;
 
     fn create(ctx: &yew::Context<Self>) -> Self {
-        use yew_agent::Dispatched;
-
         Self {
             scene: Scene::View,
-            event_bus: crate::event::Bus::dispatcher(),
             value: ctx.props().value.clone(),
+            on_delete: ctx.props().on_delete.clone(),
         }
     }
 
@@ -55,7 +55,7 @@ impl yew::Component for Component {
                         );
                     }
                 }
-                Message::Deleted => self.event_bus.send(crate::Event::WebhookUpdate),
+                Message::Deleted => self.on_delete.emit(()),
                 Message::Edit => {
                     self.scene = Scene::Edit;
                     should_render = true;
@@ -81,7 +81,6 @@ impl yew::Component for Component {
                 Message::Saved(webhook) => {
                     self.value = webhook;
                     self.scene = Scene::View;
-                    self.event_bus.send(crate::Event::WebhookUpdate);
                     should_render = true;
                 }
                 _ => unreachable!(),
@@ -141,5 +140,5 @@ impl yew::Component for Component {
         }
     }
 
-    crate::change!(value);
+    crate::change!(value, on_delete);
 }

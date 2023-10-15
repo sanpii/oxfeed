@@ -10,7 +10,6 @@ pub enum Event {
     SourceUpdate,
     Redirect(String),
     Redirected(String),
-    WebhookUpdate,
 }
 
 impl From<&oxfeed_common::Error> for Event {

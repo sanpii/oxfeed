@@ -55,17 +55,13 @@ impl yew::Component for Component {
                 Message::Cancel => self.scene = Scene::View,
                 Message::Create(ref webhook) => crate::api!(
                     ctx.link(),
-                    webhooks_create(webhook) -> |_| Message::Event(crate::Event::WebhookUpdate)
+                    webhooks_create(webhook) -> |_| Message::NeedUpdate
                 ),
                 _ => (),
             },
         }
 
-        if let Message::Event(ref event) = msg {
-            if matches!(event, crate::Event::WebhookUpdate) {
-                ctx.link().send_message(Message::NeedUpdate);
-            }
-        } else if matches!(msg, Message::NeedUpdate) {
+        if matches!(msg, Message::NeedUpdate) {
             self.scene = Scene::View;
 
             crate::api!(
@@ -80,8 +76,6 @@ impl yew::Component for Component {
     }
 
     fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        use crate::Render;
-
         yew::html! {
             <>
             {
@@ -119,7 +113,12 @@ impl yew::Component for Component {
             {
                 for self.webhooks.iter().map(|webhook| {
                     yew::html!{
-                        <li class="list-group-item">{ webhook.render() }</li>
+                        <li class="list-group-item">
+                            <crate::components::Webhook
+                                value={ webhook.clone() }
+                                on_delete={ ctx.link().callback(|_| Message::NeedUpdate) }
+                            />
+                        </li>
                     }
                 })
             }
