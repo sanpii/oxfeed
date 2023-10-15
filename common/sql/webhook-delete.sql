@@ -10,3 +10,4 @@ update source s
     set webhooks = array_remove(webhooks, w.webhook_id)
     from deleted_webhook w
     where w.user_id = s.user_id
+    returning w.*
