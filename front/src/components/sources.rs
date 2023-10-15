@@ -65,6 +65,11 @@ impl yew::Component for Component {
             return should_render;
         }
 
+        if let Message::Error(err) = msg {
+            crate::send_error(ctx, &err);
+            return true;
+        }
+
         match &self.scene {
             Scene::View => match msg {
                 Message::Add => {

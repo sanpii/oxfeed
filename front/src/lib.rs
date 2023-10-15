@@ -16,6 +16,23 @@ pub use filter::*;
 pub use location::Location;
 pub use render::*;
 
+pub type Context = yew::UseReducerHandle<components::app::Context>;
+
+pub fn context<COMP>(ctx: &yew::Context<COMP>, callback: yew::Callback<Context>) -> (Context, yew::ContextHandle<Context>)
+    where COMP: yew::Component
+{
+    ctx
+        .link()
+        .context(callback)
+        .expect("No Context Provided")
+}
+
+pub fn send_error<COMP: yew::Component>(ctx: &yew::Context<COMP>, err: &str) {
+    let (context, _) = crate::context(ctx, yew::Callback::noop());
+    let alert = crate::event::Alert::error(&err);
+    context.dispatch(crate::components::app::Action::AddAlert(alert));
+}
+
 #[derive(Clone, Eq, PartialEq, serde::Deserialize)]
 pub struct Pager<T> {
     result_count: usize,
@@ -103,4 +120,12 @@ macro_rules! api {
             )
         });
     }}
+}
+
+#[macro_export]
+macro_rules! cb {
+    ($props:ident . $cb:ident) => {{
+        let props = $props.clone();
+        yew::Callback::from(move |_| props.$cb.emit(()))
+    }};
 }

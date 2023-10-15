@@ -40,10 +40,10 @@ impl yew::Component for Component {
         component
     }
 
-    fn update(&mut self, _: &yew::Context<Self>, msg: Self::Message) -> bool {
+    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Message::Cancel => self.props.on_cancel.emit(()),
-            Message::Error(_) => (),
+            Message::Error(err) => crate::send_error(ctx, &err),
             Message::Submit => self.props.on_submit.emit(self.props.source.clone()),
             Message::ToggleActive(active) => self.props.source.active = active,
             Message::ToggleWebhook(id, active) => {

@@ -53,7 +53,7 @@ impl yew::Component for Component {
 
     fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Message::Error(_) => (),
+            Message::Error(err) => crate::send_error(ctx, &err),
             Message::Content(content) => self.content = Some(content),
             Message::ToggleContent => {
                 self.scene = !self.scene;

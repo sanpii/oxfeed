@@ -46,6 +46,11 @@ impl yew::Component for Component {
             return true;
         }
 
+        if let Message::Error(err) = msg {
+            crate::send_error(ctx, &err);
+            return true;
+        }
+
         let mut should_render = false;
 
         match self.scene {

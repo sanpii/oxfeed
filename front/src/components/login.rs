@@ -39,10 +39,11 @@ impl yew::Component for Component {
                 self.scene = Scene::Login;
                 should_render = true;
             }
-            Message::Error(_) => (),
+            Message::Error(err) => crate::send_error(ctx, &err),
             Message::UserCreated => {
+                let (context, _) = crate::context(ctx, yew::Callback::noop());
                 let alert = crate::event::Alert::info("User created");
-                self.event_bus.send(crate::Event::Alert(alert));
+                context.dispatch(crate::components::app::Action::AddAlert(alert));
                 ctx.link().send_message(Message::Cancel);
             }
             Message::Create(info) => {

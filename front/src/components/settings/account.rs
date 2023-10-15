@@ -38,7 +38,7 @@ impl yew::Component for Component {
                     );
                 }
             }
-            Message::Error(_) => (),
+            Message::Error(err) => crate::send_error(ctx, &err),
             Message::Logout => crate::api!(
                 ctx.link(),
                 auth_logout() -> |_| Message::NeedUpdate

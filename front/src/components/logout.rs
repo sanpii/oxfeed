@@ -29,14 +29,15 @@ impl yew::Component for Component {
 
     fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Message::Error(_) => (),
+            Message::Error(err) => crate::send_error(ctx, &err),
             Message::Logout => crate::api!(
                 ctx.link(),
                 auth_logout() -> |_| Message::Loggedout
             ),
             Message::Loggedout => {
+                let (context, _) = crate::context(ctx, yew::Callback::noop());
                 let alert = crate::event::Alert::info("Logged out");
-                self.event_bus.send(crate::Event::Alert(alert));
+                context.dispatch(crate::components::app::Action::AddAlert(alert));
                 self.event_bus.send(crate::Event::Redirect("/".to_string()));
             }
         }

@@ -21,19 +21,67 @@ pub enum Route {
     NotFound,
 }
 
-pub enum Message {
+#[derive(Debug)]
+pub enum Action {
+    AddAlert(crate::event::Alert),
+    RemoveAlert(usize),
+}
+
+impl From<oxfeed_common::Error> for Action {
+    fn from(error: oxfeed_common::Error) -> Self {
+        Self::AddAlert(error.into())
+    }
+}
+
+#[derive(Clone, Default, Debug, Eq, PartialEq)]
+pub struct Context {
+    pub alerts: Vec<crate::event::Alert>,
+}
+
+impl yew::Reducible for Context {
+    type Action = Action;
+
+    fn reduce(self: std::rc::Rc<Self>, action: Self::Action) -> std::rc::Rc<Self> {
+        let mut context = (*self).clone();
+
+        match action {
+            Action::AddAlert(alert) => context.alerts.push(alert),
+            Action::RemoveAlert(idx) => {
+                context.alerts.remove(idx);
+            }
+        }
+
+        context.into()
+    }
+}
+
+#[yew::function_component]
+pub fn Component() -> yew::Html {
+    let context = yew::functional::use_reducer(|| Context::default());
+
+    yew::html! {
+        <ComponentLoc {context} />
+    }
+}
+
+enum Message {
     Event(crate::Event),
     Websocket(wasm_sockets::Message),
 }
 
-pub struct Component {
+#[derive(PartialEq, yew::Properties)]
+struct Properties {
+    context: crate::Context,
+}
+
+struct ComponentLoc {
     auth: bool,
     event_bus: yew_agent::Dispatcher<crate::event::Bus>,
     _producer: Box<dyn yew_agent::Bridge<crate::event::Bus>>,
     websocket: Option<wasm_sockets::EventClient>,
 }
 
-impl Component {
+impl ComponentLoc {
     fn websocket(link: &yew::html::Scope<Self>) -> Option<wasm_sockets::EventClient> {
         let url = env!("API_URL")
             .replace("http://", "ws://")
@@ -59,9 +107,9 @@ impl Component {
     }
 }
 
-impl yew::Component for Component {
+impl yew::Component for ComponentLoc {
     type Message = Message;
-    type Properties = ();
+    type Properties = Properties;
 
     fn create(ctx: &yew::Context<Self>) -> Self {
         use yew_agent::{Bridged, Dispatched};
@@ -105,17 +153,25 @@ impl yew::Component for Component {
         should_render
     }
 
-    fn view(&self, _: &yew::Context<Self>) -> yew::Html {
-        if !self.auth {
-            return yew::html! {
-                <super::Login />
-            };
-        }
+    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
+        let context = &ctx.props().context;
 
         yew::html! {
-            <yew_router::router::BrowserRouter>
-                <yew_router::Switch<Route> render={switch} />
-            </yew_router::router::BrowserRouter>
+            <yew::ContextProvider<crate::Context> context={ context.clone() }>
+            {
+                if self.auth {
+                    yew::html! {
+                        <yew_router::router::BrowserRouter>
+                            <yew_router::Switch<Route> render={ switch } />
+                        </yew_router::router::BrowserRouter>
+                    }
+                } else {
+                    yew::html! {
+                        <super::Login />
+                    }
+                }
+            }
+            </yew::ContextProvider<crate::Context>>
         }
     }
 

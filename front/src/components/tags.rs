@@ -33,7 +33,7 @@ impl yew::Component for Component {
         let mut should_render = false;
 
         match msg {
-            Message::Error(_) => (),
+            Message::Error(err) => crate::send_error(ctx, &err),
             Message::NeedUpdate => {
                 let pagination = &self.pagination;
 

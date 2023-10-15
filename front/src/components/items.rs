@@ -53,7 +53,10 @@ impl yew::Component for Component {
         let mut should_render = false;
 
         match msg {
-            Message::Error(_) => (),
+            Message::Error(err) => {
+                crate::send_error(ctx, &err);
+                should_render = true;
+            }
             Message::Event(event) => {
                 if matches!(event, crate::Event::ItemUpdate) {
                     ctx.link().send_message(Message::NeedUpdate);
@@ -94,7 +97,7 @@ impl yew::Component for Component {
         let Some(pager) = &self.pager else {
             return yew::html! {
                 <super::Empty />
-            }
+            };
         };
 
         yew::html! {

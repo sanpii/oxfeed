@@ -166,7 +166,7 @@ impl yew::Component for Component {
                 }
                 _ => (),
             },
-            Message::Error(_) => (),
+            Message::Error(err) => crate::send_error(ctx, &err),
             Message::NeedUpdate => crate::api!(
                 ctx.link(),
                 counts() -> Message::Update

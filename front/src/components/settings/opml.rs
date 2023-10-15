@@ -38,12 +38,16 @@ impl yew::Component for Component {
 
     fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Message::Error(err) => self.event_bus.send(err.into()),
+            Message::Error(err) => {
+                let (context, _) = crate::context(ctx, yew::Callback::noop());
+                context.dispatch(err.into());
+            }
             Message::Files(files) => self.files = files,
             Message::Import => self.load(ctx.link()),
             Message::Imported => {
+                let (context, _) = crate::context(ctx, yew::Callback::noop());
                 let alert = crate::event::Alert::info("Import done");
-                self.event_bus.send(crate::Event::Alert(alert));
+                context.dispatch(crate::components::app::Action::AddAlert(alert));
                 self.event_bus.send(crate::Event::SettingUpdate);
             }
             Message::Loaded(content) => {

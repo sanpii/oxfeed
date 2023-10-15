@@ -2,7 +2,6 @@ use std::collections::HashSet;
 
 #[derive(Clone, serde::Deserialize, serde::Serialize)]
 pub enum Event {
-    Alert(Alert),
     AuthRequire,
     ItemUpdate,
     Logged,
@@ -12,21 +11,7 @@ pub enum Event {
     Redirected(String),
 }
 
-impl From<&oxfeed_common::Error> for Event {
-    fn from(error: &oxfeed_common::Error) -> Self {
-        let alert = crate::event::Alert::error(&error.to_string());
-
-        Self::Alert(alert)
-    }
-}
-
-impl From<oxfeed_common::Error> for Event {
-    fn from(error: oxfeed_common::Error) -> Self {
-        error.into()
-    }
-}
-
-#[derive(Clone, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 pub struct Alert {
     pub level: log::Level,
     pub message: String,
@@ -61,6 +46,12 @@ impl Alert {
         };
 
         severity.to_string()
+    }
+}
+
+impl From<oxfeed_common::Error> for Alert {
+    fn from(error: oxfeed_common::Error) -> Self {
+        Self::error(&error.to_string())
     }
 }
 

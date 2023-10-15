@@ -219,22 +219,6 @@ impl Api {
         B: Into<Body>,
         R: serde::de::DeserializeOwned,
     {
-        let result = Self::try_fetch(method, url, body).await;
-
-        if let Err(ref err) = result {
-            let mut event_bus = crate::event::Bus::dispatcher();
-
-            event_bus.send(err.into());
-        }
-
-        result
-    }
-
-    async fn try_fetch<B, R>(method: Method, url: &str, body: B) -> oxfeed_common::Result<R>
-    where
-        B: Into<Body>,
-        R: serde::de::DeserializeOwned,
-    {
         let client = reqwest::Client::new();
         let response = client
             .request(method, &format!("{}{url}", env!("API_URL")))

@@ -54,7 +54,7 @@ impl yew::Component for Component {
 
         match msg {
             Message::Choose(idx) => self.select(self.terms[idx].clone()),
-            Message::Error(_) => (),
+            Message::Error(err) => crate::send_error(ctx, &err),
             Message::Input(input) => {
                 self.value = input.clone();
 

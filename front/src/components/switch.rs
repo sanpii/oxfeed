@@ -1,7 +1,3 @@
-pub enum Message {
-    Toggle,
-}
-
 #[derive(Clone, PartialEq, yew::Properties)]
 pub struct Properties {
     pub id: String,
@@ -13,45 +9,29 @@ pub struct Properties {
     pub on_toggle: yew::Callback<bool>,
 }
 
-pub struct Component {
-    props: Properties,
-}
+#[yew::function_component]
+pub fn Component(props: &Properties) -> yew::Html {
+    let checked = yew::functional::use_state_eq(|| props.active);
 
-impl yew::Component for Component {
-    type Message = Message;
-    type Properties = Properties;
+    let onclick = {
+        let props = props.clone();
+        let checked = checked.clone();
+        yew::Callback::from(move |_| {
+            checked.set(!*checked);
+            props.on_toggle.emit(!*checked);
+        })
+    };
 
-    fn create(context: &yew::Context<Self>) -> Self {
-        Self {
-            props: context.props().clone(),
-        }
+    yew::html! {
+        <div class={ yew::classes!("form-check", "form-switch") }>
+            <input
+                id={ props.id.clone() }
+                type="checkbox"
+                class="form-check-input"
+                checked={ *checked }
+                {onclick}
+            />
+            <label class="form-check-label" for={ props.id.clone() }>{ &props.label }</label>
+        </div>
     }
-
-    fn update(&mut self, _: &yew::Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            Message::Toggle => {
-                self.props.active = !self.props.active;
-                self.props.on_toggle.emit(self.props.active);
-            }
-        }
-
-        true
-    }
-
-    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        yew::html! {
-            <div class={ yew::classes!("form-check", "form-switch") }>
-                <input
-                    id={ self.props.id.clone() }
-                    type="checkbox"
-                    class="form-check-input"
-                    checked={ self.props.active }
-                    onclick={ ctx.link().callback(|_| Message::Toggle )}
-                />
-                <label class="form-check-label" for={ self.props.id.clone() }>{ &self.props.label }</label>
-            </div>
-        }
-    }
-
-    crate::change!(props.label, props.active, props.id);
 }

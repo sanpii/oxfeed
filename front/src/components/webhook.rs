@@ -39,6 +39,11 @@ impl yew::Component for Component {
     }
 
     fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
+        if let Message::Error(err) = msg {
+            crate::send_error(ctx, &err);
+            return true;
+        }
+
         let mut should_render = false;
 
         match self.scene {
