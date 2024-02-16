@@ -93,7 +93,10 @@ impl Task {
         let feed_icon = feed.icon.map(|x| x.uri);
 
         for entry in feed.entries {
-            let link = entry.links[0].href.clone();
+            let link = match entry.links.get(0) {
+                Some(link) => link.href.clone(),
+                None => continue,
+            };
 
             let exist = elephantry
                 .exist_where::<ItemModel>("link = $* and source_id = $*", &[&link, &source.id])?;
