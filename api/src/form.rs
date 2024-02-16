@@ -18,7 +18,9 @@ impl std::convert::TryInto<oxfeed_common::source::Entity> for Source {
     fn try_into(self) -> oxfeed_common::Result<oxfeed_common::source::Entity> {
         let user_id = self.user_id.ok_or(oxfeed_common::Error::Auth)?;
 
-        let title = self.title.clone()
+        let title = self
+            .title
+            .clone()
             .or_else(|| self.title())
             .unwrap_or_else(|| "<no title>".to_string());
 

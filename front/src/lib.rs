@@ -18,13 +18,14 @@ pub use render::*;
 
 pub type Context = yew::UseReducerHandle<components::app::Context>;
 
-pub fn context<COMP>(ctx: &yew::Context<COMP>, callback: yew::Callback<Context>) -> (Context, yew::ContextHandle<Context>)
-    where COMP: yew::Component
+pub fn context<COMP>(
+    ctx: &yew::Context<COMP>,
+    callback: yew::Callback<Context>,
+) -> (Context, yew::ContextHandle<Context>)
+where
+    COMP: yew::Component,
 {
-    ctx
-        .link()
-        .context(callback)
-        .expect("No Context Provided")
+    ctx.link().context(callback).expect("No Context Provided")
 }
 
 pub fn send_error<COMP: yew::Component>(ctx: &yew::Context<COMP>, err: &str) {

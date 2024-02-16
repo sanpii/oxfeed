@@ -34,8 +34,7 @@ impl actix::Actor for Actor {
     fn started(&mut self, ctx: &mut Self::Context) {
         use actix::AsyncContext;
 
-        let minutes = envir::parse("UPDATE_INTERVAL")
-            .unwrap_or(20);
+        let minutes = envir::parse("UPDATE_INTERVAL").unwrap_or(20);
         let interval = std::time::Duration::from_secs(60 * minutes);
 
         ctx.run_interval(interval, |act, _| {

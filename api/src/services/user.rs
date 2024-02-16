@@ -25,7 +25,9 @@ async fn update(
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = identity.token(&elephantry)?;
-    let user = elephantry.model::<Model>().find_from_token(&token)
+    let user = elephantry
+        .model::<Model>()
+        .find_from_token(&token)
         .ok_or(oxfeed_common::Error::Auth)?;
 
     elephantry.update_one::<oxfeed_common::account::Model>(
@@ -43,7 +45,9 @@ async fn delete(
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = identity.token(&elephantry)?;
-    let user = elephantry.model::<Model>().find_from_token(&token)
+    let user = elephantry
+        .model::<Model>()
+        .find_from_token(&token)
         .ok_or(oxfeed_common::Error::Auth)?;
 
     elephantry.delete_by_pk::<Model>(&elephantry::pk! {user_id => user.id})?;
