@@ -126,7 +126,7 @@ impl yew::Component for Component {
                 }
                 <span class="text-muted">{ "· " }{ &self.item.source }</span>
                 <div class="float-end">
-                    <span class="text-muted">{ &published_ago }</span>
+                    <span class="text-muted">{ &published_ago.to_string() }</span>
                     <span onclick={ ctx.link().callback(|_| Message::ToggleContent) }>
                         <super::Svg icon={ caret } size=24 />
                     </span>

@@ -23,10 +23,10 @@ wasm-cookies = "0.2"
 wasm-logger = "0.2"
 wasm-sockets = "1.0"
 yew-agent = "0.2"
-yew-router = "0.17"
+yew-router = "0.18"
 
 [dependencies.elephantry-extras]
-version = "0.4"
+version = "0.5"
 features = ["yew-pager"]
 
 [dependencies.chrono-humanize]
@@ -51,7 +51,7 @@ version = "0.3"
 features = ["HtmlDocument", "Performance"]
 
 [dependencies.yew]
-version = "0.20"
+version = "0.21"
 features = ["csr"]
 
 [build-dependencies]
