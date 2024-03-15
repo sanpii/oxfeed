@@ -23,7 +23,7 @@ sha2 = "0.10"
 uuid = "1.0"
 
 [workspace.dependencies.attohttpc]
-version = "0.26"
+version = "0.27"
 features = ["json"]
 
 [workspace.dependencies.chrono]
