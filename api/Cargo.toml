@@ -7,7 +7,7 @@ license = "MIT"
 
 [dependencies]
 actix = "0.13"
-actix-cors = "0.6"
+actix-cors = "0.7"
 actix-web.workspace = true
 actix-web-actors = "4.0"
 base64.workspace = true
