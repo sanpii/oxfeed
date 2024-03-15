@@ -235,13 +235,13 @@ impl Api {
         }
 
         match response.status() {
-            http::status::StatusCode::UNAUTHORIZED => {
+            reqwest::StatusCode::UNAUTHORIZED => {
                 let mut event_bus = crate::event::Bus::dispatcher();
 
                 event_bus.send(crate::Event::AuthRequire);
                 Err(oxfeed_common::Error::Auth)
             }
-            http::status::StatusCode::NO_CONTENT => {
+            reqwest::StatusCode::NO_CONTENT => {
                 serde_json::from_str("null").map_err(Into::into)
             }
             _ => {

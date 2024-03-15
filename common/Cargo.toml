@@ -8,7 +8,6 @@ license = "MIT"
 [dependencies]
 chrono.workspace = true
 envir.workspace = true
-http.workspace = true
 jwt.workspace = true
 serde_json.workspace = true
 thiserror = "1.0"

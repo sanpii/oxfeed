@@ -30,9 +30,6 @@ pub enum Error {
     #[error("{0}")]
     Httpc(#[from] attohttpc::Error),
 
-    #[error("{0}")]
-    Http(#[from] http::Error),
-
     #[error("Invalid email or password")]
     InvalidLogin,
 

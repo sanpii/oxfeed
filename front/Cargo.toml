@@ -10,7 +10,6 @@ anyhow = "1.0"
 futures = "0.3"
 gloo = "0.11"
 hmac.workspace = true
-http.workspace = true
 jwt.workspace = true
 regex = "1.4"
 ring.workspace = true
