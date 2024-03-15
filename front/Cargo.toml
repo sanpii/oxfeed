@@ -52,7 +52,7 @@ version = "0.3"
 features = ["HtmlDocument", "Performance"]
 
 [dependencies.yew]
-version = "0.20"
+version = "0.21"
 features = ["csr"]
 
 [build-dependencies]
