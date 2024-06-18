@@ -1,5 +1,7 @@
 use oxfeed_common::item::Entity as Item;
 use oxfeed_common::item::Model as ItemModel;
+use oxfeed_common::media::Entity as Media;
+use oxfeed_common::media::Model as MediaModel;
 use oxfeed_common::source::Entity as Source;
 use oxfeed_common::source::Model as SourceModel;
 use oxfeed_common::webhook::Entity as Webhook;
@@ -125,7 +127,36 @@ impl Task {
                 };
 
                 item.read = Self::call_webhooks(elephantry, &webhooks, &item);
-                elephantry.insert_one::<ItemModel>(&item)?;
+                item = elephantry.insert_one::<ItemModel>(&item)?;
+
+                for media in entry.media {
+                    Self::create_media(elephantry, &item, &media.content)?;
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    fn create_media(
+        elephantry: &elephantry::Connection,
+        item: &Item,
+        medias: &[feed_rs::model::MediaContent],
+    ) -> oxfeed_common::Result {
+        for media in medias {
+            let Some(content_type) = media.content_type.as_ref().map(ToString::to_string) else {
+                continue;
+            };
+
+            if content_type.starts_with("audio/") || content_type.starts_with("video/") {
+                let media = Media {
+                    id: None,
+                    item_id: item.id.unwrap(),
+                    url: media.url.as_ref().unwrap().to_string(),
+                    content_type: Some(content_type),
+                };
+
+                elephantry.insert_one::<MediaModel>(&media)?;
             }
         }
 

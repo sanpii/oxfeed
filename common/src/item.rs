@@ -11,6 +11,8 @@ pub struct Item {
     pub read: bool,
     pub favorite: bool,
     pub tags: Vec<String>,
+    #[cfg_attr(feature = "elephantry", elephantry(default))]
+    pub media: Vec<crate::media::Entity>,
 }
 
 #[derive(serde::Serialize)]
@@ -48,11 +50,14 @@ impl Model {
             r#"
 select item.item_id, item.link, item.published, item.title,
         '/icons/' || encode(convert_to(item.icon, 'utf8'), 'base64') as icon,
-        item.read, item.favorite, source.title as source, source.tags as tags
+        item.read, item.favorite, source.title as source, source.tags as tags,
+        array_remove(array_agg(media), null) as media
     from item
     join source using (source_id)
     join "user" using (user_id)
+    left join media using (item_id)
     where {}
+    group by item.item_id, source.title, source.tags
     order by published desc, title
     {}
         "#,

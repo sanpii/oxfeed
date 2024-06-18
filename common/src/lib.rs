@@ -1,5 +1,6 @@
 pub mod account;
 pub mod item;
+pub mod media;
 pub mod source;
 pub mod user;
 pub mod webhook;

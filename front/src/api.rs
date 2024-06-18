@@ -241,9 +241,7 @@ impl Api {
                 event_bus.send(crate::Event::AuthRequire);
                 Err(oxfeed_common::Error::Auth)
             }
-            reqwest::StatusCode::NO_CONTENT => {
-                serde_json::from_str("null").map_err(Into::into)
-            }
+            reqwest::StatusCode::NO_CONTENT => serde_json::from_str("null").map_err(Into::into),
             _ => {
                 let data = response.json().await?;
 

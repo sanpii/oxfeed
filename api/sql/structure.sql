@@ -58,6 +58,15 @@ create index if not exists item_read on item(read);
 create index if not exists item_favorite on item(favorite);
 create index if not exists item_source_id on item(source_id);
 
+create table if not exists media (
+    media_id uuid primary key default uuid_generate_v4(),
+    item_id uuid references item(item_id),
+    url text not null,
+    content_type text,
+
+    unique(item_id, url)
+);
+
 create or replace function crypt_password()
     returns trigger
     language plpgsql

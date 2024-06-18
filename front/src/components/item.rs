@@ -141,6 +141,7 @@ impl yew::Component for Component {
                                     on_read={ ctx.link().callback(|_| Message::ToggleRead) }
                                     favorite={ self.item.favorite }
                                     on_favorite={ ctx.link().callback(|_| Message::ToggleFavorite) }
+                                    medias={ self.item.media.clone() }
                                 />
                             }
                         } else {
@@ -166,11 +167,13 @@ impl yew::Component for Component {
                                 { yew::virtual_dom::VNode::VRef(content.into()) }
 
                                 <hr />
+
                                 <super::Actions
                                     read={ self.item.read }
                                     on_read={ ctx.link().callback(|_| Message::ToggleRead) }
                                     favorite={ self.item.favorite }
                                     on_favorite={ ctx.link().callback(|_| Message::ToggleFavorite) }
+                                    medias={ self.item.media.clone() }
                                 />
                             </>
                         }

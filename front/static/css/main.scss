@@ -69,11 +69,23 @@ li.list-group-item {
     }
 
     .actions {
+        a {
+            color: var(--bs-body-color);
+
+            &:hover {
+                text-decoration: none;
+            }
+        }
+
         .btn {
             margin-right: .5rem;
         }
 
-        svg:hover {
+        .medias svg:hover {
+            color: var(--bs-purple);
+        }
+
+        .read svg:hover {
             color: var(--bs-primary);
         }
 
@@ -101,7 +113,7 @@ li.list-group-item {
     margin-bottom: 1rem;
 }
 
-.help {
+.help, .medias {
     position: relative;
 
     .popover {
@@ -113,6 +125,11 @@ li.list-group-item {
         display: block;
         left: 24px;
     }
+}
+
+.btn.medias {
+    color: var(--bs-purple) !important;
+    border-color: var(--bs-purple);
 }
 
 .sidebar-heading {
