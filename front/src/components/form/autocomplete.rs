@@ -56,7 +56,7 @@ impl yew::Component for Component {
             Message::Choose(idx) => self.select(self.terms[idx].clone()),
             Message::Error(err) => crate::send_error(ctx, &err),
             Message::Input(input) => {
-                self.value = input.clone();
+                self.value.clone_from(&input);
 
                 let pagination = oxfeed_common::Pagination::new();
                 let filter: crate::Filter = input.clone().into();

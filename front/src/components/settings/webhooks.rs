@@ -48,7 +48,7 @@ impl yew::Component for Component {
         match &self.scene {
             Scene::View => match msg {
                 Message::Add => self.scene = Scene::Add,
-                Message::Update(ref webhooks) => self.webhooks = webhooks.clone(),
+                Message::Update(ref webhooks) => self.webhooks.clone_from(webhooks),
                 _ => (),
             },
             Scene::Add => match msg {

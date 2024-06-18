@@ -94,7 +94,7 @@ impl Task {
         let feed_icon = feed.icon.map(|x| x.uri);
 
         for entry in feed.entries {
-            let link = match entry.links.get(0) {
+            let link = match entry.links.first() {
                 Some(link) => link.href.clone(),
                 None => continue,
             };
@@ -176,9 +176,7 @@ impl Task {
         };
 
         let html = scraper::Html::parse_document(&contents);
-        let Some(icon) = html.select(&selector).next() else {
-            return None;
-        };
+        let icon = html.select(&selector).next()?;
         let href = match icon.value().attr("href") {
             Some(href) => href.to_string(),
             None => return None,

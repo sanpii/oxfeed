@@ -57,7 +57,7 @@ impl yew::Reducible for Context {
 
 #[yew::function_component]
 pub fn Component() -> yew::Html {
-    let context = yew::functional::use_reducer(|| Context::default());
+    let context = yew::functional::use_reducer(Context::default);
 
     yew::html! {
         <ComponentLoc {context} />

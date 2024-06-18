@@ -30,7 +30,7 @@ where
 
 pub fn send_error<COMP: yew::Component>(ctx: &yew::Context<COMP>, err: &str) {
     let (context, _) = crate::context(ctx, yew::Callback::noop());
-    let alert = crate::event::Alert::error(&err);
+    let alert = crate::event::Alert::error(err);
     context.dispatch(crate::components::app::Action::AddAlert(alert));
 }
 
