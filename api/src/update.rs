@@ -39,15 +39,31 @@ impl actix::Actor for Actor {
         let minutes = envir::parse("UPDATE_INTERVAL").unwrap_or(20);
         let interval = std::time::Duration::from_secs(60 * minutes);
 
-        ctx.run_interval(interval, |act, _| {
+        ctx.run_interval(interval, |_, ctx| {
+            ctx.notify(Signal);
+        });
+    }
+}
+
+impl actix::Supervised for Actor {}
+
+#[derive(actix::Message)]
+#[rtype(result = "()")]
+pub struct Signal;
+
+impl actix::Handler<Signal> for Actor {
+    type Result = ();
+
+    fn handle(&mut self, _: Signal, ctx: &mut actix::Context<Self>) {
+        use actix::AsyncContext;
+
+        ctx.run_later(std::time::Duration::from_secs(0), |act, _| {
             log::warn!("Start update");
             act.run();
             log::warn!("Update finished");
         });
     }
 }
-
-impl actix::Supervised for Actor {}
 
 struct Task;
 

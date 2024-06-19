@@ -25,6 +25,24 @@ async fn main() -> oxfeed_common::Result {
     let update = update::Actor::new(&elephantry);
     let actor = actix_web::web::Data::new(update.start());
 
+    let a = actor.clone();
+    std::thread::spawn(move || {
+        let rt = actix_web::rt::Runtime::new().unwrap();
+
+        loop {
+            let handle = rt.spawn(async {
+                let mut signal = actix_web::rt::signal::unix::signal(
+                    actix_web::rt::signal::unix::SignalKind::user_defined1(),
+                )
+                .unwrap();
+                signal.recv().await
+            });
+            rt.block_on(handle).unwrap();
+
+            a.do_send(update::Signal);
+        }
+    });
+
     actix_web::HttpServer::new(move || {
         let cors = actix_cors::Cors::permissive();
 
