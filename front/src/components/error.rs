@@ -8,12 +8,12 @@ pub fn Component(props: &Properties) -> yew::Html {
     yew::html! {
         <span class="help">
             {" "}
-            <crate::components::Svg icon="exclamation-octagon" size=16 class="text-danger" />
-            <crate::components::Popover
+            <super::Popover
                 title={ "Last error".to_string() }
-                text={ props.text.clone() }
-                position="end"
-            />
+                body={ props.text.clone() }
+            >
+                <super::Svg icon="exclamation-octagon" size=16 class="text-danger" />
+            </super::Popover>
         </span>
     }
 }

@@ -115,16 +115,22 @@ li.list-group-item {
 
 .help, .medias {
     position: relative;
+}
 
-    .popover {
-        display: none;
-        width: 276px;
-    }
+.popover {
+    padding: 0;
 
-    &:hover .popover {
-        display: block;
-        left: 24px;
+    .popover-body ul.list-group {
+        margin-bottom: 0;
     }
+}
+
+.popover:not(:popover-open) {
+    display: none;
+}
+
+:popover-open {
+    inset: unset;
 }
 
 .btn.medias {

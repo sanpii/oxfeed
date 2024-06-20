@@ -26,10 +26,9 @@ fn inline(props: &Properties) -> yew::Html {
         }
     } else {
         yew::html! {
-            <>
+            <super::Popover body={ popover_text(&props.medias) }>
                 <super::Svg icon="collection-play" size=24 />
-                { popover(&props.medias) }
-            </>
+            </super::Popover>
         }
     }
 }
@@ -47,29 +46,31 @@ fn expanded(props: &Properties) -> yew::Html {
     } else {
         yew::html! {
             <button class={ yew::classes!("btn", "btn-outline-secondary", "medias") }>
-                <super::Svg icon="collection-play" size=24 />
-                { format!("{} medias", props.medias.len()) }
-
-                { popover(&props.medias) }
+                <super::Popover body={ popover_text(&props.medias) }>
+                    <super::Svg icon="collection-play" size=24 />
+                    { format!("{} medias", props.medias.len()) }
+                </super::Popover>
             </button>
         }
     }
 }
 
-fn popover(medias: &[oxfeed_common::media::Entity]) -> yew::Html {
-    let list = medias
-        .iter()
-        .map(|x| {
-            format!(
-                "<li><a href=\"{}\" target=\"_blank\">{}</a></li>",
-                x.url,
-                x.file_name().unwrap()
-            )
-        })
-        .collect::<Vec<_>>()
-        .join("\n");
-
+fn popover_text(medias: &[oxfeed_common::media::Entity]) -> yew::Html {
     yew::html! {
-        <super::Popover text={ format!("<ul>{list}</url>") } position="end" />
+        <ul class="list-group">
+        {
+            medias
+                .iter()
+                .map(|x| {
+
+                    yew::html_nested! {
+                        <li class="list-group-item">
+                            <super::Svg size=24 icon={ x.content_type.clone().unwrap_or_default() } content_type=true />
+                            <a href={ x.url.clone() } target="_blank">{ x.file_name().unwrap() }</a>
+                        </li>
+                    }
+                }).collect::<yew::Html>()
+        }
+        </ul>
     }
 }
