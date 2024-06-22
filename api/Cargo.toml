@@ -13,7 +13,6 @@ actix-web-actors = "4.0"
 base64.workspace = true
 bigdecimal = "0.4"
 chrono.workspace = true
-env_logger = "0.11"
 envir.workspace = true
 feed-rs.workspace = true
 futures-util = "0.3"

@@ -10,10 +10,7 @@ use identity::*;
 
 #[actix_web::main]
 async fn main() -> oxfeed_common::Result {
-    #[cfg(debug_assertions)]
-    envir::dotenv();
-
-    env_logger::init();
+    envir::init();
 
     let database_url = envir::get("DATABASE_URL")?;
     let ip = envir::get("LISTEN_IP")?;
