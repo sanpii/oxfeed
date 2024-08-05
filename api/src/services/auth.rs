@@ -32,7 +32,7 @@ async fn login(
     let key: hmac::Hmac<sha2::Sha256> = hmac::Hmac::new_from_slice(secret.as_bytes()).unwrap();
     let claims: std::collections::BTreeMap<String, String> = token.verify_with_key(&key)?;
 
-    if claims.contains_key("email") || claims.contains_key("password") {
+    if !claims.contains_key("email") || !claims.contains_key("password") {
         return Err(oxfeed_common::Error::BadRequest);
     }
 
