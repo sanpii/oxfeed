@@ -124,9 +124,9 @@ impl yew::Component for Component {
                         yew::html! { <super::Tag value={ tag.clone() } /> }
                     })
                 }
-                <span class="text-muted">{ "· " }{ &self.item.source }</span>
+                <span class="text-body-secondary">{ "· " }{ &self.item.source }</span>
                 <div class="float-end">
-                    <span class="text-muted">{ &published_ago.to_string() }</span>
+                    <span class="text-body-secondary">{ &published_ago.to_string() }</span>
                     <span onclick={ ctx.link().callback(|_| Message::ToggleContent) }>
                         <super::Svg icon={ caret } size=24 />
                     </span>

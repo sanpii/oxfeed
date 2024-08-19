@@ -81,7 +81,7 @@ impl yew::Component for Component {
                                 Message::UpdateTitle(input.value())
                             }) }
                         />
-                        <small class="form-text text-muted">{ "Leave empty to use the feed title." }</small>
+                        <small class="form-text text-body-secondary">{ "Leave empty to use the feed title." }</small>
                     </div>
                 </div>
 
