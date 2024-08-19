@@ -95,6 +95,11 @@ impl yew::Component for Component {
 
     fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
         let published_ago = chrono_humanize::HumanTime::from(self.item.published);
+        let published_class = if self.item.in_future() {
+            "text-body-tertiary"
+        } else {
+            "text-body-secondary"
+        };
 
         let caret = match self.scene {
             Scene::Expanded => "chevron-up",
@@ -126,7 +131,7 @@ impl yew::Component for Component {
                 }
                 <span class="text-body-secondary">{ "· " }{ &self.item.source }</span>
                 <div class="float-end">
-                    <span class="text-body-secondary">{ &published_ago.to_string() }</span>
+                    <span class={ published_class }>{ &published_ago.to_string() }</span>
                     <span onclick={ ctx.link().callback(|_| Message::ToggleContent) }>
                         <super::Svg icon={ caret } size=24 />
                     </span>

@@ -15,6 +15,12 @@ pub struct Item {
     pub media: Vec<crate::media::Entity>,
 }
 
+impl Item {
+    pub fn in_future(&self) -> bool {
+        self.published.signed_duration_since(chrono::Utc::now()) > chrono::TimeDelta::zero()
+    }
+}
+
 #[derive(serde::Serialize)]
 #[cfg_attr(feature = "elephantry", derive(elephantry::Entity))]
 #[cfg_attr(
