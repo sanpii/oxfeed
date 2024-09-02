@@ -42,7 +42,7 @@ async fn login(
         .try_get(0)
         .ok_or(oxfeed_common::Error::InvalidLogin)?;
 
-    let response = actix_web::HttpResponse::Ok().json(&token.to_string());
+    let response = actix_web::HttpResponse::Ok().json(token.to_string());
 
     Ok(response)
 }

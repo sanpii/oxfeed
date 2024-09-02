@@ -83,7 +83,7 @@ async fn content(
         .next()
         .ok_or(oxfeed_common::Error::NotFound)?;
 
-    Ok(actix_web::HttpResponse::Ok().json(&content.unwrap_or_default()))
+    Ok(actix_web::HttpResponse::Ok().json(content.unwrap_or_default()))
 }
 
 #[actix_web::patch("/{item_id}")]

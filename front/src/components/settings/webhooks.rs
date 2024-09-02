@@ -2,7 +2,9 @@ pub enum Message {
     Add,
     Cancel,
     Create(oxfeed_common::webhook::Entity),
+    #[allow(dead_code)]
     Error(String),
+    #[allow(dead_code)]
     Event(crate::Event),
     NeedUpdate,
     Update(Vec<oxfeed_common::webhook::Entity>),
