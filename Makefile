@@ -57,3 +57,9 @@ check:
 	cargo check --package oxfeed-api
 	cargo check --package oxfeed-front --target wasm32-unknown-unknown
 .PHONY: check
+
+clippy:
+	cargo clippy --package oxfeed-common
+	cargo clippy --package oxfeed-api
+	cargo clippy --package oxfeed-front --target wasm32-unknown-unknown
+.PHONY: clippy

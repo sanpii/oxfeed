@@ -1,0 +1,19 @@
+image: "rust:latest"
+
+stages:
+    - lint
+
+variables:
+    CARGO_HOME: $CI_PROJECT_DIR/cargo
+
+lint:fmt:
+    stage: lint
+    before_script:
+        - rustup component add rustfmt
+    script: cargo fmt -- --check
+
+lint:clippy:
+    stage: lint
+    before_script:
+        - rustup component add clippy
+    script: make clippy
