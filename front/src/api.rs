@@ -256,12 +256,14 @@ pub enum Body {
     Json(serde_json::Value),
 }
 
-impl ToString for Body {
-    fn to_string(&self) -> String {
-        match self {
+impl std::fmt::Display for Body {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
             Self::Empty => String::new(),
             Self::Json(json) => json.to_string(),
-        }
+        };
+
+        f.write_str(&s)
     }
 }
 

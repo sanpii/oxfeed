@@ -66,6 +66,7 @@ pub fn Component() -> yew::Html {
 
 enum Message {
     Event(crate::Event),
+    #[allow(dead_code)]
     Websocket(wasm_sockets::Message),
 }
 
