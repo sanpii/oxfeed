@@ -9,12 +9,12 @@ pub use bar::Component as Bar;
 #[derive(Clone, PartialEq, yew::Properties)]
 pub struct Properties {
     pub kind: String,
-    pub pagination: oxfeed_common::Pagination,
+    pub pagination: elephantry_extras::Pagination,
 }
 
 pub struct Component {
     kind: String,
-    pagination: oxfeed_common::Pagination,
+    pagination: elephantry_extras::Pagination,
     filter: crate::Filter,
     _producer: Box<dyn yew_agent::Bridge<crate::event::Bus>>,
 }

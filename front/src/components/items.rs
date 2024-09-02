@@ -12,14 +12,14 @@ pub struct Properties {
     #[prop_or_default]
     pub filter: crate::Filter,
     pub kind: String,
-    pub pagination: oxfeed_common::Pagination,
+    pub pagination: elephantry_extras::Pagination,
 }
 
 pub struct Component {
     kind: String,
     filter: crate::Filter,
     pager: Option<crate::Pager<oxfeed_common::item::Item>>,
-    pagination: oxfeed_common::Pagination,
+    pagination: elephantry_extras::Pagination,
     _producer: Box<dyn yew_agent::Bridge<crate::event::Bus>>,
 }
 

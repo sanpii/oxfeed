@@ -58,7 +58,7 @@ impl yew::Component for Component {
             Message::Input(input) => {
                 self.value.clone_from(&input);
 
-                let pagination = oxfeed_common::Pagination::new();
+                let pagination = elephantry_extras::Pagination::new();
                 let filter: crate::Filter = input.clone().into();
 
                 if input.is_empty() {

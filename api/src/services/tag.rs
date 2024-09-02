@@ -5,7 +5,7 @@ pub(crate) fn scope() -> actix_web::Scope {
 #[actix_web::get("")]
 async fn all(
     elephantry: actix_web::web::Data<elephantry::Pool>,
-    pagination: actix_web::web::Query<oxfeed_common::Pagination>,
+    pagination: actix_web::web::Query<elephantry_extras::Pagination>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = identity.token(&elephantry)?;

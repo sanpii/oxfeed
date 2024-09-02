@@ -67,7 +67,7 @@ impl Api {
 
     pub async fn items_all(
         kind: &str,
-        pagination: &oxfeed_common::Pagination,
+        pagination: &elephantry_extras::Pagination,
     ) -> oxfeed_common::Result<crate::Pager<oxfeed_common::item::Item>> {
         let kind = if kind == "all" {
             String::new()
@@ -103,7 +103,7 @@ impl Api {
     pub async fn items_search(
         what: &str,
         filter: &crate::Filter,
-        pagination: &oxfeed_common::Pagination,
+        pagination: &elephantry_extras::Pagination,
     ) -> oxfeed_common::Result<crate::Pager<oxfeed_common::item::Item>> {
         let url = format!(
             "/search/{what}?{}&{}",
@@ -119,7 +119,7 @@ impl Api {
     }
 
     pub async fn sources_all(
-        pagination: &oxfeed_common::Pagination,
+        pagination: &elephantry_extras::Pagination,
     ) -> oxfeed_common::Result<crate::Pager<oxfeed_common::source::Entity>> {
         let url = format!("/sources?{}", pagination.to_query());
 
@@ -147,7 +147,7 @@ impl Api {
 
     pub async fn sources_search(
         filter: &crate::Filter,
-        pagination: &oxfeed_common::Pagination,
+        pagination: &elephantry_extras::Pagination,
     ) -> oxfeed_common::Result<crate::Pager<oxfeed_common::source::Entity>> {
         let url = format!(
             "/search/sources?{}&{}",
@@ -159,7 +159,7 @@ impl Api {
     }
 
     pub async fn tags_all(
-        pagination: &oxfeed_common::Pagination,
+        pagination: &elephantry_extras::Pagination,
     ) -> oxfeed_common::Result<Vec<oxfeed_common::Tag>> {
         let url = format!("/tags?{}", pagination.to_query());
 
@@ -168,7 +168,7 @@ impl Api {
 
     pub async fn tags_search(
         filter: &crate::Filter,
-        pagination: &oxfeed_common::Pagination,
+        pagination: &elephantry_extras::Pagination,
     ) -> oxfeed_common::Result<crate::Pager<String>> {
         let url = format!(
             "/search/tags?{}&{}",

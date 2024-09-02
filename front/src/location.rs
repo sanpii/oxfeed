@@ -50,7 +50,7 @@ impl Location {
     }
 }
 
-impl From<Location> for oxfeed_common::Pagination {
+impl From<Location> for elephantry_extras::Pagination {
     fn from(location: Location) -> Self {
         let query = location.query();
 

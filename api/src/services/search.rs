@@ -6,7 +6,7 @@ struct Request {
     tag: Option<String>,
     source: Option<String>,
     #[serde(flatten)]
-    pagination: oxfeed_common::Pagination,
+    pagination: elephantry_extras::Pagination,
 }
 
 pub(crate) fn scope() -> actix_web::Scope {
@@ -132,7 +132,7 @@ fn count<T: elephantry::Entity>(
     elephantry: &elephantry::Pool,
     sql: &str,
     params: &[&dyn elephantry::ToSql],
-    pagination: &oxfeed_common::Pagination,
+    pagination: &elephantry_extras::Pagination,
 ) -> oxfeed_common::Result<elephantry::Pager<T>> {
     let sql_count = format!("with items as ({sql}) select count(items) from items");
     let count = elephantry.query_one::<i64>(&sql_count, params)?;

@@ -15,7 +15,7 @@ pub(crate) fn scope() -> actix_web::Scope {
 #[actix_web::get("")]
 async fn all(
     elephantry: Data<elephantry::Pool>,
-    pagination: actix_web::web::Query<oxfeed_common::Pagination>,
+    pagination: actix_web::web::Query<elephantry_extras::Pagination>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     fetch(
@@ -29,7 +29,7 @@ async fn all(
 #[actix_web::get("/favorites")]
 async fn favorites(
     elephantry: Data<elephantry::Pool>,
-    pagination: actix_web::web::Query<oxfeed_common::Pagination>,
+    pagination: actix_web::web::Query<elephantry_extras::Pagination>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     fetch(
@@ -43,7 +43,7 @@ async fn favorites(
 #[actix_web::get("/unread")]
 async fn unread(
     elephantry: Data<elephantry::Pool>,
-    pagination: actix_web::web::Query<oxfeed_common::Pagination>,
+    pagination: actix_web::web::Query<elephantry_extras::Pagination>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     fetch(
@@ -58,7 +58,7 @@ pub(crate) fn fetch(
     elephantry: &elephantry::Pool,
     identity: &crate::Identity,
     filter: &elephantry::Where,
-    pagination: &oxfeed_common::Pagination,
+    pagination: &elephantry_extras::Pagination,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = identity.token(elephantry)?;
 

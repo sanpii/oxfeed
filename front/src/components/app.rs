@@ -179,7 +179,7 @@ impl yew::Component for ComponentLoc {
 }
 
 fn switch(route: Route) -> yew::Html {
-    let pagination: oxfeed_common::Pagination = crate::Location::new().into();
+    let pagination: elephantry_extras::Pagination = crate::Location::new().into();
 
     yew::html! {
         <>

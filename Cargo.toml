@@ -33,3 +33,7 @@ features = ["serde"]
 [workspace.dependencies.elephantry]
 version = "4.0"
 features = ["date", "uuid"]
+
+[workspace.dependencies.elephantry-extras]
+version = "0.6"
+features = ["serde"]

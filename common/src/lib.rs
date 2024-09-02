@@ -6,11 +6,9 @@ pub mod user;
 pub mod webhook;
 
 mod errors;
-mod pagination;
 mod tag;
 
 pub use errors::*;
-pub use pagination::*;
 pub use tag::*;
 
 #[derive(Clone, serde::Deserialize, serde::Serialize)]

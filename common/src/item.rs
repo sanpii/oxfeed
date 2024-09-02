@@ -46,7 +46,7 @@ impl Model {
         &self,
         token: &uuid::Uuid,
         filter: &elephantry::Where,
-        pagination: &crate::Pagination,
+        pagination: &elephantry_extras::Pagination,
     ) -> elephantry::Result<elephantry::Pager<Item>> {
         let mut clause = filter.clone();
         clause.and_where("\"user\".token = $*", vec![token]);

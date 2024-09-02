@@ -6,12 +6,12 @@ pub enum Message {
 
 #[derive(Clone, PartialEq, yew::Properties)]
 pub struct Properties {
-    pub pagination: oxfeed_common::Pagination,
+    pub pagination: elephantry_extras::Pagination,
 }
 
 pub struct Component {
     tags: Vec<oxfeed_common::Tag>,
-    pagination: oxfeed_common::Pagination,
+    pagination: elephantry_extras::Pagination,
 }
 
 impl yew::Component for Component {

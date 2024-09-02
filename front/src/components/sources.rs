@@ -19,14 +19,14 @@ enum Scene {
 pub struct Properties {
     #[prop_or_default]
     pub filter: crate::Filter,
-    pub pagination: oxfeed_common::Pagination,
+    pub pagination: elephantry_extras::Pagination,
 }
 
 pub struct Component {
     filter: crate::Filter,
     scene: Scene,
     pager: Option<crate::Pager<oxfeed_common::source::Entity>>,
-    pagination: oxfeed_common::Pagination,
+    pagination: elephantry_extras::Pagination,
     _producer: Box<dyn yew_agent::Bridge<crate::event::Bus>>,
 }
 
