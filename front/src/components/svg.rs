@@ -22,7 +22,8 @@ pub fn Component(props: &Properties) -> yew::Html {
         }
     } else {
         &props.icon
-    }.to_string();
+    }
+    .to_string();
 
     let span = gloo::utils::document().create_element("span").unwrap();
 
