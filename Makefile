@@ -51,3 +51,9 @@ serve_api:
 serve_front: front
 	$(TRUNK) serve $(TRUNK_FLAGS) front/index.html
 .PHONY: serve_front
+
+check:
+	cargo check --package oxfeed-common
+	cargo check --package oxfeed-api
+	cargo check --package oxfeed-front --target wasm32-unknown-unknown
+.PHONY: check
