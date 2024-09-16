@@ -57,5 +57,6 @@ features = ["HtmlDocument", "Performance"]
 version = "0.21"
 features = ["csr"]
 
-[build-dependencies]
-envir.workspace = true
+[build-dependencies.envir]
+workspace = true
+features = ["dotenv"]
