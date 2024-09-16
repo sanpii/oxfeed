@@ -221,7 +221,7 @@ impl Api {
     {
         let client = reqwest::Client::new();
         let response = client
-            .request(method, &format!("{}{url}", env!("API_URL")))
+            .request(method, format!("{}{url}", env!("API_URL")))
             .header("Content-Type", "application/json")
             .header("Authorization", &format!("Bearer {}", Self::token()))
             .body(body.into().to_string())
