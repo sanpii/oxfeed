@@ -30,7 +30,7 @@ version = "0.4"
 features = ["serde"]
 
 [workspace.dependencies.envir]
-version = "0.4"
+version = "1.0"
 default-features = false
 
 [workspace.dependencies.elephantry]
