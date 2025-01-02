@@ -60,7 +60,9 @@ pub fn Component() -> yew::Html {
     let context = yew::functional::use_reducer(Context::default);
 
     yew::html! {
-        <ComponentLoc {context} />
+        <yew::ContextProvider<crate::Context> context={ context.clone() }>
+            <ComponentLoc {context} />
+        </yew::ContextProvider<crate::Context>>
     }
 }
 
@@ -167,25 +169,17 @@ impl yew::Component for ComponentLoc {
         should_render
     }
 
-    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        let context = &ctx.props().context;
-
-        yew::html! {
-            <yew::ContextProvider<crate::Context> context={ context.clone() }>
-            {
-                if self.auth {
-                    yew::html! {
-                        <yew_router::router::BrowserRouter>
-                            <yew_router::Switch<Route> render={ switch } />
-                        </yew_router::router::BrowserRouter>
-                    }
-                } else {
-                    yew::html! {
-                        <super::Login />
-                    }
-                }
+    fn view(&self, _: &yew::Context<Self>) -> yew::Html {
+        if self.auth {
+            yew::html! {
+                <yew_router::router::BrowserRouter>
+                    <yew_router::Switch<Route> render={ switch } />
+                </yew_router::router::BrowserRouter>
             }
-            </yew::ContextProvider<crate::Context>>
+        } else {
+            yew::html! {
+                <super::Login />
+            }
         }
     }
 
