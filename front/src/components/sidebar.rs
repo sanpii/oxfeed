@@ -120,6 +120,7 @@ pub struct Component {
     current_route: super::app::Route,
     event_bus: yew_agent::Dispatcher<crate::event::Bus>,
     links: Links,
+    in_error: bool,
     _producer: Box<dyn yew_agent::Bridge<crate::event::Bus>>,
 }
 
@@ -138,6 +139,7 @@ impl yew::Component for Component {
         let component = Self {
             current_route: ctx.props().current_route.clone(),
             event_bus: crate::event::Bus::dispatcher(),
+            in_error: false,
             links: Links::new(),
             _producer: crate::event::Bus::bridge(std::rc::Rc::new(callback)),
         };
@@ -162,6 +164,10 @@ impl yew::Component for Component {
                         self.links.remove_search();
                     }
 
+                    should_render = true;
+                }
+                crate::Event::WebsocketError => {
+                    self.in_error = true;
                     should_render = true;
                 }
                 _ => (),
@@ -197,7 +203,9 @@ impl yew::Component for Component {
     }
 
     fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        let favicon = if self.links.has_unread() {
+        let favicon = if self.in_error {
+            "/favicon-error.ico"
+        } else if self.links.has_unread() {
             "/favicon.ico"
         } else {
             "/favicon-unread.ico"

@@ -9,6 +9,7 @@ pub enum Event {
     SourceUpdate,
     Redirect(String),
     Redirected(String),
+    WebsocketError,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]

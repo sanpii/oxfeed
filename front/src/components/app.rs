@@ -68,6 +68,7 @@ enum Message {
     Event(crate::Event),
     #[allow(dead_code)]
     Websocket(wasm_sockets::Message),
+    WebsocketError,
 }
 
 #[derive(PartialEq, yew::Properties)]
@@ -92,10 +93,21 @@ impl ComponentLoc {
 
         match wasm_sockets::EventClient::new(&ws_url) {
             Ok(mut websocket) => {
-                let link = link.clone();
-
+                let l = link.clone();
                 websocket.set_on_message(Some(Box::new(move |_, msg| {
-                    link.send_message(Message::Websocket(msg));
+                    l.send_message(Message::Websocket(msg));
+                })));
+
+                let l = link.clone();
+                websocket.set_on_error(Some(Box::new(move |error| {
+                    log::error!("{error:?}");
+                    l.send_message(Message::WebsocketError);
+                })));
+
+                let l = link.clone();
+                websocket.set_on_close(Some(Box::new(move |event| {
+                    log::error!("{event:?}");
+                    l.send_message(Message::WebsocketError);
                 })));
 
                 Some(websocket)
@@ -149,6 +161,7 @@ impl yew::Component for ComponentLoc {
                 _ => (),
             },
             Message::Websocket(_) => self.event_bus.send(crate::Event::ItemUpdate),
+            Message::WebsocketError => self.event_bus.send(crate::Event::WebsocketError),
         }
 
         should_render
