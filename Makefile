@@ -3,7 +3,7 @@ YARN_FLAGS?=
 CARGO?=cargo
 CARGO_FLAGS?=
 TRUNK?=trunk
-TRUNK_FLAGS?=
+TRUNK_FLAGS?=--config front/Trunk.toml
 
 ifeq ($(APP_ENVIRONMENT),prod)
 	ENV=release
@@ -32,7 +32,7 @@ front: yarn wasm
 .PHONY: front
 
 wasm: yarn
-	RUST_LOG=info $(TRUNK) build $(TRUNK_FLAGS) front/index.html
+	RUST_LOG=info $(TRUNK) build $(TRUNK_FLAGS) index.html
 .PHONY: wasm
 
 yarn: front/static/lib
@@ -49,7 +49,7 @@ serve_api:
 .PHONY: serve_api
 
 serve_front: front
-	$(TRUNK) serve $(TRUNK_FLAGS) front/index.html
+	$(TRUNK) serve $(TRUNK_FLAGS) index.html
 .PHONY: serve_front
 
 check:
