@@ -1,5 +1,5 @@
 #[yew::function_component]
-pub fn Component() -> yew::Html {
+pub(crate) fn Component() -> yew::Html {
     let contents = [
         ("book", "You really want to read something? Take a book!"),
         (

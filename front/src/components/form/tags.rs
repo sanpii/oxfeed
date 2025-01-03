@@ -1,78 +1,70 @@
-#[derive(Clone)]
-pub enum Message {
-    Add(String),
-    Delete,
-    Remove(usize),
-}
-
 #[derive(Clone, PartialEq, yew::Properties)]
-pub struct Properties {
+pub(crate) struct Properties {
     pub values: Vec<String>,
     pub on_change: yew::Callback<Vec<String>>,
 }
 
-pub struct Component {
-    values: Vec<String>,
-    on_change: yew::Callback<Vec<String>>,
-}
+#[yew::function_component]
+pub(crate) fn Component(props: &Properties) -> yew::Html {
+    let tags = yew::use_state(|| props.values.clone());
+    let on_change = props.on_change.clone();
 
-impl yew::Component for Component {
-    type Message = Message;
-    type Properties = Properties;
+    yew::use_effect_with(tags.clone(), move |tags| {
+        on_change.emit((**tags).clone());
+    });
 
-    fn create(ctx: &yew::Context<Self>) -> Self {
-        let props = ctx.props().clone();
+    let on_select = {
+        let tags = tags.clone();
 
-        Self {
-            values: props.values,
-            on_change: props.on_change,
-        }
-    }
+        yew::Callback::from(move |value| {
+            let mut new_value = (*tags).clone();
 
-    fn update(&mut self, _: &yew::Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            Message::Add(value) => {
-                if !self.values.contains(&value) {
-                    self.values.push(value);
-                }
+            if !new_value.contains(&value) {
+                new_value.push(value);
+                new_value.sort();
+
+                tags.set(new_value);
             }
-            Message::Delete => {
-                self.values.pop();
+        })
+    };
+
+    let on_delete = {
+        let tags = tags.clone();
+
+        yew::Callback::from(move |_| {
+            let mut new_value = (*tags).clone();
+            new_value.pop();
+
+            tags.set(new_value);
+        })
+    };
+
+    yew::html! {
+        <div class="form-control tags-input">
+            {
+                for tags.iter().enumerate().map(|(idx, tag)| {
+                    let tags = tags.clone();
+
+                    yew::html! {
+                        <crate::components::Tag
+                            value={ tag.clone() }
+                            editable=true
+                            on_click={
+                                yew::Callback::from(move |_| {
+                                    let mut new_value = (*tags).clone();
+                                    new_value.remove(idx);
+
+                                    tags.set(new_value);
+                                })
+                            }
+                        />
+                    }
+                })
             }
-            Message::Remove(idx) => {
-                self.values.remove(idx);
-            }
-        }
-
-        let mut tags = self.values.clone();
-        tags.sort();
-
-        self.on_change.emit(tags);
-
-        true
+            <super::Autocomplete
+                on_select={ on_select }
+                on_delete={ on_delete }
+            />
+        </div>
     }
-
-    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        yew::html! {
-            <div class="form-control tags-input">
-                {
-                    for self.values.iter().enumerate().map(|(idx, tag)| {
-                        yew::html! {
-                            <crate::components::Tag
-                                value={ tag.clone() }
-                                editable=true
-                                on_click={ ctx.link().callback(move |_| Message::Remove(idx)) }
-                            />
-                        }
-                    })
-                }
-                <super::Autocomplete
-                    on_select={ ctx.link().callback(Message::Add) }
-                    on_delete={ ctx.link().callback(|_| Message::Delete) }
-                />
-            </div>
-        }
-    }
-
-    crate::change!(values);
 }

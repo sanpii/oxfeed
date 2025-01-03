@@ -1,149 +1,101 @@
-pub enum Message {
-    Cancel,
-    Delete,
-    Deleted,
-    Edit,
-    Error(String),
-    Save(oxfeed_common::webhook::Entity),
-    Saved(oxfeed_common::webhook::Entity),
-}
-
+#[derive(Default)]
 enum Scene {
     Edit,
+    #[default]
     View,
 }
 
 #[derive(yew::Properties, Clone, PartialEq)]
-pub struct Properties {
+pub(crate) struct Properties {
     pub value: oxfeed_common::webhook::Entity,
     #[prop_or_default]
     pub on_delete: yew::Callback<()>,
 }
 
-pub struct Component {
-    scene: Scene,
-    value: oxfeed_common::webhook::Entity,
-    on_delete: yew::Callback<()>,
-}
+#[yew::function_component]
+pub(crate) fn Component(props: &Properties) -> yew::Html {
+    let scene = yew::use_state(Scene::default);
+    let value = yew::use_state(|| props.value.clone());
 
-impl yew::Component for Component {
-    type Message = Message;
-    type Properties = Properties;
+    let on_delete = {
+        let value = value.clone();
+        let on_delete = props.on_delete.clone();
 
-    fn create(ctx: &yew::Context<Self>) -> Self {
-        Self {
-            scene: Scene::View,
-            value: ctx.props().value.clone(),
-            on_delete: ctx.props().on_delete.clone(),
-        }
-    }
+        yew::Callback::from(move |_| {
+            let message = format!("Would you like delete '{}' webhook?", value.name);
 
-    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
-        if let Message::Error(err) = msg {
-            crate::send_error(ctx, &err);
-            return true;
-        }
+            if gloo::dialogs::confirm(&message) {
+                let id = value.id.unwrap();
+                yew::suspense::Suspension::from_future(async move {
+                    crate::Api::webhooks_delete(&id).await.unwrap();
+                });
 
-        let mut should_render = false;
+                on_delete.emit(());
+            }
+        })
+    };
 
-        match self.scene {
-            Scene::View => match msg {
-                Message::Delete => {
-                    let message = format!("Would you like delete '{}' webhook?", self.value.name);
+    let save = {
+        let scene = scene.clone();
+        let value = value.clone();
 
-                    if gloo::dialogs::confirm(&message) {
-                        let id = &self.value.id.unwrap();
+        yew::Callback::from(move |webhook: oxfeed_common::webhook::Entity| {
+            let id = webhook.id.unwrap();
+            value.set(webhook.clone());
 
-                        crate::api!(
-                            ctx.link(),
-                            webhooks_delete(id) -> |_| Message::Deleted
-                        );
-                    }
-                }
-                Message::Deleted => self.on_delete.emit(()),
-                Message::Edit => {
-                    self.scene = Scene::Edit;
-                    should_render = true;
-                }
-                _ => unreachable!(),
-            },
-            Scene::Edit => match msg {
-                Message::Cancel => {
-                    self.scene = Scene::View;
-                    should_render = true;
-                }
-                Message::Save(webhook) => {
-                    let id = &webhook.id.unwrap();
-                    self.value = webhook.clone();
+            yew::suspense::Suspension::from_future(async move {
+                crate::Api::webhooks_update(&id, &webhook).await.unwrap();
+            });
 
-                    crate::api!(
-                        ctx.link(),
-                        webhooks_update(id, webhook) -> Message::Saved
-                    );
+            scene.set(Scene::View);
+        })
+    };
 
-                    should_render = true;
-                }
-                Message::Saved(webhook) => {
-                    self.value = webhook;
-                    self.scene = Scene::View;
-                    should_render = true;
-                }
-                _ => unreachable!(),
-            },
-        }
+    match *scene {
+        Scene::Edit => yew::html! {
+            <super::form::Webhook
+                webhook={ (*value).clone() }
+                on_cancel={ yew::Callback::from(move |_| scene.set(Scene::View)) }
+                on_submit={ save }
+            />
+        },
+        Scene::View => {
+            let webhook = value.clone();
 
-        should_render
-    }
-
-    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        match &self.scene {
-            Scene::Edit => yew::html! {
-                <super::form::Webhook
-                    webhook={ self.value.clone() }
-                    on_cancel={ ctx.link().callback(|_| Message::Cancel) }
-                    on_submit={ ctx.link().callback(Message::Save) }
-                />
-            },
-            Scene::View => {
-                let webhook = self.value.clone();
-
-                yew::html! {
-                    <>
-                        <div class="d-inline-flex">
-                            { webhook.name }
-                            {
-                                if let Some(last_error) = webhook.last_error {
-                                    yew::html! {
-                                        <super::Error text={ last_error } />
-                                    }
-                                }
-                                else {
-                                    "".into()
-                                }
+            yew::html! {
+                <>
+                    <div class="d-inline-flex">
+                    { webhook.name.clone() }
+                    {
+                        if let Some(ref last_error) = webhook.last_error {
+                            yew::html! {
+                                <super::Error text={ last_error.clone() } />
                             }
-                        </div>
+                        }
+                        else {
+                            "".into()
+                        }
+                    }
+                    </div>
 
-                        <div class={ yew::classes!("btn-group", "float-end") }>
-                            <button
-                                class={ yew::classes!("btn", "btn-primary") }
-                                title="Edit"
-                                onclick={ ctx.link().callback(move |_| Message::Edit) }
-                            >
-                                <super::Svg icon="pencil-square" size=16 />
-                            </button>
-                            <button
-                                class={ yew::classes!("btn", "btn-danger") }
-                                title="Delete"
-                                onclick={ ctx.link().callback(|_| Message::Delete) }
-                            >
-                                <super::Svg icon="trash" size=16 />
-                            </button>
-                        </div>
-                    </>
-                }
+                    <div class={ yew::classes!("btn-group", "float-end") }>
+                        <button
+                            class={ yew::classes!("btn", "btn-primary") }
+                            title="Edit"
+                            onclick={ yew::Callback::from(move |_| scene.set(Scene::Edit)) }
+                        >
+                            <super::Svg icon="pencil-square" size=16 />
+                        </button>
+                        <button
+                            class={ yew::classes!("btn", "btn-danger") }
+                            title="Delete"
+                            onclick={ on_delete }
+                        >
+                            <super::Svg icon="trash" size=16 />
+                        </button>
+                    </div>
+                </>
             }
         }
     }
-
-    crate::change!(value, on_delete);
 }

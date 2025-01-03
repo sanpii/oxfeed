@@ -1,7 +1,6 @@
 use reqwest::Method;
-use yew_agent::Dispatched;
 
-pub struct Api;
+pub(crate) struct Api;
 
 impl Api {
     #[must_use]
@@ -57,6 +56,7 @@ impl Api {
         Ok(())
     }
 
+    #[allow(dependency_on_unit_never_type_fallback)]
     pub async fn auth_logout() -> oxfeed_common::Result {
         Self::fetch(Method::POST, "/auth/logout", ()).await?;
 
@@ -90,11 +90,11 @@ impl Api {
         Self::fetch(Method::POST, "/items/read", ()).await
     }
 
-    pub async fn items_tag(id: &uuid::Uuid, key: &str, value: &bool) -> oxfeed_common::Result {
+    pub async fn items_tag(id: &uuid::Uuid, key: &str, value: bool) -> oxfeed_common::Result {
         let url = format!("/items/{id}");
 
         let json = serde_json::json!({
-            key: *value,
+            key: value,
         });
 
         Self::fetch(Method::PATCH, &url, Body::Json(json)).await
@@ -228,20 +228,18 @@ impl Api {
             .send()
             .await?;
 
-        if response.status().is_server_error() {
+        let status = response.status();
+
+        if status.is_server_error() {
             let error = response.text().await?;
 
             return Err(oxfeed_common::Error::Api(error));
         }
 
-        match response.status() {
-            reqwest::StatusCode::UNAUTHORIZED => {
-                let mut event_bus = crate::event::Bus::dispatcher();
-
-                event_bus.send(crate::Event::AuthRequire);
-                Err(oxfeed_common::Error::Auth)
-            }
+        match status {
+            reqwest::StatusCode::UNAUTHORIZED => Err(oxfeed_common::Error::Auth),
             reqwest::StatusCode::NO_CONTENT => serde_json::from_str("null").map_err(Into::into),
+            reqwest::StatusCode::FORBIDDEN => Err(oxfeed_common::Error::InvalidLogin),
             _ => {
                 let data = response.json().await?;
 
@@ -251,7 +249,7 @@ impl Api {
     }
 }
 
-pub enum Body {
+pub(crate) enum Body {
     Empty,
     Json(serde_json::Value),
 }

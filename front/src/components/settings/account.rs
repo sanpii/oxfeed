@@ -1,90 +1,59 @@
-#[derive(Clone)]
-pub enum Message {
-    Delete,
-    Error(String),
-    Logout,
-    NeedUpdate,
-    Update(oxfeed_common::user::Entity),
-    Save(oxfeed_common::account::Entity),
+#[yew::function_component]
+pub(crate) fn Component() -> yew::HtmlResult {
+    let res = yew::suspense::use_future(|| async move { crate::Api::auth().await })?;
+    let account = match *res {
+        Ok(ref account) => oxfeed_common::account::Entity::from(account.clone()),
+        Err(_) => return Ok(yew::Html::default()),
+    };
+
+    let on_save = {
+        yew::Callback::from(move |new_account| {
+            yew::suspense::Suspension::from_future(async move {
+                crate::Api::account_update(&new_account).await.unwrap();
+                logout().await.unwrap()
+            });
+        })
+    };
+
+    let on_delete = {
+        yew::Callback::from(move |_| {
+            let message = "Would you like delete your account?";
+
+            if gloo::dialogs::confirm(message) {
+                yew::suspense::Suspension::from_future(async move {
+                    crate::Api::account_delete().await.unwrap();
+                    logout().await.unwrap()
+                });
+            }
+        })
+    };
+
+    let html = yew::html! {
+        <>
+            <crate::components::form::Account
+                account={ account.clone() }
+                on_save={ on_save }
+            />
+
+            <hr />
+
+            <a
+                class="btn btn-danger"
+                title="Delete"
+                onclick={ on_delete }
+            >
+                <crate::components::Svg icon="trash" size=24 />
+                { "Delete my account" }
+            </a>
+        </>
+    };
+
+    Ok(html)
 }
 
-pub struct Component {
-    account: Option<oxfeed_common::account::Entity>,
-}
+async fn logout() -> oxfeed_common::Result {
+    crate::Api::auth_logout().await?;
+    crate::Api::auth().await?;
 
-impl yew::Component for Component {
-    type Message = Message;
-    type Properties = ();
-
-    fn create(ctx: &yew::Context<Self>) -> Self {
-        let component = Self { account: None };
-
-        ctx.link().send_message(Self::Message::NeedUpdate);
-
-        component
-    }
-
-    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
-        let mut should_render = false;
-
-        match msg {
-            Message::Delete => {
-                let message = "Would you like delete your account?";
-
-                if gloo::dialogs::confirm(message) {
-                    crate::api!(
-                        ctx.link(),
-                        account_delete() -> |_| Message::Logout
-                    );
-                }
-            }
-            Message::Error(err) => crate::send_error(ctx, &err),
-            Message::Logout => crate::api!(
-                ctx.link(),
-                auth_logout() -> |_| Message::NeedUpdate
-            ),
-            Message::NeedUpdate => crate::api!(
-                ctx.link(),
-                auth() -> Message::Update
-            ),
-            Message::Save(account) => crate::api!(
-                ctx.link(),
-                account_update(account) -> |_| Message::Logout
-            ),
-            Message::Update(account) => {
-                self.account = Some(account.into());
-                should_render = true;
-            }
-        }
-
-        should_render
-    }
-
-    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        let Some(account) = &self.account else {
-            return "".into();
-        };
-
-        yew::html! {
-            <>
-                <crate::components::form::Account
-                    account={ account.clone() }
-                    on_save={ ctx.link().callback(Message::Save) }
-                />
-
-                <hr />
-
-                <a
-                    class="btn btn-danger"
-                    title="Delete"
-                    onclick={ ctx.link().callback(|_| Message::Delete) }
-                >
-                    <crate::components::Svg icon="trash" size=24 />
-                    { "Delete my account" }
-                </a>
-            </>
-        }
-    }
-
-    crate::change!();
+    Ok(())
 }

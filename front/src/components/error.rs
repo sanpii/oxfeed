@@ -1,10 +1,10 @@
 #[derive(PartialEq, yew::Properties)]
-pub struct Properties {
+pub(crate) struct Properties {
     pub text: String,
 }
 
 #[yew::function_component]
-pub fn Component(props: &Properties) -> yew::Html {
+pub(crate) fn Component(props: &Properties) -> yew::Html {
     yew::html! {
         <span class="help">
             {" "}

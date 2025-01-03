@@ -1,115 +1,80 @@
-pub enum Message {
-    ToggleRemember,
-    UpdateEmail(String),
-    UpdatePassword(String),
-    Submit,
-}
-
-pub struct Info {
+pub(crate) struct Info {
     pub email: String,
     pub password: String,
     pub remember_me: bool,
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub struct Properties {
+pub(crate) struct Properties {
     pub on_submit: yew::Callback<Info>,
 }
 
-pub struct Component {
-    email: String,
-    password: String,
-    remember_me: bool,
-    on_submit: yew::Callback<Info>,
-}
+#[yew::function_component]
+pub(crate) fn Component(props: &Properties) -> yew::Html {
+    let email = yew::use_state(String::new);
+    let password = yew::use_state(String::new);
+    let remember_me = yew::use_state(|| false);
 
-impl yew::Component for Component {
-    type Message = Message;
-    type Properties = Properties;
+    let edit_email = crate::components::edit_cb(email.clone());
+    let edit_password = crate::components::edit_cb(password.clone());
+    let toggle_remember_me = crate::components::toggle_cb(remember_me.clone());
 
-    fn create(ctx: &yew::Context<Self>) -> Self {
-        Self {
-            email: String::new(),
-            password: String::new(),
-            remember_me: false,
-            on_submit: ctx.props().on_submit.clone(),
-        }
-    }
+    let on_submit = {
+        let email = email.clone();
+        let password = password.clone();
+        let remember_me = remember_me.clone();
+        let on_submit = props.on_submit.clone();
 
-    fn update(&mut self, _: &yew::Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            Message::Submit => {
-                let info = Info {
-                    email: self.email.clone(),
-                    password: self.password.clone(),
-                    remember_me: self.remember_me,
-                };
+        yew::Callback::from(move |_| {
+            let info = Info {
+                email: (*email).clone(),
+                password: (*password).clone(),
+                remember_me: *remember_me,
+            };
 
-                self.on_submit.emit(info);
-            }
-            Message::ToggleRemember => self.remember_me = !self.remember_me,
-            Message::UpdateEmail(email) => self.email = email,
-            Message::UpdatePassword(password) => self.password = password,
-        }
+            on_submit.emit(info);
+        })
+    };
 
-        false
-    }
-
-    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        use yew::TargetCast;
-
-        yew::html! {
-            <>
-                <div class="form-floating">
+    yew::html! {
+        <>
+            <div class="form-floating">
+                <input
+                    type="email"
+                    name="email"
+                    class="form-control"
+                    placeholder="Email"
+                    required=true
+                    autofocus=true
+                    oninput={ edit_email }
+                />
+                <label for="email" class="form-label sr-only">{ "Email" }</label>
+            </div>
+            <div class="form-floating">
+                <input
+                    type="password"
+                    name="password"
+                    class="form-control"
+                    placeholder="Password"
+                    required=true
+                    oninput={ edit_password }
+                />
+                <label for="password" class="form-label sr-only">{ "Password" }</label>
+            </div>
+            <div class="checkbox">
+                <label class="form-label">
                     <input
-                        type="email"
-                        name="email"
-                        class="form-control"
-                        placeholder="Email"
-                        required=true
-                        autofocus=true
-                        oninput={ ctx.link().callback(|e: yew::InputEvent| {
-                            let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
-                            Message::UpdateEmail(input.value())
-                        }) }
-                    />
-                    <label for="email" class="form-label sr-only">{ "Email" }</label>
-                </div>
-                <div class="form-floating">
-                    <input
-                        type="password"
-                        name="password"
-                        class="form-control"
-                        placeholder="Password"
-                        required=true
-                        oninput={ ctx.link().callback(|e: yew::InputEvent| {
-                            let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
-                            Message::UpdatePassword(input.value())
-                        }) }
-                    />
-                    <label for="password" class="form-label sr-only">{ "Password" }</label>
-                </div>
-                <div class="checkbox">
-                    <label class="form-label">
-                        <input
-                            type="checkbox"
-                            checked={ self.remember_me }
-                            onclick={ ctx.link().callback(|_| Message::ToggleRemember) }
-                        />{ " Remember me" }
-                    </label>
-                </div>
-                <a
-                    class={yew::classes!("btn", "btn-lg", "btn-primary", "w-100")}
-                    type="submit"
-                    onclick={ ctx.link().callback(|_| Message::Submit) }
-                >{ "Sign in" }</a>
-            </>
-        }
-    }
-
-    fn changed(&mut self, ctx: &yew::Context<Self>, _: &Self::Properties) -> bool {
-        self.on_submit = ctx.props().on_submit.clone();
-
-        false
+                        type="checkbox"
+                        checked={ *remember_me }
+                        onclick={ toggle_remember_me }
+                    />{ " Remember me" }
+                </label>
+            </div>
+            <a
+                class={yew::classes!("btn", "btn-lg", "btn-primary", "w-100")}
+                type="submit"
+                onclick={ on_submit }
+            >{ "Sign in" }</a>
+        </>
     }
 }

@@ -1,101 +1,68 @@
-pub enum Message {
-    Error(oxfeed_common::Error),
-    Import,
-    Imported,
-    Loaded(String),
-    Files(Vec<gloo::file::File>),
-}
+#[yew::function_component]
+pub(crate) fn Component() -> yew::Html {
+    let export_url = format!("{}/opml", env!("API_URL"));
+    let context = crate::use_context();
+    let files = yew::use_state(Vec::<gloo::file::Blob>::new);
 
-pub struct Component {
-    event_bus: yew_agent::Dispatcher<crate::event::Bus>,
-    files: Vec<gloo::file::File>,
-}
+    let on_change = {
+        let files = files.clone();
 
-impl Component {
-    fn load(&mut self, link: &yew::html::Scope<Self>) {
-        for file in &self.files {
-            let link = link.clone();
+        yew::Callback::from(move |e: yew::Event| {
+            use yew::TargetCast as _;
 
-            gloo::file::callbacks::read_as_text(file, move |content| {
-                link.send_message(Message::Loaded(content.unwrap_or_default()));
-            });
-        }
-    }
-}
+            let mut f = Vec::new();
+            let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
 
-impl yew::Component for Component {
-    type Message = Message;
-    type Properties = ();
-
-    fn create(_: &yew::Context<Self>) -> Self {
-        use yew_agent::Dispatched;
-
-        Self {
-            event_bus: crate::event::Bus::dispatcher(),
-            files: Vec::new(),
-        }
-    }
-
-    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            Message::Error(err) => {
-                let (context, _) = crate::context(ctx, yew::Callback::noop());
-                context.dispatch(err.into());
+            if let Some(file_list) = input.files() {
+                for x in 0..file_list.length() {
+                    if let Some(file) = file_list.get(x) {
+                        f.push(file.into());
+                    }
+                }
             }
-            Message::Files(files) => self.files = files,
-            Message::Import => self.load(ctx.link()),
-            Message::Imported => {
-                let (context, _) = crate::context(ctx, yew::Callback::noop());
-                let alert = crate::event::Alert::info("Import done");
-                context.dispatch(crate::components::app::Action::AddAlert(alert));
-                self.event_bus.send(crate::Event::SettingUpdate);
-            }
-            Message::Loaded(content) => {
-                ctx.link().send_future(async move {
-                    crate::Api::opml_import(content)
+
+            files.set(f);
+        })
+    };
+
+    let import = {
+        let context = context.clone();
+        let files = files.clone();
+
+        yew::Callback::from(move |_| {
+            for file in &*files {
+                let context = context.clone();
+                let file = file.clone();
+
+                yew::suspense::Suspension::from_future(async move {
+                    let content = gloo::file::futures::read_as_text(&file)
                         .await
-                        .map_or_else(Message::Error, |_| Message::Imported)
+                        .unwrap_or_default();
+
+                    crate::Api::opml_import(content).await.unwrap();
+
+                    let alert = crate::Alert::info("Import done");
+                    context.dispatch(alert.into());
+
+                    context.dispatch(crate::Action::NeedUpdate);
                 });
             }
-        }
+        })
+    };
 
-        true
+    yew::html! {
+        <>
+            <div class="input-group mb-3">
+                <input type="file" class="form-control" onchange={ on_change } />
+                <button
+                    class={ yew::classes!("btn", "btn-outline-primary") }
+                    type="button"
+                    onclick={ import }
+                >{ "Import" }</button>
+            </div>
+            <div class="input-group">
+                <a href={ export_url } target="_blank" class={ yew::classes!("btn", "btn-outline-primary") }>{ "Export" }</a>
+            </div>
+        </>
     }
-
-    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        let export_url = format!("{}/opml", env!("API_URL"));
-
-        yew::html! {
-            <>
-                <div class="input-group mb-3">
-                    <input type="file" class="form-control" onchange={ ctx.link().callback(|e: yew::Event| {
-                        use yew::TargetCast;
-
-                        let mut files = Vec::new();
-                        let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
-
-                        if let Some(file_list) = input.files() {
-                            for x in 0..file_list.length() {
-                                if let Some(file) = file_list.get(x) {
-                                    files.push(file.into());
-                                }
-                            }
-                        }
-
-                        Message::Files(files)
-                    }) } />
-                    <button
-                        class={ yew::classes!("btn", "btn-outline-primary") }
-                        type="button"
-                        onclick={ ctx.link().callback(|_| Message::Import) }
-                    >{ "Import" }</button>
-                </div>
-                <div class="input-group">
-                    <a href={ export_url } target="_blank" class={ yew::classes!("btn", "btn-outline-primary") }>{ "Export" }</a>
-                </div>
-            </>
-        }
-    }
-
-    crate::change!();
 }

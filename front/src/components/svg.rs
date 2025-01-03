@@ -1,5 +1,5 @@
 #[derive(Clone, PartialEq, yew::Properties)]
-pub struct Properties {
+pub(crate) struct Properties {
     pub icon: String,
     pub size: u32,
     #[prop_or_default]
@@ -11,7 +11,7 @@ pub struct Properties {
 }
 
 #[yew::function_component]
-pub fn Component(props: &Properties) -> yew::Html {
+pub(crate) fn Component(props: &Properties) -> yew::Html {
     let icon = if props.content_type {
         if props.icon.starts_with("audio/") {
             "file-earmark-music"
@@ -40,7 +40,10 @@ pub fn Component(props: &Properties) -> yew::Html {
 
     let node = yew::virtual_dom::VNode::VRef(span.into());
 
-    let onclick = crate::cb!(props.on_click);
+    let onclick = {
+        let on_click = props.on_click.clone();
+        yew::Callback::from(move |_| on_click.emit(()))
+    };
 
     yew::html! {
         <span class={ &props.class } {onclick}>{ node }</span>

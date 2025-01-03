@@ -1,5 +1,5 @@
 #[derive(Clone, PartialEq, Eq, yew_router::Routable)]
-pub enum Route {
+pub(crate) enum Route {
     #[at("/favorites")]
     Favorites,
     #[at("/settings")]
@@ -21,174 +21,70 @@ pub enum Route {
     NotFound,
 }
 
-#[derive(Debug)]
-pub enum Action {
-    AddAlert(crate::event::Alert),
-    RemoveAlert(usize),
-}
-
-impl From<oxfeed_common::Error> for Action {
-    fn from(error: oxfeed_common::Error) -> Self {
-        Self::AddAlert(error.into())
-    }
-}
-
-#[derive(Clone, Default, Debug, Eq, PartialEq)]
-pub struct Context {
-    pub alerts: Vec<crate::event::Alert>,
-}
-
-impl yew::Reducible for Context {
-    type Action = Action;
-
-    fn reduce(self: std::rc::Rc<Self>, action: Self::Action) -> std::rc::Rc<Self> {
-        let mut context = (*self).clone();
-
-        match action {
-            Action::AddAlert(alert) => context.alerts.push(alert),
-            Action::RemoveAlert(idx) => {
-                context.alerts.remove(idx);
-            }
-        }
-
-        context.into()
-    }
-}
-
 #[yew::function_component]
-pub fn Component() -> yew::Html {
-    let context = yew::functional::use_reducer(Context::default);
+pub(crate) fn Component() -> yew::Html {
+    let context = yew::use_reducer(crate::Context::default);
+    let fallback = yew::html! {<div>{"Loading..."}</div>};
+    let auth = yew::use_memo(context.clone(), |context| context.auth);
+
+    let _ = yew::use_state(|| websocket(context.clone()));
 
     yew::html! {
-        <yew::ContextProvider<crate::Context> context={ context.clone() }>
-            <ComponentLoc {context} />
-        </yew::ContextProvider<crate::Context>>
+        <yew::Suspense {fallback}>
+            <yew::ContextProvider<yew::UseReducerHandle<crate::Context>> {context}>
+                if *auth {
+                    <yew_router::router::BrowserRouter>
+                        <yew_router::Switch<Route> render={ switch } />
+                    </yew_router::router::BrowserRouter>
+                } else {
+                    <super::Login />
+                }
+            </yew::ContextProvider<yew::UseReducerHandle<crate::Context>>>
+        </yew::Suspense>
     }
 }
 
-enum Message {
-    Event(crate::Event),
-    #[allow(dead_code)]
-    Websocket(wasm_sockets::Message),
-    WebsocketError,
-}
+fn websocket(context: yew::UseReducerHandle<crate::Context>) -> Option<wasm_sockets::EventClient> {
+    let url = env!("API_URL")
+        .replace("http://", "ws://")
+        .replace("https://", "wss://");
 
-#[derive(PartialEq, yew::Properties)]
-struct Properties {
-    context: crate::Context,
-}
+    let ws_url = format!("{url}/ws?token={}", crate::Api::token());
 
-struct ComponentLoc {
-    auth: bool,
-    event_bus: yew_agent::Dispatcher<crate::event::Bus>,
-    _producer: Box<dyn yew_agent::Bridge<crate::event::Bus>>,
-    websocket: Option<wasm_sockets::EventClient>,
-}
-
-impl ComponentLoc {
-    fn websocket(link: &yew::html::Scope<Self>) -> Option<wasm_sockets::EventClient> {
-        let url = env!("API_URL")
-            .replace("http://", "ws://")
-            .replace("https://", "wss://");
-
-        let ws_url = format!("{url}/ws?token={}", crate::Api::token());
-
-        match wasm_sockets::EventClient::new(&ws_url) {
-            Ok(mut websocket) => {
-                let l = link.clone();
-                websocket.set_on_message(Some(Box::new(move |_, msg| {
-                    l.send_message(Message::Websocket(msg));
+    match wasm_sockets::EventClient::new(&ws_url) {
+        Ok(mut websocket) => {
+            {
+                let context = context.clone();
+                websocket.set_on_message(Some(Box::new(move |_, _| {
+                    context.dispatch(crate::Action::NeedUpdate);
                 })));
-
-                let l = link.clone();
+            }
+            {
+                let context = context.clone();
                 websocket.set_on_error(Some(Box::new(move |error| {
                     log::error!("{error:?}");
-                    l.send_message(Message::WebsocketError);
+                    context.dispatch(crate::Action::WebsocketError);
                 })));
-
-                let l = link.clone();
+            }
+            {
+                let context = context.clone();
                 websocket.set_on_close(Some(Box::new(move |event| {
                     log::error!("{event:?}");
-                    l.send_message(Message::WebsocketError);
+                    context.dispatch(crate::Action::WebsocketError);
                 })));
+            }
 
-                Some(websocket)
-            }
-            Err(err) => {
-                log::error!("Unable to connect to websocket: {err}");
-                None
-            }
+            Some(websocket)
+        }
+        Err(err) => {
+            context.dispatch(crate::Action::WebsocketError);
+            log::error!("Unable to connect to websocket: {err}");
+            None
         }
     }
-}
-
-impl yew::Component for ComponentLoc {
-    type Message = Message;
-    type Properties = Properties;
-
-    fn create(ctx: &yew::Context<Self>) -> Self {
-        use yew_agent::{Bridged, Dispatched};
-
-        let callback = {
-            let link = ctx.link().clone();
-            move |e| link.send_message(Message::Event(e))
-        };
-
-        Self {
-            websocket: Self::websocket(ctx.link()),
-            auth: !crate::Api::token().is_empty(),
-            event_bus: crate::event::Bus::dispatcher(),
-            _producer: crate::event::Bus::bridge(std::rc::Rc::new(callback)),
-        }
-    }
-
-    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
-        let mut should_render = false;
-
-        match msg {
-            Message::Event(event) => match event {
-                crate::Event::AuthRequire => {
-                    self.auth = false;
-                    should_render = true;
-                }
-                crate::Event::Logged => {
-                    self.auth = true;
-                    self.websocket = Self::websocket(ctx.link());
-                    should_render = true;
-                }
-                crate::Event::Redirect(route) => {
-                    crate::location::set_route(&route);
-                    should_render = true;
-                }
-                _ => (),
-            },
-            Message::Websocket(_) => self.event_bus.send(crate::Event::ItemUpdate),
-            Message::WebsocketError => self.event_bus.send(crate::Event::WebsocketError),
-        }
-
-        should_render
-    }
-
-    fn view(&self, _: &yew::Context<Self>) -> yew::Html {
-        if self.auth {
-            yew::html! {
-                <yew_router::router::BrowserRouter>
-                    <yew_router::Switch<Route> render={ switch } />
-                </yew_router::router::BrowserRouter>
-            }
-        } else {
-            yew::html! {
-                <super::Login />
-            }
-        }
-    }
-
-    crate::change!();
 }
 
 fn switch(route: Route) -> yew::Html {
-    let pagination: elephantry_extras::Pagination = crate::Location::new().into();
-
     yew::html! {
         <>
             <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
@@ -200,16 +96,16 @@ fn switch(route: Route) -> yew::Html {
                         <super::Sidebar current_route={ route.clone() } />
                     </nav>
                     <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                    <super::Alerts />
+                        <super::Alerts />
                         {
                             match route {
-                                Route::All => yew::html!{<super::Items kind="all" pagination={ pagination } />},
-                                Route::Favorites => yew::html!{<super::Items kind="favorites" pagination={ pagination } />},
+                                Route::All => yew::html!{<super::Items kind="all" />},
+                                Route::Favorites => yew::html!{<super::Items kind="favorites" />},
                                 Route::Settings => yew::html!{<super::Settings />},
-                                Route::Sources => yew::html!{<super::Sources pagination={ pagination } />},
-                                Route::Tags => yew::html!{<super::Tags pagination={ pagination } />},
-                                Route::Unread => yew::html!{<super::Items kind="unread" pagination={ pagination } />},
-                                Route::Search { kind } => yew::html!{<super::Search kind={ kind.clone() } pagination={ pagination } />},
+                                Route::Sources => yew::html!{<super::Sources />},
+                                Route::Tags => yew::html!{<super::Tags />},
+                                Route::Unread => yew::html!{<super::Items kind="unread" />},
+                                Route::Search { kind } => yew::html!{<super::Search kind={ kind.clone() } />},
                                 Route::NotFound => yew::html!{<super::NotFound />},
                                 Route::Index => yew::html!{<yew_router::prelude::Redirect<Route> to={ Route::Unread } />},
                             }

@@ -1,84 +1,38 @@
-pub enum Message {
-    Error(String),
-    Update(Vec<oxfeed_common::Tag>),
-    NeedUpdate,
-}
+#[yew::function_component]
+pub(crate) fn Component() -> yew::HtmlResult {
+    let pagination = yew::use_state(|| elephantry_extras::Pagination::from(crate::Location::new()));
+    let tags = yew::suspense::use_future_with(pagination, |pagination| async move {
+        crate::Api::tags_all(&pagination).await.ok()
+    })?;
 
-#[derive(Clone, PartialEq, yew::Properties)]
-pub struct Properties {
-    pub pagination: elephantry_extras::Pagination,
-}
+    let Some(tags) = (*tags).clone() else {
+        return Ok(yew::html! { <super::Empty /> });
+    };
 
-pub struct Component {
-    tags: Vec<oxfeed_common::Tag>,
-    pagination: elephantry_extras::Pagination,
-}
-
-impl yew::Component for Component {
-    type Properties = Properties;
-    type Message = Message;
-
-    fn create(context: &yew::Context<Self>) -> Self {
-        let component = Self {
-            tags: Vec::new(),
-            pagination: context.props().pagination,
-        };
-
-        context.link().send_message(Message::NeedUpdate);
-
-        component
+    if tags.is_empty() {
+        return Ok(yew::html! { <super::Empty /> });
     }
 
-    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
-        let mut should_render = false;
+    let max = tags.iter().map(|x| x.count).max().unwrap_or(1);
 
-        match msg {
-            Message::Error(err) => crate::send_error(ctx, &err),
-            Message::NeedUpdate => {
-                let pagination = &self.pagination;
+    let html = yew::html! {
+        <div class={ yew::classes!("d-flex", "flex-wrap", "align-items-center", "cloud") }>
+        {
+            for tags.iter().map(|tag| {
+                let style = format!("font-size: {}rem", tag.count as f32 / max as f32 * 5. + 1.);
+                let href = format!("/search/all?tag={}", tag.name);
 
-                crate::api!(
-                    ctx.link(),
-                    tags_all(pagination) -> Message::Update
-                );
-            }
-            Message::Update(tags) => {
-                self.tags = tags;
-                should_render = true;
-            }
+                yew::html! {
+                    <div style={ style }>
+                        <a href={ href }>
+                            <crate::components::Tag value={ tag.name.clone() } />
+                        </a>
+                    </div>
+                }
+            })
         }
+        </div>
+    };
 
-        should_render
-    }
-
-    fn view(&self, _: &yew::Context<Self>) -> yew::Html {
-        if self.tags.is_empty() {
-            return yew::html! {
-                <super::Empty />
-            };
-        }
-
-        let max = self.tags.iter().map(|x| x.count).max().unwrap_or(1);
-
-        yew::html! {
-            <div class={ yew::classes!("d-flex", "flex-wrap", "align-items-center", "cloud") }>
-            {
-                for self.tags.iter().map(|tag| {
-                    let style = format!("font-size: {}rem", tag.count as f32 / max as f32 * 5. + 1.);
-                    let href = format!("/search/all?tag={}", tag.name);
-
-                    yew::html! {
-                        <div style={ style }>
-                            <a href={ href }>
-                                <crate::components::Tag value={ tag.name.clone() } />
-                            </a>
-                        </div>
-                    }
-                })
-            }
-            </div>
-        }
-    }
-
-    crate::change!();
+    Ok(html)
 }

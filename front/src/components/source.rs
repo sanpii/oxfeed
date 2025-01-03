@@ -1,193 +1,155 @@
-pub enum Message {
-    Cancel,
-    Delete,
-    Deleted,
-    Edit,
-    Error(String),
-    ToggleActive(bool),
-    Save(oxfeed_common::source::Entity),
-    Saved(oxfeed_common::source::Entity),
-}
-
+#[derive(Clone, Copy, Default)]
 enum Scene {
     Edit,
+    #[default]
     View,
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub struct Properties {
+pub(crate) struct Properties {
     pub value: oxfeed_common::source::Entity,
 }
 
-pub struct Component {
-    event_bus: yew_agent::Dispatcher<crate::event::Bus>,
-    scene: Scene,
-    props: Properties,
-}
+#[yew::function_component]
+pub(crate) fn Component(props: &Properties) -> yew::Html {
+    let context = crate::use_context();
+    let source = yew::use_state(|| props.value.clone());
+    let scene = yew::use_state(Scene::default);
 
-impl yew::Component for Component {
-    type Message = Message;
-    type Properties = Properties;
+    let on_cancel = {
+        let scene = scene.clone();
 
-    fn create(ctx: &yew::Context<Self>) -> Self {
-        use yew_agent::Dispatched;
+        yew::Callback::from(move |_| {
+            scene.set(Scene::View);
+        })
+    };
 
-        Self {
-            event_bus: crate::event::Bus::dispatcher(),
-            scene: Scene::View,
-            props: ctx.props().clone(),
-        }
-    }
+    let on_delete = {
+        let source = source.clone();
+        let context = context.clone();
 
-    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
-        if let Message::Saved(source) = msg {
-            self.props.value = source;
-            self.scene = Scene::View;
-            return true;
-        }
+        yew::Callback::from(move |_| {
+            let message = format!("Would you like delete '{}' source?", source.title);
 
-        if let Message::Error(err) = msg {
-            crate::send_error(ctx, &err);
-            return true;
-        }
+            if gloo::dialogs::confirm(&message) {
+                let source = source.clone();
+                let context = context.clone();
 
-        let mut should_render = false;
+                yew::suspense::Suspension::from_future(async move {
+                    let id = source.id.unwrap();
 
-        match self.scene {
-            Scene::View => match msg {
-                Message::Delete => {
-                    let message =
-                        format!("Would you like delete '{}' source?", self.props.value.title);
+                    crate::Api::sources_delete(&id).await.unwrap();
+                    context.dispatch(crate::Action::NeedUpdate);
+                });
+            }
+        })
+    };
 
-                    if gloo::dialogs::confirm(&message) {
-                        let id = self.props.value.id.unwrap();
+    let on_edit = {
+        let scene = scene.clone();
 
-                        crate::api!(
-                            ctx.link(),
-                            sources_delete(id) -> |_| Message::Deleted
-                        );
-                    }
-                }
-                Message::Deleted => self.event_bus.send(crate::Event::SourceUpdate),
-                Message::Edit => {
-                    self.scene = Scene::Edit;
-                    should_render = true;
-                }
-                Message::Saved(_) => self.event_bus.send(crate::Event::SourceUpdate),
-                Message::ToggleActive(active) => {
-                    let value = &mut self.props.value;
-                    let id = &value.id.unwrap();
+        yew::Callback::from(move |_| {
+            scene.set(Scene::Edit);
+        })
+    };
 
-                    value.active = active;
+    let on_submit = {
+        let scene = scene.clone();
+        let source = source.clone();
 
-                    crate::api!(
-                        ctx.link(),
-                        sources_update(id, value) -> Message::Saved
-                    );
+        yew::Callback::from(move |new_source: oxfeed_common::source::Entity| {
+            let scene = scene.clone();
+            let source = source.clone();
 
-                    should_render = true;
-                }
-                _ => (),
-            },
-            Scene::Edit => match msg {
-                Message::Cancel => {
-                    self.scene = Scene::View;
-                    should_render = true;
-                }
-                Message::Save(source) => {
-                    let id = &self.props.value.id.unwrap();
+            yew::suspense::Suspension::from_future(async move {
+                let id = new_source.id.unwrap();
 
-                    self.props.value = source.clone();
+                crate::Api::sources_update(&id, &new_source).await.unwrap();
+                source.set(new_source);
+                scene.set(Scene::View);
+            });
+        })
+    };
 
-                    crate::api!(
-                        ctx.link(),
-                        sources_update(id, source) -> Message::Saved
-                    );
+    let on_toggle = {
+        let source = source.clone();
+        let on_submit = on_submit.clone();
 
-                    should_render = true;
-                }
-                _ => unreachable!(),
-            },
-        }
+        yew::Callback::from(move |active| {
+            let mut new_source = (*source).clone();
 
-        should_render
-    }
+            new_source.active = active;
+            on_submit.emit(new_source);
+        })
+    };
 
-    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        match &self.scene {
-            Scene::Edit => yew::html! {
-                <super::form::Source
-                    source={ self.props.value.clone() }
-                    on_cancel={ ctx.link().callback(|_| Message::Cancel) }
-                    on_submit={ ctx.link().callback(Message::Save) }
-                />
-            },
-            Scene::View => {
-                let source = self.props.value.clone();
+    let source = (*source).clone();
 
-                yew::html! {
-                    <>
-                        <div class="d-inline-flex">
-                            <super::Switch
-                                id={ format!("active-{}", source.id.unwrap_or_default()) }
-                                active={ source.active }
-                                on_toggle={ ctx.link().callback(Message::ToggleActive) }
-                            />
+    match *scene {
+        Scene::Edit => yew::html! {
+            <super::form::Source {source} {on_cancel} {on_submit} />
+        },
+        Scene::View => {
+            yew::html! {
+                <>
+                    <div class="d-inline-flex">
+                        <super::Switch
+                            id={ format!("active-{}", source.id.unwrap_or_default()) }
+                            active={ source.active }
+                            {on_toggle}
+                        />
 
-                            { source.title }
+                        { source.title }
 
-                            {
-                                if let Some(last_error) = source.last_error {
-                                    yew::html! {
-                                        <super::Error text={ last_error } />
-                                    }
-                                }
-                                else {
-                                    "".into()
-                                }
-                            }
-                        </div>
-
-                        <div class={ yew::classes!("btn-group", "float-end") }>
-                            {
-                                if source.webhooks.is_empty() {
-                                    "".into()
-                                } else {
-                                    yew::html! {
-                                        <button class={ yew::classes!("btn", "btn-warning") } disabled=true>
-                                            <super::Svg icon="plug" size=16 />
-                                        </button>
-                                    }
-                                }
-                            }
-                            <button
-                                class={ yew::classes!("btn", "btn-primary") }
-                                title="Edit"
-                                onclick={ ctx.link().callback(move |_| Message::Edit) }
-                            >
-                                <super::Svg icon="pencil-square" size=16 />
-                            </button>
-                            <button
-                                class={ yew::classes!("btn", "btn-danger") }
-                                title="Delete"
-                                onclick={ ctx.link().callback(|_| Message::Delete) }
-                            >
-                                <super::Svg icon="trash" size=16 />
-                            </button>
-                        </div>
-
-                        <div class="tags">
                         {
-                            for source.tags.iter().map(|tag| {
-                                yew::html! { <super::Tag value={ tag.clone() } /> }
-                            })
+                            if let Some(last_error) = source.last_error {
+                                yew::html! {
+                                    <super::Error text={ last_error } />
+                                }
+                            }
+                            else {
+                                "".into()
+                            }
                         }
-                        </div>
-                    </>
-                }
+                    </div>
+
+                    <div class={ yew::classes!("btn-group", "float-end") }>
+                        {
+                            if source.webhooks.is_empty() {
+                                "".into()
+                            } else {
+                                yew::html! {
+                                    <button class={ yew::classes!("btn", "btn-warning") } disabled=true>
+                                        <super::Svg icon="plug" size=16 />
+                                    </button>
+                                }
+                            }
+                        }
+                        <button
+                            class={ yew::classes!("btn", "btn-primary") }
+                            title="Edit"
+                            onclick={ on_edit }
+                        >
+                            <super::Svg icon="pencil-square" size=16 />
+                        </button>
+                        <button
+                            class={ yew::classes!("btn", "btn-danger") }
+                            title="Delete"
+                            onclick={ on_delete }
+                        >
+                            <super::Svg icon="trash" size=16 />
+                        </button>
+                    </div>
+
+                    <div class="tags">
+                    {
+                        for source.tags.iter().map(|tag| {
+                            yew::html! { <super::Tag value={ tag.clone() } /> }
+                        })
+                    }
+                    </div>
+                </>
             }
         }
     }
-
-    crate::change!(props.value);
 }

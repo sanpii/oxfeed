@@ -3,7 +3,7 @@ mod opml;
 mod webhooks;
 
 #[yew::function_component]
-pub fn Component() -> yew::Html {
+pub(crate) fn Component() -> yew::Html {
     let text = yew::html! {
         <>
             { "A webhook is an URL called when a new item is fetched." }<br />

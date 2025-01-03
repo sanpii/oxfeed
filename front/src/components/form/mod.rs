@@ -1,5 +1,5 @@
-pub mod login;
-pub mod register;
+pub(crate) mod login;
+pub(crate) mod register;
 
 mod account;
 mod autocomplete;
@@ -7,10 +7,10 @@ mod source;
 mod tags;
 mod webhook;
 
-pub use account::Component as Account;
-pub use autocomplete::Component as Autocomplete;
-pub use login::Component as Login;
-pub use register::Component as Register;
-pub use source::Component as Source;
-pub use tags::Component as Tags;
-pub use webhook::Component as Webhook;
+pub(crate) use account::Component as Account;
+pub(crate) use autocomplete::Component as Autocomplete;
+pub(crate) use login::Component as Login;
+pub(crate) use register::Component as Register;
+pub(crate) use source::Component as Source;
+pub(crate) use tags::Component as Tags;
+pub(crate) use webhook::Component as Webhook;

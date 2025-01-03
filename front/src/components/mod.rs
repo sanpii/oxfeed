@@ -1,4 +1,4 @@
-pub mod app;
+pub(crate) mod app;
 
 mod actions;
 mod alerts;
@@ -8,7 +8,6 @@ mod form;
 mod header;
 mod item;
 mod items;
-mod list;
 mod login;
 mod logout;
 mod media;
@@ -25,27 +24,45 @@ mod tag;
 mod tags;
 mod webhook;
 
-pub use actions::Component as Actions;
-pub use alerts::Component as Alerts;
-pub use app::Component as App;
-pub use empty::Component as Empty;
-pub use error::Component as Error;
-pub use header::Component as Header;
-pub use item::Component as Item;
-pub use items::Component as Items;
-pub use list::Component as List;
-pub use login::Component as Login;
-pub use logout::Component as Logout;
-pub use media::Component as Media;
-pub use not_found::Component as NotFound;
-pub use popover::Component as Popover;
-pub use search::Component as Search;
-pub use settings::Component as Settings;
-pub use sidebar::Component as Sidebar;
-pub use source::Component as Source;
-pub use sources::Component as Sources;
-pub use svg::Component as Svg;
-pub use switch::Component as Switch;
-pub use tag::Component as Tag;
-pub use tags::Component as Tags;
-pub use webhook::Component as Webhook;
+pub(crate) use actions::Component as Actions;
+pub(crate) use alerts::Component as Alerts;
+pub(crate) use app::Component as App;
+pub(crate) use empty::Component as Empty;
+pub(crate) use error::Component as Error;
+pub(crate) use header::Component as Header;
+pub(crate) use item::Component as Item;
+pub(crate) use items::Component as Items;
+pub(crate) use login::Component as Login;
+pub(crate) use logout::Component as Logout;
+pub(crate) use media::Component as Media;
+pub(crate) use not_found::Component as NotFound;
+pub(crate) use popover::Component as Popover;
+pub(crate) use search::Component as Search;
+pub(crate) use settings::Component as Settings;
+pub(crate) use sidebar::Component as Sidebar;
+pub(crate) use source::Component as Source;
+pub(crate) use sources::Component as Sources;
+pub(crate) use svg::Component as Svg;
+pub(crate) use switch::Component as Switch;
+pub(crate) use tag::Component as Tag;
+pub(crate) use tags::Component as Tags;
+pub(crate) use webhook::Component as Webhook;
+
+pub(crate) fn edit_cb(
+    state: yew::functional::UseStateHandle<String>,
+) -> yew::Callback<yew::InputEvent> {
+    yew::Callback::from(move |e: yew::InputEvent| {
+        use yew::TargetCast;
+
+        let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
+        state.set(input.value());
+    })
+}
+
+pub(crate) fn toggle_cb(
+    state: yew::functional::UseStateHandle<bool>,
+) -> yew::Callback<yew::MouseEvent> {
+    yew::Callback::from(move |_| {
+        state.set(!(*state));
+    })
+}

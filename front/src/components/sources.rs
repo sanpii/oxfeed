@@ -1,181 +1,122 @@
-#[derive(Clone)]
-pub enum Message {
-    Add,
-    Cancel,
-    Create(oxfeed_common::source::Entity),
-    Error(String),
-    Event(crate::Event),
-    PageChange(usize),
-    Update(crate::Pager<oxfeed_common::source::Entity>),
-    NeedUpdate,
-}
-
+#[derive(Default)]
 enum Scene {
     Add,
+    #[default]
     View,
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub struct Properties {
+pub(crate) struct Properties {
     #[prop_or_default]
     pub filter: crate::Filter,
-    pub pagination: elephantry_extras::Pagination,
 }
 
-pub struct Component {
-    filter: crate::Filter,
-    scene: Scene,
-    pager: Option<crate::Pager<oxfeed_common::source::Entity>>,
-    pagination: elephantry_extras::Pagination,
-    _producer: Box<dyn yew_agent::Bridge<crate::event::Bus>>,
-}
-
-impl yew::Component for Component {
-    type Properties = Properties;
-    type Message = Message;
-
-    fn create(ctx: &yew::Context<Self>) -> Self {
-        use yew_agent::Bridged;
-
-        let props = ctx.props().clone();
-
-        let callback = {
-            let link = ctx.link().clone();
-            move |e| link.send_message(Message::Event(e))
-        };
-
-        let component = Self {
-            filter: props.filter,
-            scene: Scene::View,
-            pager: None,
-            pagination: props.pagination,
-            _producer: crate::event::Bus::bridge(std::rc::Rc::new(callback)),
-        };
-
-        ctx.link().send_message(Message::NeedUpdate);
-
-        component
-    }
-
-    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
-        let mut should_render = false;
-
-        if matches!(msg, Message::Event(crate::Event::SourceUpdate)) {
-            ctx.link().send_message(Message::NeedUpdate);
-            return should_render;
-        }
-
-        if let Message::Error(err) = msg {
-            crate::send_error(ctx, &err);
-            return true;
-        }
-
-        match &self.scene {
-            Scene::View => match msg {
-                Message::Add => {
-                    self.scene = Scene::Add;
-                    should_render = true;
-                }
-                Message::Update(ref pager) => {
-                    self.pager = Some(pager.clone());
-                    should_render = true;
-                }
-                _ => (),
-            },
-            Scene::Add => match msg {
-                Message::Cancel => {
-                    self.scene = Scene::View;
-                    should_render = true;
-                }
-                Message::Create(ref source) => crate::api!(
-                    ctx.link(),
-                    sources_create(source) -> |_| Message::NeedUpdate
-                ),
-                _ => (),
-            },
-        };
-
-        if let Message::PageChange(page) = msg {
-            self.pagination.page = page;
-            gloo::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
-            ctx.link().send_message(Message::NeedUpdate);
-        } else if matches!(msg, Message::NeedUpdate) {
-            self.scene = Scene::View;
-            let pagination = &self.pagination;
-            let filter = &self.filter;
-
-            if filter.is_empty() {
-                crate::api!(
-                    ctx.link(),
-                    sources_all(pagination) -> Message::Update
-                );
+#[yew::function_component]
+pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
+    let context = crate::use_context();
+    let scene = yew::use_state(Scene::default);
+    let pagination = yew::use_state(|| elephantry_extras::Pagination::from(crate::Location::new()));
+    let filter = yew::use_memo(props.clone(), |props| props.filter.clone());
+    let need_update = yew::use_memo(context.clone(), |context| context.need_update);
+    let pager = yew::suspense::use_future_with(
+        (filter.clone(), pagination.clone(), need_update),
+        |deps| async move {
+            if deps.0.is_empty() {
+                crate::Api::sources_all(&deps.1).await.unwrap()
             } else {
-                crate::api!(
-                    ctx.link(),
-                    sources_search(filter, pagination) -> Message::Update
-                );
+                crate::Api::sources_search(&deps.0, &deps.1).await.unwrap()
             }
-        }
+        },
+    )?;
 
-        should_render
-    }
+    let on_add = {
+        let scene = scene.clone();
 
-    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        let add = match &self.scene {
-            Scene::View => yew::html! {
-                <a
-                    class={ yew::classes!("btn", "btn-primary") }
-                    title="Add"
-                    onclick={ ctx.link().callback(|_| Message::Add) }
-                >
-                    <super::Svg icon="plus" size=24 />
-                    { "Add" }
-                </a>
-            },
-            Scene::Add => yew::html! {
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <super::form::Source
-                            source={ oxfeed_common::source::Entity::default() }
-                            on_cancel={ ctx.link().callback(|_| Message::Cancel) }
-                            on_submit={ ctx.link().callback(Message::Create) }
-                        />
-                    </li>
-                </ul>
-            },
-        };
+        yew::Callback::from(move |_| {
+            scene.set(Scene::Add);
+        })
+    };
 
-        let Some(pager) = &self.pager else {
-            return add;
-        };
+    let on_cancel = {
+        let scene = scene.clone();
 
-        if pager.iterator.is_empty() {
-            return add;
-        }
+        yew::Callback::from(move |_| {
+            scene.set(Scene::View);
+        })
+    };
 
-        yew::html! {
-            <>
-                { add }
-                <super::List<oxfeed_common::source::Entity>
-                    value={ pager.clone() }
-                    on_page_change={ ctx.link().callback(Message::PageChange) }
-                />
-            </>
-        }
-    }
+    let on_submit = {
+        let context = context.clone();
+        let scene = scene.clone();
 
-    fn changed(&mut self, ctx: &yew::Context<Self>, _: &Self::Properties) -> bool {
-        let props = ctx.props().clone();
+        yew::Callback::from(move |source| {
+            let context = context.clone();
 
-        let should_render = self.pagination != props.pagination || self.filter != props.filter;
+            yew::suspense::Suspension::from_future(async move {
+                crate::Api::sources_create(&source).await.unwrap();
+                context.dispatch(crate::Action::NeedUpdate);
+            });
+            scene.set(Scene::View);
+        })
+    };
 
-        if should_render {
-            ctx.link().send_message(Message::NeedUpdate);
-        }
+    let on_page_change = {
+        let pagination = pagination.clone();
 
-        self.pagination = props.pagination;
-        self.filter = props.filter;
+        yew::Callback::from(move |page| {
+            pagination.set(elephantry_extras::Pagination {
+                page,
+                ..*pagination
+            });
 
-        should_render
-    }
+            gloo::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
+        })
+    };
+
+    let add = match *scene {
+        Scene::View => yew::html! {
+            <a
+                class={ yew::classes!("btn", "btn-primary") }
+                title="Add"
+                onclick={ on_add }
+            >
+                <super::Svg icon="plus" size=24 />
+                { "Add" }
+            </a>
+        },
+        Scene::Add => yew::html! {
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <super::form::Source
+                        source={ oxfeed_common::source::Entity::default() }
+                        {on_cancel}
+                        {on_submit}
+                    />
+                </li>
+            </ul>
+        },
+    };
+
+    let html = yew::html! {
+        <>
+            { add }
+            <ul class="list-group">
+            {
+                for pager.iterator.iter().map(|item| {
+                    yew::html! {
+                        <li class="list-group-item">
+                            <crate::components::Source value={ item.clone() } />
+                        </li>
+                    }
+                })
+            }
+            </ul>
+            <elephantry_extras::yew::Pager
+                value={ elephantry_extras::Pager::from(pager.clone()) }
+                onclick={ on_page_change }
+            />
+        </>
+    };
+
+    Ok(html)
 }

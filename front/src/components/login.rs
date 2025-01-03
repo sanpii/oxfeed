@@ -1,111 +1,96 @@
-pub enum Message {
-    Cancel,
-    Create(super::form::register::Info),
-    Error(String),
-    Login(super::form::login::Info),
-    Logged,
-    Register,
-    UserCreated,
-}
-
+#[derive(Clone, Copy, Default)]
 enum Scene {
+    #[default]
     Login,
     Register,
 }
 
-pub struct Component {
-    event_bus: yew_agent::Dispatcher<crate::event::Bus>,
-    scene: Scene,
-}
+#[yew::function_component]
+pub(crate) fn Component() -> yew::Html {
+    let context = crate::use_context();
+    let scene = yew::use_state(Scene::default);
 
-impl yew::Component for Component {
-    type Message = Message;
-    type Properties = ();
+    let on_cancel = {
+        let scene = scene.clone();
 
-    fn create(_: &yew::Context<Self>) -> Self {
-        use yew_agent::Dispatched;
+        yew::Callback::from(move |_| {
+            scene.set(Scene::Login);
+        })
+    };
 
-        Self {
-            event_bus: crate::event::Bus::dispatcher(),
-            scene: Scene::Login,
-        }
+    let on_create = {
+        let context = context.clone();
+        let scene = scene.clone();
+
+        yew::Callback::from(move |info: crate::components::form::register::Info| {
+            let context = context.clone();
+            let scene = scene.clone();
+            let user = oxfeed_common::account::Entity {
+                id: None,
+                password: info.password,
+                email: info.email,
+            };
+
+            yew::suspense::Suspension::from_future(async move {
+                match crate::Api::account_create(&user).await {
+                    Ok(_) => {
+                        let alert = crate::Alert::info("User created");
+                        context.dispatch(alert.into());
+                        scene.set(Scene::Login);
+                    }
+                    Err(err) => context.dispatch(err.into()),
+                }
+            });
+        })
+    };
+
+    let on_login = {
+        let context = context.clone();
+
+        yew::Callback::from(move |info: crate::components::form::login::Info| {
+            let context = context.clone();
+
+            yew::suspense::Suspension::from_future(async move {
+                match crate::Api::auth_login(&info.email, &info.password, &info.remember_me).await {
+                    Ok(_) => context.dispatch(crate::Action::Logged),
+                    Err(err) => context.dispatch(err.into()),
+                }
+            });
+        })
+    };
+
+    let on_register = {
+        let scene = scene.clone();
+
+        yew::Callback::from(move |_| {
+            scene.set(Scene::Register);
+        })
+    };
+
+    match *scene {
+        Scene::Login => yew::html! {
+            <div class="login">
+                <form>
+                    <img class="mb-4" src="/logo.png" alt="" width="72px" height="72px" />
+                    <h1 class="h3 mb-3 fw-normal">{ "Please sign in" }</h1>
+                    <super::Alerts />
+                    <super::form::Login on_submit={ on_login } />
+                    { "Don't have an account yet?" }
+                    <a href="#" onclick={ on_register }>{ "Register now" }</a>
+                </form>
+            </div>
+        },
+        Scene::Register => yew::html! {
+            <div class="login">
+                <form>
+                    <img class="mb-4" src="/logo" alt="" width="72px" height="72px" />
+                    <h1 class="h3 mb-3 fw-normal">{ "Register" }</h1>
+                    <super::Alerts />
+                    <super::form::Register on_submit={ on_create } />
+                    { "Already have login and password?" }
+                    <a href="#" onclick={ on_cancel }>{ "Log in" }</a>
+                </form>
+            </div>
+        },
     }
-
-    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
-        let mut should_render = false;
-
-        match msg {
-            Message::Cancel => {
-                self.scene = Scene::Login;
-                should_render = true;
-            }
-            Message::Error(err) => crate::send_error(ctx, &err),
-            Message::UserCreated => {
-                let (context, _) = crate::context(ctx, yew::Callback::noop());
-                let alert = crate::event::Alert::info("User created");
-                context.dispatch(crate::components::app::Action::AddAlert(alert));
-                ctx.link().send_message(Message::Cancel);
-            }
-            Message::Create(info) => {
-                let user = oxfeed_common::account::Entity {
-                    id: None,
-                    password: info.password,
-                    email: info.email,
-                };
-
-                crate::api!(
-                    ctx.link(),
-                    account_create(user) -> |_| Message::UserCreated
-                );
-            }
-            Message::Login(info) => {
-                let email = &info.email;
-                let password = &info.password;
-                let remember_me = &info.remember_me;
-
-                crate::api!(
-                    ctx.link(),
-                    auth_login(email, password, remember_me) -> |_| Message::Logged
-                );
-            }
-            Message::Logged => self.event_bus.send(crate::Event::Logged),
-            Message::Register => {
-                self.scene = Scene::Register;
-                should_render = true;
-            }
-        }
-
-        should_render
-    }
-
-    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        match self.scene {
-            Scene::Login => yew::html! {
-                <div class="login">
-                    <form>
-                        <img class="mb-4" src="/logo.png" alt="" width="72px" height="72px" />
-                        <h1 class="h3 mb-3 fw-normal">{ "Please sign in" }</h1>
-                        <super::Alerts />
-                        <super::form::Login on_submit={ ctx.link().callback(Message::Login) } />
-                        { "Don't have an account yet?" }
-                        <a href="#" onclick={ ctx.link().callback(|_| Message::Register) }>{ "Register now" }</a>
-                    </form>
-                </div>
-            },
-            Scene::Register => yew::html! {
-                <div class="login">
-                    <form>
-                        <img class="mb-4" src="/logo" alt="" width="72px" height="72px" />
-                        <h1 class="h3 mb-3 fw-normal">{ "Register" }</h1>
-                        <super::Alerts />
-                        <super::form::Register on_submit={ ctx.link().callback(Message::Create) } />
-                        { "Already have login and password?" }
-                        <a href="#" onclick={ ctx.link().callback(|_| Message::Cancel) }>{ "Log in" }</a>
-                    </form>
-                </div>
-            },
-        }
-    }
-
-    crate::change!();
 }

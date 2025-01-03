@@ -1,11 +1,11 @@
 #[derive(PartialEq, yew::Properties)]
-pub struct Properties {
+pub(crate) struct Properties {
     pub inline: bool,
     pub medias: Vec<oxfeed_common::media::Entity>,
 }
 
 #[yew::function_component]
-pub fn Component(props: &Properties) -> yew::Html {
+pub(crate) fn Component(props: &Properties) -> yew::Html {
     if props.medias.is_empty() {
         return "".into();
     }

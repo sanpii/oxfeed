@@ -1,5 +1,5 @@
 #[yew::function_component]
-pub fn Component() -> yew::Html {
+pub(crate) fn Component() -> yew::Html {
     yew::html! {
         <div class="full-page">
             <super::Svg icon="file-earmark-x" size=256 />

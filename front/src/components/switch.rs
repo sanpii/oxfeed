@@ -1,5 +1,5 @@
 #[derive(Clone, PartialEq, yew::Properties)]
-pub struct Properties {
+pub(crate) struct Properties {
     pub id: String,
     #[prop_or_default]
     pub label: String,
@@ -10,7 +10,7 @@ pub struct Properties {
 }
 
 #[yew::function_component]
-pub fn Component(props: &Properties) -> yew::Html {
+pub(crate) fn Component(props: &Properties) -> yew::Html {
     let checked = yew::functional::use_state_eq(|| props.active);
 
     let onclick = {

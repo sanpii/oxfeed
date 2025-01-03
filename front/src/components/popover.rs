@@ -1,5 +1,5 @@
 #[derive(Clone, PartialEq, yew::Properties)]
-pub struct Properties {
+pub(crate) struct Properties {
     #[prop_or_default]
     pub title: Option<String>,
     pub body: yew::Html,
@@ -7,7 +7,7 @@ pub struct Properties {
 }
 
 #[yew::function_component]
-pub fn Component(props: &Properties) -> yew::Html {
+pub(crate) fn Component(props: &Properties) -> yew::Html {
     let id = format!("popover-{}", uuid::Uuid::new_v4());
 
     yew::html! {

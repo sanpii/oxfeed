@@ -1,7 +1,7 @@
 use gloo::history::History;
 use std::collections::HashMap;
 
-pub struct Location {
+pub(crate) struct Location {
     history: gloo::history::BrowserHistory,
 }
 
@@ -69,11 +69,6 @@ pub(crate) fn base_url() -> String {
 }
 
 pub(crate) fn set_route(route: &str) {
-    use yew_agent::Dispatched;
-
     let history = gloo::history::BrowserHistory::new();
     history.push(route);
-
-    let mut event_bus = crate::event::Bus::dispatcher();
-    event_bus.send(crate::Event::Redirected(route.to_string()));
 }

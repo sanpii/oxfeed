@@ -1,14 +1,28 @@
-pub enum Message {
-    Content(String),
-    Error(String),
-    ToggleContent,
-    ToggleRead,
-    ToggleFavorite,
-    Toggled,
+macro_rules! toggle {
+    ($name:ident, $item:ident, $context:ident) => {{
+        let item = $item.clone();
+        let attr = $name.clone();
+        let context = $context.clone();
+
+        yew::Callback::from(move |_| {
+            let item = item.clone();
+            let attr = attr.clone();
+            let context = context.clone();
+
+            yew::suspense::Suspension::from_future(async move {
+                crate::Api::items_tag(&item.id, stringify!($name), !*attr)
+                    .await
+                    .unwrap();
+                attr.set(!*attr);
+                context.dispatch(crate::Action::NeedUpdate);
+            });
+        })
+    }};
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Default, PartialEq)]
 enum Scene {
+    #[default]
     Hidden,
     Expanded,
 }
@@ -25,181 +39,138 @@ impl std::ops::Not for Scene {
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
-pub struct Properties {
+pub(crate) struct Properties {
     pub value: oxfeed_common::item::Item,
 }
 
-pub struct Component {
-    content: Option<String>,
-    event_bus: yew_agent::Dispatcher<crate::event::Bus>,
-    scene: Scene,
-    item: oxfeed_common::item::Item,
-}
+#[yew::function_component]
+pub(crate) fn Component(props: &Properties) -> yew::Html {
+    let context = crate::use_context();
+    let content = yew::use_state(|| None::<String>);
+    let item = yew::use_state(|| props.value.clone());
+    let favorite = yew::use_state(|| item.favorite);
+    let read = yew::use_state(|| item.read);
+    let scene = yew::use_state(Scene::default);
 
-impl yew::Component for Component {
-    type Message = Message;
-    type Properties = Properties;
+    let published_ago = chrono_humanize::HumanTime::from(item.published);
+    let published_class = if (*item).in_future() {
+        "text-body-tertiary"
+    } else {
+        "text-body-secondary"
+    };
 
-    fn create(ctx: &yew::Context<Self>) -> Self {
-        use yew_agent::Dispatched;
+    let caret = match *scene {
+        Scene::Expanded => "chevron-up",
+        Scene::Hidden => "chevron-down",
+    };
 
-        Self {
-            content: None,
-            event_bus: crate::event::Bus::dispatcher(),
-            item: ctx.props().value.clone(),
-            scene: Scene::Hidden,
-        }
-    }
+    let title = gloo::utils::document().create_element("span").unwrap();
+    title.set_inner_html(&item.title);
 
-    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            Message::Error(err) => crate::send_error(ctx, &err),
-            Message::Content(content) => self.content = Some(content),
-            Message::ToggleContent => {
-                self.scene = !self.scene;
+    let content_div = gloo::utils::document().create_element("div").unwrap();
+    content_div.set_inner_html(content.as_ref().unwrap_or(&"Loading...".to_string()));
 
-                if self.scene == Scene::Expanded && self.content.is_none() {
-                    let item_id = &self.item.id;
+    let icon = if let Some(icon) = &item.icon {
+        format!("{}{icon}", env!("API_URL"))
+    } else {
+        "/1px.png".to_string()
+    };
 
-                    crate::api!(
-                        ctx.link(),
-                        items_content(item_id) -> Message::Content
-                    );
-                }
+    let on_favorite = toggle!(favorite, item, context);
+    let on_read = toggle!(read, item, context);
+
+    let toggle_content = {
+        let content = content.clone();
+        let item = item.clone();
+        let scene = scene.clone();
+
+        yew::Callback::from(move |_| {
+            scene.set(!*scene);
+
+            if content.is_none() {
+                let content = content.clone();
+                let item = item.clone();
+
+                yew::suspense::Suspension::from_future(async move {
+                    let item_id = &item.id;
+
+                    content.set(crate::Api::items_content(item_id).await.ok());
+                });
             }
-            Message::ToggleFavorite => {
-                let item_id = &self.item.id;
-                let key = "favorite";
-                let value = !self.item.favorite;
+        })
+    };
 
-                crate::api!(
-                    ctx.link(),
-                    items_tag(item_id, key, value) -> |_| Message::Toggled
-                );
+    yew::html! {
+        <>
+            <img src={ icon } width="16" height="16" />
+            <a href={ item.link.clone() } target="_blank">
+                { yew::virtual_dom::VNode::VRef(title.into()) }
+            </a>
+            {
+                for item.tags.iter().map(|tag| {
+                    yew::html! { <super::Tag value={ tag.clone() } /> }
+                })
             }
-            Message::ToggleRead => {
-                let item_id = &self.item.id;
-                let key = "read";
-                let value = !self.item.read;
-
-                crate::api!(
-                    ctx.link(),
-                    items_tag(item_id, key, value) -> |_| Message::Toggled
-                );
-            }
-            Message::Toggled => self.event_bus.send(crate::Event::ItemUpdate),
-        }
-
-        true
-    }
-
-    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        let published_ago = chrono_humanize::HumanTime::from(self.item.published);
-        let published_class = if self.item.in_future() {
-            "text-body-tertiary"
-        } else {
-            "text-body-secondary"
-        };
-
-        let caret = match self.scene {
-            Scene::Expanded => "chevron-up",
-            Scene::Hidden => "chevron-down",
-        };
-
-        let title = gloo::utils::document().create_element("span").unwrap();
-        title.set_inner_html(&self.item.title);
-
-        let content = gloo::utils::document().create_element("div").unwrap();
-        content.set_inner_html(self.content.as_ref().unwrap_or(&"Loading...".to_string()));
-
-        let icon = if let Some(icon) = &self.item.icon {
-            format!("{}{icon}", env!("API_URL"))
-        } else {
-            "/1px.png".to_string()
-        };
-
-        yew::html! {
-            <>
-                <img src={ icon } width="16" height="16" />
-                <a href={ self.item.link.clone() } target="_blank">
-                    { yew::virtual_dom::VNode::VRef(title.into()) }
-                </a>
+            <span class="text-body-secondary">{ "· " }{ &item.source }</span>
+            <div class="float-end">
+                <span class={ published_class }>{ &published_ago.to_string() }</span>
+                <span onclick={ toggle_content }>
+                    <super::Svg icon={ caret } size=24 />
+                </span>
+            </div>
+            <div class="float-end">
                 {
-                    for self.item.tags.iter().map(|tag| {
-                        yew::html! { <super::Tag value={ tag.clone() } /> }
-                    })
-                }
-                <span class="text-body-secondary">{ "· " }{ &self.item.source }</span>
-                <div class="float-end">
-                    <span class={ published_class }>{ &published_ago.to_string() }</span>
-                    <span onclick={ ctx.link().callback(|_| Message::ToggleContent) }>
-                        <super::Svg icon={ caret } size=24 />
-                    </span>
-                </div>
-                <div class="float-end">
-                    {
-                        if self.scene == Scene::Hidden {
-                            yew::html! {
-                                <super::Actions
-                                    inline=true
-                                    read={ self.item.read }
-                                    on_read={ ctx.link().callback(|_| Message::ToggleRead) }
-                                    favorite={ self.item.favorite }
-                                    on_favorite={ ctx.link().callback(|_| Message::ToggleFavorite) }
-                                    medias={ self.item.media.clone() }
-                                />
-                            }
-                        } else {
-                            "".into()
-                        }
-                    }
-                    {
-                        if self.scene == Scene::Hidden && self.item.favorite {
-                            yew::html! {
-                                <div class="favorite">
-                                    <super::Svg icon="star-fill" size=24 />
-                                </div>
-                            }
-                        } else {
-                            "".into()
-                        }
-                    }
-                </div>
-                {
-                    if self.scene == Scene::Expanded {
+                    if *scene == Scene::Hidden {
+                        let on_favorite = on_favorite.clone();
+                        let on_read = on_read.clone();
+
                         yew::html! {
-                            <>
-                                { yew::virtual_dom::VNode::VRef(content.into()) }
-
-                                <hr />
-
-                                <super::Actions
-                                    read={ self.item.read }
-                                    on_read={ ctx.link().callback(|_| Message::ToggleRead) }
-                                    favorite={ self.item.favorite }
-                                    on_favorite={ ctx.link().callback(|_| Message::ToggleFavorite) }
-                                    medias={ self.item.media.clone() }
-                                />
-                            </>
+                            <super::Actions
+                                inline=true
+                                read={ *read }
+                                {on_read}
+                                favorite={ *favorite }
+                                {on_favorite}
+                                medias={ item.media.clone() }
+                            />
                         }
                     } else {
                         "".into()
                     }
                 }
-            </>
-        }
-    }
+                {
+                    if *scene == Scene::Hidden && *favorite {
+                        yew::html! {
+                            <div class="favorite">
+                                <super::Svg icon="star-fill" size=24 />
+                            </div>
+                        }
+                    } else {
+                        "".into()
+                    }
+                }
+            </div>
+            {
+                if *scene == Scene::Expanded {
+                    yew::html! {
+                        <>
+                            { yew::virtual_dom::VNode::VRef(content_div.into()) }
 
-    fn changed(&mut self, ctx: &yew::Context<Self>, _: &Self::Properties) -> bool {
-        let should_render = self.item != ctx.props().value;
+                            <hr />
 
-        self.item = ctx.props().value.clone();
-
-        if should_render {
-            self.content = None;
-            self.scene = Scene::Hidden;
-        }
-
-        should_render
+                            <super::Actions
+                                read={ *read }
+                                {on_read}
+                                favorite={ *favorite }
+                                {on_favorite}
+                                medias={ item.media.clone() }
+                            />
+                        </>
+                    }
+                } else {
+                    "".into()
+                }
+            }
+        </>
     }
 }

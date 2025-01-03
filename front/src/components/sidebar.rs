@@ -1,19 +1,4 @@
 #[derive(Clone)]
-pub enum Message {
-    Error(String),
-    Event(crate::Event),
-    NeedUpdate,
-    ReadAll,
-    Update(oxfeed_common::Counts),
-    UpdateAll(oxfeed_common::Counts),
-}
-
-#[derive(Clone, PartialEq, yew::Properties)]
-pub struct Properties {
-    pub current_route: super::app::Route,
-}
-
-#[derive(Clone)]
 struct Links(Vec<Link>);
 
 impl Links {
@@ -88,10 +73,6 @@ impl Links {
         self.0[3].count = counts.tags;
         self.0[4].count = counts.sources;
     }
-
-    fn has_unread(&self) -> bool {
-        self.0[1].count == 0
-    }
 }
 
 impl std::ops::Deref for Links {
@@ -116,143 +97,103 @@ struct Link {
     route: super::app::Route,
 }
 
-pub struct Component {
-    current_route: super::app::Route,
-    event_bus: yew_agent::Dispatcher<crate::event::Bus>,
-    links: Links,
-    in_error: bool,
-    _producer: Box<dyn yew_agent::Bridge<crate::event::Bus>>,
+#[derive(Clone, PartialEq, yew::Properties)]
+pub(crate) struct Properties {
+    pub current_route: super::app::Route,
 }
 
-impl yew::Component for Component {
-    type Message = Message;
-    type Properties = Properties;
-
-    fn create(ctx: &yew::Context<Self>) -> Self {
-        use yew_agent::{Bridged, Dispatched};
-
-        let callback = {
-            let link = ctx.link().clone();
-            move |e| link.send_message(Message::Event(e))
-        };
-
-        let component = Self {
-            current_route: ctx.props().current_route.clone(),
-            event_bus: crate::event::Bus::dispatcher(),
-            in_error: false,
-            links: Links::new(),
-            _producer: crate::event::Bus::bridge(std::rc::Rc::new(callback)),
-        };
-
-        ctx.link().callback(|_| Message::NeedUpdate).emit(());
-
-        component
-    }
-
-    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
-        let mut should_render = false;
-
-        match msg {
-            Message::Event(event) => match event {
-                crate::Event::ItemUpdate
-                | crate::Event::SettingUpdate
-                | crate::Event::SourceUpdate => ctx.link().send_message(Message::NeedUpdate),
-                crate::Event::Redirected(route) => {
-                    if route.starts_with("/search") {
-                        self.links.add_search(&ctx.props().current_route);
-                    } else {
-                        self.links.remove_search();
-                    }
-
-                    should_render = true;
-                }
-                crate::Event::WebsocketError => {
-                    self.in_error = true;
-                    should_render = true;
-                }
-                _ => (),
-            },
-            Message::Error(err) => crate::send_error(ctx, &err),
-            Message::NeedUpdate => crate::api!(
-                ctx.link(),
-                counts() -> Message::Update
-            ),
-            Message::Update(counts) => {
-                self.links.update_count(&counts);
-                should_render = true;
-            }
-            Message::ReadAll => {
-                ctx.link().send_future(async move {
-                    if let Err(err) = crate::Api::items_read().await {
-                        return Message::Error(err.to_string());
-                    }
-
-                    match crate::Api::counts().await {
-                        Ok(count) => Message::UpdateAll(count),
-                        Err(err) => Message::Error(err.to_string()),
-                    }
-                });
-            }
-            Message::UpdateAll(counts) => {
-                self.event_bus.send(crate::event::Event::ItemUpdate);
-                ctx.link().send_message(Message::Update(counts));
+#[yew::function_component]
+pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
+    let context = crate::use_context();
+    let current_route = yew::use_memo(props.clone(), |props| props.current_route.clone());
+    let need_update = yew::use_memo(context.clone(), |context| context.need_update);
+    let counts = yew::suspense::use_future_with(need_update, |_| async {
+        match crate::Api::counts().await {
+            Ok(counts) => counts,
+            Err(err) => {
+                log::error!("{err:?}");
+                panic!();
             }
         }
+    })?;
+    let links = yew::use_memo((counts.clone(), current_route.clone()), |deps| {
+        let mut links = Links::new();
+        links.update_count(&deps.0);
 
-        should_render
-    }
-
-    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        let favicon = if self.in_error {
-            "/favicon-error.ico"
-        } else if self.links.has_unread() {
-            "/favicon.ico"
+        if matches!(*deps.1, super::app::Route::Search { .. }) {
+            links.add_search(&current_route);
         } else {
+            links.remove_search();
+        }
+
+        links
+    });
+
+    let favicon = yew::use_memo(context.clone(), |context| {
+        if context.websocket_error {
+            "/favicon-error.ico"
+        } else if context.unread_items {
             "/favicon-unread.ico"
-        };
-
-        if let Ok(Some(element)) = gloo::utils::document().query_selector("link[rel=icon]") {
-            element.set_attribute("href", favicon).ok();
+        } else {
+            "/favicon.ico"
         }
+    });
 
-        yew::html! {
-            <>
-                <button
-                    class={ yew::classes!("btn", "btn-primary") }
-                    onclick={ ctx.link().callback(|_| Message::ReadAll) }
-                >{ "Mark all as read" }</button>
-                <ul class="nav flex-column">
-                {
-                    for self.links.iter().map(move |link| yew::html! {
-                        <li class="nav-item" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
-                            <yew_router::components::Link<super::app::Route>
-                                to={ link.route.clone() }
-                                classes={ if link.route == self.current_route { "nav-link active" } else { "nav-link" } }
-                            >
-                                <super::Svg icon={ link.icon } size=16 />
-                                { link.label }
-                                {
-                                    if link.count > 0 {
-                                        yew::html! {
-                                            <span
-                                                class={ if link.route == self.current_route { "badge bg-primary" } else { "badge bg-secondary" } }
-                                            >{ link.count }</span>
-                                        }
-                                    } else {
-                                        "".into()
-                                    }
-                                }
-                            </yew_router::components::Link<super::app::Route>>
-                        </li>
-                    })
-                }
-                    <li class={ yew::classes!("nav-item", "d-md-none") } data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
-                        <super::Logout button=false />
-                    </li>
-                </ul>
-            </>
-        }
+    if let Ok(Some(element)) = gloo::utils::document().query_selector("link[rel=icon]") {
+        element.set_attribute("href", *favicon).ok();
     }
 
-    crate::change!(current_route);
+    let read_all = {
+        let context = context.clone();
+
+        yew::Callback::from(move |_| {
+            let context = context.clone();
+
+            yew::suspense::Suspension::from_future(async move {
+                if let Err(err) = crate::Api::items_read().await {
+                    context.dispatch(err.into());
+                }
+            });
+        })
+    };
+
+    let html = yew::html! {
+        <>
+            <button
+                class={ yew::classes!("btn", "btn-primary") }
+                onclick={ read_all }
+            >{ "Mark all as read" }</button>
+            <ul class="nav flex-column">
+            {
+                for links.clone().iter().map(move |link| yew::html! {
+                    <li class="nav-item" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+                        <yew_router::components::Link<super::app::Route>
+                            to={ link.route.clone() }
+                            classes={ if link.route == *current_route { "nav-link active" } else { "nav-link" } }
+                        >
+                            <super::Svg icon={ link.icon } size=16 />
+                            { link.label }
+                            {
+                                if link.count > 0 {
+                                    yew::html! {
+                                        <span
+                                            class={ if link.route == *current_route { "badge bg-primary" } else { "badge bg-secondary" } }
+                                        >{ link.count }</span>
+                                    }
+                                } else {
+                                    "".into()
+                                }
+                            }
+                        </yew_router::components::Link<super::app::Route>>
+                    </li>
+                })
+            }
+                <li class={ yew::classes!("nav-item", "d-md-none") } data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+                    <super::Logout button=false />
+                </li>
+            </ul>
+        </>
+    };
+
+    Ok(html)
 }

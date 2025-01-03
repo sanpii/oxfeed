@@ -11,7 +11,7 @@ mod tag;
 pub use errors::*;
 pub use tag::*;
 
-#[derive(Clone, serde::Deserialize, serde::Serialize)]
+#[derive(Debug, Clone, Default, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "elephantry", derive(elephantry::Entity))]
 pub struct Counts {
     pub all: i64,

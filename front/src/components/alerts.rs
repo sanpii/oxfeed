@@ -1,6 +1,6 @@
 #[yew::function_component]
-pub fn Component() -> yew::Html {
-    let context = yew::use_context::<crate::Context>().expect("No Context Provided");
+pub(crate) fn Component() -> yew::Html {
+    let context = crate::use_context();
     let context_dispatcher = context.dispatcher();
 
     yew::html! {
@@ -12,7 +12,7 @@ pub fn Component() -> yew::Html {
 
                     <button
                         class="btn-close"
-                        onclick={ move |_| context_dispatcher.dispatch(crate::components::app::Action::RemoveAlert(idx)) }
+                        onclick={ move |_| context_dispatcher.dispatch(crate::Action::RemoveAlert(idx)) }
                     >
                     </button>
                 </div>

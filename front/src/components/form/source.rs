@@ -1,176 +1,168 @@
-pub enum Message {
-    Cancel,
-    Error(String),
-    Submit,
-    ToggleActive(bool),
-    ToggleWebhook(uuid::Uuid, bool),
-    UpdateTags(Vec<String>),
-    UpdateTitle(String),
-    UpdateUrl(String),
-    Webhooks(Vec<oxfeed_common::webhook::Entity>),
-}
-
 #[derive(Clone, PartialEq, yew::Properties)]
-pub struct Properties {
+pub(crate) struct Properties {
     pub source: oxfeed_common::source::Entity,
     pub on_cancel: yew::Callback<()>,
     pub on_submit: yew::Callback<oxfeed_common::source::Entity>,
 }
 
-pub struct Component {
-    props: Properties,
-    webhooks: Vec<oxfeed_common::webhook::Entity>,
-}
+#[yew::function_component]
+pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
+    let active = yew::use_state(|| props.source.active);
+    let title = yew::use_state(|| props.source.title.clone());
+    let url = yew::use_state(|| props.source.url.clone());
+    let tags = yew::use_state(|| props.source.tags.clone());
+    let webhooks = yew::use_mut_ref(|| props.source.webhooks.clone());
 
-impl yew::Component for Component {
-    type Message = Message;
-    type Properties = Properties;
+    let res = yew::suspense::use_future(|| async move { crate::Api::webhooks_all().await })?;
+    let all_webhooks = res.as_ref().map(|x| x.clone()).unwrap_or_default();
 
-    fn create(ctx: &yew::Context<Self>) -> Self {
-        let component = Self {
-            props: ctx.props().clone(),
-            webhooks: Vec::new(),
-        };
+    let edit_title = crate::components::edit_cb(title.clone());
+    let edit_url = crate::components::edit_cb(url.clone());
+    let toggle_active = {
+        let active = active.clone();
 
-        crate::api!(
-            ctx.link(),
-            webhooks_all() -> Message::Webhooks
-        );
+        yew::Callback::from(move |value| {
+            active.set(value);
+        })
+    };
 
-        component
-    }
+    let on_cancel = {
+        let on_cancel = props.on_cancel.clone();
 
-    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            Message::Cancel => self.props.on_cancel.emit(()),
-            Message::Error(err) => crate::send_error(ctx, &err),
-            Message::Submit => self.props.on_submit.emit(self.props.source.clone()),
-            Message::ToggleActive(active) => self.props.source.active = active,
-            Message::ToggleWebhook(id, active) => {
-                if active {
-                    if !self.props.source.webhooks.contains(&id) {
-                        self.props.source.webhooks.push(id);
-                    }
+        yew::Callback::from(move |_| {
+            on_cancel.emit(());
+        })
+    };
+
+    let on_submit = {
+        let active = active.clone();
+        let on_submit = props.on_submit.clone();
+        let title = title.clone();
+        let url = url.clone();
+        let source = props.source.clone();
+        let tags = tags.clone();
+        let webhooks = webhooks.clone();
+
+        yew::Callback::from(move |_| {
+            let mut source = source.clone();
+
+            source.active = *active;
+            source.title = (*title).clone();
+            source.url = (*url).clone();
+            source.tags = (*tags).clone();
+            source.webhooks = (*webhooks).clone().into_inner();
+
+            on_submit.emit(source);
+        })
+    };
+
+    let html = yew::html! {
+        <form>
+            <div class="row mb-3">
+                <label class="col-sm-1 col-form-label" for="title">{ "Title" }</label>
+                <div class="col-sm-11">
+                    <input
+                        class="form-control"
+                        name="title"
+                        value={ (*title).clone() }
+                        oninput={ edit_title }
+                    />
+                    <small class="form-text text-body-secondary">{ "Leave empty to use the feed title." }</small>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label class="col-sm-1 col-form-label" for="url">{ "Feed URL" }</label>
+                <div class="col-sm-11">
+                    <input
+                        class="form-control"
+                        name="url"
+                        required=true
+                        value={ (*url).clone() }
+                        oninput={ edit_url }
+                    />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label class="col-sm-1 col-form-label" for="tags">{ "Tags" }</label>
+                <div class="col-sm-11">
+                    <super::Tags
+                        values={ (*tags).clone() }
+                        on_change={ yew::Callback::from(move |value| tags.set(value)) }
+                    />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-11 offset-sm-1">
+                    <crate::components::Switch
+                        id="active"
+                        active={ *active }
+                        on_toggle={ toggle_active }
+                        label="active"
+                    />
+                </div>
+            </div>
+
+            {
+                if all_webhooks.is_empty() {
+                    "".into()
                 } else {
-                    self.props.source.webhooks.retain(|x| x != &id);
+                    yew::html! {
+                        <div class="row mb-3">
+                            <label class="col-sm-1 col-form-label" for="webhooks">{ "Webhooks" }</label>
+                            <div class="col-sm-11">
+                            {
+                                for all_webhooks.clone().iter().map(move |webhook| {
+                                    let id = webhook.id.unwrap_or_default();
+                                    let active = webhooks.borrow().contains(&id);
+
+                                    yew::html! {
+                                        <crate::components::Switch
+                                            id={ id.to_string() }
+                                            label={ webhook.name.clone() }
+                                            active={ active }
+                                            on_toggle={
+                                                let webhooks = webhooks.clone();
+
+                                                yew::Callback::from(move |active| if active {
+                                                    if !webhooks.borrow().contains(&id) {
+                                                        webhooks.borrow_mut().push(id);
+                                                    }
+                                                } else {
+                                                    webhooks.borrow_mut().retain(|x| x != &id);
+                                                })
+                                            }
+                                        />
+                                    }
+                                })
+                            }
+                            </div>
+                        </div>
+                    }
                 }
             }
-            Message::UpdateTags(tags) => self.props.source.tags = tags,
-            Message::UpdateTitle(title) => self.props.source.title = title,
-            Message::UpdateUrl(url) => self.props.source.url = url,
-            Message::Webhooks(webhooks) => self.webhooks = webhooks,
-        }
 
-        true
-    }
+            <a
+                class={ yew::classes!("btn", "btn-primary") }
+                title="Save"
+                onclick={ on_submit }
+            >
+                <crate::components::Svg icon="check" size=24 />
+                { "Save" }
+            </a>
 
-    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        use yew::TargetCast;
+            <a
+                class={ yew::classes!("btn", "btn-secondary") }
+                title="Cancel"
+                onclick={ on_cancel }
+            >
+                <crate::components::Svg icon="x" size=24 />
+                { "Cancel" }
+            </a>
+        </form>
+    };
 
-        yew::html! {
-            <form>
-                <div class="row mb-3">
-                    <label class="col-sm-1 col-form-label" for="title">{ "Title" }</label>
-                    <div class="col-sm-11">
-                        <input
-                            class="form-control"
-                            name="title"
-                            value={ self.props.source.title.clone() }
-                            oninput={ ctx.link().callback(|e: yew::InputEvent| {
-                                let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
-                                Message::UpdateTitle(input.value())
-                            }) }
-                        />
-                        <small class="form-text text-body-secondary">{ "Leave empty to use the feed title." }</small>
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-1 col-form-label" for="url">{ "Feed URL" }</label>
-                    <div class="col-sm-11">
-                        <input
-                            class="form-control"
-                            name="url"
-                            required=true
-                            value={ self.props.source.url.clone() }
-                            oninput={ ctx.link().callback(|e: yew::InputEvent| {
-                                let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
-                                Message::UpdateUrl(input.value())
-                            }) }
-                        />
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-1 col-form-label" for="tags">{ "Tags" }</label>
-                    <div class="col-sm-11">
-                        <super::Tags
-                            values={ self.props.source.tags.clone() }
-                            on_change={ ctx.link().callback(Message::UpdateTags) }
-                        />
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-sm-11 offset-sm-1">
-                        <crate::components::Switch
-                            id="active"
-                            active={ self.props.source.active }
-                            on_toggle={ ctx.link().callback(Message::ToggleActive) }
-                            label="active"
-                        />
-                    </div>
-                </div>
-
-                {
-                    if self.webhooks.is_empty() {
-                        "".into()
-                    } else {
-                        yew::html! {
-                            <div class="row mb-3">
-                                <label class="col-sm-1 col-form-label" for="webhooks">{ "Webhooks" }</label>
-                                <div class="col-sm-11">
-                                {
-                                    for self.webhooks.iter().map(move |webhook| {
-                                        let id = webhook.id.unwrap_or_default();
-                                        let active = self.props.source.webhooks.contains(&id);
-
-                                        yew::html! {
-                                            <crate::components::Switch
-                                                id={ id.to_string() }
-                                                label={ webhook.name.clone() }
-                                                active={ active }
-                                                on_toggle={ ctx.link().callback(move |active| Message::ToggleWebhook(id, active)) }
-                                            />
-                                        }
-                                    })
-                                }
-                                </div>
-                            </div>
-                        }
-                    }
-                }
-
-                <a
-                    class={ yew::classes!("btn", "btn-primary") }
-                    title="Save"
-                    onclick={ ctx.link().callback(|_| Message::Submit) }
-                >
-                    <crate::components::Svg icon="check" size=24 />
-                    { "Save" }
-                </a>
-
-                <a
-                    class={ yew::classes!("btn", "btn-secondary") }
-                    title="Cancel"
-                    onclick={ ctx.link().callback(|_| Message::Cancel) }
-                >
-                    <crate::components::Svg icon="x" size=24 />
-                    { "Cancel" }
-                </a>
-            </form>
-        }
-    }
-
-    crate::change!(props);
+    Ok(html)
 }
