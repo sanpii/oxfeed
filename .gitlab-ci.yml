@@ -15,5 +15,8 @@ lint:fmt:
 lint:clippy:
     stage: lint
     before_script:
+        - apt update -yqq
+        - apt install -yqq sudo clang libpq-dev
         - rustup component add clippy
+        - rustup target add wasm32-unknown-unknown
     script: make clippy
