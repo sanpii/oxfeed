@@ -1,19 +1,16 @@
 macro_rules! toggle {
     ($name:ident, $item:ident, $context:ident) => {{
         let item = $item.clone();
-        let attr = $name.clone();
         let context = $context.clone();
 
         yew::Callback::from(move |_| {
             let item = item.clone();
-            let attr = attr.clone();
             let context = context.clone();
 
             yew::suspense::Suspension::from_future(async move {
-                crate::Api::items_tag(&item.id, stringify!($name), !*attr)
+                crate::Api::items_tag(&item.id, stringify!($name), !item.$name)
                     .await
                     .unwrap();
-                attr.set(!*attr);
                 context.dispatch(crate::Action::NeedUpdate);
             });
         })
@@ -47,9 +44,7 @@ pub(crate) struct Properties {
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let context = crate::use_context();
     let content = yew::use_state(|| None::<String>);
-    let item = yew::use_state(|| props.value.clone());
-    let favorite = yew::use_state(|| item.favorite);
-    let read = yew::use_state(|| item.read);
+    let item = yew::use_memo(props.clone(), |props| props.value.clone());
     let scene = yew::use_state(Scene::default);
 
     let published_ago = chrono_humanize::HumanTime::from(item.published);
@@ -142,9 +137,9 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         yew::html! {
                             <super::Actions
                                 inline=true
-                                read={ *read }
+                                read={ item.read }
                                 {on_read}
-                                favorite={ *favorite }
+                                favorite={ item.favorite }
                                 {on_favorite}
                             />
                         }
@@ -153,7 +148,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     }
                 }
                 {
-                    if *scene == Scene::Hidden && *favorite {
+                    if *scene == Scene::Hidden && item.favorite {
                         yew::html! {
                             <div class="favorite">
                                 <super::Svg icon="star-fill" size=24 />
@@ -178,9 +173,9 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                             <hr />
 
                             <super::Actions
-                                read={ *read }
+                                read={ item.read }
                                 {on_read}
-                                favorite={ *favorite }
+                                favorite={ item.favorite }
                                 {on_favorite}
                             />
                         </>
