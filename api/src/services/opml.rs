@@ -39,7 +39,7 @@ fn save(
         save(elephantry, outline, user);
     }
 
-    let Ok(source) = source_try_from(outline, user) else {
+    let Some(source) = source_try_from(outline, user) else {
         return;
     };
 
@@ -51,10 +51,10 @@ fn save(
 fn source_try_from(
     outline: &opml::Outline,
     user: &oxfeed_common::user::Entity,
-) -> Result<oxfeed_common::source::Entity, ()> {
+) -> Option<oxfeed_common::source::Entity> {
     let url = match &outline.xml_url {
         Some(url) => url.clone(),
-        None => return Err(()),
+        None => return None,
     };
 
     let mut tags = Vec::new();
@@ -72,7 +72,7 @@ fn source_try_from(
         ..Default::default()
     };
 
-    Ok(entity)
+    Some(entity)
 }
 
 #[actix_web::get("")]
