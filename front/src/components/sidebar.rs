@@ -128,11 +128,12 @@ pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
 
         links
     });
+    let unread = yew::use_memo(counts.clone(), |counts| counts.unread > 0);
 
-    let favicon = yew::use_memo(context.clone(), |context| {
-        if context.websocket_error {
+    let favicon = yew::use_memo((context.clone(), unread), |deps| {
+        if deps.0.websocket_error {
             "/favicon-error.ico"
-        } else if context.unread_items {
+        } else if *deps.1 {
             "/favicon-unread.ico"
         } else {
             "/favicon.ico"
