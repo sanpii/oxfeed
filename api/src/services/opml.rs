@@ -9,7 +9,7 @@ pub(crate) fn scope() -> actix_web::Scope {
 #[actix_web::post("")]
 async fn import(
     elephantry: Data<elephantry::Pool>,
-    xml: String,
+    xml: actix_web::web::Json<String>,
     identity: crate::Identity,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
     let token = identity.token(&elephantry)?;
@@ -19,7 +19,7 @@ async fn import(
         .find_from_token(&token)
         .ok_or(oxfeed_common::Error::Auth)?;
 
-    let opml = opml::OPML::from_str(&xml).unwrap();
+    let opml = opml::OPML::from_str(&xml.0).unwrap();
 
     for outline in opml.body.outlines {
         save(&elephantry, &outline, &user);
