@@ -6,7 +6,6 @@ pub(crate) struct Properties {
     pub read: bool,
     pub on_favorite: yew::Callback<()>,
     pub on_read: yew::Callback<()>,
-    pub medias: Vec<oxfeed_common::media::Entity>,
 }
 
 struct Icon {
@@ -56,9 +55,6 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     if props.inline {
         yew::html! {
             <div class={ yew::classes!("actions", "inline") }>
-                <span class="medias" title="Medias">
-                    <super::Media inline=true medias={ props.medias.clone() } />
-                </span>
                 <span class="read" onclick={ on_read } title={ read_icon.label }>
                     <super::Svg icon={ read_icon.icon } size=24 />
                 </span>
@@ -70,11 +66,6 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     } else {
         yew::html! {
             <div class="actions">
-                <super::Media
-                    inline=false
-                    medias={ props.medias.clone() }
-                />
-
                 <button class={ yew::classes!("btn", "btn-outline-primary") } onclick={ on_read }>
                     <super::Svg icon={ read_icon.icon } size=24 />
                     { read_icon.label }

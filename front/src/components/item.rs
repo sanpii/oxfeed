@@ -111,7 +111,22 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     yew::html! { <super::Tag value={ tag.clone() } /> }
                 })
             }
+
+            if *scene == Scene::Hidden {
+                if !item.media.is_empty() {
+                    <span class="text-body-secondary">{ "· " }</span>
+                    <span class="medias" title="Medias">
+                        <super::Media inline=true medias={ item.media.clone() } />
+                    </span>
+                } else {
+                    <></>
+                }
+            } else {
+                <></>
+            }
+
             <span class="text-body-secondary">{ "· " }{ &item.source }</span>
+
             <div class="float-end">
                 <span class={ published_class }>{ &published_ago.to_string() }</span>
                 <span onclick={ toggle_content }>
@@ -131,7 +146,6 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                                 {on_read}
                                 favorite={ *favorite }
                                 {on_favorite}
-                                medias={ item.media.clone() }
                             />
                         }
                     } else {
@@ -156,6 +170,11 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         <>
                             { yew::virtual_dom::VNode::VRef(content_div.into()) }
 
+                            <super::Media
+                                inline=false
+                                medias={ item.media.clone() }
+                            />
+
                             <hr />
 
                             <super::Actions
@@ -163,7 +182,6 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                                 {on_read}
                                 favorite={ *favorite }
                                 {on_favorite}
-                                medias={ item.media.clone() }
                             />
                         </>
                     }

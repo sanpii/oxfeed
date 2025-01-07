@@ -68,6 +68,20 @@ li.list-group-item {
         display: block;
     }
 
+    .medias {
+        a {
+            color: var(--bs-body-color);
+
+            &:hover {
+                text-decoration: none;
+            }
+        }
+
+        svg:hover {
+            color: var(--bs-purple);
+        }
+    }
+
     .actions {
         a {
             color: var(--bs-body-color);
@@ -79,10 +93,6 @@ li.list-group-item {
 
         .btn {
             margin-right: .5rem;
-        }
-
-        .medias svg:hover {
-            color: var(--bs-purple);
         }
 
         .read svg:hover {
