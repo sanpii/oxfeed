@@ -1,9 +1,21 @@
 #[yew::function_component]
 pub(crate) fn Component() -> yew::HtmlResult {
     let pagination = yew::use_state(|| elephantry_extras::Pagination::from(crate::Location::new()));
-    let tags = yew::suspense::use_future_with(pagination, |pagination| async move {
-        crate::Api::tags_all(&pagination).await.ok()
-    })?;
+    let tags = yew::use_state(|| None);
+
+    {
+        let tags = tags.clone();
+
+        yew::use_effect_with(pagination, move |pagination| {
+            let pagination = pagination.clone();
+            let tags = tags.clone();
+
+            wasm_bindgen_futures::spawn_local(async move {
+                let new_tags = crate::Api::tags_all(&pagination).await.ok();
+                tags.set(new_tags);
+            });
+        });
+    }
 
     let Some(tags) = (*tags).clone() else {
         return Ok(yew::html! { <super::Empty /> });

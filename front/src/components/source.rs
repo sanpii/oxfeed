@@ -35,7 +35,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 let source = source.clone();
                 let context = context.clone();
 
-                yew::suspense::Suspension::from_future(async move {
+                wasm_bindgen_futures::spawn_local(async move {
                     let id = source.id.unwrap();
 
                     crate::Api::sources_delete(&id).await.unwrap();
@@ -61,7 +61,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             let scene = scene.clone();
             let source = source.clone();
 
-            yew::suspense::Suspension::from_future(async move {
+            wasm_bindgen_futures::spawn_local(async move {
                 let id = new_source.id.unwrap();
 
                 crate::Api::sources_update(&id, &new_source).await.unwrap();

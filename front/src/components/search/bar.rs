@@ -1,31 +1,17 @@
-#[derive(Clone, PartialEq, yew::Properties)]
-pub(crate) struct Properties {
-    pub current_route: crate::components::app::Route,
-    #[prop_or_default]
-    pub filter: crate::Filter,
-}
-
 #[yew::function_component]
-pub(crate) fn Component(props: &Properties) -> yew::Html {
+pub(crate) fn Component() -> yew::Html {
     let context = crate::use_context();
-    let current_route = yew::use_memo(props.clone(), |props| props.current_route.clone());
-    let filter = yew::use_state(crate::Filter::new);
+    let route = yew_router::hooks::use_route::<crate::components::app::Route>().unwrap_or_default();
+    let location = yew_router::prelude::use_location();
+    let filter = yew::use_memo(location.clone(), |_| crate::Filter::new());
 
     let on_input = {
-        let filter = filter.clone();
-
         yew::Callback::from(move |e: yew::InputEvent| {
             use yew::TargetCast as _;
 
             let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
-            filter.set(input.value().into());
-        })
-    };
+            let filter: crate::Filter = input.value().into();
 
-    let on_search = {
-        let filter = filter.clone();
-
-        yew::Callback::from(move |_| {
             let location = crate::Location::new();
             let mut route = location.path();
 
@@ -41,26 +27,18 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         })
     };
 
-    if matches!(*current_route, crate::components::app::Route::Settings) {
-        "".into()
+    if matches!(route, crate::components::app::Route::Settings) {
+        yew::Html::default()
     } else {
         yew::html! {
-            <form method="get">
-                <div class="input-group">
-                    <input
-                        class={ yew::classes!("form-control", "form-control-dark") }
-                        type="text"
-                        name="q"
-                        value={ filter.to_string() }
-                        placeholder="Search"
-                        aria-label="Search"
-                        oninput={ on_input }
-                    />
-                    <button class="btn btn-outline-secondary" type="button" onclick={ on_search }>
-                        <crate::components::Svg icon="search" size=24 />
-                    </button>
-                </div>
-            </form>
+            <input
+                class={ yew::classes!("form-control", "form-control-dark") }
+                type="text"
+                value={ filter.to_string() }
+                placeholder="Search"
+                aria-label="Search"
+                oninput={ on_input }
+            />
         }
     }
 }

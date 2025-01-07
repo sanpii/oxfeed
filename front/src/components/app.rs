@@ -1,4 +1,4 @@
-#[derive(Clone, PartialEq, Eq, yew_router::Routable)]
+#[derive(Clone, Debug, PartialEq, Eq, yew_router::Routable)]
 pub(crate) enum Route {
     #[at("/favorites")]
     Favorites,
@@ -24,23 +24,20 @@ pub(crate) enum Route {
 #[yew::function_component]
 pub(crate) fn Component() -> yew::Html {
     let context = yew::use_reducer(crate::Context::default);
-    let fallback = yew::html! {<div>{"Loading..."}</div>};
     let auth = yew::use_memo(context.clone(), |context| context.auth);
 
     let _ = yew::use_state(|| websocket(context.clone()));
 
     yew::html! {
-        <yew::Suspense {fallback}>
-            <yew::ContextProvider<yew::UseReducerHandle<crate::Context>> {context}>
-                if *auth {
-                    <yew_router::router::BrowserRouter>
-                        <yew_router::Switch<Route> render={ switch } />
-                    </yew_router::router::BrowserRouter>
-                } else {
-                    <super::Login />
-                }
-            </yew::ContextProvider<yew::UseReducerHandle<crate::Context>>>
-        </yew::Suspense>
+        <yew::ContextProvider<yew::UseReducerHandle<crate::Context>> {context}>
+            if *auth {
+                <yew_router::router::BrowserRouter>
+                    <yew_router::Switch<Route> render={ switch } />
+                </yew_router::router::BrowserRouter>
+            } else {
+                <super::Login />
+            }
+        </yew::ContextProvider<yew::UseReducerHandle<crate::Context>>>
     }
 }
 
@@ -88,7 +85,7 @@ fn switch(route: Route) -> yew::Html {
     yew::html! {
         <>
             <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-                <super::Header current_route={ route.clone() } />
+                <super::Header />
             </nav>
             <div class="container-fluid">
                 <div class="row">

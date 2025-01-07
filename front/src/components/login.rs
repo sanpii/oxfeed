@@ -31,7 +31,7 @@ pub(crate) fn Component() -> yew::Html {
                 email: info.email,
             };
 
-            yew::suspense::Suspension::from_future(async move {
+            wasm_bindgen_futures::spawn_local(async move {
                 match crate::Api::account_create(&user).await {
                     Ok(_) => {
                         let alert = crate::Alert::info("User created");
@@ -50,7 +50,7 @@ pub(crate) fn Component() -> yew::Html {
         yew::Callback::from(move |info: crate::components::form::login::Info| {
             let context = context.clone();
 
-            yew::suspense::Suspension::from_future(async move {
+            wasm_bindgen_futures::spawn_local(async move {
                 match crate::Api::auth_login(&info.email, &info.password, &info.remember_me).await {
                     Ok(_) => context.dispatch(crate::Action::Logged),
                     Err(err) => context.dispatch(err.into()),

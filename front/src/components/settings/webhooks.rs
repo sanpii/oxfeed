@@ -9,9 +9,20 @@ enum Scene {
 pub(crate) fn Component() -> yew::HtmlResult {
     let force_reload = yew::use_state(|| 0);
     let scene = yew::use_state(Scene::default);
-    let webhooks = yew::suspense::use_future_with(force_reload.clone(), |_| async move {
-        crate::Api::webhooks_all().await.unwrap_or_default()
-    })?;
+    let webhooks = yew::use_state(Vec::new);
+
+    {
+        let webhooks = webhooks.clone();
+
+        yew::use_effect_with(force_reload.clone(), move |_| {
+            let webhooks = webhooks.clone();
+
+            wasm_bindgen_futures::spawn_local(async move {
+                let new_webhooks = crate::Api::webhooks_all().await.unwrap_or_default();
+                webhooks.set(new_webhooks);
+            });
+        });
+    }
 
     let on_add = {
         let scene = scene.clone();
@@ -44,7 +55,7 @@ pub(crate) fn Component() -> yew::HtmlResult {
         yew::Callback::from(move |webhook| {
             let force_reload = force_reload.clone();
 
-            yew::suspense::Suspension::from_future(async move {
+            wasm_bindgen_futures::spawn_local(async move {
                 crate::Api::webhooks_create(&webhook).await.unwrap();
                 force_reload.set(*force_reload + 1);
             });

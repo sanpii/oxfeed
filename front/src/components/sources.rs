@@ -18,16 +18,24 @@ pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
     let pagination = yew::use_state(|| elephantry_extras::Pagination::from(crate::Location::new()));
     let filter = yew::use_memo(props.clone(), |props| props.filter.clone());
     let need_update = yew::use_memo(context.clone(), |context| context.need_update);
-    let pager = yew::suspense::use_future_with(
-        (filter.clone(), pagination.clone(), need_update),
-        |deps| async move {
-            if deps.0.is_empty() {
-                crate::Api::sources_all(&deps.1).await.unwrap()
-            } else {
-                crate::Api::sources_search(&deps.0, &deps.1).await.unwrap()
-            }
-        },
-    )?;
+    let pager = yew::use_state(|| None);
+
+    {
+        let pager = pager.clone();
+
+        yew::use_effect_with((filter.clone(), pagination.clone(), need_update), |deps| {
+            let deps = deps.clone();
+
+            wasm_bindgen_futures::spawn_local(async move {
+                let new_pager = if deps.0.is_empty() {
+                    crate::Api::sources_all(&deps.1).await.ok()
+                } else {
+                    crate::Api::sources_search(&deps.0, &deps.1).await.ok()
+                };
+                pager.set(new_pager);
+            });
+        });
+    }
 
     let on_add = {
         let scene = scene.clone();
@@ -52,7 +60,7 @@ pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
         yew::Callback::from(move |source| {
             let context = context.clone();
 
-            yew::suspense::Suspension::from_future(async move {
+            wasm_bindgen_futures::spawn_local(async move {
                 crate::Api::sources_create(&source).await.unwrap();
                 context.dispatch(crate::Action::NeedUpdate);
             });
@@ -96,6 +104,14 @@ pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
             </ul>
         },
     };
+
+    let Some(pager) = (*pager).clone() else {
+        return Ok(yew::html! { add });
+    };
+
+    if pager.iterator.is_empty() {
+        return Ok(yew::html! { add });
+    }
 
     let html = yew::html! {
         <>

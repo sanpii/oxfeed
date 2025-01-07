@@ -7,7 +7,7 @@ macro_rules! toggle {
             let item = item.clone();
             let context = context.clone();
 
-            yew::suspense::Suspension::from_future(async move {
+            wasm_bindgen_futures::spawn_local(async move {
                 crate::Api::items_tag(&item.id, stringify!($name), !item.$name)
                     .await
                     .unwrap();
@@ -86,7 +86,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 let content = content.clone();
                 let item = item.clone();
 
-                yew::suspense::Suspension::from_future(async move {
+                wasm_bindgen_futures::spawn_local(async move {
                     let item_id = &item.id;
 
                     content.set(crate::Api::items_content(item_id).await.ok());

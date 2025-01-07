@@ -107,15 +107,26 @@ pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
     let context = crate::use_context();
     let current_route = yew::use_memo(props.clone(), |props| props.current_route.clone());
     let need_update = yew::use_memo(context.clone(), |context| context.need_update);
-    let counts = yew::suspense::use_future_with(need_update, |_| async {
-        match crate::Api::counts().await {
-            Ok(counts) => counts,
-            Err(err) => {
-                log::error!("{err:?}");
-                panic!();
-            }
-        }
-    })?;
+    let counts = yew::use_state(oxfeed_common::Counts::default);
+
+    {
+        let counts = counts.clone();
+
+        yew::use_effect_with(need_update, move |_| {
+            let counts = counts.clone();
+
+            wasm_bindgen_futures::spawn_local(async move {
+                match crate::Api::counts().await {
+                    Ok(new_counts) => counts.set(new_counts),
+                    Err(err) => {
+                        log::error!("{err:?}");
+                        panic!();
+                    }
+                }
+            });
+        });
+    }
+
     let links = yew::use_memo((counts.clone(), current_route.clone()), |deps| {
         let mut links = Links::new();
         links.update_count(&deps.0);
@@ -150,7 +161,7 @@ pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
         yew::Callback::from(move |_| {
             let context = context.clone();
 
-            yew::suspense::Suspension::from_future(async move {
+            wasm_bindgen_futures::spawn_local(async move {
                 if let Err(err) = crate::Api::items_read().await {
                     context.dispatch(err.into());
                 }

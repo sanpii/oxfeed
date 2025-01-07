@@ -26,7 +26,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
             if gloo::dialogs::confirm(&message) {
                 let id = value.id.unwrap();
-                yew::suspense::Suspension::from_future(async move {
+                wasm_bindgen_futures::spawn_local(async move {
                     crate::Api::webhooks_delete(&id).await.unwrap();
                 });
 
@@ -43,7 +43,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             let id = webhook.id.unwrap();
             value.set(webhook.clone());
 
-            yew::suspense::Suspension::from_future(async move {
+            wasm_bindgen_futures::spawn_local(async move {
                 crate::Api::webhooks_update(&id, &webhook).await.unwrap();
             });
 

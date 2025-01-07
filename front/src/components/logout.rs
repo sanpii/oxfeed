@@ -16,7 +16,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             let context = context.clone();
             let navigator = navigator.clone();
 
-            yew::suspense::Suspension::from_future(async move {
+            wasm_bindgen_futures::spawn_local(async move {
                 crate::Api::auth_logout().await.unwrap();
                 context.dispatch(crate::Action::AuthRequire);
 

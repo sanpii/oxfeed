@@ -12,9 +12,18 @@ pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
     let url = yew::use_state(|| props.source.url.clone());
     let tags = yew::use_state(|| props.source.tags.clone());
     let webhooks = yew::use_mut_ref(|| props.source.webhooks.clone());
+    let all_webhooks = yew::use_state(Vec::new);
 
-    let res = yew::suspense::use_future(|| async move { crate::Api::webhooks_all().await })?;
-    let all_webhooks = res.as_ref().map(|x| x.clone()).unwrap_or_default();
+    {
+        let all_webhooks = all_webhooks.clone();
+
+        yew::use_state(|| {
+            wasm_bindgen_futures::spawn_local(async move {
+                let webhooks = crate::Api::webhooks_all().await.unwrap_or_default();
+                all_webhooks.set(webhooks);
+            })
+        });
+    }
 
     let edit_title = crate::components::edit_cb(title.clone());
     let edit_url = crate::components::edit_cb(url.clone());

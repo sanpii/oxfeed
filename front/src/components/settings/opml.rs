@@ -34,7 +34,7 @@ pub(crate) fn Component() -> yew::Html {
                 let context = context.clone();
                 let file = file.clone();
 
-                yew::suspense::Suspension::from_future(async move {
+                wasm_bindgen_futures::spawn_local(async move {
                     let content = gloo::file::futures::read_as_text(&file)
                         .await
                         .unwrap_or_default();
