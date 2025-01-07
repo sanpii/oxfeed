@@ -60,7 +60,7 @@ create index if not exists item_source_id on item(source_id);
 
 create table if not exists media (
     media_id uuid primary key default uuid_generate_v4(),
-    item_id uuid references item(item_id),
+    item_id uuid references item(item_id) on delete cascade,
     url text not null,
     content_type text,
 
