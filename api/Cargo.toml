@@ -14,7 +14,6 @@ base64.workspace = true
 bigdecimal = "0.4"
 chrono.workspace = true
 elephantry-extras.workspace = true
-envir.workspace = true
 feed-rs.workspace = true
 futures-util = "0.3"
 hmac.workspace = true
@@ -33,6 +32,10 @@ url.workspace = true
 [dependencies.attohttpc]
 workspace = true
 features = ["json"]
+
+[dependencies.envir]
+workspace = true
+default-features = true
 
 [dependencies.oxfeed-common]
 version = "0.1"
