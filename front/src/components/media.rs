@@ -54,10 +54,13 @@ fn expanded(props: &Properties) -> yew::Html {
 }
 
 fn popover_text(medias: &[oxfeed_common::media::Entity]) -> yew::Html {
+    let mut sorted_medias = medias.to_vec();
+    sorted_medias.sort();
+
     yew::html! {
         <ul class="list-group">
         {
-            medias
+            sorted_medias
                 .iter()
                 .map(|x| {
                     let file_name = x.file_name().unwrap();

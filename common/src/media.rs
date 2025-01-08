@@ -23,3 +23,19 @@ impl Entity {
         path.last().map(ToString::to_string)
     }
 }
+
+impl Ord for Entity {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        if self.content_type != other.content_type {
+            self.content_type.cmp(&other.content_type)
+        } else {
+            self.file_name().cmp(&other.file_name())
+        }
+    }
+}
+
+impl PartialOrd for Entity {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.cmp(other).into()
+    }
+}
