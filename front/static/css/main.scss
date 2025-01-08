@@ -69,6 +69,12 @@ li.list-group-item {
     }
 
     .medias {
+        li {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
         a {
             color: var(--bs-body-color);
 

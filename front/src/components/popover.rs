@@ -15,7 +15,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             <button
                 class="btn btn-sm"
                 popovertarget={ id.clone() }
-                popovertargetaction="show"
+                popovertargetaction="toggle"
                 style="padding: 0; margin: 0;"
             >
                 { props.children.clone() }

@@ -7,10 +7,8 @@ pub(crate) struct Properties {
 #[yew::function_component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     if props.medias.is_empty() {
-        return "".into();
-    }
-
-    if props.inline {
+        yew::Html::default()
+    } else if props.inline {
         inline(props)
     } else {
         expanded(props)
@@ -62,11 +60,12 @@ fn popover_text(medias: &[oxfeed_common::media::Entity]) -> yew::Html {
             medias
                 .iter()
                 .map(|x| {
+                    let file_name = x.file_name().unwrap();
 
                     yew::html_nested! {
                         <li class="list-group-item">
                             <super::Svg size=24 icon={ x.content_type.clone().unwrap_or_default() } content_type=true />
-                            <a href={ x.url.clone() } target="_blank">{ x.file_name().unwrap() }</a>
+                            <a href={ x.url.clone() } target="_blank" title={ file_name.clone() }>{ file_name }</a>
                         </li>
                     }
                 }).collect::<yew::Html>()
