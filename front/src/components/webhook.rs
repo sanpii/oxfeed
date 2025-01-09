@@ -73,7 +73,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                             }
                         }
                         else {
-                            "".into()
+                            yew::Html::default()
                         }
                     }
                     </div>

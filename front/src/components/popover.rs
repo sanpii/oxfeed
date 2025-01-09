@@ -27,7 +27,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                             <h3 class="popover-header">{ title }</h3>
                         }
                     } else {
-                        "".into()
+                        yew::Html::default()
                     }
                 }
                 <div class="popover-body">{ props.body.clone() }</div>

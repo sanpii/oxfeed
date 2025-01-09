@@ -79,7 +79,7 @@ pub(crate) fn Component() -> yew::Html {
                     </a>
                 }
             } else {
-                "".into()
+                yew::Html::default()
             }
         }
         <ul class="list-group">
@@ -95,7 +95,7 @@ pub(crate) fn Component() -> yew::Html {
                     </li>
                 }
             } else {
-                "".into()
+                yew::Html::default()
             }
         }
         {

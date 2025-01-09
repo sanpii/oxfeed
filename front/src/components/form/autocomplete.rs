@@ -114,7 +114,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             />
             {
                 if terms.is_empty() {
-                    "".into()
+                    yew::Html::default()
                 } else {
                     yew::html! {
                         <div class="list-group">

@@ -144,7 +144,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                             />
                         }
                     } else {
-                        "".into()
+                        yew::Html::default()
                     }
                 }
                 {
@@ -155,7 +155,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                             </div>
                         }
                     } else {
-                        "".into()
+                        yew::Html::default()
                     }
                 }
             </div>
@@ -181,7 +181,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         </>
                     }
                 } else {
-                    "".into()
+                    yew::Html::default()
                 }
             }
         </>

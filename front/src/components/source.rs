@@ -108,7 +108,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                                 }
                             }
                             else {
-                                "".into()
+                                yew::Html::default()
                             }
                         }
                     </div>
@@ -116,7 +116,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     <div class={ yew::classes!("btn-group", "float-end") }>
                         {
                             if source.webhooks.is_empty() {
-                                "".into()
+                                yew::Html::default()
                             } else {
                                 yew::html! {
                                     <button class={ yew::classes!("btn", "btn-warning") } disabled=true>

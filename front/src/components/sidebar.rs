@@ -193,7 +193,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                                         >{ link.count }</span>
                                     }
                                 } else {
-                                    "".into()
+                                    yew::Html::default()
                                 }
                             }
                         </yew_router::components::Link<super::app::Route>>
