@@ -6,7 +6,7 @@ pub(crate) struct Properties {
 }
 
 #[yew::function_component]
-pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
+pub(crate) fn Component(props: &Properties) -> yew::Html {
     let active = yew::use_state(|| props.source.active);
     let title = yew::use_state(|| props.source.title.clone());
     let url = yew::use_state(|| props.source.url.clone());
@@ -65,7 +65,7 @@ pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
         })
     };
 
-    let html = yew::html! {
+    yew::html! {
         <form>
             <div class="row mb-3">
                 <label class="col-sm-1 col-form-label" for="title">{ "Title" }</label>
@@ -171,7 +171,5 @@ pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
                 { "Cancel" }
             </a>
         </form>
-    };
-
-    Ok(html)
+    }
 }

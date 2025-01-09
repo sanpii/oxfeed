@@ -103,7 +103,7 @@ pub(crate) struct Properties {
 }
 
 #[yew::function_component]
-pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
+pub(crate) fn Component(props: &Properties) -> yew::Html {
     let context = crate::use_context();
     let current_route = yew::use_memo(props.clone(), |props| props.current_route.clone());
     let need_update = yew::use_memo(context.clone(), |context| context.need_update);
@@ -169,7 +169,7 @@ pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
         })
     };
 
-    let html = yew::html! {
+    yew::html! {
         <>
             <button
                 class={ yew::classes!("btn", "btn-primary") }
@@ -205,7 +205,5 @@ pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
                 </li>
             </ul>
         </>
-    };
-
-    Ok(html)
+    }
 }

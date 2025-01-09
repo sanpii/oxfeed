@@ -6,7 +6,7 @@ pub(crate) struct Properties {
 }
 
 #[yew::function_component]
-pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
+pub(crate) fn Component(props: &Properties) -> yew::Html {
     let context = crate::use_context();
     let filter = yew::use_memo(props.clone(), |props| props.filter.clone());
     let kind = yew::use_memo(props.clone(), |props| props.kind.clone());
@@ -55,14 +55,14 @@ pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
     };
 
     let Some(pager) = (*pager).clone() else {
-        return Ok(yew::html! { <super::Empty /> });
+        return yew::html! { <super::Empty /> };
     };
 
     if pager.iterator.is_empty() {
-        return Ok(yew::html! { <super::Empty /> });
+        return yew::html! { <super::Empty /> };
     }
 
-    let html = yew::html! {
+    yew::html! {
         <>
             <ul class="list-group">
             {
@@ -80,7 +80,5 @@ pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
                 onclick={ on_page_change }
             />
         </>
-    };
-
-    Ok(html)
+    }
 }

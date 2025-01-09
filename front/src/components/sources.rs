@@ -12,7 +12,7 @@ pub(crate) struct Properties {
 }
 
 #[yew::function_component]
-pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
+pub(crate) fn Component(props: &Properties) -> yew::Html {
     let context = crate::use_context();
     let scene = yew::use_state(Scene::default);
     let pagination = yew::use_state(|| elephantry_extras::Pagination::from(crate::Location::new()));
@@ -106,14 +106,14 @@ pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
     };
 
     let Some(pager) = (*pager).clone() else {
-        return Ok(yew::html! { add });
+        return yew::html! { add };
     };
 
     if pager.iterator.is_empty() {
-        return Ok(yew::html! { add });
+        return yew::html! { add };
     }
 
-    let html = yew::html! {
+    yew::html! {
         <>
             { add }
             <ul class="list-group">
@@ -132,7 +132,5 @@ pub(crate) fn Component(props: &Properties) -> yew::HtmlResult {
                 onclick={ on_page_change }
             />
         </>
-    };
-
-    Ok(html)
+    }
 }

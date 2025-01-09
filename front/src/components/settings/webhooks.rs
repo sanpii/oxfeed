@@ -6,7 +6,7 @@ enum Scene {
 }
 
 #[yew::function_component]
-pub(crate) fn Component() -> yew::HtmlResult {
+pub(crate) fn Component() -> yew::Html {
     let force_reload = yew::use_state(|| 0);
     let scene = yew::use_state(Scene::default);
     let webhooks = yew::use_state(Vec::new);
@@ -64,7 +64,7 @@ pub(crate) fn Component() -> yew::HtmlResult {
         })
     };
 
-    let html = yew::html! {
+    yew::html! {
         <>
         {
             if matches!(*scene, Scene::View) {
@@ -112,7 +112,5 @@ pub(crate) fn Component() -> yew::HtmlResult {
         }
         </ul>
         </>
-    };
-
-    Ok(html)
+    }
 }

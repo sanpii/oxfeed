@@ -1,5 +1,5 @@
 #[yew::function_component]
-pub(crate) fn Component() -> yew::HtmlResult {
+pub(crate) fn Component() -> yew::Html {
     let account = yew::use_state(|| None);
 
     {
@@ -17,7 +17,7 @@ pub(crate) fn Component() -> yew::HtmlResult {
     }
 
     let Some(account) = (*account).clone() else {
-        return Ok(yew::Html::default());
+        return yew::Html::default();
     };
 
     let on_save = {
@@ -42,7 +42,7 @@ pub(crate) fn Component() -> yew::HtmlResult {
         })
     };
 
-    let html = yew::html! {
+    yew::html! {
         <>
             <crate::components::form::Account
                 account={ account.clone() }
@@ -60,9 +60,7 @@ pub(crate) fn Component() -> yew::HtmlResult {
                 { "Delete my account" }
             </a>
         </>
-    };
-
-    Ok(html)
+    }
 }
 
 async fn logout() -> oxfeed_common::Result {

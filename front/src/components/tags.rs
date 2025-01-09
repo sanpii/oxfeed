@@ -1,5 +1,5 @@
 #[yew::function_component]
-pub(crate) fn Component() -> yew::HtmlResult {
+pub(crate) fn Component() -> yew::Html {
     let pagination = yew::use_state(|| elephantry_extras::Pagination::from(crate::Location::new()));
     let tags = yew::use_state(|| None);
 
@@ -18,16 +18,16 @@ pub(crate) fn Component() -> yew::HtmlResult {
     }
 
     let Some(tags) = (*tags).clone() else {
-        return Ok(yew::html! { <super::Empty /> });
+        return yew::html! { <super::Empty /> };
     };
 
     if tags.is_empty() {
-        return Ok(yew::html! { <super::Empty /> });
+        return yew::html! { <super::Empty /> };
     }
 
     let max = tags.iter().map(|x| x.count).max().unwrap_or(1);
 
-    let html = yew::html! {
+    yew::html! {
         <div class={ yew::classes!("d-flex", "flex-wrap", "align-items-center", "cloud") }>
         {
             for tags.iter().map(|tag| {
@@ -44,7 +44,5 @@ pub(crate) fn Component() -> yew::HtmlResult {
             })
         }
         </div>
-    };
-
-    Ok(html)
+    }
 }
