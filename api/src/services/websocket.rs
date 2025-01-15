@@ -1,6 +1,3 @@
-use actix::ActorContext;
-use actix_web_actors::ws;
-
 /// How often heartbeat pings are sent
 const HEARTBEAT_INTERVAL: std::time::Duration = std::time::Duration::from_secs(5);
 /// How long before lack of client response causes a timeout
@@ -15,55 +12,93 @@ async fn websocket(
     elephantry: actix_web::web::Data<elephantry::Pool>,
     identity: actix_web::web::Query<crate::Identity>,
     request: actix_web::HttpRequest,
-    stream: actix_web::web::Payload,
+    body: actix_web::web::Payload,
 ) -> oxfeed_common::Result<actix_web::HttpResponse> {
+    use futures_util::StreamExt as _;
+
     let token = identity.token(&elephantry)?;
-    let websocket = Websocket::new(elephantry.into_inner(), token);
-    let response = ws::start(websocket, &request, stream)?;
+    let (response, mut session, mut msg_stream) = actix_ws::handle(&request, body)?;
+
+    let hb = std::sync::Arc::new(std::sync::Mutex::new(std::time::Instant::now()));
+
+    {
+        let mut session = session.clone();
+        let hb = hb.clone();
+
+        actix_web::rt::spawn(async move {
+            let websocket = Websocket::new(elephantry.into_inner().get_default().unwrap(), token);
+            let mut interval = actix_web::rt::time::interval(HEARTBEAT_INTERVAL);
+
+            loop {
+                interval.tick().await;
+
+                if session.ping(b"").await.is_err() {
+                    break;
+                }
+
+                if let Err(err) = websocket.notify(&mut session).await {
+                    log::error!("{err}");
+                }
+
+                if std::time::Instant::now().duration_since(*hb.lock().unwrap()) > CLIENT_TIMEOUT {
+                    session.close(None).await.ok();
+                    break;
+                }
+            }
+        });
+    }
+
+    {
+        let hb = hb.clone();
+
+        actix_web::rt::spawn(async move {
+            while let Some(Ok(msg)) = msg_stream.next().await {
+                match msg {
+                    actix_ws::Message::Ping(bytes) => {
+                        if session.pong(&bytes).await.is_err() {
+                            return;
+                        }
+                    }
+                    actix_ws::Message::Pong(_) => {
+                        *hb.lock().unwrap() = std::time::Instant::now();
+                    }
+                    actix_ws::Message::Close(reason) => {
+                        session.close(reason).await.ok();
+                        return;
+                    }
+                    _ => (),
+                }
+            }
+        });
+    }
 
     Ok(response)
 }
 
 struct Websocket {
-    elephantry: std::sync::Arc<elephantry::Pool>,
-    hb: std::time::Instant,
+    elephantry: elephantry::Connection,
     token: uuid::Uuid,
 }
 
 impl Websocket {
-    fn new(elephantry: std::sync::Arc<elephantry::Pool>, token: uuid::Uuid) -> Self {
-        Self {
-            elephantry,
-            hb: std::time::Instant::now(),
+    fn new(elephantry: &elephantry::Connection, token: uuid::Uuid) -> Self {
+        let webosket = Self {
+            elephantry: elephantry.clone(),
             token,
-        }
-    }
+        };
 
-    fn hb(&self, context: &mut <Self as actix::Actor>::Context) {
-        use actix::AsyncContext;
-
-        context.run_interval(HEARTBEAT_INTERVAL, |actor, context| {
-            actor.ping(context);
-            if let Err(err) = actor.notify(context) {
-                log::error!("{err}");
-            }
-        });
-    }
-
-    fn ping(&self, context: &mut <Self as actix::Actor>::Context) {
-        if std::time::Instant::now().duration_since(self.hb) > CLIENT_TIMEOUT {
-            log::warn!("Websocket Client heartbeat failed, disconnecting!");
-            context.stop();
-            return;
+        match webosket.elephantry.listen("item_new") {
+            Ok(_) => (),
+            Err(err) => log::error!("Unable to listen postgresql: {err}"),
         }
 
-        context.ping(b"");
+        webosket
     }
 
-    fn notify(&self, context: &mut <Self as actix::Actor>::Context) -> elephantry::Result {
+    async fn notify(&self, session: &mut actix_ws::Session) -> elephantry::Result {
         while let Some(notify) = self.elephantry.notifies()? {
             if notify.extra()? == self.token.to_string() {
-                context.text(notify.relname()?);
+                session.text(notify.relname()?).await.ok();
             }
         }
 
@@ -71,36 +106,8 @@ impl Websocket {
     }
 }
 
-impl actix::Actor for Websocket {
-    type Context = ws::WebsocketContext<Self>;
-
-    fn started(&mut self, context: &mut Self::Context) {
-        match self.elephantry.listen("item_new") {
-            Ok(_) => (),
-            Err(err) => log::error!("Unable to listen postgresql: {err}"),
-        }
-
-        self.hb(context);
-    }
-
-    fn stopped(&mut self, _: &mut Self::Context) {
+impl Drop for Websocket {
+    fn drop(&mut self) {
         self.elephantry.unlisten("item_new").ok();
-    }
-}
-
-impl actix::StreamHandler<Result<ws::Message, ws::ProtocolError>> for Websocket {
-    fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, context: &mut Self::Context) {
-        match msg {
-            Ok(ws::Message::Ping(msg)) => {
-                self.hb = std::time::Instant::now();
-                context.pong(&msg);
-            }
-            Ok(ws::Message::Pong(_)) => self.hb = std::time::Instant::now(),
-            Ok(ws::Message::Close(reason)) => {
-                context.close(reason);
-                context.stop();
-            }
-            _ => context.stop(),
-        }
     }
 }
