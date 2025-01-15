@@ -321,3 +321,55 @@ li.list-group-item {
     }
 }
 
+.swipe {
+    div {
+        overflow: hidden;
+    }
+
+    & > .action {
+        height: 100%;
+        position: absolute;
+        right: 3px;
+        top: 3px;
+        z-index: -1;
+    }
+
+    .favorite {
+        color: var(--bs-orange);
+    }
+}
+
+@mixin scrollbar-hide() {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.swipe-container {
+    display: flex;
+    overflow: scroll auto;
+    scroll-snap-type: x mandatory;
+    @include scrollbar-hide();
+
+    .swipe-element {
+        scroll-snap-align: start;
+        min-width: 100%;
+    }
+
+    .action {
+        min-width: 50%;
+        display: flex;
+        align-items: center;
+
+        svg {
+            position: sticky;
+        }
+
+        &.end {
+            justify-content: flex-end;
+        }
+    }
+}

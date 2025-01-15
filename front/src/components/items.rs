@@ -66,10 +66,28 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         <>
             <ul class="list-group">
             {
-                for pager.iterator.iter().map(|item| {
+                for pager.iterator.iter().map(move |item| {
+                    let action_end = super::swipe::Action {
+                        active: item.favorite,
+                        callback: crate::toggle!(favorite, item, context),
+                        color: "--bs-orange",
+                        icon: "star",
+                        id: item.id.clone(),
+                    };
+
+                    let action_start = super::swipe::Action {
+                        active: item.read,
+                        callback: crate::toggle!(read, item, context),
+                        color: "--bs-blue",
+                        icon: "eye",
+                        id: item.id.clone(),
+                    };
+
                     yew::html! {
                         <li class="list-group-item">
-                            <crate::components::Item value={ item.clone() } />
+                            <super::Swipe {action_end} {action_start}>
+                                <crate::components::Item value={ item.clone() } />
+                            </super::Swipe>
                         </li>
                     }
                 })

@@ -1,3 +1,4 @@
+#[macro_export]
 macro_rules! toggle {
     ($name:ident, $item:ident, $context:ident) => {{
         let item = $item.clone();
@@ -123,7 +124,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             <span class="text-body-secondary">{ "· " }{ &item.source }</span>
 
             <div class="float-end">
-                <span class={ published_class }>{ &published_ago.to_string() }</span>
+                <span class={ yew::classes!(published_class, "d-none", "d-md-inline") }>{ &published_ago.to_string() }</span>
                 <span onclick={ toggle_content }>
                     <super::Svg icon={ caret } size=24 />
                 </span>

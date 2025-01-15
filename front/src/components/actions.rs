@@ -54,7 +54,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
     if props.inline {
         yew::html! {
-            <div class={ yew::classes!("actions", "inline") }>
+            <div class={ yew::classes!("actions", "inline", "d-md-none") }>
                 <span class="read" onclick={ on_read } title={ read_icon.label }>
                     <super::Svg icon={ read_icon.icon } size=24 />
                 </span>
