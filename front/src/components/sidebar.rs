@@ -110,6 +110,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let counts = yew::use_state(oxfeed_common::Counts::default);
 
     {
+        let context = context.clone();
         let counts = counts.clone();
 
         yew::use_effect_with(need_update, move |_| {
@@ -118,10 +119,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             wasm_bindgen_futures::spawn_local(async move {
                 match crate::Api::counts().await {
                     Ok(new_counts) => counts.set(new_counts),
-                    Err(err) => {
-                        log::error!("{err:?}");
-                        panic!();
-                    }
+                    Err(_) => context.dispatch(crate::Action::AuthRequire),
                 }
             });
         });
