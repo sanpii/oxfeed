@@ -36,6 +36,6 @@ impl Ord for Entity {
 
 impl PartialOrd for Entity {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.cmp(other).into()
+        Some(self.cmp(other))
     }
 }

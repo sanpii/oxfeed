@@ -72,7 +72,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         callback: crate::toggle!(favorite, item, context),
                         color: "--bs-orange",
                         icon: "star",
-                        id: item.id.clone(),
+                        id: item.id,
                     };
 
                     let action_start = super::swipe::Action {
@@ -80,7 +80,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         callback: crate::toggle!(read, item, context),
                         color: "--bs-blue",
                         icon: "eye",
-                        id: item.id.clone(),
+                        id: item.id,
                     };
 
                     yew::html! {

@@ -9,10 +9,10 @@ macro_rules! toggle {
             let context = context.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
-                crate::Api::items_tag(&item.id, stringify!($name), !item.$name)
+                $crate::Api::items_tag(&item.id, stringify!($name), !item.$name)
                     .await
                     .unwrap();
-                context.dispatch(crate::Action::NeedUpdate);
+                context.dispatch($crate::Action::NeedUpdate);
             });
         })
     }};
