@@ -9,7 +9,7 @@ ifeq ($(APP_ENVIRONMENT),prod)
 	ENV=release
 	YARN_FLAGS+=--production
 	CARGO_FLAGS+=--release
-	TRUNK_FLAGS+=--release
+	TRUNK_FLAGS+=--release=true
 else
 	ENV=debug
 endif
