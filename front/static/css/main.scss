@@ -48,8 +48,10 @@ li.list-group-item {
         color: var(--bs-red);
     }
 
-    > img, > a {
-        margin-right: .5rem;
+    .swipe-element {
+        > img, > a {
+            margin-right: .5rem;
+        }
     }
 
     .badge {
@@ -63,9 +65,11 @@ li.list-group-item {
         display: none;
     }
 
-    &:hover .float-end .actions {
-        margin-right: .5rem;
-        display: block;
+    @media (min-width: 768px ) /* md */ {
+        &:hover .float-end .actions {
+            margin-right: .5rem;
+            display: block;
+        }
     }
 
     .medias {
