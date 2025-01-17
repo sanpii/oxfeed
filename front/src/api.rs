@@ -179,6 +179,12 @@ impl Api {
         Self::fetch(Method::GET, &url, ()).await
     }
 
+    pub async fn tags_rename(tag: &str, name: &str) -> oxfeed_common::Result {
+        let url = format!("/tags/{tag}");
+
+        Self::fetch(Method::POST, &url, name).await
+    }
+
     pub async fn account_create(user: &oxfeed_common::account::Entity) -> oxfeed_common::Result {
         Self::fetch(Method::POST, "/account", user).await
     }
@@ -266,8 +272,14 @@ impl std::fmt::Display for Body {
 }
 
 impl From<String> for Body {
-    fn from(s: String) -> Self {
-        Self::Json(serde_json::Value::String(s))
+    fn from(value: String) -> Self {
+        Self::Json(serde_json::Value::String(value))
+    }
+}
+
+impl From<&str> for Body {
+    fn from(value: &str) -> Self {
+        value.to_string().into()
     }
 }
 

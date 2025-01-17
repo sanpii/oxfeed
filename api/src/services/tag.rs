@@ -1,5 +1,5 @@
 pub(crate) fn scope() -> actix_web::Scope {
-    actix_web::web::scope("/tags").service(all)
+    actix_web::web::scope("/tags").service(all).service(rename)
 }
 
 #[actix_web::get("")]
@@ -33,4 +33,20 @@ select unnest(tags) as name, count(*) as count
     let response = actix_web::HttpResponse::Ok().json(rows);
 
     Ok(response)
+}
+
+#[actix_web::post("/{tag}")]
+async fn rename(
+    elephantry: actix_web::web::Data<elephantry::Pool>,
+    identity: crate::Identity,
+    tag: actix_web::web::Path<String>,
+    actix_web::web::Json(name): actix_web::web::Json<String>,
+) -> oxfeed_common::Result<actix_web::HttpResponse> {
+    let token = identity.token(&elephantry)?;
+
+    let query = include_str!("../../sql/rename_tag.sql");
+
+    elephantry.query::<oxfeed_common::Tag>(query, &[&tag.into_inner(), &name, &token])?;
+
+    Ok(actix_web::HttpResponse::NoContent().finish())
 }

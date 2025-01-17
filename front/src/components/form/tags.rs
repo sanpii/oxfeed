@@ -48,8 +48,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     yew::html! {
                         <crate::components::Tag
                             value={ tag.clone() }
-                            editable=true
-                            on_click={
+                            deletable=true
+                            on_delete={
                                 yew::Callback::from(move |_| {
                                     let mut new_value = (*tags).clone();
                                     new_value.remove(idx);

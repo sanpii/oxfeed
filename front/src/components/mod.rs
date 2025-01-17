@@ -54,9 +54,11 @@ pub(crate) fn edit_cb(
     state: yew::functional::UseStateHandle<String>,
 ) -> yew::Callback<yew::InputEvent> {
     yew::Callback::from(move |e: yew::InputEvent| {
-        use yew::TargetCast;
+        use yew::TargetCast as _;
 
         let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
+        input.report_validity();
+
         state.set(input.value());
     })
 }
