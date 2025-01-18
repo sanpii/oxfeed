@@ -325,24 +325,6 @@ li.list-group-item {
     }
 }
 
-.swipe {
-    div {
-        overflow: hidden;
-    }
-
-    & > .action {
-        height: 100%;
-        position: absolute;
-        right: 3px;
-        top: 3px;
-        z-index: -1;
-    }
-
-    .favorite {
-        color: var(--bs-orange);
-    }
-}
-
 @mixin scrollbar-hide() {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -367,13 +349,11 @@ li.list-group-item {
         min-width: 50%;
         display: flex;
         align-items: center;
+        background-color: orange;
+        justify-content: center;
 
         svg {
             position: sticky;
-        }
-
-        &.end {
-            justify-content: flex-end;
         }
     }
 }

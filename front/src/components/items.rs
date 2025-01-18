@@ -71,7 +71,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         active: item.favorite,
                         callback: crate::toggle!(favorite, item, context),
                         color: "--bs-orange",
-                        icon: "star",
+                        icon: ("star", "star-fill"),
                         id: item.id,
                     };
 
@@ -79,7 +79,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         active: item.read,
                         callback: crate::toggle!(read, item, context),
                         color: "--bs-blue",
-                        icon: "eye",
+                        icon: ("eye-slash", "eye"),
                         id: item.id,
                     };
 
