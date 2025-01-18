@@ -7,7 +7,7 @@ enum Scene {
 
 #[derive(yew::Properties, Clone, PartialEq)]
 pub(crate) struct Properties {
-    pub value: oxfeed_common::webhook::Entity,
+    pub value: oxfeed::webhook::Entity,
     #[prop_or_default]
     pub on_delete: yew::Callback<()>,
 }
@@ -39,7 +39,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         let scene = scene.clone();
         let value = value.clone();
 
-        yew::Callback::from(move |webhook: oxfeed_common::webhook::Entity| {
+        yew::Callback::from(move |webhook: oxfeed::webhook::Entity| {
             let id = webhook.id.unwrap();
             value.set(webhook.clone());
 

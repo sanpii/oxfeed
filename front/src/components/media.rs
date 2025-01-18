@@ -1,7 +1,7 @@
 #[derive(PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     pub inline: bool,
-    pub medias: Vec<oxfeed_common::media::Entity>,
+    pub medias: Vec<oxfeed::media::Entity>,
 }
 
 #[yew::function_component]
@@ -53,7 +53,7 @@ fn expanded(props: &Properties) -> yew::Html {
     }
 }
 
-fn popover_text(medias: &[oxfeed_common::media::Entity]) -> yew::Html {
+fn popover_text(medias: &[oxfeed::media::Entity]) -> yew::Html {
     let mut sorted_medias = medias.to_vec();
     sorted_medias.sort();
 

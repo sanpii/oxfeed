@@ -7,7 +7,7 @@ enum Scene {
 
 #[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
-    pub value: oxfeed_common::source::Entity,
+    pub value: oxfeed::source::Entity,
 }
 
 #[yew::function_component]
@@ -57,7 +57,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         let scene = scene.clone();
         let source = source.clone();
 
-        yew::Callback::from(move |new_source: oxfeed_common::source::Entity| {
+        yew::Callback::from(move |new_source: oxfeed::source::Entity| {
             let scene = scene.clone();
             let source = source.clone();
 

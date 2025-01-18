@@ -9,7 +9,7 @@ mod update;
 use identity::*;
 
 #[actix_web::main]
-async fn main() -> oxfeed_common::Result {
+async fn main() -> oxfeed::Result {
     envir::init();
 
     let database_url = envir::get("DATABASE_URL")?;

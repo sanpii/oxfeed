@@ -1,8 +1,8 @@
 #[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
-    pub source: oxfeed_common::source::Entity,
+    pub source: oxfeed::source::Entity,
     pub on_cancel: yew::Callback<()>,
-    pub on_submit: yew::Callback<oxfeed_common::source::Entity>,
+    pub on_submit: yew::Callback<oxfeed::source::Entity>,
 }
 
 #[yew::function_component]

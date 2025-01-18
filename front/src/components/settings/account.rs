@@ -10,7 +10,7 @@ pub(crate) fn Component() -> yew::Html {
                 let new_account = crate::Api::auth()
                     .await
                     .ok()
-                    .map(oxfeed_common::account::Entity::from);
+                    .map(oxfeed::account::Entity::from);
                 account.set(new_account);
             })
         });
@@ -63,7 +63,7 @@ pub(crate) fn Component() -> yew::Html {
     }
 }
 
-async fn logout() -> oxfeed_common::Result {
+async fn logout() -> oxfeed::Result {
     crate::Api::auth_logout().await?;
     crate::Api::auth().await?;
 

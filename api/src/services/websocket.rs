@@ -13,7 +13,7 @@ async fn websocket(
     identity: actix_web::web::Query<crate::Identity>,
     request: actix_web::HttpRequest,
     body: actix_web::web::Payload,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     use futures_util::StreamExt as _;
 
     let token = identity.token(&elephantry)?;

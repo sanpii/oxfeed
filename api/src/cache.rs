@@ -1,4 +1,4 @@
-pub(crate) fn get(url: &str) -> oxfeed_common::Result<Vec<u8>> {
+pub(crate) fn get(url: &str) -> oxfeed::Result<Vec<u8>> {
     let path = path(url);
 
     let body = if path.exists() {

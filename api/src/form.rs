@@ -12,11 +12,11 @@ pub(crate) struct Source {
     webhooks: Vec<uuid::Uuid>,
 }
 
-impl std::convert::TryInto<oxfeed_common::source::Entity> for Source {
-    type Error = oxfeed_common::Error;
+impl std::convert::TryInto<oxfeed::source::Entity> for Source {
+    type Error = oxfeed::Error;
 
-    fn try_into(self) -> oxfeed_common::Result<oxfeed_common::source::Entity> {
-        let user_id = self.user_id.ok_or(oxfeed_common::Error::Auth)?;
+    fn try_into(self) -> oxfeed::Result<oxfeed::source::Entity> {
+        let user_id = self.user_id.ok_or(oxfeed::Error::Auth)?;
 
         let title = self
             .title
@@ -24,7 +24,7 @@ impl std::convert::TryInto<oxfeed_common::source::Entity> for Source {
             .or_else(|| self.title())
             .unwrap_or_else(|| "<no title>".to_string());
 
-        let entity = oxfeed_common::source::Entity {
+        let entity = oxfeed::source::Entity {
             last_error: None,
             id: self.id,
             tags: self.tags,
@@ -89,16 +89,16 @@ pub(crate) struct Webhook {
     mark_read: bool,
 }
 
-impl std::convert::TryInto<oxfeed_common::webhook::Entity> for Webhook {
-    type Error = oxfeed_common::Error;
+impl std::convert::TryInto<oxfeed::webhook::Entity> for Webhook {
+    type Error = oxfeed::Error;
 
-    fn try_into(self) -> oxfeed_common::Result<oxfeed_common::webhook::Entity> {
+    fn try_into(self) -> oxfeed::Result<oxfeed::webhook::Entity> {
         let user_id = match self.user_id {
             Some(user_id) => Some(user_id),
-            None => return Err(oxfeed_common::Error::Auth),
+            None => return Err(oxfeed::Error::Auth),
         };
 
-        let entity = oxfeed_common::webhook::Entity {
+        let entity = oxfeed::webhook::Entity {
             id: self.id,
             name: self.name.clone(),
             url: self.url.clone(),

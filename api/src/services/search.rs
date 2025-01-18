@@ -23,7 +23,7 @@ async fn all(
     elephantry: Data<elephantry::Pool>,
     query: Query<Request>,
     identity: crate::Identity,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     search(&elephantry, &identity, &elephantry::Where::new(), &query)
 }
 
@@ -32,7 +32,7 @@ async fn favorites(
     elephantry: Data<elephantry::Pool>,
     query: Query<Request>,
     identity: crate::Identity,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     let clause = elephantry::Where::from("favorite", Vec::new());
     search(&elephantry, &identity, &clause, &query)
 }
@@ -42,7 +42,7 @@ async fn unread(
     elephantry: Data<elephantry::Pool>,
     query: Query<Request>,
     identity: crate::Identity,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     let clause = elephantry::Where::from("not read", Vec::new());
     search(&elephantry, &identity, &clause, &query)
 }
@@ -52,7 +52,7 @@ fn search(
     identity: &crate::Identity,
     clause: &elephantry::Where,
     query: &Request,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     use std::fmt::Write;
 
     let mut clause = clause.clone();
@@ -85,8 +85,7 @@ fn search(
         sql.push_str("order by i.published desc\n");
     }
 
-    let pager =
-        count::<oxfeed_common::item::Item>(elephantry, &sql, &clause.params(), &query.pagination)?;
+    let pager = count::<oxfeed::item::Item>(elephantry, &sql, &clause.params(), &query.pagination)?;
     let response = actix_web::HttpResponse::Ok().json(pager);
 
     Ok(response)
@@ -97,7 +96,7 @@ async fn tags(
     elephantry: Data<elephantry::Pool>,
     query: Query<Request>,
     identity: crate::Identity,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     let token = identity.token(&elephantry)?;
     let sql = include_str!("../../sql/search_tags.sql");
     let q = query.q.as_ref().map(|x| format!("^{x}"));
@@ -113,7 +112,7 @@ async fn sources(
     elephantry: Data<elephantry::Pool>,
     query: Query<Request>,
     identity: crate::Identity,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     let q = query.q.clone().unwrap_or_else(|| ".*".to_string());
 
     let mut clause = elephantry::Where::builder()
@@ -133,7 +132,7 @@ fn count<T: elephantry::Entity>(
     sql: &str,
     params: &[&dyn elephantry::ToSql],
     pagination: &elephantry_extras::Pagination,
-) -> oxfeed_common::Result<elephantry::Pager<T>> {
+) -> oxfeed::Result<elephantry::Pager<T>> {
     let sql_count = format!("with items as ({sql}) select count(items) from items");
     let count = elephantry.query_one::<i64>(&sql_count, params)?;
 

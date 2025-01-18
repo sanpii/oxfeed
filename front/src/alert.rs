@@ -36,8 +36,8 @@ impl Alert {
     }
 }
 
-impl From<oxfeed_common::Error> for Alert {
-    fn from(error: oxfeed_common::Error) -> Self {
+impl From<oxfeed::Error> for Alert {
+    fn from(error: oxfeed::Error) -> Self {
         Self::error(&error.to_string())
     }
 }

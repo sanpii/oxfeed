@@ -16,7 +16,7 @@ pub(crate) fn scope() -> actix_web::Scope {
 #[actix_web::get("/")]
 async fn index(
     elephantry: actix_web::web::Data<elephantry::Pool>,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     elephantry.ping()?;
 
     Ok(actix_web::HttpResponse::NoContent().finish())
@@ -26,11 +26,11 @@ async fn index(
 async fn counts(
     elephantry: actix_web::web::Data<elephantry::Pool>,
     identity: crate::Identity,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     let token = identity.token(&elephantry)?;
 
     let sql = include_str!("../../sql/counts.sql");
-    let counts = elephantry.query_one::<oxfeed_common::Counts>(sql, &[&token])?;
+    let counts = elephantry.query_one::<oxfeed::Counts>(sql, &[&token])?;
     let response = actix_web::HttpResponse::Ok().json(counts);
 
     Ok(response)

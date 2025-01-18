@@ -47,7 +47,7 @@ enum Scene {
 
 #[derive(PartialEq, yew::Properties)]
 struct TagProperties {
-    tag: oxfeed_common::Tag,
+    tag: oxfeed::Tag,
     max: i64,
 }
 

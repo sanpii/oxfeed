@@ -25,7 +25,7 @@ pub(crate) fn Component() -> yew::Html {
         yew::Callback::from(move |info: crate::components::form::register::Info| {
             let context = context.clone();
             let scene = scene.clone();
-            let user = oxfeed_common::account::Entity {
+            let user = oxfeed::account::Entity {
                 id: None,
                 password: info.password,
                 email: info.email,

@@ -11,13 +11,13 @@ async fn import(
     elephantry: Data<elephantry::Pool>,
     xml: actix_web::web::Json<String>,
     identity: crate::Identity,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     let token = identity.token(&elephantry)?;
 
     let user = elephantry
-        .model::<oxfeed_common::user::Model>()
+        .model::<oxfeed::user::Model>()
         .find_from_token(&token)
-        .ok_or(oxfeed_common::Error::Auth)?;
+        .ok_or(oxfeed::Error::Auth)?;
 
     let opml = opml::OPML::from_str(&xml.0).unwrap();
 
@@ -30,11 +30,7 @@ async fn import(
     Ok(response)
 }
 
-fn save(
-    elephantry: &elephantry::Pool,
-    outline: &opml::Outline,
-    user: &oxfeed_common::user::Entity,
-) {
+fn save(elephantry: &elephantry::Pool, outline: &opml::Outline, user: &oxfeed::user::Entity) {
     for outline in &outline.outlines {
         save(elephantry, outline, user);
     }
@@ -43,15 +39,15 @@ fn save(
         return;
     };
 
-    if let Err(error) = elephantry.insert_one::<oxfeed_common::source::Model>(&source) {
+    if let Err(error) = elephantry.insert_one::<oxfeed::source::Model>(&source) {
         log::error!("Unable to import outline '{}': {error}", source.title);
     }
 }
 
 fn source_try_from(
     outline: &opml::Outline,
-    user: &oxfeed_common::user::Entity,
-) -> Option<oxfeed_common::source::Entity> {
+    user: &oxfeed::user::Entity,
+) -> Option<oxfeed::source::Entity> {
     let url = match &outline.xml_url {
         Some(url) => url.clone(),
         None => return None,
@@ -63,7 +59,7 @@ fn source_try_from(
         tags.push(category.clone());
     }
 
-    let entity = oxfeed_common::source::Entity {
+    let entity = oxfeed::source::Entity {
         tags,
         title: outline.text.clone(),
         url,
@@ -76,9 +72,7 @@ fn source_try_from(
 }
 
 #[actix_web::get("")]
-async fn export(
-    elephantry: Data<elephantry::Pool>,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+async fn export(elephantry: Data<elephantry::Pool>) -> oxfeed::Result<actix_web::HttpResponse> {
     let mut opml = opml::OPML::default();
 
     let feeds = elephantry.query::<(String, String)>("select (title, url) from source", &[])?;

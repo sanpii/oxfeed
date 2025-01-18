@@ -38,7 +38,7 @@ impl std::ops::Not for Scene {
 
 #[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
-    pub value: oxfeed_common::item::Item,
+    pub value: oxfeed::item::Item,
 }
 
 #[yew::function_component]

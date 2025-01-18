@@ -88,7 +88,7 @@ pub(crate) fn Component() -> yew::Html {
                 yew::html! {
                     <li class="list-group-item">
                         <crate::components::form::Webhook
-                            webhook={ oxfeed_common::webhook::Entity::default() }
+                            webhook={ oxfeed::webhook::Entity::default() }
                             {on_cancel}
                             {on_submit}
                         />

@@ -1,7 +1,7 @@
 #[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
-    pub account: oxfeed_common::account::Entity,
-    pub on_save: yew::Callback<oxfeed_common::account::Entity>,
+    pub account: oxfeed::account::Entity,
+    pub on_save: yew::Callback<oxfeed::account::Entity>,
 }
 
 #[yew::function_component]

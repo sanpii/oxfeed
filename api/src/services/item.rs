@@ -1,5 +1,5 @@
 use actix_web::web::{Data, Json, Path};
-use oxfeed_common::item::Model;
+use oxfeed::item::Model;
 use std::collections::HashMap;
 
 pub(crate) fn scope() -> actix_web::Scope {
@@ -17,7 +17,7 @@ async fn all(
     elephantry: Data<elephantry::Pool>,
     pagination: actix_web::web::Query<elephantry_extras::Pagination>,
     identity: crate::Identity,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     fetch(
         &elephantry,
         &identity,
@@ -31,7 +31,7 @@ async fn favorites(
     elephantry: Data<elephantry::Pool>,
     pagination: actix_web::web::Query<elephantry_extras::Pagination>,
     identity: crate::Identity,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     fetch(
         &elephantry,
         &identity,
@@ -45,7 +45,7 @@ async fn unread(
     elephantry: Data<elephantry::Pool>,
     pagination: actix_web::web::Query<elephantry_extras::Pagination>,
     identity: crate::Identity,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     fetch(
         &elephantry,
         &identity,
@@ -59,7 +59,7 @@ pub(crate) fn fetch(
     identity: &crate::Identity,
     filter: &elephantry::Where,
     pagination: &elephantry_extras::Pagination,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     let token = identity.token(elephantry)?;
 
     let model = elephantry.model::<Model>();
@@ -74,14 +74,14 @@ async fn content(
     elephantry: Data<elephantry::Pool>,
     path: Path<uuid::Uuid>,
     identity: crate::Identity,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     let token = identity.token(&elephantry)?;
     let item_id = Some(path.into_inner());
     let sql = include_str!("../../sql/item_content.sql");
     let content = elephantry
         .query::<Option<String>>(sql, &[&item_id, &token])?
         .next()
-        .ok_or(oxfeed_common::Error::NotFound)?;
+        .ok_or(oxfeed::Error::NotFound)?;
 
     Ok(actix_web::HttpResponse::Ok().json(content.unwrap_or_default()))
 }
@@ -92,14 +92,14 @@ async fn patch(
     path: Path<uuid::Uuid>,
     json: Json<serde_json::Value>,
     identity: crate::Identity,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     let token = identity.token(&elephantry)?;
     let item_id = path.into_inner();
 
     elephantry
         .model::<Model>()
         .one(&token, &item_id)?
-        .ok_or(oxfeed_common::Error::NotFound)?;
+        .ok_or(oxfeed::Error::NotFound)?;
 
     let mut data = HashMap::new();
 
@@ -115,7 +115,7 @@ async fn patch(
     if !data.is_empty() {
         elephantry
             .update_by_pk::<Model>(&elephantry::pk!(item_id), &data)?
-            .ok_or(oxfeed_common::Error::NotFound)?;
+            .ok_or(oxfeed::Error::NotFound)?;
     }
 
     Ok(actix_web::HttpResponse::NoContent().finish())
@@ -125,7 +125,7 @@ async fn patch(
 async fn read_all(
     elephantry: Data<elephantry::Pool>,
     identity: crate::Identity,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     let token = identity.token(&elephantry)?;
     let sql = include_str!("../../sql/read_all.sql");
 

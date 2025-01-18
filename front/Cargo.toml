@@ -34,7 +34,7 @@ features = ["wasmbind"]
 workspace = true
 features = ["serde"]
 
-[dependencies.oxfeed-common]
+[dependencies.oxfeed]
 version = "0.1"
 features = ["front"]
 path = "../common/"

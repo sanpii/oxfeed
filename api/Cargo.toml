@@ -37,7 +37,7 @@ features = ["json"]
 workspace = true
 default-features = true
 
-[dependencies.oxfeed-common]
+[dependencies.oxfeed]
 version = "0.1"
 path = "../common/"
 features = ["back"]

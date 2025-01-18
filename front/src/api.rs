@@ -25,19 +25,15 @@ impl Api {
         wasm_cookies::delete("token");
     }
 
-    pub async fn counts() -> oxfeed_common::Result<oxfeed_common::Counts> {
+    pub async fn counts() -> oxfeed::Result<oxfeed::Counts> {
         Self::fetch(Method::GET, "/counts", ()).await
     }
 
-    pub async fn auth() -> oxfeed_common::Result<oxfeed_common::user::Entity> {
+    pub async fn auth() -> oxfeed::Result<oxfeed::user::Entity> {
         Self::fetch(Method::GET, "/auth", ()).await
     }
 
-    pub async fn auth_login(
-        email: &str,
-        password: &str,
-        remember_me: &bool,
-    ) -> oxfeed_common::Result {
+    pub async fn auth_login(email: &str, password: &str, remember_me: &bool) -> oxfeed::Result {
         use hmac::Mac;
         use jwt::SignWithKey;
 
@@ -57,7 +53,7 @@ impl Api {
     }
 
     #[allow(dependency_on_unit_never_type_fallback)]
-    pub async fn auth_logout() -> oxfeed_common::Result {
+    pub async fn auth_logout() -> oxfeed::Result {
         Self::fetch(Method::POST, "/auth/logout", ()).await?;
 
         Self::clear_token();
@@ -68,7 +64,7 @@ impl Api {
     pub async fn items_all(
         kind: &str,
         pagination: &elephantry_extras::Pagination,
-    ) -> oxfeed_common::Result<crate::Pager<oxfeed_common::item::Item>> {
+    ) -> oxfeed::Result<crate::Pager<oxfeed::item::Item>> {
         let kind = if kind == "all" {
             String::new()
         } else {
@@ -80,17 +76,17 @@ impl Api {
         Self::fetch(Method::GET, &url, ()).await
     }
 
-    pub async fn items_content(id: &uuid::Uuid) -> oxfeed_common::Result<String> {
+    pub async fn items_content(id: &uuid::Uuid) -> oxfeed::Result<String> {
         let url = format!("/items/{id}/content");
 
         Self::fetch(Method::GET, &url, ()).await
     }
 
-    pub async fn items_read() -> oxfeed_common::Result {
+    pub async fn items_read() -> oxfeed::Result {
         Self::fetch(Method::POST, "/items/read", ()).await
     }
 
-    pub async fn items_tag(id: &uuid::Uuid, key: &str, value: bool) -> oxfeed_common::Result {
+    pub async fn items_tag(id: &uuid::Uuid, key: &str, value: bool) -> oxfeed::Result {
         let url = format!("/items/{id}");
 
         let json = serde_json::json!({
@@ -104,7 +100,7 @@ impl Api {
         what: &str,
         filter: &crate::Filter,
         pagination: &elephantry_extras::Pagination,
-    ) -> oxfeed_common::Result<crate::Pager<oxfeed_common::item::Item>> {
+    ) -> oxfeed::Result<crate::Pager<oxfeed::item::Item>> {
         let url = format!(
             "/search/{what}?{}&{}",
             filter.to_url_param(),
@@ -114,41 +110,39 @@ impl Api {
         Self::fetch(Method::GET, &url, ()).await
     }
 
-    pub async fn opml_import(opml: String) -> oxfeed_common::Result {
+    pub async fn opml_import(opml: String) -> oxfeed::Result {
         Self::fetch(Method::POST, "/opml", opml).await
     }
 
     pub async fn sources_all(
         pagination: &elephantry_extras::Pagination,
-    ) -> oxfeed_common::Result<crate::Pager<oxfeed_common::source::Entity>> {
+    ) -> oxfeed::Result<crate::Pager<oxfeed::source::Entity>> {
         let url = format!("/sources?{}", pagination.to_query());
 
         Self::fetch(Method::GET, &url, ()).await
     }
 
     pub async fn sources_create(
-        source: &oxfeed_common::source::Entity,
-    ) -> oxfeed_common::Result<oxfeed_common::source::Entity> {
+        source: &oxfeed::source::Entity,
+    ) -> oxfeed::Result<oxfeed::source::Entity> {
         Self::fetch(Method::POST, "/sources", source).await
     }
 
     pub async fn sources_update(
         id: &uuid::Uuid,
-        source: &oxfeed_common::source::Entity,
-    ) -> oxfeed_common::Result<oxfeed_common::source::Entity> {
+        source: &oxfeed::source::Entity,
+    ) -> oxfeed::Result<oxfeed::source::Entity> {
         Self::fetch(Method::PUT, &format!("/sources/{id}"), source).await
     }
 
-    pub async fn sources_delete(
-        id: &uuid::Uuid,
-    ) -> oxfeed_common::Result<oxfeed_common::source::Entity> {
+    pub async fn sources_delete(id: &uuid::Uuid) -> oxfeed::Result<oxfeed::source::Entity> {
         Self::fetch(Method::DELETE, &format!("/sources/{id}"), ()).await
     }
 
     pub async fn sources_search(
         filter: &crate::Filter,
         pagination: &elephantry_extras::Pagination,
-    ) -> oxfeed_common::Result<crate::Pager<oxfeed_common::source::Entity>> {
+    ) -> oxfeed::Result<crate::Pager<oxfeed::source::Entity>> {
         let url = format!(
             "/search/sources?{}&{}",
             filter.to_url_param(),
@@ -160,7 +154,7 @@ impl Api {
 
     pub async fn tags_all(
         pagination: &elephantry_extras::Pagination,
-    ) -> oxfeed_common::Result<Vec<oxfeed_common::Tag>> {
+    ) -> oxfeed::Result<Vec<oxfeed::Tag>> {
         let url = format!("/tags?{}", pagination.to_query());
 
         Self::fetch(Method::GET, &url, ()).await
@@ -169,7 +163,7 @@ impl Api {
     pub async fn tags_search(
         filter: &crate::Filter,
         pagination: &elephantry_extras::Pagination,
-    ) -> oxfeed_common::Result<crate::Pager<String>> {
+    ) -> oxfeed::Result<crate::Pager<String>> {
         let url = format!(
             "/search/tags?{}&{}",
             filter.to_url_param(),
@@ -179,48 +173,46 @@ impl Api {
         Self::fetch(Method::GET, &url, ()).await
     }
 
-    pub async fn tags_rename(tag: &str, name: &str) -> oxfeed_common::Result {
+    pub async fn tags_rename(tag: &str, name: &str) -> oxfeed::Result {
         let url = format!("/tags/{tag}");
 
         Self::fetch(Method::POST, &url, name).await
     }
 
-    pub async fn account_create(user: &oxfeed_common::account::Entity) -> oxfeed_common::Result {
+    pub async fn account_create(user: &oxfeed::account::Entity) -> oxfeed::Result {
         Self::fetch(Method::POST, "/account", user).await
     }
 
-    pub async fn account_delete() -> oxfeed_common::Result {
+    pub async fn account_delete() -> oxfeed::Result {
         Self::fetch(Method::DELETE, "/account", ()).await
     }
 
-    pub async fn account_update(account: &oxfeed_common::account::Entity) -> oxfeed_common::Result {
+    pub async fn account_update(account: &oxfeed::account::Entity) -> oxfeed::Result {
         Self::fetch(Method::PUT, "/account", account).await
     }
 
-    pub async fn webhooks_all() -> oxfeed_common::Result<Vec<oxfeed_common::webhook::Entity>> {
+    pub async fn webhooks_all() -> oxfeed::Result<Vec<oxfeed::webhook::Entity>> {
         Self::fetch(Method::GET, "/webhooks", ()).await
     }
 
     pub async fn webhooks_create(
-        webhook: &oxfeed_common::webhook::Entity,
-    ) -> oxfeed_common::Result<oxfeed_common::webhook::Entity> {
+        webhook: &oxfeed::webhook::Entity,
+    ) -> oxfeed::Result<oxfeed::webhook::Entity> {
         Self::fetch(Method::POST, "/webhooks", webhook).await
     }
 
     pub async fn webhooks_update(
         id: &uuid::Uuid,
-        webhook: &oxfeed_common::webhook::Entity,
-    ) -> oxfeed_common::Result<oxfeed_common::webhook::Entity> {
+        webhook: &oxfeed::webhook::Entity,
+    ) -> oxfeed::Result<oxfeed::webhook::Entity> {
         Self::fetch(Method::PUT, &format!("/webhooks/{id}"), webhook).await
     }
 
-    pub async fn webhooks_delete(
-        id: &uuid::Uuid,
-    ) -> oxfeed_common::Result<oxfeed_common::webhook::Entity> {
+    pub async fn webhooks_delete(id: &uuid::Uuid) -> oxfeed::Result<oxfeed::webhook::Entity> {
         Self::fetch(Method::DELETE, &format!("/webhooks/{id}"), ()).await
     }
 
-    async fn fetch<B, R>(method: Method, url: &str, body: B) -> oxfeed_common::Result<R>
+    async fn fetch<B, R>(method: Method, url: &str, body: B) -> oxfeed::Result<R>
     where
         B: Into<Body>,
         R: serde::de::DeserializeOwned,
@@ -239,13 +231,13 @@ impl Api {
         if status.is_server_error() {
             let error = response.text().await?;
 
-            return Err(oxfeed_common::Error::Api(error));
+            return Err(oxfeed::Error::Api(error));
         }
 
         match status {
-            reqwest::StatusCode::UNAUTHORIZED => Err(oxfeed_common::Error::Auth),
+            reqwest::StatusCode::UNAUTHORIZED => Err(oxfeed::Error::Auth),
             reqwest::StatusCode::NO_CONTENT => serde_json::from_str("null").map_err(Into::into),
-            reqwest::StatusCode::FORBIDDEN => Err(oxfeed_common::Error::InvalidLogin),
+            reqwest::StatusCode::FORBIDDEN => Err(oxfeed::Error::InvalidLogin),
             _ => {
                 let data = response.json().await?;
 
@@ -299,6 +291,6 @@ macro_rules! body_impl {
     };
 }
 
-body_impl!(oxfeed_common::account::Entity);
-body_impl!(oxfeed_common::source::Entity);
-body_impl!(oxfeed_common::webhook::Entity);
+body_impl!(oxfeed::account::Entity);
+body_impl!(oxfeed::source::Entity);
+body_impl!(oxfeed::webhook::Entity);

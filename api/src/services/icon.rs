@@ -8,7 +8,7 @@ pub(crate) fn scope() -> actix_web::Scope {
 }
 
 #[actix_web::get("/{url:.*}")]
-async fn icon(url: actix_web::web::Path<String>) -> oxfeed_common::Result<actix_web::HttpResponse> {
+async fn icon(url: actix_web::web::Path<String>) -> oxfeed::Result<actix_web::HttpResponse> {
     use base64::Engine;
 
     let url = base64::engine::general_purpose::STANDARD.decode(url.into_inner())?;

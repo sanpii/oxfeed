@@ -1,4 +1,4 @@
-use oxfeed_common::webhook::Model;
+use oxfeed::webhook::Model;
 
 pub(crate) fn scope() -> actix_web::Scope {
     actix_web::web::scope("/webhooks")
@@ -12,7 +12,7 @@ pub(crate) fn scope() -> actix_web::Scope {
 async fn all(
     elephantry: actix_web::web::Data<elephantry::Pool>,
     identity: crate::Identity,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     let token = identity.token(&elephantry)?;
     let model = elephantry.model::<Model>();
     let items = model.all(&token)?;
@@ -26,15 +26,15 @@ async fn create(
     elephantry: actix_web::web::Data<elephantry::Pool>,
     mut data: actix_web::web::Json<crate::form::Webhook>,
     identity: crate::Identity,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     use std::convert::TryInto;
 
     let token = identity.token(&elephantry)?;
 
     let user = elephantry
-        .model::<oxfeed_common::user::Model>()
+        .model::<oxfeed::user::Model>()
         .find_from_token(&token)
-        .ok_or(oxfeed_common::Error::Auth)?;
+        .ok_or(oxfeed::Error::Auth)?;
 
     data.user_id = Some(user.id);
     let webhook = elephantry.insert_one::<Model>(&data.into_inner().try_into()?)?;
@@ -48,7 +48,7 @@ async fn delete(
     elephantry: actix_web::web::Data<elephantry::Pool>,
     path: actix_web::web::Path<uuid::Uuid>,
     identity: crate::Identity,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     let webhook_id = path.into_inner();
     let token = identity.token(&elephantry)?;
     let response = match elephantry.model::<Model>().delete(&token, &webhook_id)? {
@@ -65,22 +65,22 @@ async fn update(
     mut data: actix_web::web::Json<crate::form::Webhook>,
     path: actix_web::web::Path<uuid::Uuid>,
     identity: crate::Identity,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     use std::convert::TryInto;
 
     let token = identity.token(&elephantry)?;
 
     let user = elephantry
-        .model::<oxfeed_common::user::Model>()
+        .model::<oxfeed::user::Model>()
         .find_from_token(&token)
-        .ok_or(oxfeed_common::Error::Auth)?;
+        .ok_or(oxfeed::Error::Auth)?;
 
     data.user_id = Some(user.id);
     let webhook_id = Some(path.into_inner());
     let pk = elephantry::pk!(webhook_id);
     let webhook = elephantry
         .update_one::<Model>(&pk, &data.into_inner().try_into()?)?
-        .ok_or(oxfeed_common::Error::NotFound)?;
+        .ok_or(oxfeed::Error::NotFound)?;
 
     Ok(actix_web::HttpResponse::Ok().json(webhook))
 }

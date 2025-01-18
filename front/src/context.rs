@@ -2,7 +2,7 @@
 pub(crate) struct Context {
     pub auth: bool,
     pub alerts: Vec<crate::Alert>,
-    pub counts: oxfeed_common::Counts,
+    pub counts: oxfeed::Counts,
     pub need_update: usize,
     pub websocket_error: bool,
     pub route: String,
@@ -13,7 +13,7 @@ impl Default for Context {
         Self {
             auth: !crate::Api::token().is_empty(),
             alerts: Vec::new(),
-            counts: oxfeed_common::Counts::default(),
+            counts: oxfeed::Counts::default(),
             need_update: 0,
             websocket_error: false,
             route: crate::Location::new().path(),

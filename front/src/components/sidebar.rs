@@ -66,7 +66,7 @@ impl Links {
         self.0.len() != Self::new().0.len()
     }
 
-    fn update_count(&mut self, counts: &oxfeed_common::Counts) {
+    fn update_count(&mut self, counts: &oxfeed::Counts) {
         self.0[0].count = counts.all;
         self.0[1].count = counts.unread;
         self.0[2].count = counts.favorites;
@@ -107,7 +107,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let context = crate::use_context();
     let current_route = yew::use_memo(props.clone(), |props| props.current_route.clone());
     let need_update = yew::use_memo(context.clone(), |context| context.need_update);
-    let counts = yew::use_state(oxfeed_common::Counts::default);
+    let counts = yew::use_state(oxfeed::Counts::default);
 
     {
         let context = context.clone();

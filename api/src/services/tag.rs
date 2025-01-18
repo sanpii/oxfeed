@@ -7,7 +7,7 @@ async fn all(
     elephantry: actix_web::web::Data<elephantry::Pool>,
     pagination: actix_web::web::Query<elephantry_extras::Pagination>,
     identity: crate::Identity,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     let token = identity.token(&elephantry)?;
 
     let mut clause = elephantry::Where::new();
@@ -28,7 +28,7 @@ select unnest(tags) as name, count(*) as count
         pagination.to_sql(),
     );
 
-    let rows = elephantry.query::<oxfeed_common::Tag>(&query, &params)?;
+    let rows = elephantry.query::<oxfeed::Tag>(&query, &params)?;
 
     let response = actix_web::HttpResponse::Ok().json(rows);
 
@@ -41,12 +41,12 @@ async fn rename(
     identity: crate::Identity,
     tag: actix_web::web::Path<String>,
     actix_web::web::Json(name): actix_web::web::Json<String>,
-) -> oxfeed_common::Result<actix_web::HttpResponse> {
+) -> oxfeed::Result<actix_web::HttpResponse> {
     let token = identity.token(&elephantry)?;
 
     let query = include_str!("../../sql/rename_tag.sql");
 
-    elephantry.query::<oxfeed_common::Tag>(query, &[&tag.into_inner(), &name, &token])?;
+    elephantry.query::<oxfeed::Tag>(query, &[&tag.into_inner(), &name, &token])?;
 
     Ok(actix_web::HttpResponse::NoContent().finish())
 }

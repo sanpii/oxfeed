@@ -15,8 +15,8 @@ impl From<crate::Alert> for Action {
     }
 }
 
-impl From<oxfeed_common::Error> for Action {
-    fn from(value: oxfeed_common::Error) -> Self {
+impl From<oxfeed::Error> for Action {
+    fn from(value: oxfeed::Error) -> Self {
         Self::AddAlert(value.into())
     }
 }

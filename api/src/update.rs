@@ -1,11 +1,11 @@
-use oxfeed_common::item::Entity as Item;
-use oxfeed_common::item::Model as ItemModel;
-use oxfeed_common::media::Entity as Media;
-use oxfeed_common::media::Model as MediaModel;
-use oxfeed_common::source::Entity as Source;
-use oxfeed_common::source::Model as SourceModel;
-use oxfeed_common::webhook::Entity as Webhook;
-use oxfeed_common::webhook::Model as WebhookModel;
+use oxfeed::item::Entity as Item;
+use oxfeed::item::Model as ItemModel;
+use oxfeed::media::Entity as Media;
+use oxfeed::media::Model as MediaModel;
+use oxfeed::source::Entity as Source;
+use oxfeed::source::Model as SourceModel;
+use oxfeed::webhook::Entity as Webhook;
+use oxfeed::webhook::Model as WebhookModel;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 pub(crate) struct Actor {
@@ -68,7 +68,7 @@ impl actix::Handler<Signal> for Actor {
 struct Task;
 
 impl Task {
-    fn run(elephantry: &elephantry::Connection) -> oxfeed_common::Result {
+    fn run(elephantry: &elephantry::Connection) -> oxfeed::Result {
         let sources = elephantry
             .find_where::<SourceModel>("active", &[], None)?
             .collect::<Vec<_>>();
@@ -95,7 +95,7 @@ impl Task {
         Ok(())
     }
 
-    fn fetch(elephantry: &elephantry::Connection, source: &Source) -> oxfeed_common::Result {
+    fn fetch(elephantry: &elephantry::Connection, source: &Source) -> oxfeed::Result {
         log::info!("Fetching {}", source.url);
 
         let webhooks = elephantry
@@ -158,7 +158,7 @@ impl Task {
         elephantry: &elephantry::Connection,
         item: &Item,
         medias: &[feed_rs::model::MediaContent],
-    ) -> oxfeed_common::Result {
+    ) -> oxfeed::Result {
         for media in medias {
             let Some(content_type) = media.content_type.as_ref().map(ToString::to_string) else {
                 continue;
@@ -235,7 +235,7 @@ impl Task {
         read
     }
 
-    fn call_webhook(webhook: &Webhook, item: &Item) -> oxfeed_common::Result {
+    fn call_webhook(webhook: &Webhook, item: &Item) -> oxfeed::Result {
         log::info!("call webhook '{}'", webhook.name);
 
         let response = attohttpc::RequestBuilder::try_new(attohttpc::Method::POST, &webhook.url)?
@@ -251,7 +251,7 @@ impl Task {
                 response.status(),
                 response.text().unwrap_or_default(),
             );
-            Err(oxfeed_common::Error::Webhook(error))
+            Err(oxfeed::Error::Webhook(error))
         }
     }
 }

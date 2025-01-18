@@ -96,7 +96,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             <ul class="list-group">
                 <li class="list-group-item">
                     <super::form::Source
-                        source={ oxfeed_common::source::Entity::default() }
+                        source={ oxfeed::source::Entity::default() }
                         {on_cancel}
                         {on_submit}
                     />
