@@ -1,4 +1,5 @@
 pub(crate) mod auth;
+pub(crate) mod favicon;
 pub(crate) mod icon;
 pub(crate) mod item;
 pub(crate) mod opml;

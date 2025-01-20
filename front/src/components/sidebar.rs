@@ -137,20 +137,20 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
         links
     });
-    let unread = yew::use_memo(counts.clone(), |counts| counts.unread > 0);
 
-    let favicon = yew::use_memo((context.clone(), unread), |deps| {
+    let favicon = yew::use_memo((context.clone(), counts), |deps| {
         if deps.0.websocket_error {
-            "/favicon-error.ico"
-        } else if *deps.1 {
-            "/favicon-unread.ico"
+            "error.svg".to_string()
+        } else if deps.1.unread > 0 {
+            format!("unread-{}.svg", deps.1.unread)
         } else {
-            "/favicon.ico"
+            "default.svg".to_string()
         }
     });
 
     if let Ok(Some(element)) = gloo::utils::document().query_selector("link[rel=icon]") {
-        element.set_attribute("href", *favicon).ok();
+        let href = format!("{}/favicon/{favicon}", env!("API_URL"));
+        element.set_attribute("href", &href).ok();
     }
 
     let read_all = {

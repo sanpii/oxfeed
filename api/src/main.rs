@@ -51,6 +51,7 @@ async fn main() -> oxfeed::Result {
             .app_data(actix_web::web::Data::new(elephantry.clone()))
             .wrap(cors)
             .service(services::auth::scope())
+            .service(services::favicon::scope())
             .service(services::icon::scope())
             .service(services::item::scope())
             .service(services::opml::scope())
