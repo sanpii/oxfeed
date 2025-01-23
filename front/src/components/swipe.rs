@@ -27,10 +27,16 @@ impl Action {
             self.inactive_icon()
         };
 
+        let bg = if delta.abs() > 0.5 {
+            format!("background-color: color-mix(in srgb, var({}) 50%, transparent)", self.color)
+        } else {
+            String::new()
+        };
+
         yew::html! {
             <div
                 class={ yew::classes!("action", position.to_string()) }
-                style={ format!("color: var({color}); background-color: color-mix(in srgb, var({color}) 50%, transparent)", color=self.color) }
+                style={ format!("color: var({}); {bg}", self.color) }
             >
                 <super::Svg {icon} size=24 />
             </div>

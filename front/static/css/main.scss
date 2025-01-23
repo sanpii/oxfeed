@@ -350,6 +350,7 @@ li.list-group-item {
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: background-color 1s ease;
 
         svg {
             position: sticky;
