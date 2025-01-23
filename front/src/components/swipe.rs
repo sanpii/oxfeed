@@ -28,7 +28,10 @@ impl Action {
         };
 
         let bg = if delta.abs() > 0.5 {
-            format!("background-color: color-mix(in srgb, var({}) 50%, transparent)", self.color)
+            format!(
+                "background-color: color-mix(in srgb, var({}) 50%, transparent)",
+                self.color
+            )
         } else {
             String::new()
         };
