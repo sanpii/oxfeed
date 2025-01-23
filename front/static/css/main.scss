@@ -322,6 +322,13 @@ li.list-group-item {
 
     svg {
         margin-right: 2rem;
+
+    }
+
+    @media (max-width: 768px ) /* md */ {
+        svg {
+            max-width: 168px;
+        }
     }
 }
 
