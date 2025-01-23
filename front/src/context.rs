@@ -35,7 +35,10 @@ impl yew::Reducible for Context {
                 context.alerts.remove(idx);
             }
             Logged => context.auth = true,
-            AuthRequire => context.auth = false,
+            AuthRequire => {
+                context.auth = false;
+                context.websocket_error = false;
+            }
             NeedUpdate => context.need_update = context.need_update.overflowing_add(1).0,
             WebsocketError => context.websocket_error = true,
             Route(route) => {
