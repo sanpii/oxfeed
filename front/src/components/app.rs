@@ -23,10 +23,29 @@ pub(crate) enum Route {
 
 #[yew::function_component]
 pub(crate) fn Component() -> yew::Html {
+    use wasm_bindgen::JsCast as _;
+
     let context = yew::use_reducer(crate::Context::default);
     let auth = yew::use_memo(context.clone(), |context| context.auth);
 
     let _ = yew::use_state(|| websocket(context.clone()));
+
+    let on_visibility_change = {
+        let context = context.clone();
+
+        yew::use_state(move || {
+            wasm_bindgen::closure::Closure::<dyn Fn()>::wrap(Box::new(move || {
+                let document = gloo::utils::document();
+
+                if document.visibility_state() == web_sys::VisibilityState::Visible {
+                    context.dispatch(crate::Action::NeedUpdate);
+                }
+            }))
+        })
+    };
+
+    let document = gloo::utils::document();
+    document.set_onvisibilitychange((*on_visibility_change).as_ref().dyn_ref());
 
     yew::html! {
         <yew::ContextProvider<yew::UseReducerHandle<crate::Context>> {context}>
