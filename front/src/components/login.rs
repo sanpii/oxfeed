@@ -62,7 +62,7 @@ pub(crate) fn Component() -> yew::Html {
         Scene::Login => yew::html! {
             <div class="login">
                 <form>
-                    <img class="mb-4" src="/logo.png" alt="" width="72px" height="72px" />
+                    <super::Svg icon="rss" size=72 />
                     <h1 class="h3 mb-3 fw-normal">{ "Please sign in" }</h1>
                     <super::Alerts />
                     <super::form::Login on_submit={ on_login } />
@@ -74,7 +74,7 @@ pub(crate) fn Component() -> yew::Html {
         Scene::Register => yew::html! {
             <div class="login">
                 <form>
-                    <img class="mb-4" src="/logo" alt="" width="72px" height="72px" />
+                    <super::Svg icon="rss" size=72 />
                     <h1 class="h3 mb-3 fw-normal">{ "Register" }</h1>
                     <super::Alerts />
                     <super::form::Register on_submit={ on_create } />
