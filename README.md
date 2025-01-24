@@ -1,6 +1,6 @@
 # OxFeed
 
-[![Github actions](https://github.com/sanpii/oxfeed/workflows/.github/workflows/ci.yml/badge.svg)](https://github.com/sanpii/oxfeed/actions?query=workflow%3A.github%2Fworkflows%2Fci.yml)
+[![Github actions](https://github.com/sanpii/oxfeed/actions/workflows/ci.yml/badge.svg)](https://github.com/sanpii/oxfeed/actions?query=workflow%3A.github%2Fworkflows%2Fci.yml)
 [![pipeline status](https://gitlab.com/sanpi/oxfeed/badges/main/pipeline.svg)](https://gitlab.com/sanpi/oxfeed/-/commits/main)
 
 Feed reader.
