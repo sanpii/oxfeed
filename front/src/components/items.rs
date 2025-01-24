@@ -40,18 +40,14 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         );
     }
 
-    let on_page_change = {
-        let pagination = pagination.clone();
+    let on_page_change = yew_callback::callback!(pagination, move |page| {
+        pagination.set(elephantry_extras::Pagination {
+            page,
+            ..*pagination
+        });
 
-        yew::Callback::from(move |page| {
-            pagination.set(elephantry_extras::Pagination {
-                page,
-                ..*pagination
-            });
-
-            gloo::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
-        })
-    };
+        gloo::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
+    });
 
     let Some(pager) = (*pager).clone() else {
         return yew::html! { <super::Empty /> };

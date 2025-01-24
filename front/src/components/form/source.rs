@@ -30,32 +30,23 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
     let edit_title = crate::components::edit_cb(title.clone());
     let edit_url = crate::components::edit_cb(url.clone());
-    let toggle_active = {
-        let active = active.clone();
+    let toggle_active = yew_callback::callback!(active, move |value| {
+        active.set(value);
+    });
 
-        yew::Callback::from(move |value| {
-            active.set(value);
-        })
-    };
+    let on_cancel = yew_callback::callback!(on_cancel = props.on_cancel, move |_| {
+        on_cancel.emit(());
+    });
 
-    let on_cancel = {
-        let on_cancel = props.on_cancel.clone();
-
-        yew::Callback::from(move |_| {
-            on_cancel.emit(());
-        })
-    };
-
-    let on_submit = {
-        let active = active.clone();
-        let on_submit = props.on_submit.clone();
-        let title = title.clone();
-        let url = url.clone();
-        let source = props.source.clone();
-        let tags = tags.clone();
-        let webhooks = webhooks.clone();
-
-        yew::Callback::from(move |_| {
+    let on_submit = yew_callback::callback!(
+        active,
+        on_submit = props.on_submit,
+        title,
+        url,
+        source = props.source,
+        tags,
+        webhooks,
+        move |_| {
             let mut source = source.clone();
 
             source.active = *active;
@@ -65,8 +56,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             source.webhooks = (*webhooks).clone().into_inner();
 
             on_submit.emit(source);
-        })
-    };
+        }
+    );
 
     yew::html! {
         <form>
@@ -101,7 +92,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 <div class="col-sm-11">
                     <super::Tags
                         values={ (*tags).clone() }
-                        on_change={ yew::Callback::from(move |value| tags.set(value)) }
+                        on_change={ yew_callback::callback!(move |value| tags.set(value)) }
                     />
                 </div>
             </div>
@@ -136,15 +127,15 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                                             label={ webhook.name.clone() }
                                             active={ active }
                                             on_toggle={
-                                                let webhooks = webhooks.clone();
-
-                                                yew::Callback::from(move |active| if active {
-                                                    if !webhooks.borrow().contains(&id) {
-                                                        webhooks.borrow_mut().push(id);
+                                                yew_callback::callback!(webhooks,
+                                                    move |active| if active {
+                                                        if !webhooks.borrow().contains(&id) {
+                                                            webhooks.borrow_mut().push(id);
+                                                        }
+                                                    } else {
+                                                        webhooks.borrow_mut().retain(|x| x != &id);
                                                     }
-                                                } else {
-                                                    webhooks.borrow_mut().retain(|x| x != &id);
-                                                })
+                                                )
                                             }
                                         />
                                     }

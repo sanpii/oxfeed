@@ -73,28 +73,21 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let on_favorite = toggle!(favorite, item, context);
     let on_read = toggle!(read, item, context);
 
-    let toggle_content = {
-        let content = content.clone();
-        let context = context.clone();
-        let item = item.clone();
-        let scene = scene.clone();
+    let toggle_content = yew_callback::callback!(content, context, item, scene, move |_| {
+        scene.set(!*scene);
 
-        yew::Callback::from(move |_| {
-            scene.set(!*scene);
+        if content.is_none() {
+            let content = content.clone();
+            let context = context.clone();
+            let item = item.clone();
 
-            if content.is_none() {
-                let content = content.clone();
-                let context = context.clone();
-                let item = item.clone();
+            wasm_bindgen_futures::spawn_local(async move {
+                let item_id = &item.id;
 
-                wasm_bindgen_futures::spawn_local(async move {
-                    let item_id = &item.id;
-
-                    content.set(Some(crate::api::call!(context, items_content, item_id)));
-                });
-            }
-        })
-    };
+                content.set(Some(crate::api::call!(context, items_content, item_id)));
+            });
+        }
+    });
 
     yew::html! {
         <>

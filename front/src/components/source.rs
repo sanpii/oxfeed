@@ -16,49 +16,35 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let source = yew::use_state(|| props.value.clone());
     let scene = yew::use_state(Scene::default);
 
-    let on_cancel = {
-        let scene = scene.clone();
+    let on_cancel = yew_callback::callback!(scene, move |_| {
+        scene.set(Scene::View);
+    });
 
-        yew::Callback::from(move |_| {
-            scene.set(Scene::View);
-        })
-    };
+    let on_delete = yew_callback::callback!(source, context, move |_| {
+        let message = format!("Would you like delete '{}' source?", source.title);
 
-    let on_delete = {
-        let source = source.clone();
-        let context = context.clone();
+        if gloo::dialogs::confirm(&message) {
+            let source = source.clone();
+            let context = context.clone();
 
-        yew::Callback::from(move |_| {
-            let message = format!("Would you like delete '{}' source?", source.title);
+            wasm_bindgen_futures::spawn_local(async move {
+                let id = source.id.unwrap();
 
-            if gloo::dialogs::confirm(&message) {
-                let source = source.clone();
-                let context = context.clone();
+                crate::api::call!(context, sources_delete, &id);
+                context.dispatch(crate::Action::NeedUpdate);
+            });
+        }
+    });
 
-                wasm_bindgen_futures::spawn_local(async move {
-                    let id = source.id.unwrap();
+    let on_edit = yew_callback::callback!(scene, move |_| {
+        scene.set(Scene::Edit);
+    });
 
-                    crate::api::call!(context, sources_delete, &id);
-                    context.dispatch(crate::Action::NeedUpdate);
-                });
-            }
-        })
-    };
-
-    let on_edit = {
-        let scene = scene.clone();
-
-        yew::Callback::from(move |_| {
-            scene.set(Scene::Edit);
-        })
-    };
-
-    let on_submit = {
-        let context = context.clone();
-        let scene = scene.clone();
-        let source = source.clone();
-
-        yew::Callback::from(move |new_source: oxfeed::source::Entity| {
+    let on_submit = yew_callback::callback!(
+        context,
+        scene,
+        source,
+        move |new_source: oxfeed::source::Entity| {
             let context = context.clone();
             let scene = scene.clone();
             let source = source.clone();
@@ -70,20 +56,15 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 source.set(new_source);
                 scene.set(Scene::View);
             });
-        })
-    };
+        }
+    );
 
-    let on_toggle = {
-        let source = source.clone();
-        let on_submit = on_submit.clone();
+    let on_toggle = yew_callback::callback!(source, on_submit, move |active| {
+        let mut new_source = (*source).clone();
 
-        yew::Callback::from(move |active| {
-            let mut new_source = (*source).clone();
-
-            new_source.active = active;
-            on_submit.emit(new_source);
-        })
-    };
+        new_source.active = active;
+        on_submit.emit(new_source);
+    });
 
     let source = (*source).clone();
 

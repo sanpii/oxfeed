@@ -150,17 +150,13 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         element.set_attribute("href", &href).ok();
     }
 
-    let read_all = {
+    let read_all = yew_callback::callback!(context, move |_| {
         let context = context.clone();
 
-        yew::Callback::from(move |_| {
-            let context = context.clone();
-
-            wasm_bindgen_futures::spawn_local(async move {
-                crate::api::call!(context, items_read);
-            });
-        })
-    };
+        wasm_bindgen_futures::spawn_local(async move {
+            crate::api::call!(context, items_read);
+        });
+    });
 
     yew::html! {
         <>

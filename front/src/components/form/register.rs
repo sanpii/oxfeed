@@ -16,19 +16,14 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let edit_email = crate::components::edit_cb(email.clone());
     let edit_password = crate::components::edit_cb(password.clone());
 
-    let on_submit = {
-        let email = email.clone();
-        let password = password.clone();
-        let on_submit = props.on_submit.clone();
-
-        yew::Callback::from(move |_| {
+    let on_submit =
+        yew_callback::callback!(email, password, on_submit = props.on_submit, move |_| {
             let info = Info {
                 email: (*email).clone(),
                 password: (*password).clone(),
             };
             on_submit.emit(info);
-        })
-    };
+        });
 
     yew::html! {
         <>

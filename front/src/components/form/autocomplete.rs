@@ -16,27 +16,15 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let terms = yew::use_state(Vec::new);
     let value = yew::use_state(String::new);
 
-    let select = {
-        let active = active.clone();
-        let on_select = on_select.clone();
-        let terms = terms.clone();
-        let value = value.clone();
+    let select = yew_callback::callback!(active, on_select, terms, value, move |selected| {
+        on_select.emit(selected);
+        active.set(None);
+        terms.set(Vec::new());
+        value.set(String::new());
+    });
 
-        yew::Callback::from(move |selected| {
-            on_select.emit(selected);
-            active.set(None);
-            terms.set(Vec::new());
-            value.set(String::new());
-        })
-    };
-
-    let on_input = {
-        let active = active.clone();
-        let context = context.clone();
-        let terms = terms.clone();
-        let value = value.clone();
-
-        yew::Callback::from(move |e: yew::InputEvent| {
+    let on_input =
+        yew_callback::callback!(active, context, terms, value, move |e: yew::InputEvent| {
             use yew::TargetCast as _;
 
             let context = context.clone();
@@ -57,16 +45,14 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     terms.set(pager.iterator);
                 });
             }
-        })
-    };
+        });
 
-    let on_keydown = {
-        let active = active.clone();
-        let select = select.clone();
-        let terms = terms.clone();
-        let value = value.clone();
-
-        yew::Callback::from(move |e: yew::KeyboardEvent| {
+    let on_keydown = yew_callback::callback!(
+        active,
+        select,
+        terms,
+        value,
+        move |e: yew::KeyboardEvent| {
             match e.key().as_str() {
                 "ArrowDown" => {
                     let new_value = if let Some(active) = *active {
@@ -104,8 +90,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 }
                 _ => (),
             };
-        })
-    };
+        }
+    );
 
     yew::html! {
         <div class="autocomplete">
@@ -131,7 +117,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                                 yew::html! {
                                     <div
                                         class={ yew::classes!("list-group-item", "list-group-item-action", if (*active) == Some(idx) { "active" } else { "" }) }
-                                        onclick={ yew::Callback::from(move |_| { select.emit(terms[idx].clone()); }) }
+                                        onclick={ yew_callback::callback!(move |_| { select.emit(terms[idx].clone()); }) }
                                     >{ term }</div>
                                 }
                             })

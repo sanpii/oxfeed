@@ -59,42 +59,28 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let start = yew::use_state(|| 0);
     let delta = yew::use_state(|| 0.);
 
-    let ontouchstart = {
-        let start = start.clone();
+    let ontouchstart = yew_callback::callback!(start, move |e: web_sys::TouchEvent| {
+        start.set(e.touches().get(0).unwrap().client_x());
+    });
 
-        yew::Callback::from(move |e: web_sys::TouchEvent| {
-            start.set(e.touches().get(0).unwrap().client_x());
-        })
-    };
+    let ontouchmove = yew_callback::callback!(delta, start, move |e: web_sys::TouchEvent| {
+        use wasm_bindgen::JsCast as _;
 
-    let ontouchmove = {
-        let delta = delta.clone();
-        let start = start.clone();
+        let container = e.target().unwrap().unchecked_into::<web_sys::Element>();
+        let client_x = e.touches().get(0).unwrap().client_x();
+        delta.set((*start - client_x) as f32 / container.client_width() as f32);
+    });
 
-        yew::Callback::from(move |e: web_sys::TouchEvent| {
-            use wasm_bindgen::JsCast as _;
+    let ontouchend = yew_callback::callback!(delta, props, move |_| {
+        if *delta < -0.5 {
+            props.action_start.emit();
+        } else if *delta > 0.5 {
+            props.action_end.emit();
+        }
 
-            let container = e.target().unwrap().unchecked_into::<web_sys::Element>();
-            let client_x = e.touches().get(0).unwrap().client_x();
-            delta.set((*start - client_x) as f32 / container.client_width() as f32);
-        })
-    };
-
-    let ontouchend = {
-        let delta = delta.clone();
-        let props = props.clone();
-
-        yew::Callback::from(move |_| {
-            if *delta < -0.5 {
-                props.action_start.emit();
-            } else if *delta > 0.5 {
-                props.action_end.emit();
-            }
-
-            start.set(0);
-            delta.set(0.);
-        })
-    };
+        start.set(0);
+        delta.set(0.);
+    });
 
     yew::html! {
         <>

@@ -18,12 +18,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let scene = yew::use_state(Scene::default);
     let value = yew::use_state(|| props.value.clone());
 
-    let on_delete = {
-        let context = context.clone();
-        let on_delete = props.on_delete.clone();
-        let value = value.clone();
-
-        yew::Callback::from(move |_| {
+    let on_delete =
+        yew_callback::callback!(context, on_delete = props.on_delete, value, move |_| {
             let context = context.clone();
             let message = format!("Would you like delete '{}' webhook?", value.name);
 
@@ -35,15 +31,13 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
                 on_delete.emit(());
             }
-        })
-    };
+        });
 
-    let save = {
-        let context = context.clone();
-        let scene = scene.clone();
-        let value = value.clone();
-
-        yew::Callback::from(move |webhook: oxfeed::webhook::Entity| {
+    let save = yew_callback::callback!(
+        context,
+        scene,
+        value,
+        move |webhook: oxfeed::webhook::Entity| {
             let context = context.clone();
 
             let id = webhook.id.unwrap();
@@ -54,14 +48,14 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             });
 
             scene.set(Scene::View);
-        })
-    };
+        }
+    );
 
     match *scene {
         Scene::Edit => yew::html! {
             <super::form::Webhook
                 webhook={ (*value).clone() }
-                on_cancel={ yew::Callback::from(move |_| scene.set(Scene::View)) }
+                on_cancel={ yew_callback::callback!(move |_| scene.set(Scene::View)) }
                 on_submit={ save }
             />
         },
@@ -88,7 +82,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         <button
                             class={ yew::classes!("btn", "btn-primary") }
                             title="Edit"
-                            onclick={ yew::Callback::from(move |_| scene.set(Scene::Edit)) }
+                            onclick={ yew_callback::callback!(move |_| scene.set(Scene::Edit)) }
                         >
                             <super::Svg icon="pencil-square" size=16 />
                         </button>

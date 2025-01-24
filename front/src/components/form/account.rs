@@ -8,36 +8,23 @@ pub(crate) struct Properties {
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let account = yew::use_mut_ref(|| props.account.clone());
 
-    let on_save = {
-        let account = account.clone();
-        let on_save = props.on_save.clone();
+    let on_save = yew_callback::callback!(account, on_save = props.on_save, move |_| {
+        on_save.emit(account.borrow().clone());
+    });
 
-        yew::Callback::from(move |_| {
-            on_save.emit(account.borrow().clone());
-        })
-    };
+    let edit_email = yew_callback::callback!(account, move |e: yew::InputEvent| {
+        use yew::TargetCast;
 
-    let edit_email = {
-        let account = account.clone();
+        let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
+        account.borrow_mut().email = input.value();
+    });
 
-        yew::Callback::from(move |e: yew::InputEvent| {
-            use yew::TargetCast;
+    let edit_password = yew_callback::callback!(account, move |e: yew::InputEvent| {
+        use yew::TargetCast;
 
-            let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
-            account.borrow_mut().email = input.value();
-        })
-    };
-
-    let edit_password = {
-        let account = account.clone();
-
-        yew::Callback::from(move |e: yew::InputEvent| {
-            use yew::TargetCast;
-
-            let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
-            account.borrow_mut().password = input.value();
-        })
-    };
+        let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
+        account.borrow_mut().password = input.value();
+    });
 
     yew::html! {
         <form>

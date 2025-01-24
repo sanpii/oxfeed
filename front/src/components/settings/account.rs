@@ -21,34 +21,26 @@ pub(crate) fn Component() -> yew::Html {
         return yew::Html::default();
     };
 
-    let on_save = {
+    let on_save = yew_callback::callback!(context, move |new_account| {
         let context = context.clone();
 
-        yew::Callback::from(move |new_account| {
-            let context = context.clone();
+        wasm_bindgen_futures::spawn_local(async move {
+            crate::api::call!(context, account_update, &new_account);
+            logout().await.unwrap()
+        });
+    });
 
+    let on_delete = yew_callback::callback!(context, move |_| {
+        let context = context.clone();
+        let message = "Would you like delete your account?";
+
+        if gloo::dialogs::confirm(message) {
             wasm_bindgen_futures::spawn_local(async move {
-                crate::api::call!(context, account_update, &new_account);
+                crate::api::call!(context, account_delete);
                 logout().await.unwrap()
             });
-        })
-    };
-
-    let on_delete = {
-        let context = context.clone();
-
-        yew::Callback::from(move |_| {
-            let context = context.clone();
-            let message = "Would you like delete your account?";
-
-            if gloo::dialogs::confirm(message) {
-                wasm_bindgen_futures::spawn_local(async move {
-                    crate::api::call!(context, account_delete);
-                    logout().await.unwrap()
-                });
-            }
-        })
-    };
+        }
+    });
 
     yew::html! {
         <>

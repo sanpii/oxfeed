@@ -43,14 +43,10 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         }
     });
 
-    let on_favorite = {
-        let on_favorite = props.on_favorite.clone();
-        yew::Callback::from(move |_| on_favorite.emit(()))
-    };
-    let on_read = {
-        let on_read = props.on_read.clone();
-        yew::Callback::from(move |_| on_read.emit(()))
-    };
+    let on_favorite =
+        yew_callback::callback!(on_favorite = props.on_favorite, move |_| on_favorite
+            .emit(()));
+    let on_read = yew_callback::callback!(on_read = props.on_read, move |_| on_read.emit(()));
 
     if props.inline {
         yew::html! {

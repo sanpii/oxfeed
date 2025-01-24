@@ -15,30 +15,25 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let edit_name = crate::components::edit_cb(name.clone());
     let edit_url = crate::components::edit_cb(url.clone());
 
-    let toggle_mark_read = {
-        let mark_read = mark_read.clone();
+    let toggle_mark_read = yew_callback::callback!(mark_read, move |value| {
+        mark_read.set(value);
+    });
 
-        yew::Callback::from(move |value| {
-            mark_read.set(value);
-        })
-    };
-
-    let on_submit = {
-        let mark_read = mark_read.clone();
-        let name = name.clone();
-        let webhook = props.webhook.clone();
-        let on_submit = props.on_submit.clone();
-        let url = url.clone();
-
-        yew::Callback::from(move |_| {
+    let on_submit = yew_callback::callback!(
+        mark_read,
+        name,
+        webhook = props.webhook,
+        on_submit = props.on_submit,
+        url,
+        move |_| {
             let mut webhook = webhook.clone();
             webhook.name = (*name).clone();
             webhook.url = (*url).clone();
             webhook.mark_read = *mark_read;
 
             on_submit.emit(webhook);
-        })
-    };
+        }
+    );
 
     yew::html! {
         <form>

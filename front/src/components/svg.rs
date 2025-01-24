@@ -40,13 +40,11 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
     let node = yew::virtual_dom::VNode::VRef(span.into());
 
-    let onclick = {
-        let on_click = props.on_click.clone();
-        yew::Callback::from(move |e: web_sys::MouseEvent| {
+    let onclick =
+        yew_callback::callback!(on_click = props.on_click, move |e: web_sys::MouseEvent| {
             e.prevent_default();
             on_click.emit(())
-        })
-    };
+        });
 
     yew::html! {
         <span class={ &props.class } {onclick}>{ node }</span>

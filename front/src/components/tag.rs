@@ -20,14 +20,9 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         bg_color.to_color_string(),
     );
 
-    let on_delete = {
-        let on_delete = props.on_delete.clone();
-        yew::Callback::from(move |_| on_delete.emit(()))
-    };
-    let on_edit = {
-        let on_edit = props.on_edit.clone();
-        yew::Callback::from(move |_| on_edit.emit(()))
-    };
+    let on_delete =
+        yew_callback::callback!(on_delete = props.on_delete, move |_| on_delete.emit(()));
+    let on_edit = yew_callback::callback!(on_edit = props.on_edit, move |_| on_edit.emit(()));
 
     yew::html! {
         <span {style} class="badge position-relative">

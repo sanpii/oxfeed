@@ -13,14 +13,10 @@ pub(crate) struct Properties {
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let checked = yew::functional::use_state_eq(|| props.active);
 
-    let onclick = {
-        let props = props.clone();
-        let checked = checked.clone();
-        yew::Callback::from(move |_| {
-            checked.set(!*checked);
-            props.on_toggle.emit(!*checked);
-        })
-    };
+    let onclick = yew_callback::callback!(on_toggle = props.on_toggle, checked, move |_| {
+        checked.set(!*checked);
+        on_toggle.emit(!*checked);
+    });
 
     yew::html! {
         <div class={ yew::classes!("form-check", "form-switch") }>

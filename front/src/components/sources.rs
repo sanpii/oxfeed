@@ -42,49 +42,32 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         );
     }
 
-    let on_add = {
-        let scene = scene.clone();
+    let on_add = yew_callback::callback!(scene, move |_| {
+        scene.set(Scene::Add);
+    });
 
-        yew::Callback::from(move |_| {
-            scene.set(Scene::Add);
-        })
-    };
+    let on_cancel = yew_callback::callback!(scene, move |_| {
+        scene.set(Scene::View);
+    });
 
-    let on_cancel = {
-        let scene = scene.clone();
-
-        yew::Callback::from(move |_| {
-            scene.set(Scene::View);
-        })
-    };
-
-    let on_submit = {
+    let on_submit = yew_callback::callback!(context, scene, move |source| {
         let context = context.clone();
-        let scene = scene.clone();
 
-        yew::Callback::from(move |source| {
-            let context = context.clone();
+        wasm_bindgen_futures::spawn_local(async move {
+            crate::api::call!(context, sources_create, &source);
+            context.dispatch(crate::Action::NeedUpdate);
+        });
+        scene.set(Scene::View);
+    });
 
-            wasm_bindgen_futures::spawn_local(async move {
-                crate::api::call!(context, sources_create, &source);
-                context.dispatch(crate::Action::NeedUpdate);
-            });
-            scene.set(Scene::View);
-        })
-    };
+    let on_page_change = yew_callback::callback!(pagination, move |page| {
+        pagination.set(elephantry_extras::Pagination {
+            page,
+            ..*pagination
+        });
 
-    let on_page_change = {
-        let pagination = pagination.clone();
-
-        yew::Callback::from(move |page| {
-            pagination.set(elephantry_extras::Pagination {
-                page,
-                ..*pagination
-            });
-
-            gloo::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
-        })
-    };
+        gloo::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
+    });
 
     let add = match *scene {
         Scene::View => yew::html! {

@@ -10,19 +10,14 @@ pub(crate) fn Component() -> yew::Html {
     let context = crate::use_context();
     let scene = yew::use_state(Scene::default);
 
-    let on_cancel = {
-        let scene = scene.clone();
+    let on_cancel = yew_callback::callback!(scene, move |_| {
+        scene.set(Scene::Login);
+    });
 
-        yew::Callback::from(move |_| {
-            scene.set(Scene::Login);
-        })
-    };
-
-    let on_create = {
-        let context = context.clone();
-        let scene = scene.clone();
-
-        yew::Callback::from(move |info: crate::components::form::register::Info| {
+    let on_create = yew_callback::callback!(
+        context,
+        scene,
+        move |info: crate::components::form::register::Info| {
             let context = context.clone();
             let scene = scene.clone();
             let user = oxfeed::account::Entity {
@@ -38,13 +33,12 @@ pub(crate) fn Component() -> yew::Html {
                 context.dispatch(alert.into());
                 scene.set(Scene::Login);
             });
-        })
-    };
+        }
+    );
 
-    let on_login = {
-        let context = context.clone();
-
-        yew::Callback::from(move |info: crate::components::form::login::Info| {
+    let on_login = yew_callback::callback!(
+        context,
+        move |info: crate::components::form::login::Info| {
             let context = context.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
@@ -57,16 +51,12 @@ pub(crate) fn Component() -> yew::Html {
                 );
                 context.dispatch(crate::Action::Logged);
             });
-        })
-    };
+        }
+    );
 
-    let on_register = {
-        let scene = scene.clone();
-
-        yew::Callback::from(move |_| {
-            scene.set(Scene::Register);
-        })
-    };
+    let on_register = yew_callback::callback!(scene, move |_| {
+        scene.set(Scene::Register);
+    });
 
     match *scene {
         Scene::Login => yew::html! {

@@ -69,40 +69,26 @@ fn Tag(props: &TagProperties) -> yew::Html {
 
     let href = format!("/search/all?tag={}", *name);
 
-    let on_cancel = {
-        let scene = scene.clone();
+    let on_cancel = yew_callback::callback!(scene, move |_| {
+        scene.set(Scene::View);
+    });
 
-        yew::Callback::from(move |_| {
+    let on_edit = yew_callback::callback!(scene, move |_| {
+        scene.set(Scene::Edit);
+    });
+
+    let on_save = yew_callback::callback!(scene, name, tag = props.tag.name, move |_| {
+        if !name.is_empty() {
+            let context = context.clone();
+            let name = name.clone();
+            let tag = tag.clone();
+
+            wasm_bindgen_futures::spawn_local(async move {
+                crate::api::call!(context, tags_rename, &tag, &name);
+            });
             scene.set(Scene::View);
-        })
-    };
-
-    let on_edit = {
-        let scene = scene.clone();
-
-        yew::Callback::from(move |_| {
-            scene.set(Scene::Edit);
-        })
-    };
-
-    let on_save = {
-        let scene = scene.clone();
-        let name = name.clone();
-        let tag = props.tag.name.clone();
-
-        yew::Callback::from(move |_| {
-            if !name.is_empty() {
-                let context = context.clone();
-                let name = name.clone();
-                let tag = tag.clone();
-
-                wasm_bindgen_futures::spawn_local(async move {
-                    crate::api::call!(context, tags_rename, &tag, &name);
-                });
-                scene.set(Scene::View);
-            }
-        })
-    };
+        }
+    });
 
     let edit_tag = crate::components::edit_cb(name.clone());
 

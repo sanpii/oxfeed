@@ -27,47 +27,29 @@ pub(crate) fn Component() -> yew::Html {
         });
     }
 
-    let on_add = {
-        let scene = scene.clone();
+    let on_add = yew_callback::callback!(scene, move |_| {
+        scene.set(Scene::Add);
+    });
 
-        yew::Callback::from(move |_| {
-            scene.set(Scene::Add);
-        })
-    };
+    let on_cancel = yew_callback::callback!(scene, move |_| {
+        scene.set(Scene::View);
+    });
 
-    let on_cancel = {
-        let scene = scene.clone();
+    let on_delete = yew_callback::callback!(force_reload, move |_| {
+        force_reload.set(*force_reload + 1);
+    });
 
-        yew::Callback::from(move |_| {
-            scene.set(Scene::View);
-        })
-    };
-
-    let on_delete = {
-        let force_reload = force_reload.clone();
-
-        yew::Callback::from(move |_| {
-            force_reload.set(*force_reload + 1);
-        })
-    };
-
-    let on_submit = {
+    let on_submit = yew_callback::callback!(context, force_reload, scene, move |webhook| {
         let context = context.clone();
         let force_reload = force_reload.clone();
-        let scene = scene.clone();
 
-        yew::Callback::from(move |webhook| {
-            let context = context.clone();
-            let force_reload = force_reload.clone();
+        wasm_bindgen_futures::spawn_local(async move {
+            crate::api::call!(context, webhooks_create, &webhook);
+            force_reload.set(*force_reload + 1);
+        });
 
-            wasm_bindgen_futures::spawn_local(async move {
-                crate::api::call!(context, webhooks_create, &webhook);
-                force_reload.set(*force_reload + 1);
-            });
-
-            scene.set(Scene::View);
-        })
-    };
+        scene.set(Scene::View);
+    });
 
     yew::html! {
         <>

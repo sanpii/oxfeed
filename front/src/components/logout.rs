@@ -8,24 +8,19 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let context = crate::use_context();
     let navigator = yew_router::hooks::use_navigator().unwrap();
 
-    let logout = {
+    let logout = yew_callback::callback!(context, navigator, move |_| {
         let context = context.clone();
         let navigator = navigator.clone();
 
-        yew::Callback::from(move |_| {
-            let context = context.clone();
-            let navigator = navigator.clone();
+        wasm_bindgen_futures::spawn_local(async move {
+            crate::api::call!(context, auth_logout);
+            context.dispatch(crate::Action::AuthRequire);
 
-            wasm_bindgen_futures::spawn_local(async move {
-                crate::api::call!(context, auth_logout);
-                context.dispatch(crate::Action::AuthRequire);
-
-                let alert = crate::Alert::info("Logged out");
-                context.dispatch(alert.into());
-                navigator.push(&crate::components::app::Route::Index);
-            });
-        })
-    };
+            let alert = crate::Alert::info("Logged out");
+            context.dispatch(alert.into());
+            navigator.push(&crate::components::app::Route::Index);
+        });
+    });
 
     if props.button {
         yew::html! {

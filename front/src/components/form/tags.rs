@@ -13,31 +13,23 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         on_change.emit((**tags).clone());
     });
 
-    let on_select = {
-        let tags = tags.clone();
+    let on_select = yew_callback::callback!(tags, move |value| {
+        let mut new_value = (*tags).clone();
 
-        yew::Callback::from(move |value| {
-            let mut new_value = (*tags).clone();
-
-            if !new_value.contains(&value) {
-                new_value.push(value);
-                new_value.sort();
-
-                tags.set(new_value);
-            }
-        })
-    };
-
-    let on_delete = {
-        let tags = tags.clone();
-
-        yew::Callback::from(move |_| {
-            let mut new_value = (*tags).clone();
-            new_value.pop();
+        if !new_value.contains(&value) {
+            new_value.push(value);
+            new_value.sort();
 
             tags.set(new_value);
-        })
-    };
+        }
+    });
+
+    let on_delete = yew_callback::callback!(tags, move |_| {
+        let mut new_value = (*tags).clone();
+        new_value.pop();
+
+        tags.set(new_value);
+    });
 
     yew::html! {
         <div class="form-control tags-input">
@@ -50,7 +42,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                             value={ tag.clone() }
                             deletable=true
                             on_delete={
-                                yew::Callback::from(move |_| {
+                                yew_callback::callback!(move |_| {
                                     let mut new_value = (*tags).clone();
                                     new_value.remove(idx);
 

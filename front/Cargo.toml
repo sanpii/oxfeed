@@ -20,6 +20,7 @@ wasm-bindgen-futures = "0.4"
 wasm-cookies = "0.2"
 wasm-logger = "0.2"
 wasm-sockets = "1.0"
+yew-callback = "0.1"
 yew-router = "0.18"
 
 [dependencies.elephantry-extras]
