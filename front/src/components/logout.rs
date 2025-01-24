@@ -17,7 +17,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             let navigator = navigator.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
-                crate::Api::auth_logout().await.unwrap();
+                crate::api::call!(context, auth_logout);
                 context.dispatch(crate::Action::AuthRequire);
 
                 let alert = crate::Alert::info("Logged out");

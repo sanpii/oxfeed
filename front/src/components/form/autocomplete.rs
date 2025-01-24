@@ -8,6 +8,7 @@ pub(crate) struct Properties {
 
 #[yew::function_component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
+    let context = crate::use_context();
     let active = yew::use_state(|| None::<usize>);
     let input_ref = yew::NodeRef::default();
     let on_delete = props.on_delete.clone();
@@ -31,11 +32,14 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
     let on_input = {
         let active = active.clone();
+        let context = context.clone();
         let terms = terms.clone();
         let value = value.clone();
 
         yew::Callback::from(move |e: yew::InputEvent| {
-            use yew::TargetCast;
+            use yew::TargetCast as _;
+
+            let context = context.clone();
 
             let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
             value.set(input.value());
@@ -49,7 +53,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 let terms = terms.clone();
 
                 wasm_bindgen_futures::spawn_local(async move {
-                    let pager = crate::Api::tags_search(&filter, &pagination).await.unwrap();
+                    let pager = crate::api::call!(context, tags_search, &filter, &pagination);
                     terms.set(pager.iterator);
                 });
             }

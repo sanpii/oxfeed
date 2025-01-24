@@ -16,6 +16,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
     {
         let pager = pager.clone();
+        let context = context.clone();
 
         yew::use_effect_with(
             (
@@ -29,13 +30,11 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
                 wasm_bindgen_futures::spawn_local(async move {
                     let new_pager = if deps.0.is_empty() {
-                        crate::Api::items_all(&deps.1, &deps.2).await.ok()
+                        crate::api::call!(context, items_all, &deps.1, &deps.2)
                     } else {
-                        crate::Api::items_search(&deps.1, &deps.0, &deps.2)
-                            .await
-                            .ok()
+                        crate::api::call!(context, items_search, &deps.1, &deps.0, &deps.2)
                     };
-                    pager.set(new_pager);
+                    pager.set(Some(new_pager));
                 });
             },
         );

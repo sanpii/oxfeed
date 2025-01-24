@@ -39,7 +39,7 @@ pub(crate) fn Component() -> yew::Html {
                         .await
                         .unwrap_or_default();
 
-                    crate::Api::opml_import(content).await.unwrap();
+                    crate::api::call!(context, opml_import, content);
 
                     let alert = crate::Alert::info("Import done");
                     context.dispatch(alert.into());

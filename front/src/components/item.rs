@@ -9,9 +9,7 @@ macro_rules! toggle {
             let context = context.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
-                $crate::Api::items_tag(&item.id, stringify!($name), !item.$name)
-                    .await
-                    .unwrap();
+                $crate::api::call!(context, items_tag, &item.id, stringify!($name), !item.$name);
                 context.dispatch($crate::Action::NeedUpdate);
             });
         })
@@ -77,6 +75,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
     let toggle_content = {
         let content = content.clone();
+        let context = context.clone();
         let item = item.clone();
         let scene = scene.clone();
 
@@ -85,12 +84,13 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
             if content.is_none() {
                 let content = content.clone();
+                let context = context.clone();
                 let item = item.clone();
 
                 wasm_bindgen_futures::spawn_local(async move {
                     let item_id = &item.id;
 
-                    content.set(crate::Api::items_content(item_id).await.ok());
+                    content.set(Some(crate::api::call!(context, items_content, item_id)));
                 });
             }
         })

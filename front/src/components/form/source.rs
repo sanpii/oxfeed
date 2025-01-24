@@ -7,6 +7,7 @@ pub(crate) struct Properties {
 
 #[yew::function_component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
+    let context = crate::use_context();
     let active = yew::use_state(|| props.source.active);
     let title = yew::use_state(|| props.source.title.clone());
     let url = yew::use_state(|| props.source.url.clone());
@@ -18,8 +19,10 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         let all_webhooks = all_webhooks.clone();
 
         yew::use_state(|| {
+            let context = context.clone();
+
             wasm_bindgen_futures::spawn_local(async move {
-                let webhooks = crate::Api::webhooks_all().await.unwrap_or_default();
+                let webhooks = crate::api::call!(context, webhooks_all);
                 all_webhooks.set(webhooks);
             })
         });

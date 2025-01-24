@@ -32,14 +32,11 @@ pub(crate) fn Component() -> yew::Html {
             };
 
             wasm_bindgen_futures::spawn_local(async move {
-                match crate::Api::account_create(&user).await {
-                    Ok(_) => {
-                        let alert = crate::Alert::info("User created");
-                        context.dispatch(alert.into());
-                        scene.set(Scene::Login);
-                    }
-                    Err(err) => context.dispatch(err.into()),
-                }
+                crate::api::call!(context, account_create, &user);
+
+                let alert = crate::Alert::info("User created");
+                context.dispatch(alert.into());
+                scene.set(Scene::Login);
             });
         })
     };
@@ -51,10 +48,14 @@ pub(crate) fn Component() -> yew::Html {
             let context = context.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
-                match crate::Api::auth_login(&info.email, &info.password, &info.remember_me).await {
-                    Ok(_) => context.dispatch(crate::Action::Logged),
-                    Err(err) => context.dispatch(err.into()),
-                }
+                crate::api::call!(
+                    context,
+                    auth_login,
+                    &info.email,
+                    &info.password,
+                    &info.remember_me
+                );
+                context.dispatch(crate::Action::Logged);
             });
         })
     };

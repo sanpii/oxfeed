@@ -38,7 +38,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 wasm_bindgen_futures::spawn_local(async move {
                     let id = source.id.unwrap();
 
-                    crate::Api::sources_delete(&id).await.unwrap();
+                    crate::api::call!(context, sources_delete, &id);
                     context.dispatch(crate::Action::NeedUpdate);
                 });
             }
@@ -54,17 +54,19 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     };
 
     let on_submit = {
+        let context = context.clone();
         let scene = scene.clone();
         let source = source.clone();
 
         yew::Callback::from(move |new_source: oxfeed::source::Entity| {
+            let context = context.clone();
             let scene = scene.clone();
             let source = source.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
                 let id = new_source.id.unwrap();
 
-                crate::Api::sources_update(&id, &new_source).await.unwrap();
+                crate::api::call!(context, sources_update, &id, &new_source);
                 source.set(new_source);
                 scene.set(Scene::View);
             });

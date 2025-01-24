@@ -117,10 +117,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             let counts = counts.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
-                match crate::Api::counts().await {
-                    Ok(new_counts) => counts.set(new_counts),
-                    Err(_) => context.dispatch(crate::Action::AuthRequire),
-                }
+                counts.set(crate::api::call!(context, counts));
             });
         });
     }
@@ -160,9 +157,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             let context = context.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
-                if let Err(err) = crate::Api::items_read().await {
-                    context.dispatch(err.into());
-                }
+                crate::api::call!(context, items_read);
             });
         })
     };

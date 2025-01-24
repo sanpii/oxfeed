@@ -1,25 +1,23 @@
 #[yew::function_component]
 pub(crate) fn Component() -> yew::Html {
+    let context = crate::use_context();
     let pagination = yew::use_state(|| elephantry_extras::Pagination::from(crate::Location::new()));
-    let tags = yew::use_state(|| None);
+    let tags = yew::use_state(Vec::new);
 
     {
         let tags = tags.clone();
 
         yew::use_effect_with(pagination, move |pagination| {
+            let context = context.clone();
             let pagination = pagination.clone();
             let tags = tags.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
-                let new_tags = crate::Api::tags_all(&pagination).await.ok();
+                let new_tags = crate::api::call!(context, tags_all, &pagination);
                 tags.set(new_tags);
             });
         });
     }
-
-    let Some(tags) = (*tags).clone() else {
-        return yew::html! { <super::Empty /> };
-    };
 
     if tags.is_empty() {
         return yew::html! { <super::Empty /> };
@@ -88,7 +86,6 @@ fn Tag(props: &TagProperties) -> yew::Html {
     };
 
     let on_save = {
-        let context = context.clone();
         let scene = scene.clone();
         let name = name.clone();
         let tag = props.tag.name.clone();
@@ -100,9 +97,7 @@ fn Tag(props: &TagProperties) -> yew::Html {
                 let tag = tag.clone();
 
                 wasm_bindgen_futures::spawn_local(async move {
-                    if let Err(err) = crate::Api::tags_rename(&tag, &name).await {
-                        context.dispatch(err.into());
-                    }
+                    crate::api::call!(context, tags_rename, &tag, &name);
                 });
                 scene.set(Scene::View);
             }

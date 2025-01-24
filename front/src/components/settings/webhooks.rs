@@ -7,18 +7,21 @@ enum Scene {
 
 #[yew::function_component]
 pub(crate) fn Component() -> yew::Html {
+    let context = crate::use_context();
     let force_reload = yew::use_state(|| 0);
     let scene = yew::use_state(Scene::default);
     let webhooks = yew::use_state(Vec::new);
 
     {
+        let context = context.clone();
         let webhooks = webhooks.clone();
 
         yew::use_effect_with(force_reload.clone(), move |_| {
+            let context = context.clone();
             let webhooks = webhooks.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
-                let new_webhooks = crate::Api::webhooks_all().await.unwrap_or_default();
+                let new_webhooks = crate::api::call!(context, webhooks_all);
                 webhooks.set(new_webhooks);
             });
         });
@@ -49,14 +52,16 @@ pub(crate) fn Component() -> yew::Html {
     };
 
     let on_submit = {
+        let context = context.clone();
         let force_reload = force_reload.clone();
         let scene = scene.clone();
 
         yew::Callback::from(move |webhook| {
+            let context = context.clone();
             let force_reload = force_reload.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
-                crate::Api::webhooks_create(&webhook).await.unwrap();
+                crate::api::call!(context, webhooks_create, &webhook);
                 force_reload.set(*force_reload + 1);
             });
 

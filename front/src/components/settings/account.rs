@@ -1,17 +1,18 @@
 #[yew::function_component]
 pub(crate) fn Component() -> yew::Html {
-    let account = yew::use_state(|| None);
+    let context = crate::use_context();
+    let account = yew::use_state(|| None::<oxfeed::account::Entity>);
 
     {
         let account = account.clone();
+        let context = context.clone();
 
         yew::use_state(|| {
+            let context = context.clone();
+
             wasm_bindgen_futures::spawn_local(async move {
-                let new_account = crate::Api::auth()
-                    .await
-                    .ok()
-                    .map(oxfeed::account::Entity::from);
-                account.set(new_account);
+                let new_account = crate::api::call!(context, auth).into();
+                account.set(Some(new_account));
             })
         });
     }
@@ -21,21 +22,28 @@ pub(crate) fn Component() -> yew::Html {
     };
 
     let on_save = {
+        let context = context.clone();
+
         yew::Callback::from(move |new_account| {
+            let context = context.clone();
+
             wasm_bindgen_futures::spawn_local(async move {
-                crate::Api::account_update(&new_account).await.unwrap();
+                crate::api::call!(context, account_update, &new_account);
                 logout().await.unwrap()
             });
         })
     };
 
     let on_delete = {
+        let context = context.clone();
+
         yew::Callback::from(move |_| {
+            let context = context.clone();
             let message = "Would you like delete your account?";
 
             if gloo::dialogs::confirm(message) {
                 wasm_bindgen_futures::spawn_local(async move {
-                    crate::Api::account_delete().await.unwrap();
+                    crate::api::call!(context, account_delete);
                     logout().await.unwrap()
                 });
             }

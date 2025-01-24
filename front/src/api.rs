@@ -1,5 +1,26 @@
 use reqwest::Method;
 
+macro_rules! call {
+    ($context:expr, $fn:ident, $($args:expr),*) => {
+        match $crate::Api::$fn( $( $args, )* ).await {
+            Ok(result) => result,
+            Err(err) if matches!(err, oxfeed::Error::Auth) => {
+                $context.dispatch(crate::Action::AuthRequire);
+                return;
+            }
+            Err(err) => {
+                $context.dispatch(err.into());
+                return;
+            }
+        }
+    };
+    ($context:expr, $fn:ident) => {
+        $crate::api::call!($context, $fn, )
+    };
+}
+
+pub(crate) use call;
+
 pub(crate) struct Api;
 
 impl Api {
