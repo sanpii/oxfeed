@@ -1,3 +1,42 @@
+#[derive(Clone, Copy, Default)]
+enum InputType {
+    #[default]
+    Password,
+    Text,
+}
+
+impl InputType {
+    fn icon(&self) -> &'static str {
+        if matches!(self, InputType::Password) {
+            "eye"
+        } else {
+            "eye-slash"
+        }
+    }
+}
+
+impl std::fmt::Display for InputType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            Self::Password => "password",
+            Self::Text => "text",
+        };
+
+        f.write_str(s)
+    }
+}
+
+impl std::ops::Not for InputType {
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        match self {
+            Self::Password => Self::Text,
+            Self::Text => Self::Password,
+        }
+    }
+}
+
 pub(crate) struct Info {
     pub email: String,
     pub password: String,
@@ -12,6 +51,7 @@ pub(crate) struct Properties {
 #[yew::function_component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let email = yew::use_state(String::new);
+    let input_type = yew::use_state(InputType::default);
     let password = yew::use_state(String::new);
     let remember_me = yew::use_state(|| false);
 
@@ -35,6 +75,12 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         }
     );
 
+    let on_click = yew_callback::callback!(input_type,
+        move |_| {
+            input_type.set(!*input_type);
+        }
+    );
+
     yew::html! {
         <>
             <div class="form-floating">
@@ -49,16 +95,21 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 />
                 <label for="email" class="form-label sr-only">{ "Email" }</label>
             </div>
-            <div class="form-floating">
-                <input
-                    type="password"
-                    name="password"
-                    class="form-control"
-                    placeholder="Password"
-                    required=true
-                    oninput={ edit_password }
-                />
-                <label for="password" class="form-label sr-only">{ "Password" }</label>
+            <div class="input-group">
+                <div class="form-floating">
+                    <input
+                        type={ input_type.to_string() }
+                        name="password"
+                        class="form-control"
+                        placeholder="Password"
+                        required=true
+                        oninput={ edit_password }
+                    />
+                    <label for="password" class="form-label sr-only">{ "Password" }</label>
+                </div>
+                <span class="input-group-text" onclick={ on_click }>
+                    <crate::components::Svg icon={ input_type.icon() } size=16 />
+                </span>
             </div>
             <div class="checkbox">
                 <label class="form-label">
