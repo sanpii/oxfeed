@@ -7,6 +7,7 @@ pub(crate) struct Context {
     pub need_update: usize,
     pub websocket_error: bool,
     pub route: String,
+    pub theme: Theme,
 }
 
 impl Default for Context {
@@ -19,6 +20,7 @@ impl Default for Context {
             need_update: 0,
             websocket_error: false,
             route: crate::Location::new().path(),
+            theme: Theme::default(),
         }
     }
 }
@@ -49,8 +51,50 @@ impl yew::Reducible for Context {
                 crate::location::set_route(&route);
                 context.route = route;
             }
+            Theme(theme) => context.theme = theme,
         }
 
         context.into()
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+pub(crate) enum Theme {
+    Auto,
+    Dark,
+    Light,
+}
+
+impl Theme {
+    pub const fn icon(&self) -> &'static str {
+        match self {
+            Self::Auto => "circle-half",
+            Self::Dark => "moon-stars-fill",
+            Self::Light => "sun-fill",
+        }
+    }
+
+    pub const fn all() -> [Self; 3] {
+        [Theme::Light, Theme::Dark, Theme::Auto]
+    }
+}
+
+impl std::fmt::Display for Theme {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            Self::Auto => "Auto",
+            Self::Dark => "Dark",
+            Self::Light => "Light",
+        };
+
+        f.write_str(s)
+    }
+}
+
+impl Default for Theme {
+    fn default() -> Self {
+        use gloo::storage::Storage as _;
+
+        gloo::storage::LocalStorage::get("theme").unwrap_or(Self::Auto)
     }
 }

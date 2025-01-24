@@ -35,6 +35,10 @@ features = ["date", "uuid"]
 workspace = true
 optional = true
 
+[dependencies.gloo]
+workspace = true
+optional = true
+
 [dependencies.log]
 workspace = true
 optional = true
@@ -58,4 +62,4 @@ features = ["serde"]
 [features]
 default = []
 back = ["actix-web", "attohttpc", "base64", "log", "feed-rs", "elephantry", "opml"]
-front = ["reqwest"]
+front = ["gloo", "reqwest"]

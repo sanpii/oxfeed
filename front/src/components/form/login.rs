@@ -75,11 +75,9 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         }
     );
 
-    let on_click = yew_callback::callback!(input_type,
-        move |_| {
-            input_type.set(!*input_type);
-        }
-    );
+    let on_click = yew_callback::callback!(input_type, move |_| {
+        input_type.set(!*input_type);
+    });
 
     yew::html! {
         <>

@@ -27,6 +27,7 @@ pub(crate) fn Component() -> yew::Html {
 
     let context = yew::use_reducer(crate::Context::default);
     let auth = yew::use_memo(context.clone(), |context| context.auth);
+    let theme = yew::use_memo(context.clone(), |context| context.theme);
 
     let _ = yew::use_state(|| websocket(context.clone()));
 
@@ -46,6 +47,16 @@ pub(crate) fn Component() -> yew::Html {
 
     let document = gloo::utils::document();
     document.set_onvisibilitychange((*on_visibility_change).as_ref().dyn_ref());
+
+    yew::use_effect_with(theme, |theme| {
+        let document = gloo::utils::document();
+        let Some(root) = document.document_element() else {
+            return;
+        };
+
+        root.set_attribute("data-bs-theme", &theme.to_string().to_lowercase())
+            .ok();
+    });
 
     yew::html! {
         <yew::ContextProvider<yew::UseReducerHandle<crate::Context>> {context}>
@@ -103,12 +114,12 @@ fn websocket(context: yew::UseReducerHandle<crate::Context>) -> Option<wasm_sock
 fn switch(route: Route) -> yew::Html {
     yew::html! {
         <>
-            <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+            <nav class="navbar navbar-dark navbar-expand-lg sticky-top bg-dark flex-md-nowrap p-0 shadow">
                 <super::Header />
             </nav>
             <div class="container-fluid">
                 <div class="row">
-                    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse">
                         <super::Sidebar current_route={ route.clone() } />
                     </nav>
                     <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">

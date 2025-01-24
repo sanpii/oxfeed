@@ -53,6 +53,10 @@ pub enum Error {
     #[error("{0}")]
     Reqwest(#[from] reqwest::Error),
 
+    #[cfg(feature = "gloo")]
+    #[error("Unable to save preference: {0}")]
+    Storage(#[from] gloo::storage::errors::StorageError),
+
     #[error("{0}")]
     Utf8(#[from] std::string::FromUtf8Error),
 

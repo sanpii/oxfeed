@@ -9,6 +9,7 @@ members = [
 actix-web = "4.0"
 base64 = "0.22"
 feed-rs = "2.0"
+gloo = "0.11"
 hmac = "0.12"
 jwt = "0.16"
 log = "0.4"

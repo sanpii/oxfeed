@@ -6,7 +6,7 @@ edition = "2021"
 license = "MIT"
 
 [dependencies]
-gloo = "0.11"
+gloo.workspace = true
 hmac.workspace = true
 jwt.workspace = true
 regex = "1.4"

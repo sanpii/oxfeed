@@ -23,6 +23,7 @@ mod swipe;
 mod switch;
 mod tag;
 mod tags;
+mod theme;
 mod webhook;
 
 pub(crate) use actions::Component as Actions;
@@ -48,6 +49,7 @@ pub(crate) use swipe::Component as Swipe;
 pub(crate) use switch::Component as Switch;
 pub(crate) use tag::Component as Tag;
 pub(crate) use tags::Component as Tags;
+pub(crate) use theme::Component as Theme;
 pub(crate) use webhook::Component as Webhook;
 
 pub(crate) fn edit_cb(
