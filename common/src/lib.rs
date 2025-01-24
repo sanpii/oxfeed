@@ -16,6 +16,7 @@ pub use tag::*;
 pub struct Counts {
     pub all: i64,
     pub favorites: i64,
+    pub sources_has_error: bool,
     pub sources: i64,
     pub tags: i64,
     pub unread: i64,

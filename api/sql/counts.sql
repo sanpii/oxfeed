@@ -1,6 +1,6 @@
 with
     count_sources as (
-        select count(*)
+        select count(*), count(*) filter (where last_error is not null) > 0 errors
             from source
             join "user" using(user_id)
             where "user".token = $1
@@ -34,7 +34,8 @@ select count_sources.count as sources,
         count_tags.count as tags,
         count_unread.count as unread,
         count_all.count as all,
-        count_favorites.count as favorites
+        count_favorites.count as favorites,
+        count_sources.errors as sources_has_error
     from count_sources,
         count_tags,
         count_unread,

@@ -6,36 +6,42 @@ impl Links {
         let links = vec![
             Link {
                 count: 0,
+                has_error: false,
                 icon: "collection",
                 label: "All",
                 route: super::app::Route::All,
             },
             Link {
                 count: 0,
+                has_error: false,
                 icon: "book",
                 label: "Unread",
                 route: super::app::Route::Unread,
             },
             Link {
                 count: 0,
+                has_error: false,
                 icon: "star",
                 label: "Favorites",
                 route: super::app::Route::Favorites,
             },
             Link {
                 count: 0,
+                has_error: false,
                 icon: "tags",
                 label: "Tags",
                 route: super::app::Route::Tags,
             },
             Link {
                 count: 0,
+                has_error: false,
                 icon: "diagram-3",
                 label: "Sources",
                 route: super::app::Route::Sources,
             },
             Link {
                 count: 0,
+                has_error: false,
                 icon: "sliders",
                 label: "Settings",
                 route: super::app::Route::Settings,
@@ -49,6 +55,7 @@ impl Links {
         if !self.has_search() {
             self.0.push(Link {
                 count: 0,
+                has_error: false,
                 icon: "search",
                 label: "Search",
                 route: search_route.clone(),
@@ -72,6 +79,7 @@ impl Links {
         self.0[2].count = counts.favorites;
         self.0[3].count = counts.tags;
         self.0[4].count = counts.sources;
+        self.0[4].has_error = counts.sources_has_error;
     }
 }
 
@@ -95,6 +103,7 @@ struct Link {
     icon: &'static str,
     label: &'static str,
     route: super::app::Route,
+    has_error: bool,
 }
 
 #[derive(Clone, PartialEq, yew::Properties)]
@@ -172,7 +181,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                             to={ link.route.clone() }
                             classes={ if link.route == *current_route { "nav-link active" } else { "nav-link" } }
                         >
-                            <super::Svg icon={ link.icon } size=16 />
+                            <super::Svg icon={ link.icon } size=16 class={ if link.has_error { "text-danger" } else { "" } } />
                             { link.label }
                             {
                                 if link.count > 0 {
