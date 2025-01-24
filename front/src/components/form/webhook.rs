@@ -24,6 +24,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     };
 
     let on_submit = {
+        let mark_read = mark_read.clone();
         let name = name.clone();
         let webhook = props.webhook.clone();
         let on_submit = props.on_submit.clone();
@@ -33,6 +34,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             let mut webhook = webhook.clone();
             webhook.name = (*name).clone();
             webhook.url = (*url).clone();
+            webhook.mark_read = *mark_read;
 
             on_submit.emit(webhook);
         })
