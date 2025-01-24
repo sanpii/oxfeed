@@ -1,8 +1,12 @@
 use reqwest::Method;
 
 macro_rules! call {
-    ($context:expr, $fn:ident, $($args:expr),*) => {
-        match $crate::Api::$fn( $( $args, )* ).await {
+    ($context:expr, $fn:ident, $($args:expr),*) => {{
+        $context.dispatch($crate::Action::Fetch);
+        let result = $crate::Api::$fn( $( $args, )* ).await;
+        $context.dispatch($crate::Action::Fetched);
+
+        match result {
             Ok(result) => result,
             Err(err) if matches!(err, oxfeed::Error::Auth) => {
                 $context.dispatch(crate::Action::AuthRequire);
@@ -13,7 +17,7 @@ macro_rules! call {
                 return;
             }
         }
-    };
+    }};
     ($context:expr, $fn:ident) => {
         $crate::api::call!($context, $fn, )
     };

@@ -2,6 +2,8 @@
 pub(crate) enum Action {
     AuthRequire,
     AddAlert(crate::Alert),
+    Fetch,
+    Fetched,
     Logged,
     RemoveAlert(usize),
     WebsocketError,

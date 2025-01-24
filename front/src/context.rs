@@ -3,6 +3,7 @@ pub(crate) struct Context {
     pub auth: bool,
     pub alerts: Vec<crate::Alert>,
     pub counts: oxfeed::Counts,
+    pub fetching: bool,
     pub need_update: usize,
     pub websocket_error: bool,
     pub route: String,
@@ -14,6 +15,7 @@ impl Default for Context {
             auth: !crate::Api::token().is_empty(),
             alerts: Vec::new(),
             counts: oxfeed::Counts::default(),
+            fetching: false,
             need_update: 0,
             websocket_error: false,
             route: crate::Location::new().path(),
@@ -34,6 +36,8 @@ impl yew::Reducible for Context {
             RemoveAlert(idx) => {
                 context.alerts.remove(idx);
             }
+            Fetch => context.fetching = true,
+            Fetched => context.fetching = false,
             Logged => context.auth = true,
             AuthRequire => {
                 context.auth = false;
