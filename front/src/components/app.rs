@@ -28,8 +28,7 @@ pub(crate) fn Component() -> yew::Html {
     let context = yew::use_reducer(crate::Context::default);
     let auth = yew::use_memo(context.clone(), |context| context.auth);
     let theme = yew::use_memo(context.clone(), |context| context.theme);
-
-    let _ = yew::use_state(|| websocket(context.clone()));
+    let _sse = yew::use_state(|| sse(context.clone()));
 
     let on_visibility_change = {
         let context = context.clone();
@@ -71,44 +70,23 @@ pub(crate) fn Component() -> yew::Html {
     }
 }
 
-fn websocket(context: yew::UseReducerHandle<crate::Context>) -> Option<wasm_sockets::EventClient> {
-    let url = env!("API_URL")
-        .replace("http://", "ws://")
-        .replace("https://", "wss://");
+fn sse(
+    context: yew::UseReducerHandle<crate::Context>,
+) -> gloo::net::eventsource::futures::EventSource {
+    use futures::StreamExt as _;
 
-    let ws_url = format!("{url}/ws?token={}", crate::Api::token());
+    let url = format!("{}/sse?token={}", env!("API_URL"), crate::Api::token());
+    let mut es = gloo::net::eventsource::futures::EventSource::new(&url).unwrap();
+    let mut stream = es.subscribe("message").unwrap();
 
-    match wasm_sockets::EventClient::new(&ws_url) {
-        Ok(mut websocket) => {
-            {
-                let context = context.clone();
-                websocket.set_on_message(Some(Box::new(move |_, _| {
-                    context.dispatch(crate::Action::NeedUpdate);
-                })));
-            }
-            {
-                let context = context.clone();
-                websocket.set_on_error(Some(Box::new(move |error| {
-                    log::error!("{error:?}");
-                    context.dispatch(crate::Action::WebsocketError);
-                })));
-            }
-            {
-                let context = context.clone();
-                websocket.set_on_close(Some(Box::new(move |event| {
-                    log::error!("{event:?}");
-                    context.dispatch(crate::Action::WebsocketError);
-                })));
-            }
-
-            Some(websocket)
+    yew::platform::spawn_local(async move {
+        while let Some(Ok(_)) = stream.next().await {
+            context.dispatch(crate::Action::NeedUpdate);
         }
-        Err(err) => {
-            context.dispatch(crate::Action::WebsocketError);
-            log::error!("Unable to connect to websocket: {err}");
-            None
-        }
-    }
+        context.dispatch(crate::Action::SseError);
+    });
+
+    es
 }
 
 fn switch(route: Route) -> yew::Html {

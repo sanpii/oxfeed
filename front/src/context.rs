@@ -5,7 +5,7 @@ pub(crate) struct Context {
     pub counts: oxfeed::Counts,
     pub fetching: bool,
     pub need_update: usize,
-    pub websocket_error: bool,
+    pub sse_error: bool,
     pub route: String,
     pub theme: Theme,
 }
@@ -18,7 +18,7 @@ impl Default for Context {
             counts: oxfeed::Counts::default(),
             fetching: false,
             need_update: 0,
-            websocket_error: false,
+            sse_error: false,
             route: crate::Location::new().path(),
             theme: Theme::default(),
         }
@@ -43,10 +43,10 @@ impl yew::Reducible for Context {
             Logged => context.auth = true,
             AuthRequire => {
                 context.auth = false;
-                context.websocket_error = false;
+                context.sse_error = false;
             }
             NeedUpdate => context.need_update = context.need_update.overflowing_add(1).0,
-            WebsocketError => context.websocket_error = true,
+            SseError => context.sse_error = true,
             Route(route) => {
                 crate::location::set_route(&route);
                 context.route = route;

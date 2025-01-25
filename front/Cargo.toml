@@ -6,6 +6,7 @@ edition = "2021"
 license = "MIT"
 
 [dependencies]
+futures = "0.3"
 gloo.workspace = true
 hmac.workspace = true
 jwt.workspace = true
@@ -19,7 +20,6 @@ wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 wasm-cookies = "0.2"
 wasm-logger = "0.2"
-wasm-sockets = "1.0"
 yew-callback = "0.1"
 yew-router = "0.18"
 

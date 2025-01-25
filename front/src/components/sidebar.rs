@@ -145,7 +145,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     });
 
     let favicon = yew::use_memo((context.clone(), counts), |deps| {
-        if deps.0.websocket_error {
+        if deps.0.sse_error {
             "error.svg".to_string()
         } else if deps.1.unread > 0 {
             format!("unread-{}.svg", deps.1.unread)

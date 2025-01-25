@@ -5,10 +5,10 @@ pub(crate) mod item;
 pub(crate) mod opml;
 pub(crate) mod search;
 pub(crate) mod source;
+pub(crate) mod sse;
 pub(crate) mod tag;
 pub(crate) mod user;
 pub(crate) mod webhook;
-pub(crate) mod websocket;
 
 pub(crate) fn scope() -> actix_web::Scope {
     actix_web::web::scope("").service(index).service(counts)

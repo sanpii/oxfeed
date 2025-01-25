@@ -40,6 +40,8 @@ async fn main() -> oxfeed::Result {
         }
     });
 
+    let broadcaster = services::sse::Broadcaster::new(&elephantry);
+
     actix_web::HttpServer::new(move || {
         let cors = actix_cors::Cors::permissive();
 
@@ -48,6 +50,7 @@ async fn main() -> oxfeed::Result {
                 actix_web::middleware::TrailingSlash::Trim,
             ))
             .app_data(actix_web::web::Data::new(actor.clone()))
+            .app_data(actix_web::web::Data::new(broadcaster.clone()))
             .app_data(actix_web::web::Data::new(elephantry.clone()))
             .wrap(cors)
             .service(services::auth::scope())
@@ -56,11 +59,11 @@ async fn main() -> oxfeed::Result {
             .service(services::item::scope())
             .service(services::opml::scope())
             .service(services::search::scope())
+            .service(services::sse::scope())
             .service(services::source::scope())
             .service(services::tag::scope())
             .service(services::user::scope())
             .service(services::webhook::scope())
-            .service(services::websocket::scope())
             .service(services::scope())
     })
     .bind(&bind)?

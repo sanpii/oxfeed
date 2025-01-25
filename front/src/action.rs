@@ -7,7 +7,7 @@ pub(crate) enum Action {
     Logged,
     RemoveAlert(usize),
     Theme(crate::context::Theme),
-    WebsocketError,
+    SseError,
     NeedUpdate,
     Route(String),
 }
