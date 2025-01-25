@@ -58,6 +58,7 @@ async fn main() -> oxfeed::Result {
             .service(services::icon::scope())
             .service(services::item::scope())
             .service(services::opml::scope())
+            .service(services::rss::scope())
             .service(services::search::scope())
             .service(services::sse::scope())
             .service(services::source::scope())

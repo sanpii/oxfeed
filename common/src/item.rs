@@ -21,6 +21,20 @@ impl Item {
     }
 }
 
+#[derive(Clone, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[cfg_attr(feature = "elephantry", derive(elephantry::Entity))]
+pub struct FeedItem {
+    #[cfg_attr(feature = "elephantry", elephantry(column = "item_id"))]
+    pub id: uuid::Uuid,
+    pub link: String,
+    pub content: Option<String>,
+    pub published: chrono::DateTime<chrono::offset::Utc>,
+    pub title: String,
+    pub tags: Vec<String>,
+    #[cfg_attr(feature = "elephantry", elephantry(default))]
+    pub media: Vec<crate::media::Entity>,
+}
+
 #[derive(serde::Serialize)]
 #[cfg_attr(feature = "elephantry", derive(elephantry::Entity))]
 #[cfg_attr(
@@ -100,5 +114,23 @@ select count(*)
         self.connection
             .query::<Entity>(sql, &[item_id, token])
             .map(|x| x.try_get(0))
+    }
+
+    pub fn rss(&self, user_id: &uuid::Uuid) -> crate::Result<Vec<FeedItem>> {
+        let query = r#"
+select item.item_id, item.content, item.link, item.published, item.title,
+         source.tags as tags, array_remove(array_agg(media), null) as media
+    from item
+    join source using (source_id)
+    join "user" using (user_id)
+    left join media using (item_id)
+    where user_id = $*
+    group by item.item_id, source.title, source.tags
+    order by published desc, title
+    limit 25"#;
+
+        let rows = self.connection.query::<FeedItem>(query, &[user_id])?;
+
+        Ok(rows.into_vec())
     }
 }

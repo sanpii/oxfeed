@@ -47,6 +47,10 @@ pub(crate) fn Component() -> yew::Html {
     let document = gloo::utils::document();
     document.set_onvisibilitychange((*on_visibility_change).as_ref().dyn_ref());
 
+    yew::use_effect_with((), |_| {
+        change_rss();
+    });
+
     yew::use_effect_with(theme, |theme| {
         let document = gloo::utils::document();
         let Some(root) = document.document_element() else {
@@ -87,6 +91,21 @@ fn sse(
     });
 
     es
+}
+
+fn change_rss() {
+    yew::platform::spawn_local(async move {
+        let Ok(me) = crate::Api::auth().await else {
+            return;
+        };
+
+        let document = gloo::utils::document();
+
+        if let Ok(Some(element)) = document.query_selector("link[type=\"application/rss+xml\"]") {
+            let href = format!("{}/rss/{}", env!("API_URL"), me.id);
+            element.set_attribute("href", &href).ok();
+        }
+    });
 }
 
 fn switch(route: Route) -> yew::Html {

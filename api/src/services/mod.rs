@@ -3,6 +3,7 @@ pub(crate) mod favicon;
 pub(crate) mod icon;
 pub(crate) mod item;
 pub(crate) mod opml;
+pub(crate) mod rss;
 pub(crate) mod search;
 pub(crate) mod source;
 pub(crate) mod sse;
