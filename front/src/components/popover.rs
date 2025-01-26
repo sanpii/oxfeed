@@ -2,6 +2,8 @@
 pub(crate) struct Properties {
     #[prop_or_default]
     pub title: Option<String>,
+    #[prop_or_default]
+    pub class: Option<String>,
     pub body: yew::Html,
     pub children: yew::Html,
 }
@@ -13,10 +15,9 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     yew::html! {
         <>
             <button
-                class="btn btn-sm"
+                class={ yew::classes!("btn", "btn-sm", props.class.clone()) }
                 popovertarget={ id.clone() }
                 popovertargetaction="toggle"
-                style="padding: 0; margin: 0;"
             >
                 { props.children.clone() }
             </button>

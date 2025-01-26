@@ -8,6 +8,7 @@ enum Scene {
 #[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     pub value: oxfeed::source::Entity,
+    pub webhooks: Vec<oxfeed::webhook::Entity>,
 }
 
 #[yew::function_component]
@@ -101,10 +102,24 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                             if source.webhooks.is_empty() {
                                 yew::Html::default()
                             } else {
+                                let body = yew::html! {
+                                    <ul>
+                                    {
+                                        for source.webhooks.iter().map(|webhook_id| {
+                                            if let Some(w) = props.webhooks.iter().find(|x| x.id == Some(*webhook_id)) {
+                                                yew::html! { <li>{ w.name.clone() }</li> }
+                                            } else {
+                                                yew::Html::default()
+                                            }
+                                        })
+                                    }
+                                    </ul>
+                                };
+
                                 yew::html! {
-                                    <button class={ yew::classes!("btn", "btn-warning") } disabled=true>
+                                    <super::Popover {body} class="btn-warning">
                                         <super::Svg icon="plug" size=16 />
-                                    </button>
+                                    </super::Popover>
                                 }
                             }
                         }

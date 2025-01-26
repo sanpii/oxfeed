@@ -19,6 +19,18 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let filter = yew::use_memo(props.clone(), |props| props.filter.clone());
     let need_update = yew::use_memo(context.clone(), |context| context.need_update);
     let pager = yew::use_state(|| None);
+    let webhooks = yew::use_state(Vec::new);
+
+    {
+        let context = context.clone();
+        let webhooks = webhooks.clone();
+
+        yew::use_effect_with((), |_| {
+            wasm_bindgen_futures::spawn_local(async move {
+                webhooks.set(crate::api::call!(context, webhooks_all));
+            });
+        });
+    }
 
     {
         let context = context.clone();
@@ -109,7 +121,10 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 for pager.iterator.iter().map(|item| {
                     yew::html! {
                         <li class="list-group-item">
-                            <crate::components::Source value={ item.clone() } />
+                            <crate::components::Source
+                                webhooks={ (*webhooks).clone() }
+                                value={ item.clone() }
+                            />
                         </li>
                     }
                 })
