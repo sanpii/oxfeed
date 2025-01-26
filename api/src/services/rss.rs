@@ -17,7 +17,7 @@ async fn index(
             let categories = x
                 .tags
                 .iter()
-                .map(|tag| format!("<category>{tag}</category>"))
+                .map(|tag| format!("<category>{}</category>", html_encode(tag)))
                 .collect::<Vec<_>>()
                 .join("\n");
 
@@ -73,4 +73,11 @@ async fn index(
         .body(rss);
 
     Ok(response)
+}
+
+fn html_encode(text: &str) -> String {
+    text
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
 }
