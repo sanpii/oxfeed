@@ -98,14 +98,20 @@ impl Task {
     fn fetch(elephantry: &elephantry::Connection, source: &Source) -> oxfeed::Result {
         log::info!("Fetching {}", source.url);
 
+        let response = attohttpc::RequestBuilder::try_new(attohttpc::Method::GET, &source.url)?
+            .timeout(std::time::Duration::from_secs(5 * 60))
+            .send()?;
+
+        if !Self::is_modified(response.headers(), elephantry, source).unwrap_or_default() {
+            return Ok(());
+        }
+
+        let contents = response.text()?;
+
         let webhooks = elephantry
             .find_where::<WebhookModel>("webhook_id = any($*)", &[&source.webhooks], None)?
             .into_vec();
 
-        let contents = attohttpc::RequestBuilder::try_new(attohttpc::Method::GET, &source.url)?
-            .timeout(std::time::Duration::from_secs(5 * 60))
-            .send()?
-            .text()?;
         let feed = feed_rs::parser::parse(contents.as_bytes())?;
         let feed_icon = feed.icon.map(|x| x.uri);
 
@@ -152,6 +158,25 @@ impl Task {
         }
 
         Ok(())
+    }
+
+    fn is_modified(
+        headers: &attohttpc::header::HeaderMap,
+        elephantry: &elephantry::Connection,
+        source: &Source,
+    ) -> std::result::Result<bool, Box<dyn std::error::Error>> {
+        let last_modified = match headers.get(attohttpc::header::LAST_MODIFIED) {
+            Some(last_modified) => last_modified.to_str()?,
+            None => return Ok(true),
+        };
+
+        let last_modified = chrono::DateTime::parse_from_rfc2822(last_modified)?;
+
+        let query = "select published from item join source using(source_id) where source_id = $* order by 1 desc limit 1;";
+        let last_item =
+            elephantry.query_one::<chrono::DateTime<chrono::FixedOffset>>(query, &[&source.id])?;
+
+        Ok(last_item > last_modified)
     }
 
     fn create_media(
