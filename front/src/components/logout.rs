@@ -12,7 +12,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         let context = context.clone();
         let navigator = navigator.clone();
 
-        wasm_bindgen_futures::spawn_local(async move {
+        yew::platform::spawn_local(async move {
             crate::api::call!(context, auth_logout);
             context.dispatch(crate::Action::AuthRequire);
 

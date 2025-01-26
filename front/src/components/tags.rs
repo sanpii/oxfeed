@@ -12,7 +12,7 @@ pub(crate) fn Component() -> yew::Html {
             let pagination = pagination.clone();
             let tags = tags.clone();
 
-            wasm_bindgen_futures::spawn_local(async move {
+            yew::platform::spawn_local(async move {
                 let new_tags = crate::api::call!(context, tags_all, &pagination);
                 tags.set(new_tags);
             });
@@ -83,7 +83,7 @@ fn Tag(props: &TagProperties) -> yew::Html {
             let name = name.clone();
             let tag = tag.clone();
 
-            wasm_bindgen_futures::spawn_local(async move {
+            yew::platform::spawn_local(async move {
                 crate::api::call!(context, tags_rename, &tag, &name);
             });
             scene.set(Scene::View);

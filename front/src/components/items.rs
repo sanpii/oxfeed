@@ -28,7 +28,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             |deps| {
                 let deps = deps.clone();
 
-                wasm_bindgen_futures::spawn_local(async move {
+                yew::platform::spawn_local(async move {
                     let new_pager = if deps.0.is_empty() {
                         crate::api::call!(context, items_all, &deps.1, &deps.2)
                     } else {

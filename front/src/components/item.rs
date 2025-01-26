@@ -8,7 +8,7 @@ macro_rules! toggle {
             let item = item.clone();
             let context = context.clone();
 
-            wasm_bindgen_futures::spawn_local(async move {
+            yew::platform::spawn_local(async move {
                 $crate::api::call!(context, items_tag, &item.id, stringify!($name), !item.$name);
                 context.dispatch($crate::Action::NeedUpdate);
             });
@@ -81,7 +81,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             let context = context.clone();
             let item = item.clone();
 
-            wasm_bindgen_futures::spawn_local(async move {
+            yew::platform::spawn_local(async move {
                 let item_id = &item.id;
 
                 content.set(Some(crate::api::call!(context, items_content, item_id)));

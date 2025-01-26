@@ -17,7 +17,6 @@ serde_json.workspace = true
 sha2.workspace = true
 urlencoding = "2.0"
 wasm-bindgen = "0.2"
-wasm-bindgen-futures = "0.4"
 wasm-cookies = "0.2"
 wasm-logger = "0.2"
 yew-callback = "0.1"

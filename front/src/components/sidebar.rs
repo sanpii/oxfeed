@@ -125,7 +125,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         yew::use_effect_with(need_update, move |_| {
             let counts = counts.clone();
 
-            wasm_bindgen_futures::spawn_local(async move {
+            yew::platform::spawn_local(async move {
                 counts.set(crate::api::call!(context, counts));
             });
         });
@@ -162,7 +162,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let read_all = yew_callback::callback!(context, move |_| {
         let context = context.clone();
 
-        wasm_bindgen_futures::spawn_local(async move {
+        yew::platform::spawn_local(async move {
             crate::api::call!(context, items_read);
         });
     });

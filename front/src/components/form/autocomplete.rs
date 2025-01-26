@@ -40,7 +40,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 let filter = (*value).clone().into();
                 let terms = terms.clone();
 
-                wasm_bindgen_futures::spawn_local(async move {
+                yew::platform::spawn_local(async move {
                     let pager = crate::api::call!(context, tags_search, &filter, &pagination);
                     terms.set(pager.iterator);
                 });

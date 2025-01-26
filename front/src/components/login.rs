@@ -26,7 +26,7 @@ pub(crate) fn Component() -> yew::Html {
                 email: info.email,
             };
 
-            wasm_bindgen_futures::spawn_local(async move {
+            yew::platform::spawn_local(async move {
                 crate::api::call!(context, account_create, &user);
 
                 let alert = crate::Alert::info("User created");
@@ -41,7 +41,7 @@ pub(crate) fn Component() -> yew::Html {
         move |info: crate::components::form::login::Info| {
             let context = context.clone();
 
-            wasm_bindgen_futures::spawn_local(async move {
+            yew::platform::spawn_local(async move {
                 crate::api::call!(
                     context,
                     auth_login,

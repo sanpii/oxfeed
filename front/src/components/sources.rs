@@ -26,7 +26,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         let webhooks = webhooks.clone();
 
         yew::use_effect_with((), |_| {
-            wasm_bindgen_futures::spawn_local(async move {
+            yew::platform::spawn_local(async move {
                 webhooks.set(crate::api::call!(context, webhooks_all));
             });
         });
@@ -42,7 +42,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 let context = context.clone();
                 let deps = deps.clone();
 
-                wasm_bindgen_futures::spawn_local(async move {
+                yew::platform::spawn_local(async move {
                     let new_pager = if deps.0.is_empty() {
                         crate::api::call!(context, sources_all, &deps.1)
                     } else {
@@ -65,7 +65,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let on_submit = yew_callback::callback!(context, scene, move |source| {
         let context = context.clone();
 
-        wasm_bindgen_futures::spawn_local(async move {
+        yew::platform::spawn_local(async move {
             crate::api::call!(context, sources_create, &source);
             context.dispatch(crate::Action::NeedUpdate);
         });

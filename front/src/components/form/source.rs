@@ -21,7 +21,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         yew::use_state(|| {
             let context = context.clone();
 
-            wasm_bindgen_futures::spawn_local(async move {
+            yew::platform::spawn_local(async move {
                 let webhooks = crate::api::call!(context, webhooks_all);
                 all_webhooks.set(webhooks);
             })

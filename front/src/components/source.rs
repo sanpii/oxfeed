@@ -28,7 +28,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             let source = source.clone();
             let context = context.clone();
 
-            wasm_bindgen_futures::spawn_local(async move {
+            yew::platform::spawn_local(async move {
                 let id = source.id.unwrap();
 
                 crate::api::call!(context, sources_delete, &id);
@@ -50,7 +50,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             let scene = scene.clone();
             let source = source.clone();
 
-            wasm_bindgen_futures::spawn_local(async move {
+            yew::platform::spawn_local(async move {
                 let id = new_source.id.unwrap();
 
                 crate::api::call!(context, sources_update, &id, &new_source);

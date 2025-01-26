@@ -10,7 +10,7 @@ pub(crate) fn Component() -> yew::Html {
         yew::use_state(|| {
             let context = context.clone();
 
-            wasm_bindgen_futures::spawn_local(async move {
+            yew::platform::spawn_local(async move {
                 let new_account = crate::api::call!(context, auth).into();
                 account.set(Some(new_account));
             })
@@ -24,7 +24,7 @@ pub(crate) fn Component() -> yew::Html {
     let on_save = yew_callback::callback!(context, move |new_account| {
         let context = context.clone();
 
-        wasm_bindgen_futures::spawn_local(async move {
+        yew::platform::spawn_local(async move {
             crate::api::call!(context, account_update, &new_account);
             logout().await.unwrap()
         });
@@ -35,7 +35,7 @@ pub(crate) fn Component() -> yew::Html {
         let message = "Would you like delete your account?";
 
         if gloo::dialogs::confirm(message) {
-            wasm_bindgen_futures::spawn_local(async move {
+            yew::platform::spawn_local(async move {
                 crate::api::call!(context, account_delete);
                 logout().await.unwrap()
             });
