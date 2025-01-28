@@ -28,7 +28,7 @@ pub struct FeedItem {
     pub id: uuid::Uuid,
     pub link: String,
     pub content: Option<String>,
-    pub published: chrono::DateTime<chrono::offset::Utc>,
+    pub published: String,
     pub title: String,
     pub tags: Vec<String>,
     #[cfg_attr(feature = "elephantry", elephantry(default))]
@@ -118,7 +118,7 @@ select count(*)
 
     pub fn rss(&self, user_id: &uuid::Uuid) -> crate::Result<Vec<FeedItem>> {
         let query = r#"
-select item.item_id, item.content, item.link, item.published, item.title,
+select item.item_id, item.content, item.link, to_char(item.published, 'DD Mon YY HH24:MI:SS TZHTZM') as published, item.title,
          source.tags as tags, array_remove(array_agg(media), null) as media
     from item
     join source using (source_id)
