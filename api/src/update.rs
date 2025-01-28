@@ -98,7 +98,8 @@ impl Task {
     fn fetch(elephantry: &elephantry::Connection, source: &Source) -> oxfeed::Result {
         log::info!("Fetching {}", source.url);
 
-        let response = attohttpc::RequestBuilder::try_new(attohttpc::Method::GET, &source.url)?
+        let response = reqwest::blocking::Client::new()
+            .get(&source.url)
             .timeout(std::time::Duration::from_secs(5 * 60))
             .send()?;
 
@@ -161,11 +162,11 @@ impl Task {
     }
 
     fn is_modified(
-        headers: &attohttpc::header::HeaderMap,
+        headers: &reqwest::header::HeaderMap,
         elephantry: &elephantry::Connection,
         source: &Source,
     ) -> std::result::Result<bool, Box<dyn std::error::Error>> {
-        let last_modified = match headers.get(attohttpc::header::LAST_MODIFIED) {
+        let last_modified = match headers.get(reqwest::header::LAST_MODIFIED) {
             Some(last_modified) => last_modified.to_str()?,
             None => return Ok(true),
         };
@@ -207,13 +208,12 @@ impl Task {
     fn icon(link: &str) -> Option<String> {
         let selector = scraper::Selector::parse("link[rel=\"icon\"]").unwrap();
 
-        let Ok(request) = attohttpc::RequestBuilder::try_new(attohttpc::Method::GET, link) else {
+        let Ok(response) = reqwest::blocking::get(link) else {
             return None;
         };
 
-        let contents = match request.send() {
-            Ok(contents) => contents.text().unwrap_or_default(),
-            Err(_) => return None,
+        let Ok(contents) = response.text() else {
+            return None;
         };
 
         let html = scraper::Html::parse_document(&contents);
@@ -263,12 +263,13 @@ impl Task {
     fn call_webhook(webhook: &Webhook, item: &Item) -> oxfeed::Result {
         log::info!("call webhook '{}'", webhook.name);
 
-        let response = attohttpc::RequestBuilder::try_new(attohttpc::Method::POST, &webhook.url)?
+        let response = reqwest::blocking::Client::new()
+            .post(&webhook.url)
             .timeout(std::time::Duration::from_secs(5 * 60))
-            .json(item)?
+            .json(item)
             .send()?;
 
-        if response.is_success() {
+        if response.status().is_success() {
             Ok(())
         } else {
             let error = format!(

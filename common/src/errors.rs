@@ -26,10 +26,6 @@ pub enum Error {
     #[error("{0}")]
     Feed(#[from] feed_rs::parser::ParseFeedError),
 
-    #[cfg(feature = "attohttpc")]
-    #[error("{0}")]
-    Httpc(#[from] attohttpc::Error),
-
     #[error("Invalid email or password")]
     InvalidLogin,
 
@@ -49,7 +45,6 @@ pub enum Error {
     #[error("{0}")]
     Opml(#[from] opml::Error),
 
-    #[cfg(feature = "reqwest")]
     #[error("{0}")]
     Reqwest(#[from] reqwest::Error),
 

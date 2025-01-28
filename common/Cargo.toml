@@ -10,15 +10,12 @@ chrono.workspace = true
 envir.workspace = true
 elephantry-extras.workspace = true
 jwt.workspace = true
+reqwest.workspace = true
 serde_json.workspace = true
 thiserror = "2.0"
 url.workspace = true
 
 [dependencies.actix-web]
-workspace = true
-optional = true
-
-[dependencies.attohttpc]
 workspace = true
 optional = true
 
@@ -47,10 +44,6 @@ optional = true
 workspace = true
 optional = true
 
-[dependencies.reqwest]
-workspace = true
-optional = true
-
 [dependencies.serde]
 workspace = true
 features = ["derive"]
@@ -61,5 +54,5 @@ features = ["serde"]
 
 [features]
 default = []
-back = ["actix-web", "attohttpc", "base64", "log", "feed-rs", "elephantry", "opml"]
-front = ["gloo", "reqwest"]
+back = ["actix-web", "base64", "log", "feed-rs", "elephantry", "opml"]
+front = ["gloo"]

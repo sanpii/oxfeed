@@ -2,7 +2,7 @@ pub(crate) fn get(url: &str) -> oxfeed::Result<Vec<u8>> {
     let path = path(url);
 
     let body = if path.exists() {
-        use std::io::Read;
+        use std::io::Read as _;
 
         let mut content = Vec::new();
         let mut file = std::fs::File::open(&path)?;
@@ -12,14 +12,12 @@ pub(crate) fn get(url: &str) -> oxfeed::Result<Vec<u8>> {
     } else {
         use std::io::Write;
 
-        let content = attohttpc::RequestBuilder::try_new(attohttpc::Method::GET, url)?
-            .send()?
-            .bytes()?;
+        let content = reqwest::blocking::Client::new().get(url).send()?.bytes()?;
         std::fs::create_dir_all(path.parent().unwrap())?;
         let mut file = std::fs::File::create(&path)?;
         file.write_all(&content)?;
 
-        content
+        content.to_vec()
     };
 
     Ok(body)

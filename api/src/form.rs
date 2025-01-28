@@ -71,10 +71,8 @@ impl Source {
         title
     }
 
-    fn fetch(url: &str) -> Result<String, attohttpc::Error> {
-        attohttpc::RequestBuilder::try_new(attohttpc::Method::GET, url)?
-            .send()?
-            .text()
+    fn fetch(url: &str) -> Result<String, reqwest::Error> {
+        reqwest::blocking::get(url)?.text()
     }
 }
 

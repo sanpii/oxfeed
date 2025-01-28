@@ -29,10 +29,6 @@ sha2.workspace = true
 tree_magic_mini = "3.0"
 url.workspace = true
 
-[dependencies.attohttpc]
-workspace = true
-features = ["json"]
-
 [dependencies.envir]
 workspace = true
 default-features = true
@@ -45,6 +41,10 @@ features = ["back"]
 [dependencies.elephantry]
 workspace = true
 features = ["numeric", "serde"]
+
+[dependencies.reqwest]
+workspace = true
+features = ["blocking", "json"]
 
 [dependencies.uuid]
 workspace = true

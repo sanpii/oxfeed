@@ -76,8 +76,7 @@ async fn index(
 }
 
 fn html_encode(text: &str) -> String {
-    text
-        .replace("&", "&amp;")
+    text.replace("&", "&amp;")
         .replace("<", "&lt;")
         .replace(">", "&gt;")
 }
