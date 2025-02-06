@@ -38,8 +38,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
         yew::use_effect_with(
             (filter.clone(), pagination.clone(), need_update),
-            move |deps| {
-                let context = context.clone();
+            |deps| {
                 let deps = deps.clone();
 
                 yew::platform::spawn_local(async move {

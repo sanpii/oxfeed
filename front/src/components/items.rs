@@ -15,8 +15,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let pager = yew::use_state(|| None);
 
     {
-        let pager = pager.clone();
         let context = context.clone();
+        let pager = pager.clone();
 
         yew::use_effect_with(
             (

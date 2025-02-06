@@ -14,7 +14,7 @@ pub(crate) struct Properties {
 #[yew::function_component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let context = crate::use_context();
-    let source = yew::use_state(|| props.value.clone());
+    let source = yew::use_memo(props.clone(), |props| props.value.clone());
     let scene = yew::use_state(Scene::default);
 
     let on_cancel = yew_callback::callback!(scene, move |_| {
@@ -44,18 +44,16 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let on_submit = yew_callback::callback!(
         context,
         scene,
-        source,
         move |new_source: oxfeed::source::Entity| {
             let context = context.clone();
             let scene = scene.clone();
-            let source = source.clone();
 
             yew::platform::spawn_local(async move {
                 let id = new_source.id.unwrap();
 
                 crate::api::call!(context, sources_update, &id, &new_source);
-                source.set(new_source);
                 scene.set(Scene::View);
+                context.dispatch(crate::Action::NeedUpdate);
             });
         }
     );
