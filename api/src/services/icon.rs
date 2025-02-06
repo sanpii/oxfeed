@@ -14,7 +14,7 @@ async fn icon(url: actix_web::web::Path<String>) -> oxfeed::Result<actix_web::Ht
     let url = base64::engine::general_purpose::STANDARD.decode(url.into_inner())?;
     let icon = String::from_utf8(url)?;
 
-    let body = match crate::cache::get(&icon) {
+    let body = match crate::cache::get(&icon).await {
         Ok(body) => body,
         Err(_) => EMPTY_IMG.to_vec(),
     };

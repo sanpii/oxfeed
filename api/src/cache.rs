@@ -1,4 +1,4 @@
-pub(crate) fn get(url: &str) -> oxfeed::Result<Vec<u8>> {
+pub(crate) async fn get(url: &str) -> oxfeed::Result<Vec<u8>> {
     let path = path(url);
 
     let body = if path.exists() {
@@ -12,7 +12,7 @@ pub(crate) fn get(url: &str) -> oxfeed::Result<Vec<u8>> {
     } else {
         use std::io::Write;
 
-        let content = reqwest::blocking::Client::new().get(url).send()?.bytes()?;
+        let content = reqwest::get(url).await?.bytes().await?;
         std::fs::create_dir_all(path.parent().unwrap())?;
         let mut file = std::fs::File::create(&path)?;
         file.write_all(&content)?;
