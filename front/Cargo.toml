@@ -45,7 +45,7 @@ features = ["json"]
 
 [dependencies.uuid]
 workspace = true
-features = ["v4"]
+features = ["v4", "js"]
 
 [dependencies.web-sys]
 version = "0.3"
