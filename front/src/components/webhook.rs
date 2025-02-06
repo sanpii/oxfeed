@@ -9,14 +9,17 @@ enum Scene {
 pub(crate) struct Properties {
     pub value: oxfeed::webhook::Entity,
     #[prop_or_default]
-    pub on_delete: yew::Callback<()>,
+    pub on_delete: yew::Callback<uuid::Uuid>,
+    #[prop_or_default]
+    pub on_save: yew::Callback<oxfeed::webhook::Entity>,
 }
 
 #[yew::function_component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let context = crate::use_context();
     let scene = yew::use_state(Scene::default);
-    let value = yew::use_state(|| props.value.clone());
+    let value = yew::use_memo(props.clone(), |props| props.value.clone());
+    let on_save = yew::use_memo(props.clone(), |props| props.on_save.clone());
 
     let on_delete =
         yew_callback::callback!(context, on_delete = props.on_delete, value, move |_| {
@@ -29,22 +32,23 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     crate::api::call!(context, webhooks_delete, &id);
                 });
 
-                on_delete.emit(());
+                on_delete.emit(id);
             }
         });
 
     let save = yew_callback::callback!(
         context,
+        on_save,
         scene,
-        value,
         move |webhook: oxfeed::webhook::Entity| {
             let context = context.clone();
-
-            let id = webhook.id.unwrap();
-            value.set(webhook.clone());
+            let on_save = on_save.clone();
 
             yew::platform::spawn_local(async move {
+                let id = webhook.id.unwrap();
+
                 crate::api::call!(context, webhooks_update, &id, &webhook);
+                on_save.emit(webhook);
             });
 
             scene.set(Scene::View);
@@ -89,7 +93,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         <button
                             class={ yew::classes!("btn", "btn-danger") }
                             title="Delete"
-                            onclick={ on_delete }
+                            onclick={ on_delete.clone() }
                         >
                             <super::Svg icon="trash" size=16 />
                         </button>

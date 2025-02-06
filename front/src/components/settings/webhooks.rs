@@ -8,7 +8,6 @@ enum Scene {
 #[yew::function_component]
 pub(crate) fn Component() -> yew::Html {
     let context = crate::use_context();
-    let force_reload = yew::use_state(|| 0);
     let scene = yew::use_state(Scene::default);
     let webhooks = yew::use_state(Vec::new);
 
@@ -16,7 +15,7 @@ pub(crate) fn Component() -> yew::Html {
         let context = context.clone();
         let webhooks = webhooks.clone();
 
-        yew::use_effect_with(force_reload.clone(), move |_| {
+        yew::use_effect_with((), move |_| {
             let context = context.clone();
             let webhooks = webhooks.clone();
 
@@ -35,17 +34,28 @@ pub(crate) fn Component() -> yew::Html {
         scene.set(Scene::View);
     });
 
-    let on_delete = yew_callback::callback!(force_reload, move |_| {
-        force_reload.set(*force_reload + 1);
+    let on_delete = yew_callback::callback!(webhooks, move |id| {
+        let new_webhooks = webhooks
+            .iter()
+            .filter(|x| x.id != Some(id))
+            .cloned()
+            .collect();
+        webhooks.set(new_webhooks);
     });
 
-    let on_submit = yew_callback::callback!(context, force_reload, scene, move |webhook| {
+    let on_save = yew_callback::callback!(webhooks, move |webhook| {
+        let mut new_webhooks = (*webhooks).clone();
+        new_webhooks.insert(0, webhook);
+        webhooks.set(new_webhooks);
+    });
+
+    let on_submit = yew_callback::callback!(context, on_save, scene, move |webhook| {
         let context = context.clone();
-        let force_reload = force_reload.clone();
+        let on_save = on_save.clone();
 
         yew::platform::spawn_local(async move {
             crate::api::call!(context, webhooks_create, &webhook);
-            force_reload.set(*force_reload + 1);
+            on_save.emit(webhook);
         });
 
         scene.set(Scene::View);
@@ -92,6 +102,7 @@ pub(crate) fn Component() -> yew::Html {
                         <crate::components::Webhook
                             value={ webhook.clone() }
                             on_delete={ on_delete.clone() }
+                            on_save={ on_save.clone() }
                         />
                     </li>
                 }
