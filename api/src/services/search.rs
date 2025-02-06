@@ -117,8 +117,11 @@ async fn sources(
 
     let mut clause = elephantry::Where::builder()
         .and_where("source.title ~* $*", vec![&q])
-        .or_where("source.url ~* $*", vec![&q])
         .build();
+
+    if let Some(source) = &query.source {
+        clause.and_where("source.url ~* $*", vec![source])
+    }
 
     if let Some(tag) = &query.tag {
         clause.and_where("$* = any(source.tags)", vec![tag]);
