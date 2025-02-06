@@ -36,21 +36,18 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         let context = context.clone();
         let pager = pager.clone();
 
-        yew::use_effect_with(
-            (filter.clone(), pagination.clone(), need_update),
-            |deps| {
-                let deps = deps.clone();
+        yew::use_effect_with((filter.clone(), pagination.clone(), need_update), |deps| {
+            let deps = deps.clone();
 
-                yew::platform::spawn_local(async move {
-                    let new_pager = if deps.0.is_empty() {
-                        crate::api::call!(context, sources_all, &deps.1)
-                    } else {
-                        crate::api::call!(context, sources_search, &deps.0, &deps.1)
-                    };
-                    pager.set(Some(new_pager));
-                });
-            },
-        );
+            yew::platform::spawn_local(async move {
+                let new_pager = if deps.0.is_empty() {
+                    crate::api::call!(context, sources_all, &deps.1)
+                } else {
+                    crate::api::call!(context, sources_search, &deps.0, &deps.1)
+                };
+                pager.set(Some(new_pager));
+            });
+        });
     }
 
     let on_add = yew_callback::callback!(scene, move |_| {

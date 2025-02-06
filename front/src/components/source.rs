@@ -41,10 +41,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         scene.set(Scene::Edit);
     });
 
-    let on_submit = yew_callback::callback!(
-        context,
-        scene,
-        move |new_source: oxfeed::source::Entity| {
+    let on_submit =
+        yew_callback::callback!(context, scene, move |new_source: oxfeed::source::Entity| {
             let context = context.clone();
             let scene = scene.clone();
 
@@ -55,8 +53,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 scene.set(Scene::View);
                 context.dispatch(crate::Action::NeedUpdate);
             });
-        }
-    );
+        });
 
     let on_toggle = yew_callback::callback!(source, on_submit, move |active| {
         let mut new_source = (*source).clone();

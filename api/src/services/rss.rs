@@ -45,9 +45,7 @@ async fn index(
     let mut template = tinytemplate::TinyTemplate::new();
     template.add_template("rss", TEMPLATE).unwrap();
 
-    let context = Context {
-        items,
-    };
+    let context = Context { items };
     let rss = template.render("rss", &context).unwrap();
 
     let response = actix_web::HttpResponse::Ok()
