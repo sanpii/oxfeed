@@ -114,7 +114,7 @@ impl Task {
             .send()
             .await?;
 
-        if !Self::is_modified(response.headers(), elephantry, source).unwrap_or_default() {
+        if !Self::is_modified(response.headers(), elephantry, source).unwrap_or(true) {
             return Ok(());
         }
 
