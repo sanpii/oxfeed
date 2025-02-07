@@ -324,21 +324,8 @@ li.list-group-item {
             font-size: 16px;
         }
 
-        input {
-            margin-bottom: -1px;
-            border-radius: 0;
-
-            &:first-of-type {
-                margin-bottom: -1px;
-                border-top-right-radius: 4px;
-                border-top-left-radius: 4px;
-            }
-
-            &:last-of-type {
-                margin-bottom: 10px;
-                border-bottom-left-radius: 4px;
-                border-bottom-right-radius: 4px;
-            }
+        & > div {
+            margin-bottom: 10px;
         }
     }
 }
