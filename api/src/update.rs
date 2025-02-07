@@ -127,6 +127,17 @@ impl Task {
         let feed = feed_rs::parser::parse(contents.as_bytes())?;
         let feed_icon = feed.icon.map(|x| x.uri);
 
+        if source.title.is_empty() {
+            let title = feed.title.map(|x| x.content).unwrap_or_default();
+
+            if let Err(err) = elephantry.update_by_pk::<SourceModel>(
+                &elephantry::pk! { source_id => source.id },
+                &elephantry::values!(title),
+            ) {
+                log::error!("{err}");
+            }
+        }
+
         for entry in feed.entries {
             let link = match entry.links.first() {
                 Some(link) => link.href.clone(),
