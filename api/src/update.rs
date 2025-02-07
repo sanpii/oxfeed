@@ -22,19 +22,13 @@ impl Actor {
     pub fn start(self) -> actix::Addr<Self> {
         actix::Supervisor::start(|_| self)
     }
-
-    fn run(&self) {
-        if let Err(error) = Task::run(&self.elephantry) {
-            log::error!("{error}");
-        }
-    }
 }
 
 impl actix::Actor for Actor {
     type Context = actix::Context<Self>;
 
     fn started(&mut self, ctx: &mut Self::Context) {
-        use actix::AsyncContext;
+        use actix::AsyncContext as _;
 
         let minutes = envir::parse("UPDATE_INTERVAL").unwrap_or(20);
         let interval = std::time::Duration::from_secs(60 * minutes);
@@ -52,62 +46,79 @@ impl actix::Supervised for Actor {}
 pub struct Signal;
 
 impl actix::Handler<Signal> for Actor {
-    type Result = ();
+    type Result = actix::ResponseActFuture<Self, ()>;
 
-    fn handle(&mut self, _: Signal, ctx: &mut actix::Context<Self>) {
-        use actix::AsyncContext;
+    fn handle(&mut self, _: Signal, _: &mut actix::Context<Self>) -> Self::Result {
+        use actix::ActorFutureExt as _;
+        use actix::WrapFuture as _;
 
-        ctx.run_later(std::time::Duration::from_secs(0), |act, _| {
-            log::warn!("Start update");
-            act.run();
-            log::warn!("Update finished");
-        });
+        log::warn!("Start update");
+
+        Box::pin(
+            Task::run(self.elephantry.get_default().unwrap().clone())
+                .into_actor(self)
+                .map(|res, _, _| {
+                    if let Err(error) = res {
+                        log::error!("{error}");
+                    }
+                    log::warn!("Update finished");
+                }),
+        )
     }
 }
 
 struct Task;
 
 impl Task {
-    fn run(elephantry: &elephantry::Connection) -> oxfeed::Result {
+    async fn run(elephantry: elephantry::Connection) -> oxfeed::Result {
         let sources = elephantry
             .find_where::<SourceModel>("active", &[], None)?
             .collect::<Vec<_>>();
 
-        sources.par_iter().for_each(|source| {
-            let last_error = match Self::fetch(elephantry, source) {
-                Ok(_) => None,
-                Err(err) => {
-                    log::error!("{err}");
-                    Some(err.to_string())
-                }
-            };
+        let handles = sources
+            .par_iter()
+            .map(|source| async {
+                let source = source.clone();
+                let elephantry = elephantry.clone();
 
-            if let Err(err) = elephantry.update_by_pk::<SourceModel>(
-                &elephantry::pk! { source_id => source.id },
-                &elephantry::values!(last_error),
-            ) {
-                log::error!("{err}");
-            }
-        });
+                let last_error = match Self::fetch(&elephantry, &source).await {
+                    Ok(_) => None,
+                    Err(err) => {
+                        log::error!("{err}");
+                        Some(err.to_string())
+                    }
+                };
+
+                if let Err(err) = elephantry.update_by_pk::<SourceModel>(
+                    &elephantry::pk! { source_id => source.id },
+                    &elephantry::values!(last_error),
+                ) {
+                    log::error!("{err}");
+                }
+            })
+            .collect::<Vec<_>>();
+
+        futures_util::future::join_all(handles).await;
 
         elephantry.execute("refresh materialized view concurrently fts.item")?;
 
         Ok(())
     }
 
-    fn fetch(elephantry: &elephantry::Connection, source: &Source) -> oxfeed::Result {
+    async fn fetch(elephantry: &elephantry::Connection, source: &Source) -> oxfeed::Result {
         log::info!("Fetching {}", source.url);
 
-        let response = reqwest::blocking::Client::new()
+        let response = reqwest::Client::new()
             .get(&source.url)
             .timeout(std::time::Duration::from_secs(5 * 60))
-            .send()?;
+            .send()
+            .await?;
 
         if !Self::is_modified(response.headers(), elephantry, source).unwrap_or_default() {
             return Ok(());
         }
 
-        let contents = response.text()?;
+        let contents = response.text().await?;
 
         let webhooks = elephantry
             .find_where::<WebhookModel>("webhook_id = any($*)", &[&source.webhooks], None)?
@@ -139,7 +150,10 @@ impl Task {
 
                 let mut item = Item {
                     id: None,
-                    icon: feed_icon.clone().or_else(|| Self::icon(&link)),
+                    icon: match feed_icon {
+                        Some(ref icon) => Some(icon.clone()),
+                        None => Self::icon(&link).await,
+                    },
                     content,
                     title,
                     published: entry.published,
@@ -205,14 +219,14 @@ impl Task {
         Ok(())
     }
 
-    fn icon(link: &str) -> Option<String> {
+    async fn icon(link: &str) -> Option<String> {
         let selector = scraper::Selector::parse("link[rel=\"icon\"]").unwrap();
 
-        let Ok(response) = reqwest::blocking::get(link) else {
+        let Ok(response) = reqwest::get(link).await else {
             return None;
         };
 
-        let Ok(contents) = response.text() else {
+        let Ok(contents) = response.text().await else {
             return None;
         };
 
