@@ -14,8 +14,18 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let pagination = yew::use_state(|| elephantry_extras::Pagination::from(crate::Location::new()));
     let pager = yew::use_state(|| None);
 
+    let on_page_change = yew_callback::callback!(pagination, move |page| {
+        pagination.set(elephantry_extras::Pagination {
+            page,
+            ..*pagination
+        });
+
+        gloo::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
+    });
+
     {
         let context = context.clone();
+        let on_page_change = on_page_change.clone();
         let pager = pager.clone();
 
         yew::use_effect_with(
@@ -34,20 +44,16 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     } else {
                         crate::api::call!(context, items_search, &deps.1, &deps.0, &deps.2)
                     };
-                    pager.set(Some(new_pager));
+
+                    if new_pager.is_empty() && new_pager.page > 1 {
+                        on_page_change.emit(new_pager.page - 1);
+                    } else {
+                        pager.set(Some(new_pager));
+                    }
                 });
             },
         );
     }
-
-    let on_page_change = yew_callback::callback!(pagination, move |page| {
-        pagination.set(elephantry_extras::Pagination {
-            page,
-            ..*pagination
-        });
-
-        gloo::utils::window().scroll_to_with_x_and_y(0.0, 0.0);
-    });
 
     let Some(pager) = (*pager).clone() else {
         return yew::html! { <super::Empty /> };

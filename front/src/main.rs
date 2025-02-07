@@ -38,6 +38,12 @@ pub(crate) struct Pager<T> {
     iterator: Vec<T>,
 }
 
+impl<T> Pager<T> {
+    fn is_empty(&self) -> bool {
+        self.result_count == 0
+    }
+}
+
 impl<T> From<Pager<T>> for elephantry_extras::Pager {
     fn from(pager: Pager<T>) -> Self {
         elephantry_extras::Pager {
