@@ -19,7 +19,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     });
 
     yew::html! {
-        <div class={ yew::classes!("form-check", "form-switch") }>
+        <div class="form-check form-switch">
             <input
                 id={ props.id.clone() }
                 type="checkbox"

@@ -148,7 +148,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             }
 
             <a
-                class={ yew::classes!("btn", "btn-primary") }
+                class="btn btn-primary"
                 title="Save"
                 onclick={ on_submit }
             >
@@ -157,7 +157,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             </a>
 
             <a
-                class={ yew::classes!("btn", "btn-secondary") }
+                class="btn btn-secondary"
                 title="Cancel"
                 onclick={ on_cancel }
             >

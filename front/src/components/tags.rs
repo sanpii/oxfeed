@@ -26,7 +26,7 @@ pub(crate) fn Component() -> yew::Html {
     let max = tags.iter().map(|x| x.count).max().unwrap_or(1);
 
     yew::html! {
-        <div class={ yew::classes!("d-flex", "flex-wrap", "align-items-center", "cloud") }>
+        <div class="d-flex flex-wrap align-items-center cloud">
         {
             for tags.iter().map(|tag| yew::html! {
                 <Tag tag={ tag.clone() } {max} />

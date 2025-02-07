@@ -50,7 +50,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
     if props.inline {
         yew::html! {
-            <div class={ yew::classes!("actions", "inline") }>
+            <div class="actions inline">
                 <span class="read" onclick={ on_read } title={ read_icon.label }>
                     <super::Svg icon={ read_icon.icon } size=24 />
                 </span>
@@ -62,11 +62,11 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     } else {
         yew::html! {
             <div class="actions">
-                <button class={ yew::classes!("btn", "btn-outline-primary") } onclick={ on_read }>
+                <button class="btn btn-outline-primary" onclick={ on_read }>
                     <super::Svg icon={ read_icon.icon } size=24 />
                     { read_icon.label }
                 </button>
-                <button class={ yew::classes!("btn", "btn-outline-warning") } onclick={ on_favorite }>
+                <button class="btn btn-outline-warning" onclick={ on_favorite }>
                     <super::Svg icon={ favorite_icon.icon } size=24 />
                     { favorite_icon.label }
                 </button>

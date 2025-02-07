@@ -92,7 +92,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         }
                     </div>
 
-                    <div class={ yew::classes!("btn-group", "float-end") }>
+                    <div class="btn-group float-end">
                         {
                             if source.webhooks.is_empty() {
                                 yew::Html::default()
@@ -119,14 +119,14 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                             }
                         }
                         <button
-                            class={ yew::classes!("btn", "btn-primary") }
+                            class="btn btn-primary"
                             title="Edit"
                             onclick={ on_edit }
                         >
                             <super::Svg icon="pencil-square" size=16 />
                         </button>
                         <button
-                            class={ yew::classes!("btn", "btn-danger") }
+                            class="btn btn-danger"
                             title="Delete"
                             onclick={ on_delete }
                         >

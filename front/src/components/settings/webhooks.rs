@@ -67,7 +67,7 @@ pub(crate) fn Component() -> yew::Html {
             if matches!(*scene, Scene::View) {
                 yew::html! {
                     <a
-                        class={ yew::classes!("btn", "btn-primary") }
+                        class="btn btn-primary"
                         title="Add"
                         onclick={ on_add }
                     >

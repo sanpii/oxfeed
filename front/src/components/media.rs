@@ -36,14 +36,14 @@ fn expanded(props: &Properties) -> yew::Html {
         let media = &props.medias[0];
 
         yew::html! {
-            <a class={ yew::classes!("btn", "btn-outline-secondary", "medias") } href={ media.url.to_string() } target="_blank">
+            <a class="btn btn-outline-secondary medias" href={ media.url.to_string() } target="_blank">
                 <super::Svg icon="play-btn" size=24 />
                 { media.file_name().unwrap() }
             </a>
         }
     } else {
         yew::html! {
-            <button class={ yew::classes!("btn", "btn-outline-secondary", "medias") }>
+            <button class="btn btn-outline-secondary medias">
                 <super::Popover body={ popover_text(&props.medias) }>
                     <super::Svg icon="collection-play" size=24 />
                     { format!("{} medias", props.medias.len()) }

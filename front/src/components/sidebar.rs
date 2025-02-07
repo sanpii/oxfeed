@@ -170,7 +170,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     yew::html! {
         <>
             <button
-                class={ yew::classes!("btn", "btn-primary") }
+                class="btn btn-primary"
                 onclick={ read_all }
             >{ "Mark all as read" }</button>
             <ul class="nav flex-column">
@@ -198,7 +198,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     </li>
                 })
             }
-                <li class={ yew::classes!("nav-item", "d-md-none") } data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+                <li class="nav-item d-md-none" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
                     <super::Logout button=false />
                 </li>
             </ul>
