@@ -125,18 +125,7 @@ impl Task {
             .into_vec();
 
         let feed = feed_rs::parser::parse(contents.as_bytes())?;
-        let feed_icon = feed.icon.map(|x| x.uri);
-
-        if source.title.is_empty() {
-            let title = feed.title.map(|x| x.content).unwrap_or_default();
-
-            if let Err(err) = elephantry.update_by_pk::<SourceModel>(
-                &elephantry::pk! { source_id => source.id },
-                &elephantry::values!(title),
-            ) {
-                log::error!("{err}");
-            }
-        }
+        Self::update_source(&elephantry, &source, &feed).await?;
 
         for entry in feed.entries {
             let link = match entry.links.first() {
@@ -161,10 +150,6 @@ impl Task {
 
                 let mut item = Item {
                     id: None,
-                    icon: match feed_icon {
-                        Some(ref icon) => Some(icon.clone()),
-                        None => Self::icon(&link).await,
-                    },
                     content,
                     title,
                     published: entry.published,
@@ -203,6 +188,42 @@ impl Task {
             elephantry.query_one::<chrono::DateTime<chrono::FixedOffset>>(query, &[&source.id])?;
 
         Ok(last_item > last_modified)
+    }
+
+    async fn update_source(
+        elephantry: &elephantry::Connection,
+        source: &Source,
+        feed: &feed_rs::model::Feed,
+    ) -> oxfeed::Result {
+        let icon = match feed.icon.as_ref().map(|x| x.uri.clone()) {
+            Some(ref icon) => Some(icon.clone()),
+            None => {
+                if let Some(link) = feed.links.get(0) {
+                    Self::icon(&link.href).await
+                } else {
+                    None
+                }
+            }
+        };
+        let title = feed
+            .title
+            .as_ref()
+            .map(|x| x.content.clone())
+            .unwrap_or_default();
+
+        let mut values = elephantry::values!(icon);
+
+        if source.title.is_empty() {
+            values.insert("title".to_string(), &title);
+        }
+
+        if let Err(err) = elephantry
+            .update_by_pk::<SourceModel>(&elephantry::pk! { source_id => source.id }, &values)
+        {
+            log::error!("{err}");
+        }
+
+        Ok(())
     }
 
     fn create_media(

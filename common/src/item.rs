@@ -51,7 +51,6 @@ pub struct Entity {
     pub read: bool,
     pub favorite: bool,
     pub published: Option<chrono::DateTime<chrono::offset::Utc>>,
-    pub icon: Option<String>,
 }
 
 #[cfg(feature = "elephantry")]
@@ -69,7 +68,7 @@ impl Model {
         let query = format!(
             r#"
 select item.item_id, item.link, item.published, item.title,
-        '/icons/' || encode(convert_to(item.icon, 'utf8'), 'base64') as icon,
+        '/icons/' || encode(convert_to(source.icon, 'utf8'), 'base64') as icon,
         item.read, item.favorite, source.title as source, source.tags as tags,
         array_remove(array_agg(media), null) as media
     from item
@@ -77,7 +76,7 @@ select item.item_id, item.link, item.published, item.title,
     join "user" using (user_id)
     left join media using (item_id)
     where {}
-    group by item.item_id, source.title, source.tags
+    group by item.item_id, source.title, source.tags, source.icon
     order by published desc, title
     {}
         "#,

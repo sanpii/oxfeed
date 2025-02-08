@@ -29,6 +29,7 @@ impl std::convert::TryInto<oxfeed::source::Entity> for Source {
             id: self.id,
             tags: self.tags,
             title,
+            icon: None,
             url: self.url.clone(),
             user_id,
             active: self.active,

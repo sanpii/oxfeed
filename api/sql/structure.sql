@@ -16,6 +16,7 @@ create table if not exists source (
     source_id uuid primary key default uuid_generate_v4(),
     user_id uuid references "user"(user_id) not null,
     url text not null,
+    icon text,
     title text not null,
     tags text[] not null,
     last_error text,
@@ -43,7 +44,6 @@ create index if not exists webhook_user_id on source(user_id);
 create table if not exists item (
     item_id uuid primary key default uuid_generate_v4(),
     source_id uuid references source(source_id) not null,
-    icon text,
     link text not null,
     title text not null,
     content text,
