@@ -187,7 +187,7 @@ impl Task {
         let last_item =
             elephantry.query_one::<chrono::DateTime<chrono::FixedOffset>>(query, &[&source.id])?;
 
-        Ok(last_item > last_modified)
+        Ok(last_item < last_modified)
     }
 
     async fn update_source(
