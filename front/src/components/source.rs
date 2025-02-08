@@ -64,6 +64,11 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
     let source = (*source).clone();
 
+    let icon = source
+        .icon
+        .clone()
+        .unwrap_or_else(|| "/1px.png".to_string());
+
     match *scene {
         Scene::Edit => yew::html! {
             <super::form::Source {source} {on_cancel} {on_submit} />
@@ -78,7 +83,10 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                             {on_toggle}
                         />
 
-                        { source.title }
+                        <span>
+                            <img src={ icon } width="16" height="16" class="me-1" />
+                            { source.title }
+                        </span>
 
                         {
                             if let Some(last_error) = source.last_error {

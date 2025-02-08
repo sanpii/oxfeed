@@ -48,7 +48,7 @@ impl Model {
 
         let query = format!(
             r#"
-select source_id, last_error, title, url, user_id, active, webhooks,
+select source_id, last_error, title, url, user_id, active, icon, webhooks,
         array(select unnest(tags) order by 1) tags
     from source
     join "user" using (user_id)
