@@ -195,16 +195,7 @@ impl Task {
         source: &Source,
         feed: &feed_rs::model::Feed,
     ) -> oxfeed::Result {
-        let icon = match feed.icon.as_ref().map(|x| x.uri.clone()) {
-            Some(ref icon) => Some(icon.clone()),
-            None => {
-                if let Some(link) = feed.links.get(0) {
-                    Self::icon(&link.href).await
-                } else {
-                    None
-                }
-            }
-        };
+        let icon = Self::icon(feed).await;
         let title = feed
             .title
             .as_ref()
@@ -251,7 +242,25 @@ impl Task {
         Ok(())
     }
 
-    async fn icon(link: &str) -> Option<String> {
+    async fn icon(feed: &feed_rs::model::Feed) -> Option<String> {
+        if let Some(icon) = feed.icon.as_ref().map(|x| x.uri.clone()) {
+            return Some(icon);
+        }
+
+        if let Some(link) = feed.links.get(0) {
+            if let Some(icon) = Self::favicon(&link.href).await {
+                return Some(icon);
+            }
+        }
+
+        if let Some(link) = feed.entries.get(0).and_then(|x| x.links.get(0)) {
+            Self::favicon(&link.href).await
+        } else {
+            None
+        }
+    }
+
+    async fn favicon(link: &str) -> Option<String> {
         let selector = scraper::Selector::parse("link[rel=\"icon\"]").unwrap();
 
         let Ok(response) = reqwest::get(link).await else {
