@@ -125,7 +125,7 @@ impl Task {
             .into_vec();
 
         let feed = feed_rs::parser::parse(contents.as_bytes())?;
-        Self::update_source(&elephantry, &source, &feed).await?;
+        Self::update_source(elephantry, source, &feed).await?;
 
         for entry in feed.entries {
             let link = match entry.links.first() {
@@ -195,7 +195,7 @@ impl Task {
         source: &Source,
         feed: &feed_rs::model::Feed,
     ) -> oxfeed::Result {
-        let icon = Self::icon(feed).await;
+        let icon = Self::icon(feed, &source.url).await;
         let title = feed
             .title
             .as_ref()
@@ -242,34 +242,31 @@ impl Task {
         Ok(())
     }
 
-    async fn icon(feed: &feed_rs::model::Feed) -> Option<String> {
+    async fn icon(feed: &feed_rs::model::Feed, link: &str) -> Option<String> {
         if let Some(icon) = feed.icon.as_ref().map(|x| x.uri.clone()) {
             return Some(icon);
         }
 
-        if let Some(link) = feed.links.get(0) {
+        if let Some(link) = feed.links.first() {
             if let Some(icon) = Self::favicon(&link.href).await {
                 return Some(icon);
             }
         }
 
-        if let Some(link) = feed.entries.get(0).and_then(|x| x.links.get(0)) {
-            Self::favicon(&link.href).await
-        } else {
-            None
+        if let Some(link) = feed.entries.first().and_then(|x| x.links.first()) {
+            if let Some(icon) = Self::favicon(&link.href).await {
+                return Some(icon);
+            }
         }
+
+        Self::default_favicon(link).await
     }
 
     async fn favicon(link: &str) -> Option<String> {
         let selector = scraper::Selector::parse("link[rel=\"icon\"]").unwrap();
 
-        let Ok(response) = reqwest::get(link).await else {
-            return None;
-        };
-
-        let Ok(contents) = response.text().await else {
-            return None;
-        };
+        let response = reqwest::get(link).await.ok()?;
+        let contents = response.text().await.ok()?;
 
         let html = scraper::Html::parse_document(&contents);
         let icon = html.select(&selector).next()?;
@@ -287,6 +284,18 @@ impl Task {
             url.set_path("");
 
             Some(format!("{url}{}", href.trim_start_matches('/')))
+        }
+    }
+
+    async fn default_favicon(link: &str) -> Option<String> {
+        let url = url::Url::parse(link).ok()?;
+        let favicon = format!("{}/favicon.ico", url.origin().ascii_serialization());
+        let request = reqwest::get(&favicon).await.ok()?;
+
+        if request.status().is_success() {
+            Some(favicon.clone())
+        } else {
+            None
         }
     }
 
