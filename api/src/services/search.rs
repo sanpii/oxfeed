@@ -76,13 +76,12 @@ fn search(
     clause.and_where("token = $*", vec![&token]);
 
     writeln!(sql, "where {}", clause.to_string()).ok();
+    writeln!(sql, "group by i.item_id, s.title, s.tags, s.icon").ok();
 
     if query.q.is_some() {
-        sql.push_str(
-            "order by ts_rank_cd(f.document, websearch_to_tsquery($1)) desc, i.published desc\n",
-        );
+        writeln!(sql, ", f.document\norder by ts_rank_cd(f.document, websearch_to_tsquery($1)) desc, i.published desc").ok();
     } else {
-        sql.push_str("order by i.published desc\n");
+        writeln!(sql, "order by i.published desc").ok();
     }
 
     let pager = count::<oxfeed::item::Item>(elephantry, &sql, &clause.params(), &query.pagination)?;
