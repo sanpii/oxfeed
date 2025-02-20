@@ -77,9 +77,8 @@ impl Api {
         Ok(())
     }
 
-    #[allow(dependency_on_unit_never_type_fallback)]
     pub async fn auth_logout() -> oxfeed::Result {
-        Self::fetch(Method::POST, "/auth/logout", ()).await?;
+        Self::fetch::<_, ()>(Method::POST, "/auth/logout", ()).await?;
 
         Self::clear_token();
 
