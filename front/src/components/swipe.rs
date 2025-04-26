@@ -64,11 +64,10 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     });
 
     let ontouchmove = yew_callback::callback!(delta, start, move |e: web_sys::TouchEvent| {
-        use wasm_bindgen::JsCast as _;
-
-        let container = e.target().unwrap().unchecked_into::<web_sys::Element>();
         let client_x = e.touches().get(0).unwrap().client_x();
-        delta.set((*start - client_x) as f32 / container.client_width() as f32);
+        let window = web_sys::window().unwrap();
+        let width = window.inner_width().unwrap().as_f64().unwrap() as f32;
+        delta.set((*start - client_x) as f32 / width);
     });
 
     let ontouchend = yew_callback::callback!(delta, props, move |_| {
