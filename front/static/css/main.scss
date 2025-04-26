@@ -182,6 +182,7 @@ li.list-group-item {
     z-index: 100; /* Behind the navbar */
     padding: 48px 0 0; /* Height of navbar */
     box-shadow: inset -1px 0 0 var(--bs-border-color-translucent);
+    background-color: var(--bs-body-bg);
 
     .nav-link {
         font-weight: 500;
