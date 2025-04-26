@@ -18,9 +18,9 @@ pub struct Entity {
 impl Entity {
     pub fn file_name(&self) -> Option<String> {
         let url = url::Url::parse(&self.url).ok()?;
-        let path = url.path_segments()?;
+        let mut path = url.path_segments()?;
 
-        path.last().map(ToString::to_string)
+        path.next_back().map(ToString::to_string)
     }
 }
 
