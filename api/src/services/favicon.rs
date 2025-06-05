@@ -41,10 +41,8 @@ fn favicon(color: &str, nb: Option<usize>) -> actix_web::HttpResponse {
 "#
     );
 
-    let response = actix_web::HttpResponse::Ok()
+    actix_web::HttpResponse::Ok()
         .append_header(("Content-Type", "image/svg+xml"))
         .append_header(("Cache-Control", "public, max-age=604800"))
-        .body(icon);
-
-    response
+        .body(icon)
 }
