@@ -1,5 +1,6 @@
 #[derive(Clone, Default, Eq, PartialEq)]
 pub(crate) struct Filter {
+    active: Option<bool>,
     q: String,
     source: String,
     tag: String,
@@ -14,6 +15,7 @@ impl Filter {
     #[must_use]
     pub fn from(location: &crate::Location) -> Self {
         Self {
+            active: location.active(),
             q: location.q(),
             source: location.param("source"),
             tag: location.param("tag"),
@@ -22,12 +24,16 @@ impl Filter {
 
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        self.q.is_empty() && self.tag.is_empty() && self.source.is_empty()
+        self.active.is_none() && self.q.is_empty() && self.tag.is_empty() && self.source.is_empty()
     }
 
     #[must_use]
     pub fn to_url_param(&self) -> String {
         let mut params = Vec::new();
+
+        if let Some(active) = self.active {
+            params.push(format!("active={active}"));
+        }
 
         if !self.q.is_empty() {
             params.push(format!("q={}", urlencoding::encode(&self.q)));
@@ -47,15 +53,19 @@ impl Filter {
 
 impl From<String> for Filter {
     fn from(query: String) -> Self {
+        let mut active = None;
         let mut q = query.clone();
         let mut source = String::new();
         let mut tag = String::new();
 
         let regex =
-            regex::Regex::new(r#"(:?source=(?P<source>[^ ]+) )?(tag=(?P<tag>[^ ]+) )?(?P<q>.*)"#)
+            regex::Regex::new(r#"(:?active=(?P<active>[^ ]+) )?(:?source=(?P<source>[^ ]+) )?(tag=(?P<tag>[^ ]+) )?(?P<q>.*)"#)
                 .unwrap();
 
         if let Some(captures) = regex.captures(&query) {
+            active = captures
+                .name("active")
+                .and_then(|x| x.as_str().parse().ok());
             q = captures
                 .name("q")
                 .map_or_else(|| query.clone(), |x| x.as_str().to_string());
@@ -69,12 +79,21 @@ impl From<String> for Filter {
                 .unwrap_or_default();
         }
 
-        Self { q, source, tag }
+        Self {
+            active,
+            q,
+            source,
+            tag,
+        }
     }
 }
 
 impl std::fmt::Display for Filter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Some(active) = self.active {
+            write!(f, "active={active} ")?;
+        }
+
         if !self.source.is_empty() {
             write!(f, "source={} ", self.source)?;
         }

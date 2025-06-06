@@ -25,6 +25,11 @@ impl Location {
     }
 
     #[must_use]
+    pub fn active(&self) -> Option<bool> {
+        self.param("active").parse().ok()
+    }
+
+    #[must_use]
     pub fn q(&self) -> String {
         self.param("q")
     }

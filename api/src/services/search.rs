@@ -2,6 +2,7 @@ use actix_web::web::{Data, Query};
 
 #[derive(serde::Deserialize)]
 struct Request {
+    active: Option<bool>,
     q: Option<String>,
     tag: Option<String>,
     source: Option<String>,
@@ -53,7 +54,7 @@ fn search(
     clause: &elephantry::Where,
     query: &Request,
 ) -> oxfeed::Result<actix_web::HttpResponse> {
-    use std::fmt::Write;
+    use std::fmt::Write as _;
 
     let mut clause = clause.clone();
 
@@ -63,6 +64,10 @@ fn search(
     } else {
         include_str!("../../sql/search_items.sql").to_string()
     };
+
+    if let Some(active) = &query.active {
+        clause.and_where("s.active = $*", vec![active]);
+    }
 
     if let Some(tag) = &query.tag {
         clause.and_where("$* = any(tags)", vec![tag]);
@@ -117,6 +122,10 @@ async fn sources(
     let mut clause = elephantry::Where::builder()
         .and_where("source.title ~* $*", vec![&q])
         .build();
+
+    if let Some(active) = &query.active {
+        clause.and_where("source.active = $*", vec![active]);
+    }
 
     if let Some(source) = &query.source {
         clause.and_where("source.url ~* $*", vec![source])
