@@ -45,6 +45,8 @@ impl Broadcaster {
                 log::error!("Unable to listen postgresql: {err}");
             }
 
+            let wait = std::time::Duration::new(1, 0);
+
             loop {
                 if let Ok(Some(notify)) = this.elephantry.notifies() {
                     this.broadcast((
@@ -52,6 +54,7 @@ impl Broadcaster {
                         notify.extra().unwrap(),
                     ));
                 }
+                std::thread::sleep(wait);
             }
         });
     }
