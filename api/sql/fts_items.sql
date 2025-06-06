@@ -4,5 +4,5 @@ select ts_headline(i.title, websearch_to_tsquery($1), 'StartSel = <mark>, StopSe
     from fts.item f
     join item i using(item_id)
     join source s using(source_id)
-    join media using(item_id)
+    left join media using(item_id)
     join "user" using(user_id)
