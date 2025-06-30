@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Sanpi <sanpi@homecomputing.fr>"]
 edition = "2024"
 license = "MIT"
+rust-version.workspace = true
 
 [dependencies]
 actix = "0.13"

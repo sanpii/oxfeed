@@ -95,10 +95,10 @@ impl futures_util::Stream for Client {
 
         let client = self.get_mut();
 
-        if let Ok(message) = client.rx.try_recv() {
-            if message.1 == client.token.to_string() {
-                return Event::Data(message.0).into();
-            }
+        if let Ok(message) = client.rx.try_recv()
+            && message.1 == client.token.to_string()
+        {
+            return Event::Data(message.0).into();
         }
 
         if client.keep_alive.poll_tick(cx).is_ready() {

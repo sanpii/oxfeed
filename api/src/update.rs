@@ -247,16 +247,16 @@ impl Task {
             return Some(icon);
         }
 
-        if let Some(link) = feed.links.first() {
-            if let Some(icon) = Self::favicon(&link.href).await {
-                return Some(icon);
-            }
+        if let Some(link) = feed.links.first()
+            && let Some(icon) = Self::favicon(&link.href).await
+        {
+            return Some(icon);
         }
 
-        if let Some(link) = feed.entries.first().and_then(|x| x.links.first()) {
-            if let Some(icon) = Self::favicon(&link.href).await {
-                return Some(icon);
-            }
+        if let Some(link) = feed.entries.first().and_then(|x| x.links.first())
+            && let Some(icon) = Self::favicon(&link.href).await
+        {
+            return Some(icon);
         }
 
         Self::default_favicon(link).await
