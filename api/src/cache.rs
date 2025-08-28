@@ -10,7 +10,7 @@ pub(crate) async fn get(url: &str) -> oxfeed::Result<Vec<u8>> {
 
         content
     } else {
-        use std::io::Write;
+        use std::io::Write as _;
 
         let content = reqwest::get(url).await?.bytes().await?;
         std::fs::create_dir_all(path.parent().unwrap())?;

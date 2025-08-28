@@ -9,14 +9,17 @@ pub(crate) fn scope() -> actix_web::Scope {
 
 #[actix_web::get("/{url:.*}")]
 async fn icon(url: actix_web::web::Path<String>) -> oxfeed::Result<actix_web::HttpResponse> {
-    use base64::Engine;
+    use base64::Engine as _;
 
     let url = base64::engine::general_purpose::STANDARD.decode(url.into_inner())?;
     let icon = String::from_utf8(url)?;
 
     let body = match crate::cache::get(&icon).await {
         Ok(body) => body,
-        Err(_) => EMPTY_IMG.to_vec(),
+        Err(err) => {
+            log::error!("Unable to get icon: {err}");
+            EMPTY_IMG.to_vec()
+        }
     };
 
     let mut mime = tree_magic_mini::from_u8(&body);
