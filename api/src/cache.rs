@@ -24,10 +24,11 @@ pub(crate) async fn get(url: &str) -> oxfeed::Result<Vec<u8>> {
 }
 
 fn path(url: &str) -> std::path::PathBuf {
-    let digest = ring::digest::digest(&ring::digest::SHA256, url.as_bytes());
+    use sha2::Digest as _;
+
+    let digest = sha2::Sha256::digest(url.as_bytes());
 
     let mut path = digest
-        .as_ref()
         .chunks(4)
         .map(|x| {
             x.iter()

@@ -12,8 +12,9 @@ impl Color {
     }
 
     pub fn update(&mut self, input: &str) -> &Color {
-        let raw = ring::digest::digest(&ring::digest::SHA256, input.as_bytes());
-        let raw = raw.as_ref();
+        use sha2::Digest as _;
+
+        let raw = sha2::Sha256::digest(input.as_bytes());
 
         self.0 = raw[0];
         self.1 = raw[1];
