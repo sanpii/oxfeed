@@ -52,11 +52,10 @@ select source_id, last_error, title, url, user_id, active, icon, webhooks,
         array(select unnest(tags) order by 1) tags
     from source
     join "user" using (user_id)
-    where {}
+    where {clause}
     order by last_error is null, title
     {}
-        "#,
-            clause.to_string(),
+"#,
             pagination.to_sql(),
         );
 
@@ -67,9 +66,8 @@ select source_id, last_error, title, url, user_id, active, icon, webhooks,
 select count(*)
     from source
     join "user" using (user_id)
-    where {}
-        "#,
-            clause.to_string()
+    where {clause}
+        "#
         );
 
         let count = self.connection.query_one::<i64>(&query, &params)?;

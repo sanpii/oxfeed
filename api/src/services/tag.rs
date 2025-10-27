@@ -19,12 +19,11 @@ async fn all(
 select unnest(tags) as name, count(*) as count
     from source
     join "user" using (user_id)
-    where {}
+    where {clause}
     group by name
     order by name
     {}
         "#,
-        clause.to_string(),
         pagination.to_sql(),
     );
 

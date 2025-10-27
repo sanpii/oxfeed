@@ -75,12 +75,11 @@ select item.item_id, item.link, item.published, item.title,
     join source using (source_id)
     join "user" using (user_id)
     left join media using (item_id)
-    where {}
+    where {clause}
     group by item.item_id, source.title, source.tags, source.icon
     order by published desc, title
     {}
         "#,
-            clause.to_string(),
             pagination.to_sql(),
         );
 
@@ -92,9 +91,8 @@ select count(*)
     from item
     join source using (source_id)
     join "user" using (user_id)
-    where {}
-        "#,
-            clause.to_string()
+    where {clause}
+        "#
         );
 
         let count = self.connection.query_one::<i64>(&query, &params)?;

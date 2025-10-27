@@ -80,7 +80,7 @@ fn search(
     let token = identity.token(elephantry)?;
     clause.and_where("token = $*", vec![&token]);
 
-    writeln!(sql, "where {}", clause.to_string()).ok();
+    writeln!(sql, "where {clause}").ok();
     writeln!(sql, "group by i.item_id, s.title, s.tags, s.icon").ok();
 
     if query.q.is_some() {
