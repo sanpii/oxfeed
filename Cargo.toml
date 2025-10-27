@@ -38,7 +38,7 @@ version = "1.0"
 default-features = false
 
 [workspace.dependencies.elephantry]
-version = "4.0"
+version = "5.0"
 features = ["date", "uuid"]
 
 [workspace.dependencies.elephantry-extras]

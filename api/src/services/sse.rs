@@ -49,10 +49,7 @@ impl Broadcaster {
 
             loop {
                 if let Ok(Some(notify)) = this.elephantry.notifies() {
-                    this.broadcast((
-                        notify.relname().unwrap().to_string(),
-                        notify.extra().unwrap(),
-                    ));
+                    this.broadcast((notify.relname, notify.extra));
                 }
                 std::thread::sleep(wait);
             }
