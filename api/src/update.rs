@@ -31,7 +31,7 @@ impl actix::Actor for Actor {
         use actix::AsyncContext as _;
 
         let minutes = envir::parse("UPDATE_INTERVAL").unwrap_or(20);
-        let interval = std::time::Duration::from_secs(60 * minutes);
+        let interval = std::time::Duration::from_mins(minutes);
 
         ctx.run_interval(interval, |_, ctx| {
             ctx.notify(Signal);
@@ -110,7 +110,7 @@ impl Task {
 
         let response = reqwest::Client::new()
             .get(&source.url)
-            .timeout(std::time::Duration::from_secs(5 * 60))
+            .timeout(std::time::Duration::from_mins(5))
             .send()
             .await?;
 
@@ -329,7 +329,7 @@ impl Task {
 
         let response = reqwest::blocking::Client::new()
             .post(&webhook.url)
-            .timeout(std::time::Duration::from_secs(5 * 60))
+            .timeout(std::time::Duration::from_mins(5))
             .json(item)
             .send()?;
 

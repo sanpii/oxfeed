@@ -36,7 +36,7 @@ impl Api {
     }
 
     fn set_token(token: &str, remember_me: bool) {
-        let expires = std::time::Duration::from_secs(365 * 24 * 60 * 60);
+        let expires = std::time::Duration::from_hours(365 * 24);
         let mut options = wasm_cookies::CookieOptions::default().expires_after(expires);
 
         if !remember_me {
