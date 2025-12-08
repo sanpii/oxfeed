@@ -119,18 +119,14 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         <>
             { add }
             <ul class="list-group">
-            {
-                for pager.iterator.iter().map(|item| {
-                    yew::html! {
-                        <li class="list-group-item">
-                            <crate::components::Source
-                                webhooks={ (*webhooks).clone() }
-                                value={ item.clone() }
-                            />
-                        </li>
-                    }
-                })
-            }
+                for item in &pager.iterator {
+                    <li class="list-group-item">
+                        <crate::components::Source
+                            webhooks={ (*webhooks).clone() }
+                            value={ item.clone() }
+                        />
+                    </li>
+                }
             </ul>
             <elephantry_extras::yew::Pager
                 value={ elephantry_extras::Pager::from(pager.clone()) }

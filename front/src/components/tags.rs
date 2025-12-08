@@ -27,11 +27,9 @@ pub(crate) fn Component() -> yew::Html {
 
     yew::html! {
         <div class="d-flex flex-wrap align-items-center cloud">
-        {
-            for tags.iter().map(|tag| yew::html! {
+            for tag in tags.iter() {
                 <Tag tag={ tag.clone() } {max} />
-            })
-        }
+            }
         </div>
     }
 }

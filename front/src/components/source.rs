@@ -107,15 +107,13 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                             } else {
                                 let body = yew::html! {
                                     <ul>
-                                    {
-                                        for source.webhooks.iter().map(|webhook_id| {
+                                        for webhook_id in &source.webhooks {
                                             if let Some(w) = props.webhooks.iter().find(|x| x.id == Some(*webhook_id)) {
-                                                yew::html! { <li>{ w.name.clone() }</li> }
+                                                <li>{ w.name.clone() }</li>
                                             } else {
-                                                yew::Html::default()
+                                                <></>
                                             }
-                                        })
-                                    }
+                                        }
                                     </ul>
                                 };
 
@@ -143,11 +141,9 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     </div>
 
                     <div class="tags">
-                    {
-                        for source.tags.iter().map(|tag| {
-                            yew::html! { <super::Tag value={ tag.clone() } /> }
-                        })
-                    }
+                        for tag in source.tags {
+                            <super::Tag value={ tag.clone() } />
+                        }
                     </div>
                 </>
             }

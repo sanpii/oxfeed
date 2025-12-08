@@ -95,10 +95,9 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             <a href={ item.link.clone() } target="_blank">
                 { yew::virtual_dom::VNode::VRef(title.into()) }
             </a>
-            {
-                for item.tags.iter().map(|tag| {
-                    yew::html! { <super::Tag value={ tag.clone() } /> }
-                })
+
+            for tag in &item.tags {
+                <super::Tag value={ tag.clone() } />
             }
 
             if *scene == Scene::Hidden {

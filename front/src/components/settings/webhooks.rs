@@ -95,19 +95,15 @@ pub(crate) fn Component() -> yew::Html {
                 yew::Html::default()
             }
         }
-        {
-            for webhooks.clone().iter().map(|webhook| {
-                yew::html!{
-                    <li class="list-group-item">
-                        <crate::components::Webhook
-                            value={ webhook.clone() }
-                            on_delete={ on_delete.clone() }
-                            on_save={ on_save.clone() }
-                        />
-                    </li>
-                }
-            })
-        }
+            for webhook in webhooks.iter() {
+                <li class="list-group-item">
+                    <crate::components::Webhook
+                        value={ webhook.clone() }
+                        on_delete={ on_delete.clone() }
+                        on_save={ on_save.clone() }
+                    />
+                </li>
+            }
         </ul>
         </>
     }

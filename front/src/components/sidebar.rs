@@ -174,8 +174,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 onclick={ read_all }
             >{ "Mark all as read" }</button>
             <ul class="nav flex-column">
-            {
-                for links.clone().iter().map(move |link| yew::html! {
+                for link in links.iter() {
                     <li class="nav-item" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
                         <yew_router::components::Link<super::app::Route>
                             to={ link.route.clone() }
@@ -196,8 +195,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                             }
                         </yew_router::components::Link<super::app::Route>>
                     </li>
-                })
-            }
+                }
                 <li class="nav-item d-md-none" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
                     <super::Logout button=false />
                 </li>
