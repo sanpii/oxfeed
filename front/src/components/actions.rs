@@ -13,7 +13,7 @@ struct Icon {
     icon: &'static str,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let read_icon = yew::use_memo(props.read, |read| {
         if *read {

@@ -5,7 +5,7 @@ pub(crate) struct Properties {
     pub kind: String,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let context = crate::use_context();
     let filter = yew::use_memo(props.clone(), |props| props.filter.clone());

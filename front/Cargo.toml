@@ -18,8 +18,8 @@ urlencoding = "2.0"
 wasm-bindgen = "0.2"
 wasm-cookies = "0.2"
 wasm-logger = "0.2"
-yew-callback = "0.1"
-yew-router = "0.18"
+yew-callback = "0.2"
+yew-router = "0.19"
 
 [dependencies.elephantry-extras]
 workspace = true
@@ -51,7 +51,7 @@ version = "0.3"
 features = ["Document", "HtmlDocument", "Performance", "Touch", "TouchEvent", "TouchList", "VisibilityState"]
 
 [dependencies.yew]
-version = "0.21"
+version = "0.22"
 features = ["csr"]
 
 [build-dependencies.envir]

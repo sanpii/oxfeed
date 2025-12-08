@@ -1,4 +1,4 @@
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component() -> yew::Html {
     let contents = [
         ("book", "You really want to read something? Take a book!"),

@@ -3,7 +3,7 @@ pub(crate) struct Properties {
     pub text: String,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     yew::html! {
         <span class="help">

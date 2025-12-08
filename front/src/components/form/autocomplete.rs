@@ -6,7 +6,7 @@ pub(crate) struct Properties {
     pub on_delete: yew::Callback<()>,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let context = crate::use_context();
     let active = yew::use_state(|| None::<usize>);

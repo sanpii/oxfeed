@@ -5,7 +5,7 @@ pub(crate) struct Properties {
     pub on_submit: yew::Callback<oxfeed::source::Entity>,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let context = crate::use_context();
     let active = yew::use_state(|| props.source.active);

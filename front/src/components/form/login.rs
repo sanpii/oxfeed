@@ -48,7 +48,7 @@ pub(crate) struct Properties {
     pub on_submit: yew::Callback<Info>,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let email = yew::use_state(String::new);
     let input_type = yew::use_state(InputType::default);

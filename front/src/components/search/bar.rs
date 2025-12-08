@@ -1,4 +1,4 @@
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component() -> yew::Html {
     let context = crate::use_context();
     let route = yew_router::hooks::use_route::<crate::components::app::Route>().unwrap_or_default();

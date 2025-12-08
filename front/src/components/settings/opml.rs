@@ -1,4 +1,4 @@
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component() -> yew::Html {
     let export_url = format!("{}/opml", env!("API_URL"));
     let context = crate::use_context();

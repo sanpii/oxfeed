@@ -54,7 +54,7 @@ pub(crate) struct Properties {
     pub action_end: Action,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let start = yew::use_state(|| 0);
     let delta = yew::use_state(|| 0.);

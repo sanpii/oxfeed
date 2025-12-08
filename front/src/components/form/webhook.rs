@@ -5,7 +5,7 @@ pub(crate) struct Properties {
     pub on_submit: yew::Callback<oxfeed::webhook::Entity>,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let name = yew::use_state(|| props.webhook.name.clone());
     let mark_read = yew::use_state(|| props.webhook.mark_read);

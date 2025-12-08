@@ -111,7 +111,7 @@ pub(crate) struct Properties {
     pub current_route: super::app::Route,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let context = crate::use_context();
     let current_route = yew::use_memo(props.clone(), |props| props.current_route.clone());

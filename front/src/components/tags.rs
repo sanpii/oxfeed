@@ -1,4 +1,4 @@
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component() -> yew::Html {
     let context = crate::use_context();
     let pagination = yew::use_state(|| elephantry_extras::Pagination::from(crate::Location::new()));
@@ -49,7 +49,7 @@ struct TagProperties {
     max: i64,
 }
 
-#[yew::function_component]
+#[yew::component]
 fn Tag(props: &TagProperties) -> yew::Html {
     let context = crate::use_context();
     let scene = yew::use_state(Scene::default);

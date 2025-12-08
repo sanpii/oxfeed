@@ -1,4 +1,4 @@
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component() -> yew::Html {
     let context = crate::use_context();
     let fetching = yew::use_memo(context, |context| context.fetching);

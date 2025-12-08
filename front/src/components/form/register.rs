@@ -8,7 +8,7 @@ pub(crate) struct Properties {
     pub on_submit: yew::Callback<Info>,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let email = yew::use_state(String::new);
     let password = yew::use_state(String::new);

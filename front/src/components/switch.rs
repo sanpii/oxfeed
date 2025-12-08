@@ -9,7 +9,7 @@ pub(crate) struct Properties {
     pub on_toggle: yew::Callback<bool>,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let checked = yew::functional::use_state_eq(|| props.active);
 

@@ -39,7 +39,7 @@ pub(crate) struct Properties {
     pub value: oxfeed::item::Item,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let context = crate::use_context();
     let content = yew::use_state(|| None::<String>);

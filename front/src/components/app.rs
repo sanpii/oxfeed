@@ -21,7 +21,7 @@ pub(crate) enum Route {
     NotFound,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component() -> yew::Html {
     use wasm_bindgen::JsCast as _;
 

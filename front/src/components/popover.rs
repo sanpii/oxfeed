@@ -8,7 +8,7 @@ pub(crate) struct Properties {
     pub children: yew::Html,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let id = format!("popover-{}", uuid::Uuid::new_v4());
 

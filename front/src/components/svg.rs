@@ -10,7 +10,7 @@ pub(crate) struct Properties {
     pub on_click: yew::Callback<()>,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let icon = if props.content_type {
         if props.icon.starts_with("audio/") {

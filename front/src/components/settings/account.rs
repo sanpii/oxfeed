@@ -1,4 +1,4 @@
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component() -> yew::Html {
     let context = crate::use_context();
     let account = yew::use_state(|| None::<oxfeed::account::Entity>);

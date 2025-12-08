@@ -3,7 +3,7 @@ pub(crate) struct Properties {
     pub button: bool,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let context = crate::use_context();
     let navigator = yew_router::hooks::use_navigator().unwrap();

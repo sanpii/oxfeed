@@ -11,7 +11,7 @@ pub(crate) struct Properties {
     pub webhooks: Vec<oxfeed::webhook::Entity>,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let context = crate::use_context();
     let source = yew::use_memo(props.clone(), |props| props.value.clone());

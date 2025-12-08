@@ -11,7 +11,7 @@ pub(crate) struct Properties {
     pub on_edit: yew::Callback<()>,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let bg_color = crate::cha::Color::from(&props.value);
     let color = if bg_color.is_dark() { "white" } else { "black" };

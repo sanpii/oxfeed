@@ -4,7 +4,7 @@ pub(crate) struct Properties {
     pub on_change: yew::Callback<Vec<String>>,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let tags = yew::use_state(|| props.values.clone());
     let on_change = props.on_change.clone();

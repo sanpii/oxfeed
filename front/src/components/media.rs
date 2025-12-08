@@ -4,7 +4,7 @@ pub(crate) struct Properties {
     pub medias: Vec<oxfeed::media::Entity>,
 }
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     if props.medias.is_empty() {
         yew::Html::default()

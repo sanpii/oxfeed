@@ -2,7 +2,7 @@ mod account;
 mod opml;
 mod webhooks;
 
-#[yew::function_component]
+#[yew::component]
 pub(crate) fn Component() -> yew::Html {
     let text = yew::html! {
         <>

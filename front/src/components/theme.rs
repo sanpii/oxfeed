@@ -1,4 +1,4 @@
-#[yew::function_component]
+#[yew::component]
 pub fn Component() -> yew::Html {
     let context = crate::use_context();
     let theme = yew::use_memo(context.clone(), |context| context.theme);
