@@ -102,29 +102,24 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 oninput={ on_input }
                 onkeydown={ on_keydown }
             />
-            {
-                if terms.is_empty() {
-                    yew::Html::default()
-                } else {
-                    yew::html! {
-                        <div class="list-group">
-                        {
-                            for terms.clone().iter().enumerate().map(|(idx, term)| {
-                                let active = active.clone();
-                                let select = select.clone();
-                                let terms = terms.clone();
 
-                                yew::html! {
-                                    <div
-                                        class={ yew::classes!("list-group-item", "list-group-item-action", if (*active) == Some(idx) { "active" } else { "" }) }
-                                        onclick={ yew_callback::callback!(move |_| { select.emit(terms[idx].clone()); }) }
-                                    >{ term }</div>
-                                }
-                            })
+            if !terms.is_empty() {
+                <div class="list-group">
+                {
+                    for terms.clone().iter().enumerate().map(|(idx, term)| {
+                        let active = active.clone();
+                        let select = select.clone();
+                        let terms = terms.clone();
+
+                        yew::html! {
+                            <div
+                                class={ yew::classes!("list-group-item", "list-group-item-action", if (*active) == Some(idx) { "active" } else { "" }) }
+                                onclick={ yew_callback::callback!(move |_| { select.emit(terms[idx].clone()); }) }
+                            >{ term }</div>
                         }
-                        </div>
-                    }
+                    })
                 }
+                </div>
             }
         </div>
     }

@@ -182,16 +182,11 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         >
                             <super::Svg icon={ link.icon } size=16 class={ if link.has_error { "text-danger" } else { "" } } />
                             { link.label }
-                            {
-                                if link.count > 0 {
-                                    yew::html! {
-                                        <span
-                                            class={ if link.route == *current_route { "badge bg-primary" } else { "badge bg-secondary" } }
-                                        >{ link.count }</span>
-                                    }
-                                } else {
-                                    yew::Html::default()
-                                }
+
+                            if link.count > 0 {
+                                <span
+                                    class={ if link.route == *current_route { "badge bg-primary" } else { "badge bg-secondary" } }
+                                >{ link.count }</span>
                             }
                         </yew_router::components::Link<super::app::Route>>
                     </li>

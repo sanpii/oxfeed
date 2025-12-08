@@ -69,17 +69,11 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             yew::html! {
                 <>
                     <div class="d-inline-flex">
-                    { webhook.name.clone() }
-                    {
+                        { webhook.name.clone() }
+
                         if let Some(ref last_error) = webhook.last_error {
-                            yew::html! {
-                                <super::Error text={ last_error.clone() } />
-                            }
+                            <super::Error text={ last_error.clone() } />
                         }
-                        else {
-                            yew::Html::default()
-                        }
-                    }
                     </div>
 
                     <div class="btn-group float-end">

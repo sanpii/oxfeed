@@ -22,14 +22,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 { props.children.clone() }
             </button>
             <div id={ id.clone() } class="popover" popover="auto">
-                {
-                    if let Some(title) = &props.title {
-                        yew::html! {
-                            <h3 class="popover-header">{ title }</h3>
-                        }
-                    } else {
-                        yew::Html::default()
-                    }
+                if let Some(title) = &props.title {
+                    <h3 class="popover-header">{ title }</h3>
                 }
                 <div class="popover-body">{ props.body.clone() }</div>
             </div>

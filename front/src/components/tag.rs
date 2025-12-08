@@ -27,28 +27,20 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     yew::html! {
         <span {style} class="badge position-relative">
             { &props.value }
-            {
-                if props.deletable {
-                    yew::html! {
-                        <crate::components::Svg
-                            icon="x"
-                            size=16
-                            on_click={ on_delete }
-                        />
-                    }
-                } else if props.editable {
-                    yew::html! {
-                        <span class="position-absolute top-1 start-99" style="font-size: 1rem;">
-                            <crate::components::Svg
-                                icon="pencil"
-                                size=16
-                                on_click={ on_edit }
-                            />
-                        </span>
-                    }
-                } else {
-                    yew::Html::default()
-                }
+            if props.deletable {
+                <crate::components::Svg
+                    icon="x"
+                    size=16
+                    on_click={ on_delete }
+                />
+            } else if props.editable {
+                <span class="position-absolute top-1 start-99" style="font-size: 1rem;">
+                    <crate::components::Svg
+                        icon="pencil"
+                        size=16
+                        on_click={ on_edit }
+                    />
+                </span>
             }
         </span>
     }

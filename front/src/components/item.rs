@@ -106,11 +106,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     <span class="medias" title="Medias">
                         <super::Media inline=true medias={ item.media.clone() } />
                     </span>
-                } else {
-                    <></>
                 }
-            } else {
-                <></>
             }
 
             <span class="text-body-secondary">{ "· " }{ &item.source }</span>
@@ -140,16 +136,10 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         yew::Html::default()
                     }
                 }
-                {
-                    if *scene == Scene::Hidden && item.favorite {
-                        yew::html! {
-                            <div class="favorite">
-                                <super::Svg icon="star-fill" size=24 />
-                            </div>
-                        }
-                    } else {
-                        yew::Html::default()
-                    }
+                if *scene == Scene::Hidden && item.favorite {
+                    <div class="favorite">
+                        <super::Svg icon="star-fill" size=24 />
+                    </div>
                 }
             </div>
             {

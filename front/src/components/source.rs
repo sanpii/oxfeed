@@ -88,15 +88,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                             { source.title }
                         </span>
 
-                        {
-                            if let Some(last_error) = source.last_error {
-                                yew::html! {
-                                    <super::Error text={ last_error } />
-                                }
-                            }
-                            else {
-                                yew::Html::default()
-                            }
+                        if let Some(last_error) = source.last_error {
+                            <super::Error text={ last_error } />
                         }
                     </div>
 

@@ -63,38 +63,27 @@ pub(crate) fn Component() -> yew::Html {
 
     yew::html! {
         <>
-        {
-            if matches!(*scene, Scene::View) {
-                yew::html! {
-                    <a
-                        class="btn btn-primary"
-                        title="Add"
-                        onclick={ on_add }
-                    >
-                        <crate::components::Svg icon="plus" size=24 />
-                        { "Add" }
-                    </a>
-                }
-            } else {
-                yew::Html::default()
-            }
+        if matches!(*scene, Scene::View) {
+            <a
+                class="btn btn-primary"
+                title="Add"
+                onclick={ on_add }
+            >
+                <crate::components::Svg icon="plus" size=24 />
+                { "Add" }
+            </a>
         }
         <ul class="list-group">
-        {
             if matches!(*scene, Scene::Add) {
-                yew::html! {
-                    <li class="list-group-item">
-                        <crate::components::form::Webhook
-                            webhook={ oxfeed::webhook::Entity::default() }
-                            {on_cancel}
-                            {on_submit}
-                        />
-                    </li>
-                }
-            } else {
-                yew::Html::default()
+                <li class="list-group-item">
+                    <crate::components::form::Webhook
+                        webhook={ oxfeed::webhook::Entity::default() }
+                        {on_cancel}
+                        {on_submit}
+                    />
+                </li>
             }
-        }
+
             for webhook in webhooks.iter() {
                 <li class="list-group-item">
                     <crate::components::Webhook

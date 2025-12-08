@@ -108,43 +108,37 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 </div>
             </div>
 
-            {
-                if all_webhooks.is_empty() {
-                    yew::Html::default()
-                } else {
-                    yew::html! {
-                        <div class="row mb-3">
-                            <label class="col-sm-1 col-form-label" for="webhooks">{ "Webhooks" }</label>
-                            <div class="col-sm-11">
-                            {
-                                for all_webhooks.clone().iter().map(move |webhook| {
-                                    let id = webhook.id.unwrap_or_default();
-                                    let active = webhooks.borrow().contains(&id);
+            if !all_webhooks.is_empty() {
+                <div class="row mb-3">
+                    <label class="col-sm-1 col-form-label" for="webhooks">{ "Webhooks" }</label>
+                    <div class="col-sm-11">
+                    {
+                        for all_webhooks.clone().iter().map(move |webhook| {
+                            let id = webhook.id.unwrap_or_default();
+                            let active = webhooks.borrow().contains(&id);
 
-                                    yew::html! {
-                                        <crate::components::Switch
-                                            id={ id.to_string() }
-                                            label={ webhook.name.clone() }
-                                            active={ active }
-                                            on_toggle={
-                                                yew_callback::callback!(webhooks,
-                                                    move |active| if active {
-                                                        if !webhooks.borrow().contains(&id) {
-                                                            webhooks.borrow_mut().push(id);
-                                                        }
-                                                    } else {
-                                                        webhooks.borrow_mut().retain(|x| x != &id);
-                                                    }
-                                                )
+                            yew::html! {
+                                <crate::components::Switch
+                                    id={ id.to_string() }
+                                    label={ webhook.name.clone() }
+                                    active={ active }
+                                    on_toggle={
+                                        yew_callback::callback!(webhooks,
+                                            move |active| if active {
+                                                if !webhooks.borrow().contains(&id) {
+                                                    webhooks.borrow_mut().push(id);
+                                                }
+                                            } else {
+                                                webhooks.borrow_mut().retain(|x| x != &id);
                                             }
-                                        />
+                                        )
                                     }
-                                })
+                                />
                             }
-                            </div>
-                        </div>
+                        })
                     }
-                }
+                    </div>
+                </div>
             }
 
             <a
