@@ -84,15 +84,13 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     yew::html! {
         <>
             <div
-                class="swipe-container"
+                class="swipe-container d-flex"
                 {ontouchstart}
                 {ontouchmove}
                 {ontouchend}
             >
                 { props.action_start.view("start", *delta) }
-                <div
-                    class="swipe-element"
-                >
+                <div class="swipe-element">
                     { props.children.clone() }
                 </div>
                 { props.action_end.view("end", *delta) }

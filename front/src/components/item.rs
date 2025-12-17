@@ -58,9 +58,6 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         Scene::Hidden => "chevron-down",
     };
 
-    let title = gloo::utils::document().create_element("span").unwrap();
-    title.set_inner_html(&item.title);
-
     let content_div = gloo::utils::document().create_element("div").unwrap();
     content_div.set_inner_html(content.as_ref().unwrap_or(&"Loading...".to_string()));
 
@@ -91,57 +88,59 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
     yew::html! {
         <>
-            <img src={ icon } width="16" height="16" />
-            <a href={ item.link.clone() } target="_blank">
-                { yew::virtual_dom::VNode::VRef(title.into()) }
-            </a>
+            <div class="d-flex gap-2 align-items-center">
+                <img src={ icon } width="16" height="16" />
+                <a href={ item.link.clone() } target="_blank">{ &item.title }</a>
 
-            for tag in &item.tags {
-                <super::Tag value={ tag.clone() } />
-            }
-
-            if *scene == Scene::Hidden {
-                if !item.media.is_empty() {
-                    <span class="text-body-secondary">{ "· " }</span>
-                    <span class="medias" title="Medias">
-                        <super::Media inline=true medias={ item.media.clone() } />
-                    </span>
+                for tag in &item.tags {
+                    <super::Tag value={ tag.clone() } />
                 }
-            }
 
-            <span class="text-body-secondary">{ "· " }{ &item.source }</span>
-
-            <div class="float-end">
-                <span class={ yew::classes!(published_class, "d-none", "d-md-inline") }>{ &published_ago.to_string() }</span>
-                <span onclick={ toggle_content }>
-                    <super::Svg icon={ caret } size=24 />
-                </span>
-            </div>
-            <div class="float-end">
-                {
-                    if *scene == Scene::Hidden {
-                        let on_favorite = on_favorite.clone();
-                        let on_read = on_read.clone();
-
-                        yew::html! {
-                            <super::Actions
-                                inline=true
-                                read={ item.read }
-                                {on_read}
-                                favorite={ item.favorite }
-                                {on_favorite}
-                            />
-                        }
-                    } else {
-                        yew::Html::default()
+                if *scene == Scene::Hidden {
+                    if !item.media.is_empty() {
+                        <span class="text-body-secondary">{ "· " }</span>
+                        <span class="medias" title="Medias">
+                            <super::Media inline=true medias={ item.media.clone() } />
+                        </span>
                     }
                 }
-                if *scene == Scene::Hidden && item.favorite {
-                    <div class="favorite">
-                        <super::Svg icon="star-fill" size=24 />
-                    </div>
-                }
+
+                <span class="text-body-secondary">{ "· " }{ &item.source }</span>
+
+                <div class="flex-float-end">
+                    {
+                        if *scene == Scene::Hidden {
+                            let on_favorite = on_favorite.clone();
+                            let on_read = on_read.clone();
+
+                            yew::html! {
+                                <super::Actions
+                                    inline=true
+                                    read={ item.read }
+                                    {on_read}
+                                    favorite={ item.favorite }
+                                    {on_favorite}
+                                />
+                            }
+                        } else {
+                            yew::Html::default()
+                        }
+                    }
+
+                    if *scene == Scene::Hidden && item.favorite {
+                        <div class="favorite">
+                            <super::Svg icon="star-fill" size=24 />
+                        </div>
+                    }
+
+                    <span class={ yew::classes!(published_class, "d-none", "d-md-inline") }>{ &published_ago.to_string() }</span>
+                    <span onclick={ toggle_content }>
+                        <super::Svg icon={ caret } size=24 />
+                    </span>
+                </div>
             </div>
+
+            <div>
             {
                 if *scene == Scene::Expanded {
                     yew::html! {
@@ -167,6 +166,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     yew::Html::default()
                 }
             }
+            </div>
         </>
     }
 }

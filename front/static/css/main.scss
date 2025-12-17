@@ -67,17 +67,16 @@ li.list-group-item {
 
     .badge {
         font-weight: 400;
-        margin-right: .5rem;
         vertical-align: middle;
         font-size: 100%;
     }
 
-    .float-end .actions {
+    .flex-float-end .actions {
         display: none;
     }
 
-    @media (min-width: 768px ) /* md */ {
-        &:hover .float-end .actions {
+    @media (min-width: 768px) /* md */ {
+        &:hover .flex-float-end .actions {
             margin-right: .5rem;
             display: block;
         }
@@ -125,13 +124,18 @@ li.list-group-item {
         }
     }
 
-    .float-end > .favorite {
-        display: block;
-        color: var(--bs-orange);
-        margin-right: .5rem;
+    .flex-float-end {
+        margin-left: auto;
+        display: flex;
+
+        &> .favorite {
+            display: block;
+            color: var(--bs-orange);
+            margin-right: .5rem;
+        }
     }
 
-    &:hover .float-end > .favorite {
+    &:hover .flex-float-end > .favorite {
         display: none;
     }
 }
@@ -362,7 +366,6 @@ li.list-group-item {
 }
 
 .swipe-container {
-    display: flex;
     overflow: scroll auto;
     scroll-snap-type: x mandatory;
     @include scrollbar-hide();
@@ -370,6 +373,12 @@ li.list-group-item {
     .swipe-element {
         scroll-snap-align: start;
         min-width: 100%;
+        white-space: nowrap;
+
+        a {
+            overflow-x: hidden;
+            text-overflow: ellipsis;
+        }
     }
 
     .action {
