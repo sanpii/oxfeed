@@ -23,7 +23,7 @@ pub(crate) fn use_context() -> yew::UseReducerHandle<Context> {
 }
 
 #[derive(Clone, Eq, PartialEq, serde::Deserialize)]
-pub(crate) struct Pager<T> {
+pub(crate) struct Pager<T: Clone> {
     result_count: usize,
     result_min: usize,
     result_max: usize,
@@ -38,13 +38,13 @@ pub(crate) struct Pager<T> {
     iterator: Vec<T>,
 }
 
-impl<T> Pager<T> {
+impl<T: Clone> Pager<T> {
     fn is_empty(&self) -> bool {
         self.result_count == 0
     }
 }
 
-impl<T> From<Pager<T>> for elephantry_extras::Pager {
+impl<T: Clone> From<Pager<T>> for elephantry_extras::Pager {
     fn from(pager: Pager<T>) -> Self {
         elephantry_extras::Pager {
             count: pager.count,

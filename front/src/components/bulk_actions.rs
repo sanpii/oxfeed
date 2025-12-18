@@ -1,14 +1,20 @@
+pub enum Selection {
+    All,
+    None,
+}
+
 #[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     pub active: bool,
     pub on_action: yew::Callback<(&'static str, bool)>,
+    pub on_select: yew::Callback<Selection>,
     pub on_toggle: yew::Callback<bool>,
 }
 
 #[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
-    let on_toggle = yew_callback::callback!(on_toggle = props.on_toggle, move |enabled| {
-        on_toggle.emit(enabled);
+    let on_toggle = yew_callback::callback!(active = props.active, on_toggle = props.on_toggle, move |_| {
+        on_toggle.emit(!active);
     });
 
     let on_read = yew_callback::callback!(on_action = props.on_action, move |_| {
@@ -24,12 +30,26 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         on_action.emit(("favorite", false));
     });
 
+    let on_selectall = yew_callback::callback!(on_select = props.on_select, move |_| {
+        on_select.emit(Selection::All);
+    });
+    let on_unselectall = yew_callback::callback!(on_select = props.on_select, move |_| {
+        on_select.emit(Selection::None);
+    });
+
     yew::html! {
         <div class="input-group mb-3">
             <div class="btn-group">
                 <div class="btn btn-outline-secondary">
-                    <super::Switch id="enable-bulk" {on_toggle} active={ props.active } />
+                    <input type="checkbox" class="form-check-input" checked={ props.active } onclick={ on_toggle } />
                 </div>
+
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" onclick={ move |_| on_selectall.emit(()) }>{ "All" }</a></li>
+                    <li><a class="dropdown-item" href="#" onclick={ move |_| on_unselectall.emit(()) }>{ "None" }</a></li>
+                </ul>
             </div>
 
             <div class="btn-group mx-2">

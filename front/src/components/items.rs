@@ -15,7 +15,6 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let pager = yew::use_state(|| None);
     let bulk_active = yew::use_state(|| false);
     let bulk = yew::use_state(Vec::<oxfeed::item::Item>::new);
-    let select = yew::use_state(|| false);
 
     let on_page_change = yew_callback::callback!(pagination, move |page| {
         pagination.set(elephantry_extras::Pagination {
@@ -84,6 +83,15 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         }
     });
 
+    let on_bulk_select = yew_callback::callback!(bulk_active, bulk, pager, move |selection| {
+        bulk_active.set(true);
+
+        match selection {
+            super::bulk_actions::Selection::All => bulk.set(pager.iterator.clone()),
+            super::bulk_actions::Selection::None => bulk.set(Vec::new()),
+        }
+    });
+
     let on_item_toggle = yew_callback::callback!(bulk, move |(item, selected)| {
         let mut new_value = (*bulk).clone();
 
@@ -102,6 +110,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 <super::BulkActions
                     active={ *bulk_active }
                     on_action={ on_bulk_action }
+                    on_select={ on_bulk_select }
                     on_toggle={ on_bulk_toggle }
                 />
 
@@ -129,7 +138,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                                     <crate::components::Item
                                         value={ item.clone() }
                                         bulk_enable={ *bulk_active }
-                                        select={ *select }
+                                        select={ bulk.contains(item) }
                                         on_toggle={ on_item_toggle.clone() }
                                     />
                                 </super::Swipe>
