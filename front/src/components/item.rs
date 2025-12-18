@@ -37,6 +37,10 @@ impl std::ops::Not for Scene {
 #[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     pub value: oxfeed::item::Item,
+    #[prop_or_default]
+    pub bulk_enable: bool,
+    pub select: bool,
+    pub on_toggle: yew::Callback<(oxfeed::item::Item, bool)>,
 }
 
 #[yew::component]
@@ -45,6 +49,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let content = yew::use_state(|| None::<String>);
     let item = yew::use_memo(props.clone(), |props| props.value.clone());
     let scene = yew::use_state(Scene::default);
+    let select = yew::use_memo(props.clone(), |props| props.select);
 
     let published_ago = chrono_humanize::HumanTime::from(item.published);
     let published_class = if (*item).in_future() {
@@ -96,9 +101,22 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         });
     }
 
+    let on_toggle = yew_callback::callback!(on_toggle = props.on_toggle, item, select, move |_| {
+        on_toggle.emit(((*item).clone(), !*select));
+    });
+
     yew::html! {
         <>
             <div class="d-flex gap-2 align-items-center">
+                if props.bulk_enable {
+                    <input
+                        type="checkbox"
+                        class="form-check-input"
+                        checked={ *select }
+                        onclick={ on_toggle }
+                    />
+                }
+
                 <img src={ icon } width="16" height="16" />
                 <a href={ item.link.clone() } target="_blank">{ &item.title }</a>
 

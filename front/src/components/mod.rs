@@ -2,6 +2,7 @@ pub(crate) mod app;
 
 mod actions;
 mod alerts;
+mod bulk_actions;
 mod empty;
 mod error;
 mod form;
@@ -29,6 +30,7 @@ mod webhook;
 pub(crate) use actions::Component as Actions;
 pub(crate) use alerts::Component as Alerts;
 pub(crate) use app::Component as App;
+pub(crate) use bulk_actions::Component as BulkActions;
 pub(crate) use empty::Component as Empty;
 pub(crate) use error::Component as Error;
 pub(crate) use header::Component as Header;
