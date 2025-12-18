@@ -86,6 +86,16 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         }
     });
 
+    {
+        let content = content.clone();
+        let scene = scene.clone();
+
+        yew::use_effect_with(props.value.clone(), move |_| {
+            content.set(None);
+            scene.set(Scene::default());
+        });
+    }
+
     yew::html! {
         <>
             <div class="d-flex gap-2 align-items-center">
