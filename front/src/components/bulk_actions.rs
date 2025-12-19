@@ -13,9 +13,13 @@ pub(crate) struct Properties {
 
 #[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
-    let on_toggle = yew_callback::callback!(active = props.active, on_toggle = props.on_toggle, move |_| {
-        on_toggle.emit(!active);
-    });
+    let on_toggle = yew_callback::callback!(
+        active = props.active,
+        on_toggle = props.on_toggle,
+        move |_| {
+            on_toggle.emit(!active);
+        }
+    );
 
     let on_read = yew_callback::callback!(on_action = props.on_action, move |_| {
         on_action.emit(("read", true));

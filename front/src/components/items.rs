@@ -12,9 +12,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let kind = yew::use_memo(props.clone(), |props| props.kind.clone());
     let need_update = yew::use_memo(context.clone(), |context| context.need_update);
     let pagination = yew::use_state(|| elephantry_extras::Pagination::from(crate::Location::new()));
-    let pager = yew::use_state(|| None);
+    let pager = yew::use_state(crate::Pager::default);
     let bulk_active = yew::use_state(|| false);
-    let bulk = yew::use_state(Vec::<oxfeed::item::Item>::new);
 
     let on_page_change = yew_callback::callback!(pagination, move |page| {
         pagination.set(elephantry_extras::Pagination {
@@ -50,59 +49,75 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     if new_pager.is_empty() && new_pager.page > 1 {
                         on_page_change.emit(new_pager.page - 1);
                     } else {
-                        pager.set(Some(new_pager));
+                        let items = new_pager
+                            .iterator
+                            .into_iter()
+                            .map(|x| (x, false))
+                            .collect::<Vec<_>>();
+
+                        let enumerate_pager = crate::Pager {
+                            iterator: items,
+                            result_count: new_pager.result_count,
+                            result_min: new_pager.result_min,
+                            result_max: new_pager.result_max,
+                            last_page: new_pager.last_page,
+                            page: new_pager.page,
+                            has_next_page: new_pager.has_next_page,
+                            has_previous_page: new_pager.has_previous_page,
+                            count: new_pager.count,
+                            max_per_page: new_pager.max_per_page,
+                            base_url: new_pager.base_url,
+                        };
+                        pager.set(enumerate_pager);
                     }
                 });
             },
         );
     }
 
-    let Some(pager) = (*pager).clone() else {
-        return yew::html! { <super::Empty /> };
-    };
-
-    if pager.iterator.is_empty() {
-        return yew::html! { <super::Empty /> };
-    }
-
     let on_bulk_toggle = yew_callback::callback!(bulk_active, move |enable| {
         bulk_active.set(enable);
     });
 
-    let on_bulk_action = yew_callback::callback!(bulk, context, move |(tag, value)| {
-        for item in &(*bulk) {
+    let on_bulk_action = yew_callback::callback!(context, pager, move |(tag, value)| {
+        let mut new_pager = (*pager).clone();
+
+        new_pager.iterator.iter_mut().filter(|x| x.1).for_each(|x| {
+            let item = x.clone();
             let context = context.clone();
-            let item = item.clone();
 
             yew::platform::spawn_local(async move {
-                crate::api::call!(context, items_tag, &item.id, tag, value);
+                crate::api::call!(context, items_tag, &item.0.id, tag, value);
                 context.dispatch(crate::Action::NeedUpdate);
             });
 
-            bulk.set(Vec::new());
-        }
+            x.1 = false;
+        });
+
+        pager.set(new_pager);
     });
 
-    let on_bulk_select = yew_callback::callback!(bulk_active, bulk, pager, move |selection| {
+    let on_bulk_select = yew_callback::callback!(bulk_active, pager, move |selection| {
+        let mut new_pager = (*pager).clone();
+        let active = matches!(selection, super::bulk_actions::Selection::All);
+
+        new_pager.iterator.iter_mut().for_each(|x| x.1 = active);
+        pager.set(new_pager);
+
         bulk_active.set(true);
-
-        match selection {
-            super::bulk_actions::Selection::All => bulk.set(pager.iterator.clone()),
-            super::bulk_actions::Selection::None => bulk.set(Vec::new()),
-        }
     });
 
-    let on_item_toggle = yew_callback::callback!(bulk, move |(item, selected)| {
-        let mut new_value = (*bulk).clone();
+    let on_item_toggle = yew_callback::callback!(pager, move |event: super::item::ToggleEvent| {
+        let mut new_value = (*pager).clone();
 
-        if selected {
-            new_value.push(item);
-        } else {
-            new_value.retain(|x| x == &item);
-        }
+        select(&mut new_value.iterator, event);
 
-        bulk.set(new_value);
+        pager.set(new_value);
     });
+
+    if pager.iterator.is_empty() {
+        return yew::html! { <super::Empty /> };
+    }
 
     yew::html! {
         <>
@@ -117,28 +132,28 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 {
                     for pager.iterator.iter().map(move |item| {
                         let action_end = super::swipe::Action {
-                            active: item.favorite,
-                            callback: crate::toggle!(favorite, item, context),
+                            active: item.0.favorite,
+                            callback: crate::toggle!(favorite, item.0, context),
                             color: "--bs-orange",
                             icon: ("star", "star-fill"),
-                            id: item.id,
+                            id: item.0.id,
                         };
 
                         let action_start = super::swipe::Action {
-                            active: item.read,
-                            callback: crate::toggle!(read, item, context),
+                            active: item.0.read,
+                            callback: crate::toggle!(read, item.0, context),
                             color: "--bs-blue",
                             icon: ("eye-slash", "eye"),
-                            id: item.id,
+                            id: item.0.id,
                         };
 
                         yew::html! {
                             <li class="list-group-item">
                                 <super::Swipe {action_end} {action_start}>
                                     <crate::components::Item
-                                        value={ item.clone() }
+                                        value={ item.0.clone() }
                                         bulk_enable={ *bulk_active }
-                                        select={ bulk.contains(item) }
+                                        select={ item.1 }
                                         on_toggle={ on_item_toggle.clone() }
                                     />
                                 </super::Swipe>
@@ -148,9 +163,47 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 }
             </ul>
             <elephantry_extras::yew::Pager
-                value={ elephantry_extras::Pager::from(pager.clone()) }
+                value={ elephantry_extras::Pager::from((*pager).clone()) }
                 onclick={ on_page_change }
             />
         </>
+    }
+}
+
+fn select(items: &mut [(oxfeed::item::Item, bool)], event: super::item::ToggleEvent) {
+    let Some(current) = items.iter().position(|x| x.0 == event.item) else {
+        return;
+    };
+
+    let range = if event.multiple {
+        let near = near(current, items);
+
+        if current < near {
+            current..=near
+        } else {
+            near..=current
+        }
+    } else {
+        current..=current
+    };
+
+    for x in range {
+        items[x].1 = event.active;
+    }
+}
+
+fn near(current: usize, items: &[(oxfeed::item::Item, bool)]) -> usize {
+    if let Some((pos, _)) = items.iter().enumerate().skip(current).find(|(_, x)| x.1) {
+        pos
+    } else if let Some((pos, _)) = items
+        .iter()
+        .enumerate()
+        .rev()
+        .skip(items.len() - current)
+        .find(|(_, x)| x.1)
+    {
+        pos
+    } else {
+        0
     }
 }

@@ -48,7 +48,7 @@ features = ["v4", "js"]
 
 [dependencies.web-sys]
 version = "0.3"
-features = ["Document", "HtmlDocument", "Performance", "Touch", "TouchEvent", "TouchList", "VisibilityState"]
+features = ["Document", "HtmlDocument", "Performance", "Selection", "Touch", "TouchEvent", "TouchList", "VisibilityState"]
 
 [dependencies.yew]
 version = "0.22"

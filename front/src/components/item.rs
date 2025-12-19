@@ -1,6 +1,6 @@
 #[macro_export]
 macro_rules! toggle {
-    ($name:ident, $item:ident, $context:ident) => {{
+    ($name:ident, $item:expr, $context:ident) => {{
         let item = $item.clone();
         let context = $context.clone();
 
@@ -34,13 +34,19 @@ impl std::ops::Not for Scene {
     }
 }
 
+pub struct ToggleEvent {
+    pub item: oxfeed::item::Item,
+    pub active: bool,
+    pub multiple: bool,
+}
+
 #[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     pub value: oxfeed::item::Item,
     #[prop_or_default]
     pub bulk_enable: bool,
     pub select: bool,
-    pub on_toggle: yew::Callback<(oxfeed::item::Item, bool)>,
+    pub on_toggle: yew::Callback<ToggleEvent>,
 }
 
 #[yew::component]
@@ -101,9 +107,24 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         });
     }
 
-    let on_toggle = yew_callback::callback!(on_toggle = props.on_toggle, item, select, move |_| {
-        on_toggle.emit(((*item).clone(), !*select));
-    });
+    let on_toggle = yew_callback::callback!(
+        on_toggle = props.on_toggle,
+        item,
+        select,
+        move |e: yew::MouseEvent| {
+            let event = ToggleEvent {
+                item: (*item).clone(),
+                active: !*select,
+                multiple: e.shift_key(),
+            };
+
+            if let Ok(Some(selection)) = gloo::utils::window().get_selection() {
+                selection.empty().ok();
+            }
+
+            on_toggle.emit(event);
+        }
+    );
 
     yew::html! {
         <>
