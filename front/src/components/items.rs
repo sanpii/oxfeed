@@ -135,14 +135,14 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
     yew::html! {
         <>
-            <ul class="list-group" ontouchstart={ on_touch_start } ontouchend={ on_touch_end }>
-                <super::BulkActions
-                    active={ *bulk_active }
-                    on_action={ on_bulk_action }
-                    on_select={ on_bulk_select }
-                    on_toggle={ on_bulk_toggle }
-                />
+            <super::BulkActions
+                active={ *bulk_active }
+                on_action={ on_bulk_action }
+                on_select={ on_bulk_select }
+                on_toggle={ on_bulk_toggle }
+            />
 
+            <ul class="list-group" ontouchstart={ on_touch_start } ontouchend={ on_touch_end }>
                 {
                     for pager.iterator.iter().map(move |item| {
                         let action_end = super::swipe::Action {
