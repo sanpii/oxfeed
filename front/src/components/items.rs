@@ -115,13 +115,27 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         pager.set(new_value);
     });
 
+    let timeout = yew::use_mut_ref(|| None::<gloo::timers::callback::Timeout>);
+    let on_touch_start = yew_callback::callback!(bulk_active, timeout, move |_| {
+        let bulk_active = bulk_active.clone();
+
+        let t = gloo::timers::callback::Timeout::new(1_500, move || {
+            bulk_active.set(true);
+        });
+
+        *timeout.borrow_mut() = Some(t);
+    });
+    let on_touch_end = yew_callback::callback!(timeout, move |_| {
+        (*timeout).take().unwrap().cancel();
+    });
+
     if pager.iterator.is_empty() {
         return yew::html! { <super::Empty /> };
     }
 
     yew::html! {
         <>
-            <ul class="list-group">
+            <ul class="list-group" ontouchstart={ on_touch_start } ontouchend={ on_touch_end }>
                 <super::BulkActions
                     active={ *bulk_active }
                     on_action={ on_bulk_action }
