@@ -30,7 +30,7 @@ pub(crate) fn Component() -> yew::Html {
     } else {
         yew::html! {
             <input
-                class="form-control form-control-dark"
+                class="ms-3 form-control form-control-dark"
                 type="text"
                 value={ filter.to_string() }
                 placeholder="Search"

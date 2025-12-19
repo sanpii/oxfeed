@@ -16,7 +16,7 @@ pub(crate) fn Component() -> yew::Html {
                 <span class="navbar-toggler-icon"></span>
             </button>
             <super::search::Bar />
-            <ul class="navbar-nav ms-auto">
+            <ul class="navbar-nav ms-auto me-3">
                 <li class="nav-item"><super::Theme /></li>
                 <li class="nav-item"><super::Logout button=true /></li>
             </ul>

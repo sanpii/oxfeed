@@ -119,7 +119,7 @@ fn switch(route: Route) -> yew::Html {
                     <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse">
                         <super::Sidebar current_route={ route.clone() } />
                     </nav>
-                    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-3">
                         <super::Alerts />
                         {
                             match route {
