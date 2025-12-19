@@ -45,7 +45,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         <div class="input-group mb-3">
             <div class="btn-group">
                 <div class="btn btn-outline-secondary">
-                    <input type="checkbox" class="form-check-input" checked={ props.active } onclick={ on_toggle } />
+                    <input type="checkbox" class="form-check-input" checked={ props.active } onclick={ on_toggle } title="Enable bulk actions" />
                 </div>
 
                 <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
@@ -57,19 +57,19 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             </div>
 
             <div class="btn-group mx-2">
-                <button type="button" class="btn btn-outline-primary" onclick={ on_read }>
+                <button type="button" class="btn btn-outline-primary" onclick={ on_read } title="Mark as read">
                     <super::Svg icon="eye" size=24 />
                 </button>
-                <button type="button" class="btn btn-outline-primary" onclick={ on_unread }>
+                <button type="button" class="btn btn-outline-primary" onclick={ on_unread } title="Mark as unread">
                     <super::Svg icon="eye-slash" size=24 />
                 </button>
             </div>
 
             <div class="btn-group">
-                <button type="button" class="btn btn-outline-warning" onclick={ on_favorite }>
+                <button type="button" class="btn btn-outline-warning" onclick={ on_favorite } title="Add to favorites">
                     <super::Svg icon="star-fill" size=24 />
                 </button>
-                <button type="button" class="btn btn-outline-warning" onclick={ on_unfavorite }>
+                <button type="button" class="btn btn-outline-warning" onclick={ on_unfavorite } title="Remove from favorites">
                     <super::Svg icon="star" size=24 />
                 </button>
             </div>
