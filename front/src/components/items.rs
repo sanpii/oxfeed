@@ -130,12 +130,24 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     });
 
     if pager.iterator.is_empty() {
-        return yew::html! { <super::Empty /> };
+        return yew::html! {
+            <>
+                <super::BulkActions
+                    disabled=true
+                    active={ *bulk_active }
+                    on_action={ on_bulk_action }
+                    on_select={ on_bulk_select }
+                    on_toggle={ on_bulk_toggle }
+                />
+                <super::Empty />
+            </>
+        };
     }
 
     yew::html! {
         <>
             <super::BulkActions
+                disabled=false
                 active={ *bulk_active }
                 on_action={ on_bulk_action }
                 on_select={ on_bulk_select }

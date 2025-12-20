@@ -6,6 +6,7 @@ pub enum Selection {
 #[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     pub active: bool,
+    pub disabled: bool,
     pub on_action: yew::Callback<(&'static str, bool)>,
     pub on_select: yew::Callback<Selection>,
     pub on_toggle: yew::Callback<bool>,
@@ -43,36 +44,38 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
     yew::html! {
         <div class="input-group mb-3">
-            <div class="btn-group">
-                <div class="btn btn-outline-secondary">
-                    <input type="checkbox" class="form-check-input" checked={ props.active } onclick={ on_toggle } title="Enable bulk actions" />
+            <fieldset disabled={ props.disabled }>
+                <div class="btn-group">
+                    <div class="btn btn-outline-secondary">
+                        <input type="checkbox" class="form-check-input" checked={ props.active } onclick={ on_toggle } title="Enable bulk actions" />
+                    </div>
+
+                    <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick={ move |_| on_selectall.emit(()) }>{ "All" }</a></li>
+                        <li><a class="dropdown-item" href="#" onclick={ move |_| on_unselectall.emit(()) }>{ "None" }</a></li>
+                    </ul>
                 </div>
 
-                <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#" onclick={ move |_| on_selectall.emit(()) }>{ "All" }</a></li>
-                    <li><a class="dropdown-item" href="#" onclick={ move |_| on_unselectall.emit(()) }>{ "None" }</a></li>
-                </ul>
-            </div>
+                <div class="btn-group mx-2">
+                    <button type="button" class="btn btn-outline-primary" onclick={ on_read } title="Mark as read">
+                        <super::Svg icon="eye" size=24 />
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" onclick={ on_unread } title="Mark as unread">
+                        <super::Svg icon="eye-slash" size=24 />
+                    </button>
+                </div>
 
-            <div class="btn-group mx-2">
-                <button type="button" class="btn btn-outline-primary" onclick={ on_read } title="Mark as read">
-                    <super::Svg icon="eye" size=24 />
-                </button>
-                <button type="button" class="btn btn-outline-primary" onclick={ on_unread } title="Mark as unread">
-                    <super::Svg icon="eye-slash" size=24 />
-                </button>
-            </div>
-
-            <div class="btn-group">
-                <button type="button" class="btn btn-outline-warning" onclick={ on_favorite } title="Add to favorites">
-                    <super::Svg icon="star-fill" size=24 />
-                </button>
-                <button type="button" class="btn btn-outline-warning" onclick={ on_unfavorite } title="Remove from favorites">
-                    <super::Svg icon="star" size=24 />
-                </button>
-            </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-warning" onclick={ on_favorite } title="Add to favorites">
+                        <super::Svg icon="star-fill" size=24 />
+                    </button>
+                    <button type="button" class="btn btn-outline-warning" onclick={ on_unfavorite } title="Remove from favorites">
+                        <super::Svg icon="star" size=24 />
+                    </button>
+                </div>
+            </fieldset>
         </div>
     }
 }
