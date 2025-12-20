@@ -59,7 +59,7 @@ check:
 .PHONY: check
 
 clippy:
-	cargo clippy --package oxfeed
-	cargo clippy --package oxfeed-api
-	cargo clippy --package oxfeed-front --target wasm32-unknown-unknown
+	cargo clippy --package oxfeed --all-targets --all-features
+	cargo clippy --package oxfeed-api --all-targets --all-features
+	cargo clippy --package oxfeed-front --target wasm32-unknown-unknown --all-targets --all-features
 .PHONY: clippy
