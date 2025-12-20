@@ -39,7 +39,7 @@ create table if not exists webhook (
     unique(name, user_id)
 );
 
-create index if not exists webhook_user_id on source(user_id);
+create index if not exists webhook_user_id on webhook(user_id);
 
 create table if not exists item (
     item_id uuid primary key default uuid_generate_v4(),
