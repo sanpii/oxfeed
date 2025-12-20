@@ -67,10 +67,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             let filter = value.clone();
 
             yew::html! {
-                <>
-                    <div class="d-inline-flex">
-                        { filter.name.clone() }
-                    </div>
+                <li class="list-group-item d-flex align-items-center">
+                    <span class="flex-fill">{ filter.name.clone() }</span>
 
                     <div class="btn-group float-end">
                         <button
@@ -88,7 +86,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                             <super::Svg icon="trash" size=16 />
                         </button>
                     </div>
-                </>
+                </li>
             }
         }
     }

@@ -67,14 +67,14 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             let webhook = value.clone();
 
             yew::html! {
-                <>
-                    <div class="d-inline-flex">
+                <li class="list-group-item d-flex align-items-center">
+                    <span class="flex-fill">
                         { webhook.name.clone() }
 
                         if let Some(ref last_error) = webhook.last_error {
                             <super::Error text={ last_error.clone() } />
                         }
-                    </div>
+                    </span>
 
                     <div class="btn-group float-end">
                         <button
@@ -92,7 +92,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                             <super::Svg icon="trash" size=16 />
                         </button>
                     </div>
-                </>
+                </li>
             }
         }
     }

@@ -83,23 +83,19 @@ pub(crate) fn Component() -> yew::Html {
         }
         <ul class="list-group">
             if matches!(*scene, Scene::Add) {
-                <li class="list-group-item">
-                    <crate::components::form::Webhook
-                        webhook={ oxfeed::webhook::Entity::default() }
-                        {on_cancel}
-                        {on_submit}
-                    />
-                </li>
+                <crate::components::form::Webhook
+                    webhook={ oxfeed::webhook::Entity::default() }
+                    {on_cancel}
+                    {on_submit}
+                />
             }
 
             for webhook in webhooks.iter() {
-                <li class="list-group-item">
-                    <crate::components::Webhook
-                        value={ webhook.clone() }
-                        on_delete={ on_delete.clone() }
-                        on_save={ on_save.clone() }
-                    />
-                </li>
+                <crate::components::Webhook
+                    value={ webhook.clone() }
+                    on_delete={ on_delete.clone() }
+                    on_save={ on_save.clone() }
+                />
             }
         </ul>
         </>
