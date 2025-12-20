@@ -68,7 +68,13 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
             yew::html! {
                 <li class="list-group-item d-flex align-items-center">
-                    <span class="flex-fill">{ filter.name.clone() }</span>
+                    <span class="flex-fill">
+                        { filter.name.clone() }
+
+                        if let Err(err) = regex::Regex::new(&filter.regex) {
+                            <super::Error text={ err.to_string() } />
+                        }
+                    </span>
 
                     <div class="btn-group float-end">
                         <button

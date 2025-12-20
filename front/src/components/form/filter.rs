@@ -9,10 +9,28 @@ pub(crate) struct Properties {
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let name = yew::use_state(|| props.filter.name.clone());
     let regex = yew::use_state(|| props.filter.regex.clone());
+    let is_valid = yew::use_state(|| true);
     let on_cancel = props.on_cancel.clone();
 
     let edit_name = crate::components::edit_cb(name.clone());
-    let edit_regex = crate::components::edit_cb(regex.clone());
+    let edit_regex = yew_callback::callback!(regex, is_valid, move |e: yew::InputEvent| {
+        use yew::TargetCast as _;
+
+        let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
+        let value = input.value();
+
+        if let Err(err) = regex::Regex::new(&value) {
+            is_valid.set(false);
+            input.set_custom_validity(&err.to_string());
+        } else {
+            is_valid.set(true);
+            input.set_custom_validity("");
+        }
+
+        input.report_validity();
+
+        regex.set(value);
+    });
 
     let on_submit = yew_callback::callback!(
         name,
@@ -47,7 +65,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 <label class="col-sm-1 col-form-label" for="regex">{ "Regex" }</label>
                 <div class="col-sm-11">
                     <input
-                        class="form-control"
+                        class={ yew::classes!("form-control", if !*is_valid { "is-invalid" } else { "" }) }
                         name="regex"
                         required=true
                         value={ (*regex).clone() }
