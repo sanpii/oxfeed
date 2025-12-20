@@ -43,9 +43,17 @@ pub(crate) fn Component() -> yew::Html {
         webhooks.set(new_webhooks);
     });
 
-    let on_save = yew_callback::callback!(webhooks, move |webhook| {
+    let on_save = yew_callback::callback!(webhooks, move |webhook: oxfeed::webhook::Entity| {
         let mut new_webhooks = (*webhooks).clone();
-        new_webhooks.insert(0, webhook);
+
+        if let Some(old) = new_webhooks.iter_mut().find(|x| x.id == webhook.id) {
+            *old = webhook;
+        } else {
+            new_webhooks.insert(0, webhook);
+        }
+
+        new_webhooks.sort_by(|a, b| a.name.cmp(&b.name));
+
         webhooks.set(new_webhooks);
     });
 
