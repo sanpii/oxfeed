@@ -1,4 +1,5 @@
 pub mod account;
+pub mod filter;
 pub mod item;
 pub mod media;
 pub mod source;

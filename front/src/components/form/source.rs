@@ -12,6 +12,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let title = yew::use_state(|| props.source.title.clone());
     let url = yew::use_state(|| props.source.url.clone());
     let tags = yew::use_state(|| props.source.tags.clone());
+    let filters = yew::use_mut_ref(|| props.source.filters.clone());
+    let all_filters = yew::use_state(Vec::new);
     let webhooks = yew::use_mut_ref(|| props.source.webhooks.clone());
     let all_webhooks = yew::use_state(Vec::new);
 
@@ -24,6 +26,19 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             yew::platform::spawn_local(async move {
                 let webhooks = crate::api::call!(context, webhooks_all);
                 all_webhooks.set(webhooks);
+            })
+        });
+    }
+
+    {
+        let all_filters = all_filters.clone();
+
+        yew::use_state(|| {
+            let context = context.clone();
+
+            yew::platform::spawn_local(async move {
+                let filters = crate::api::call!(context, filters_all);
+                all_filters.set(filters);
             })
         });
     }
@@ -45,6 +60,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         url,
         source = props.source,
         tags,
+        filters,
         webhooks,
         move |_| {
             let mut source = source.clone();
@@ -53,6 +69,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             source.title = (*title).clone();
             source.url = (*url).clone();
             source.tags = (*tags).clone();
+            source.filters = (*filters).clone().into_inner();
             source.webhooks = (*webhooks).clone().into_inner();
 
             on_submit.emit(source);
@@ -108,38 +125,73 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 </div>
             </div>
 
-            if !all_webhooks.is_empty() {
-                <div class="row mb-3">
-                    <label class="col-sm-1 col-form-label" for="webhooks">{ "Webhooks" }</label>
-                    <div class="col-sm-11">
-                    {
-                        for all_webhooks.clone().iter().map(move |webhook| {
-                            let id = webhook.id.unwrap_or_default();
-                            let active = webhooks.borrow().contains(&id);
+            <div class="row mb-3">
+                if !all_webhooks.is_empty() {
+                    <div class="col">
+                        <label class="col-sm-1 col-form-label" for="webhooks">{ "Webhooks" }</label>
+                        <div class="col-sm-11">
+                        {
+                            for all_webhooks.clone().iter().map(move |webhook| {
+                                let id = webhook.id.unwrap_or_default();
+                                let active = webhooks.borrow().contains(&id);
 
-                            yew::html! {
-                                <crate::components::Switch
-                                    id={ id.to_string() }
-                                    label={ webhook.name.clone() }
-                                    active={ active }
-                                    on_toggle={
-                                        yew_callback::callback!(webhooks,
-                                            move |active| if active {
-                                                if !webhooks.borrow().contains(&id) {
-                                                    webhooks.borrow_mut().push(id);
+                                yew::html! {
+                                    <crate::components::Switch
+                                        id={ id.to_string() }
+                                        label={ webhook.name.clone() }
+                                        active={ active }
+                                        on_toggle={
+                                            yew_callback::callback!(webhooks,
+                                                move |active| if active {
+                                                    if !webhooks.borrow().contains(&id) {
+                                                        webhooks.borrow_mut().push(id);
+                                                    }
+                                                } else {
+                                                    webhooks.borrow_mut().retain(|x| x != &id);
                                                 }
-                                            } else {
-                                                webhooks.borrow_mut().retain(|x| x != &id);
-                                            }
-                                        )
-                                    }
-                                />
-                            }
-                        })
-                    }
+                                            )
+                                        }
+                                    />
+                                }
+                            })
+                        }
+                        </div>
                     </div>
-                </div>
-            }
+                }
+
+                if !all_filters.is_empty() {
+                    <div class="col">
+                        <label class="col-sm-1 col-form-label" for="filters">{ "Filters" }</label>
+                        <div class="col-sm-11">
+                        {
+                            for all_filters.clone().iter().map(move |filter| {
+                                let id = filter.id.unwrap_or_default();
+                                let active = filters.borrow().contains(&id);
+
+                                yew::html! {
+                                    <crate::components::Switch
+                                        id={ id.to_string() }
+                                        label={ filter.name.clone() }
+                                        active={ active }
+                                        on_toggle={
+                                            yew_callback::callback!(filters,
+                                                move |active| if active {
+                                                    if !filters.borrow().contains(&id) {
+                                                        filters.borrow_mut().push(id);
+                                                    }
+                                                } else {
+                                                    filters.borrow_mut().retain(|x| x != &id);
+                                                }
+                                            )
+                                        }
+                                    />
+                                }
+                            })
+                        }
+                        </div>
+                    </div>
+                }
+            </div>
 
             <a
                 class="btn btn-primary"

@@ -1,4 +1,5 @@
 mod account;
+mod filters;
 mod opml;
 mod webhooks;
 
@@ -27,6 +28,21 @@ pub(crate) fn Component() -> yew::Html {
                 </div>
                 <div class="card-body">
                     <webhooks::Component />
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    { "Filters" }
+                    <span class="help">
+                        <crate::components::Popover
+                            body={ "Filter on url" }
+                        >
+                            <crate::components::Svg icon="question-circle" size=16 />
+                        </crate::components::Popover>
+                    </span>
+                </div>
+                <div class="card-body">
+                    <filters::Component />
                 </div>
             </div>
             <div class="card">

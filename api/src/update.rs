@@ -1,3 +1,5 @@
+use oxfeed::filter::Entity as Filter;
+use oxfeed::filter::Model as FilterModel;
 use oxfeed::item::Entity as Item;
 use oxfeed::item::Model as ItemModel;
 use oxfeed::media::Entity as Media;
@@ -120,6 +122,10 @@ impl Task {
 
         let contents = response.text().await?;
 
+        let filters = elephantry
+            .find_where::<FilterModel>("filter_id = any($*)", &[&source.filters], None)?
+            .into_vec();
+
         let webhooks = elephantry
             .find_where::<WebhookModel>("webhook_id = any($*)", &[&source.webhooks], None)?
             .into_vec();
@@ -136,35 +142,42 @@ impl Task {
             let exist = elephantry
                 .exist_where::<ItemModel>("link = $* and source_id = $*", &[&link, &source.id])?;
 
-            if !exist {
-                let title = entry
-                    .title
-                    .map_or_else(|| "&lt;no title&gt;".to_string(), |x| x.content);
+            if exist {
+                continue;
+            }
 
-                log::info!("Adding '{title}'");
+            if Self::is_filtered(&filters, &link) {
+                log::info!("Skipping {link}");
+                continue;
+            }
 
-                let content = match entry.content {
-                    Some(content) => content.body,
-                    None => entry.summary.map(|x| x.content),
-                };
+            let title = entry
+                .title
+                .map_or_else(|| "&lt;no title&gt;".to_string(), |x| x.content);
 
-                let mut item = Item {
-                    id: None,
-                    content,
-                    title,
-                    published: entry.published,
-                    read: false,
-                    source_id: source.id.unwrap(),
-                    link,
-                    favorite: false,
-                };
+            log::info!("Adding '{title}'");
 
-                item.read = Self::call_webhooks(elephantry, &webhooks, &item);
-                item = elephantry.insert_one::<ItemModel>(&item)?;
+            let content = match entry.content {
+                Some(content) => content.body,
+                None => entry.summary.map(|x| x.content),
+            };
 
-                for media in entry.media {
-                    Self::create_media(elephantry, &item, &media.content)?;
-                }
+            let mut item = Item {
+                id: None,
+                content,
+                title,
+                published: entry.published,
+                read: false,
+                source_id: source.id.unwrap(),
+                link,
+                favorite: false,
+            };
+
+            item.read = Self::call_webhooks(elephantry, &webhooks, &item);
+            item = elephantry.insert_one::<ItemModel>(&item)?;
+
+            for media in entry.media {
+                Self::create_media(elephantry, &item, &media.content)?;
             }
         }
 
@@ -215,6 +228,21 @@ impl Task {
         }
 
         Ok(())
+    }
+
+    fn is_filtered(filters: &[Filter], link: &str) -> bool {
+        for filter in filters {
+            let Ok(regex) = regex::Regex::new(&filter.regex) else {
+                log::error!("Invalid regex: {}", filter.regex);
+                continue;
+            };
+
+            if regex.is_match(link) {
+                return true;
+            }
+        }
+
+        false
     }
 
     fn create_media(

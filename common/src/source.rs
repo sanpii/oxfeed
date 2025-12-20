@@ -15,6 +15,8 @@ pub struct Entity {
     pub user_id: uuid::Uuid,
     pub active: bool,
     #[cfg_attr(feature = "elephantry", elephantry(default))]
+    pub filters: Vec<uuid::Uuid>,
+    #[cfg_attr(feature = "elephantry", elephantry(default))]
     pub webhooks: Vec<uuid::Uuid>,
 }
 
@@ -29,6 +31,7 @@ impl Default for Entity {
             url: String::new(),
             user_id: uuid::Uuid::default(),
             active: true,
+            filters: Vec::new(),
             webhooks: Vec::new(),
         }
     }
@@ -48,7 +51,7 @@ impl Model {
 
         let query = format!(
             r#"
-select source_id, last_error, title, url, user_id, active, icon, webhooks,
+select source_id, last_error, title, url, user_id, active, icon, filters, webhooks,
         array(select unnest(tags) order by 1) tags
     from source
     join "user" using (user_id)

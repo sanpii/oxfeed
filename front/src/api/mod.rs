@@ -29,6 +29,7 @@ pub(crate) struct Api;
 
 include!("_account.rs");
 include!("_auth.rs");
+include!("_filters.rs");
 include!("_items.rs");
 include!("_opml.rs");
 include!("_sources.rs");

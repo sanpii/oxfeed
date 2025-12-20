@@ -1,4 +1,34 @@
 #[derive(serde::Deserialize)]
+pub(crate) struct Filter {
+    #[serde(default)]
+    id: Option<uuid::Uuid>,
+    #[serde(default)]
+    pub user_id: Option<uuid::Uuid>,
+    name: String,
+    regex: String,
+}
+
+impl std::convert::TryInto<oxfeed::filter::Entity> for Filter {
+    type Error = oxfeed::Error;
+
+    fn try_into(self) -> oxfeed::Result<oxfeed::filter::Entity> {
+        let user_id = match self.user_id {
+            Some(user_id) => Some(user_id),
+            None => return Err(oxfeed::Error::Auth),
+        };
+
+        let entity = oxfeed::filter::Entity {
+            id: self.id,
+            name: self.name.clone(),
+            regex: self.regex.clone(),
+            user_id,
+        };
+
+        Ok(entity)
+    }
+}
+
+#[derive(serde::Deserialize)]
 pub(crate) struct Source {
     id: Option<uuid::Uuid>,
     #[serde(default)]
@@ -6,6 +36,8 @@ pub(crate) struct Source {
     url: String,
     title: Option<String>,
     active: bool,
+    #[serde(default)]
+    filters: Vec<uuid::Uuid>,
     #[serde(default)]
     tags: Vec<String>,
     #[serde(default)]
@@ -33,6 +65,7 @@ impl std::convert::TryInto<oxfeed::source::Entity> for Source {
             url: self.url.clone(),
             user_id,
             active: self.active,
+            filters: self.filters,
             webhooks: self.webhooks,
         };
 

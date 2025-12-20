@@ -21,6 +21,7 @@ create table if not exists source (
     tags text[] not null,
     last_error text,
     active bool not null,
+    fiters uuid[],
     webhooks uuid[],
 
     unique(url, user_id)
@@ -40,6 +41,17 @@ create table if not exists webhook (
 );
 
 create index if not exists webhook_user_id on webhook(user_id);
+
+create table if not exists filter (
+    filter_id uuid primary key default uuid_generate_v4(),
+    user_id uuid references "user"(user_id) not null,
+    name text not null,
+    regex text not null,
+
+    unique(name, user_id)
+);
+
+create index if not exists filter_user_id on filter(user_id);
 
 create table if not exists item (
     item_id uuid primary key default uuid_generate_v4(),
