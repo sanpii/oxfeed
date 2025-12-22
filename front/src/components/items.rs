@@ -129,6 +129,31 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         (*timeout).take().unwrap().cancel();
     });
 
+    let webhook_response = yew::use_state(|| None);
+    let on_bulk_webhook =
+        yew_callback::callback!(context, pager, webhook_response, move |id: uuid::Uuid| {
+            let mut new_pager = (*pager).clone();
+
+            new_pager.iterator.iter_mut().filter(|x| x.1).for_each(|x| {
+                let context = context.clone();
+                let item = x.0.clone();
+                let webhook_response = webhook_response.clone();
+
+                yew::platform::spawn_local(async move {
+                    let response = crate::api::call!(context, webhooks_execute, &id, &item);
+                    webhook_response.set(Some(response));
+                });
+
+                x.1 = false;
+            });
+
+            pager.set(new_pager);
+        });
+
+    let on_close = yew_callback::callback!(webhook_response, move |_| {
+        webhook_response.set(None);
+    });
+
     if pager.iterator.is_empty() {
         return yew::html! {
             <>
@@ -138,6 +163,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     on_action={ on_bulk_action }
                     on_select={ on_bulk_select }
                     on_toggle={ on_bulk_toggle }
+                    on_webhook={ on_bulk_webhook }
                 />
                 <super::Empty />
             </>
@@ -152,7 +178,26 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 on_action={ on_bulk_action }
                 on_select={ on_bulk_select }
                 on_toggle={ on_bulk_toggle }
+                on_webhook={ on_bulk_webhook }
             />
+
+            if let Some(ref response) = *webhook_response {
+                <div class="modal d-block" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                { "Status code: " }{ &response.status }
+                            </div>
+                            <div class="modal-body">
+                                <pre><code>{ &response.body }</code></pre>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" onclick={ on_close }>{ "Close" }</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
 
             <ul class="list-group" ontouchstart={ on_touch_start } ontouchend={ on_touch_end }>
                 {

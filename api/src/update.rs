@@ -173,7 +173,7 @@ impl Task {
                 favorite: false,
             };
 
-            item.read = Self::call_webhooks(elephantry, &webhooks, &item);
+            item.read = Self::call_webhooks(elephantry, &webhooks, &item).await;
             item = elephantry.insert_one::<ItemModel>(&item)?;
 
             for media in entry.media {
@@ -327,7 +327,7 @@ impl Task {
         }
     }
 
-    fn call_webhooks(
+    async fn call_webhooks(
         elephantry: &elephantry::Connection,
         webhooks: &[Webhook],
         item: &Item,
@@ -335,7 +335,9 @@ impl Task {
         let mut read = false;
 
         for webhook in webhooks {
-            match Self::call_webhook(webhook, item) {
+            log::info!("call webhook '{}'", webhook.name);
+
+            match crate::execute_webhook(webhook, item).await {
                 Ok(_) => read |= webhook.mark_read,
                 Err(err) => {
                     let last_error = err.to_string();
@@ -350,26 +352,5 @@ impl Task {
         }
 
         read
-    }
-
-    fn call_webhook(webhook: &Webhook, item: &Item) -> oxfeed::Result {
-        log::info!("call webhook '{}'", webhook.name);
-
-        let response = reqwest::blocking::Client::new()
-            .post(&webhook.url)
-            .timeout(std::time::Duration::from_mins(5))
-            .json(item)
-            .send()?;
-
-        if response.status().is_success() {
-            Ok(())
-        } else {
-            let error = format!(
-                "{} · {}",
-                response.status(),
-                response.text().unwrap_or_default(),
-            );
-            Err(oxfeed::Error::Webhook(error))
-        }
     }
 }

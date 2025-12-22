@@ -74,3 +74,24 @@ async fn main() -> oxfeed::Result {
 
     Ok(())
 }
+
+pub async fn execute_webhook(
+    webhook: &oxfeed::webhook::Entity,
+    item: &oxfeed::item::Entity,
+) -> oxfeed::Result<String> {
+    let response = reqwest::Client::new()
+        .post(&webhook.url)
+        .timeout(std::time::Duration::from_mins(5))
+        .json(item)
+        .send()
+        .await?;
+
+    if response.status().is_success() {
+        Ok(response.text().await.unwrap_or_default())
+    } else {
+        let status = response.status();
+        let body = response.text().await.unwrap_or_default();
+
+        Err(oxfeed::Error::Webhook(status, body))
+    }
+}

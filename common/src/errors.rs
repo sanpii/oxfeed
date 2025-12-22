@@ -59,8 +59,8 @@ pub enum Error {
     #[error("{0}")]
     Web(#[from] actix_web::Error),
 
-    #[error("{0}")]
-    Webhook(String),
+    #[error("{0} · {1}")]
+    Webhook(reqwest::StatusCode, String),
 }
 
 #[cfg(feature = "actix-web")]

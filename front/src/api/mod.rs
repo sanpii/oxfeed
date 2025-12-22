@@ -123,5 +123,6 @@ macro_rules! body_impl {
 
 body_impl!(oxfeed::account::Entity);
 body_impl!(oxfeed::filter::Entity);
+body_impl!(oxfeed::item::Item);
 body_impl!(oxfeed::source::Entity);
 body_impl!(oxfeed::webhook::Entity);

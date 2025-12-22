@@ -35,7 +35,7 @@ pub struct FeedItem {
     pub media: Vec<crate::media::Entity>,
 }
 
-#[derive(serde::Serialize)]
+#[derive(serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "elephantry", derive(elephantry::Entity))]
 #[cfg_attr(
     feature = "elephantry",

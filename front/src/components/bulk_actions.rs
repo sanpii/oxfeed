@@ -10,6 +10,7 @@ pub(crate) struct Properties {
     pub on_action: yew::Callback<(&'static str, bool)>,
     pub on_select: yew::Callback<Selection>,
     pub on_toggle: yew::Callback<bool>,
+    pub on_webhook: yew::Callback<uuid::Uuid>,
 }
 
 #[yew::component]
@@ -45,7 +46,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     yew::html! {
         <div class="input-group mb-3">
             <fieldset disabled={ props.disabled }>
-                <div class="btn-group">
+                <div class="btn-group me-2">
                     <div class="btn btn-outline-secondary">
                         <input type="checkbox" class="form-check-input" checked={ props.active } onclick={ on_toggle } title="Enable bulk actions" />
                     </div>
@@ -58,7 +59,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     </ul>
                 </div>
 
-                <div class="btn-group mx-2">
+                <div class="btn-group me-2">
                     <button type="button" class="btn btn-outline-primary" onclick={ on_read } title="Mark as read">
                         <super::Svg icon="eye" size=24 />
                     </button>
@@ -67,7 +68,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     </button>
                 </div>
 
-                <div class="btn-group">
+                <div class="btn-group me-2">
                     <button type="button" class="btn btn-outline-warning" onclick={ on_favorite } title="Add to favorites">
                         <super::Svg icon="star-fill" size=24 />
                     </button>
@@ -75,7 +76,66 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         <super::Svg icon="star" size=24 />
                     </button>
                 </div>
+
+                <Webhooks on_webhook={ props.on_webhook.clone() } />
             </fieldset>
+        </div>
+    }
+}
+
+#[derive(Clone, PartialEq, yew::Properties)]
+pub(crate) struct WebhooksProperties {
+    pub on_webhook: yew::Callback<uuid::Uuid>,
+}
+
+#[yew::component]
+fn Webhooks(props: &WebhooksProperties) -> yew::Html {
+    let context = crate::use_context();
+    let wait = yew::use_memo(context.clone(), |context| context.fetching);
+
+    let webhooks = yew::use_state(Vec::new);
+
+    {
+        let context = context.clone();
+        let webhooks = webhooks.clone();
+
+        yew::use_effect_with((), move |_| {
+            let context = context.clone();
+            let webhooks = webhooks.clone();
+
+            yew::platform::spawn_local(async move {
+                let new_webhooks = crate::api::call!(context, webhooks_all);
+                webhooks.set(new_webhooks);
+            });
+        });
+    }
+
+    let on_webhook = yew_callback::callback!(on_webhook = props.on_webhook, move |id| {
+        on_webhook.emit(id);
+    });
+
+    yew::html! {
+        <div class="btn-group">
+            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" title="Execute a webhook">
+                if *wait {
+                    <super::Svg icon="hourglass-split" size=24 />
+                } else {
+                    <super::Svg icon="plug" size=24 />
+                }
+            </button>
+            <ul class="dropdown-menu">
+            {
+                for (*webhooks).clone().into_iter().map(|webhook| {
+                    let on_webhook = on_webhook.clone();
+
+                    yew::html! {
+                        <li>
+                            <a class="dropdown-item" href="#" onclick={ move |_| on_webhook.emit(webhook.id.unwrap()) }>{ &webhook.name }</a>
+                        </li>
+                    }
+                })
+            }
+            </ul>
         </div>
     }
 }

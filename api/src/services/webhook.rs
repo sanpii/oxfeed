@@ -5,6 +5,7 @@ pub(crate) fn scope() -> actix_web::Scope {
         .service(all)
         .service(create)
         .service(delete)
+        .service(execute)
         .service(update)
 }
 
@@ -55,6 +56,42 @@ async fn delete(
         Some(webhook) => actix_web::HttpResponse::Ok().json(webhook),
         None => actix_web::HttpResponse::NoContent().finish(),
     };
+
+    Ok(response)
+}
+
+#[actix_web::post("/{webhook_id}")]
+async fn execute(
+    elephantry: actix_web::web::Data<elephantry::Pool>,
+    path: actix_web::web::Path<uuid::Uuid>,
+    item: actix_web::web::Json<oxfeed::item::Item>,
+    identity: crate::Identity,
+) -> oxfeed::Result<actix_web::HttpResponse> {
+    let webhook_id = path.into_inner();
+    let token = identity.token(&elephantry)?;
+    let Some(webhook) = elephantry.model::<Model>().one(&token, &webhook_id)? else {
+        return Err(oxfeed::Error::BadRequest);
+    };
+
+    let Some(item) = elephantry
+        .model::<oxfeed::item::Model>()
+        .one(&token, &item.id)?
+    else {
+        return Err(oxfeed::Error::BadRequest);
+    };
+
+    let response = match crate::execute_webhook(&webhook, &item).await {
+        Ok(body) => oxfeed::webhook::Response {
+            status: reqwest::StatusCode::OK,
+            body,
+        },
+        Err(oxfeed::Error::Webhook(status, body)) => oxfeed::webhook::Response { status, body },
+        Err(err) => return Err(err),
+    };
+
+    let response = actix_web::HttpResponseBuilder::new(actix_web::http::StatusCode::OK)
+        .append_header(actix_web::http::header::ContentType(mime::TEXT_PLAIN))
+        .json(response);
 
     Ok(response)
 }

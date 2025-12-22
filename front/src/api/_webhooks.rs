@@ -19,4 +19,8 @@ impl Api {
     pub async fn webhooks_delete(id: &uuid::Uuid) -> oxfeed::Result<oxfeed::webhook::Entity> {
         Self::fetch(Method::DELETE, &format!("/webhooks/{id}"), ()).await
     }
+
+    pub async fn webhooks_execute(id: &uuid::Uuid, item: &oxfeed::item::Item) -> oxfeed::Result<oxfeed::webhook::Response> {
+        Self::fetch(Method::POST, &format!("/webhooks/{id}"), item).await
+    }
 }
