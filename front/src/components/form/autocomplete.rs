@@ -94,7 +94,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     );
 
     yew::html! {
-        <div class="autocomplete">
+        <div class="autocomplete ms-2">
             <input
                 type="text"
                 ref={ input_ref.clone() }
