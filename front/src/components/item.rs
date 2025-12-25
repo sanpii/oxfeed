@@ -69,6 +69,9 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         Scene::Hidden => "chevron-down",
     };
 
+    let title = gloo::utils::document().create_element("span").unwrap();
+    title.set_inner_html(&item.title);
+
     let content_div = gloo::utils::document().create_element("div").unwrap();
     content_div.set_inner_html(content.as_ref().unwrap_or(&"Loading...".to_string()));
 
@@ -139,7 +142,9 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 }
 
                 <img src={ icon } width="16" height="16" />
-                <a href={ item.link.clone() } target="_blank">{ &item.title }</a>
+                <a href={ item.link.clone() } target="_blank">
+                    { yew::virtual_dom::VNode::VRef(title.into()) }
+                </a>
 
                 for tag in &item.tags {
                     <super::Tag value={ tag.clone() } />
