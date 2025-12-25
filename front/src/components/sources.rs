@@ -17,11 +17,10 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let scene = yew::use_state(Scene::default);
     let pagination = yew::use_state(|| elephantry_extras::Pagination::from(crate::Location::new()));
     let filter = yew::use_memo(props.clone(), |props| props.filter.clone());
-    let filters = yew::use_state(Vec::new);
     let need_update = yew::use_memo(context.clone(), |context| context.need_update);
     let pager = yew::use_state(|| None);
-    let webhooks = yew::use_state(Vec::new);
 
+    let filters = yew::use_state(Vec::new);
     {
         let context = context.clone();
         let filters = filters.clone();
@@ -33,6 +32,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         });
     }
 
+    let webhooks = yew::use_state(Vec::new);
     {
         let context = context.clone();
         let webhooks = webhooks.clone();
@@ -113,6 +113,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         source={ oxfeed::source::Entity::default() }
                         {on_cancel}
                         {on_submit}
+                        filters={ (*filters).clone() }
+                        webhooks={ (*webhooks).clone() }
                     />
                 </li>
             </ul>

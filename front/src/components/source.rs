@@ -72,7 +72,13 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
     match *scene {
         Scene::Edit => yew::html! {
-            <super::form::Source {source} {on_cancel} {on_submit} />
+            <super::form::Source
+                {source}
+                {on_cancel}
+                {on_submit}
+                filters={ props.filters.clone() }
+                webhooks={ props.webhooks.clone() }
+            />
         },
         Scene::View => {
             yew::html! {

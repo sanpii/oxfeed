@@ -1,52 +1,36 @@
 #[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     pub source: oxfeed::source::Entity,
+    pub filters: Vec<oxfeed::filter::Entity>,
+    pub webhooks: Vec<oxfeed::webhook::Entity>,
     pub on_cancel: yew::Callback<()>,
     pub on_submit: yew::Callback<oxfeed::source::Entity>,
 }
 
 #[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
-    let context = crate::use_context();
-    let active = yew::use_state(|| props.source.active);
-    let title = yew::use_state(|| props.source.title.clone());
-    let url = yew::use_state(|| props.source.url.clone());
-    let tags = yew::use_state(|| props.source.tags.clone());
-    let filters = yew::use_mut_ref(|| props.source.filters.clone());
-    let all_filters = yew::use_state(Vec::new);
-    let webhooks = yew::use_mut_ref(|| props.source.webhooks.clone());
-    let all_webhooks = yew::use_state(Vec::new);
+    let source = yew::use_mut_ref(move || props.source.clone());
 
-    {
-        let all_webhooks = all_webhooks.clone();
+    let edit_title = yew_callback::callback!(source, move |e: yew::InputEvent| {
+        use yew::TargetCast as _;
 
-        yew::use_state(|| {
-            let context = context.clone();
+        let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
+        input.report_validity();
 
-            yew::platform::spawn_local(async move {
-                let webhooks = crate::api::call!(context, webhooks_all);
-                all_webhooks.set(webhooks);
-            })
-        });
-    }
+        source.borrow_mut().title = input.value();
+    });
 
-    {
-        let all_filters = all_filters.clone();
+    let edit_url = yew_callback::callback!(source, move |e: yew::InputEvent| {
+        use yew::TargetCast as _;
 
-        yew::use_state(|| {
-            let context = context.clone();
+        let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
+        input.report_validity();
 
-            yew::platform::spawn_local(async move {
-                let filters = crate::api::call!(context, filters_all);
-                all_filters.set(filters);
-            })
-        });
-    }
+        source.borrow_mut().url = input.value();
+    });
 
-    let edit_title = crate::components::edit_cb(title.clone());
-    let edit_url = crate::components::edit_cb(url.clone());
-    let toggle_active = yew_callback::callback!(active, move |value| {
-        active.set(value);
+    let toggle_active = yew_callback::callback!(source, move |value| {
+        source.borrow_mut().active = value;
     });
 
     let on_cancel = yew_callback::callback!(on_cancel = props.on_cancel, move |_| {
@@ -54,28 +38,15 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     });
 
     let on_submit = yew_callback::callback!(
-        active,
         on_submit = props.on_submit,
-        title,
-        url,
-        source = props.source,
-        tags,
-        filters,
-        webhooks,
+        source,
         move |_| {
-            let mut source = source.clone();
-
-            source.active = *active;
-            source.title = (*title).clone();
-            source.url = (*url).clone();
-            source.tags = (*tags).clone();
-            source.filters = (*filters).clone().into_inner();
-            source.webhooks = (*webhooks).clone().into_inner();
-
-            on_submit.emit(source);
+            use std::ops::Deref as _;
+            on_submit.emit(source.borrow().deref().clone());
         }
     );
 
+    let value = source.clone();
     yew::html! {
         <form>
             <div class="row mb-3">
@@ -84,7 +55,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     <input
                         class="form-control"
                         name="title"
-                        value={ (*title).clone() }
+                        value={ source.borrow().title.clone() }
                         oninput={ edit_title }
                     />
                     <small class="form-text text-body-secondary">{ "Leave empty to use the feed title." }</small>
@@ -98,7 +69,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         class="form-control"
                         name="url"
                         required=true
-                        value={ (*url).clone() }
+                        value={ source.borrow().url.clone() }
                         oninput={ edit_url }
                     />
                 </div>
@@ -108,8 +79,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 <label class="col-sm-1 col-form-label" for="tags">{ "Tags" }</label>
                 <div class="col-sm-11">
                     <super::Tags
-                        values={ (*tags).clone() }
-                        on_change={ yew_callback::callback!(move |value| tags.set(value)) }
+                        values={ source.borrow().tags.clone() }
+                        on_change={ yew_callback::callback!(source, move |value| source.borrow_mut().tags = value) }
                     />
                 </div>
             </div>
@@ -118,7 +89,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 <div class="col-sm-11 offset-sm-1">
                     <crate::components::Switch
                         id="active"
-                        active={ *active }
+                        active={ source.borrow().active }
                         on_toggle={ toggle_active }
                         label="active"
                     />
@@ -126,14 +97,14 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             </div>
 
             <div class="row mb-3">
-                if !all_webhooks.is_empty() {
+                if !props.webhooks.is_empty() {
                     <div class="col">
                         <label class="col-sm-1 col-form-label" for="webhooks">{ "Webhooks" }</label>
                         <div class="col-sm-11">
                         {
-                            for all_webhooks.clone().iter().map(move |webhook| {
+                            for props.webhooks.clone().iter().map(move |webhook| {
                                 let id = webhook.id.unwrap_or_default();
-                                let active = webhooks.borrow().contains(&id);
+                                let active = value.borrow().webhooks.contains(&id);
 
                                 yew::html! {
                                     <crate::components::Switch
@@ -141,13 +112,13 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                                         label={ webhook.name.clone() }
                                         active={ active }
                                         on_toggle={
-                                            yew_callback::callback!(webhooks,
+                                            yew_callback::callback!(value,
                                                 move |active| if active {
-                                                    if !webhooks.borrow().contains(&id) {
-                                                        webhooks.borrow_mut().push(id);
+                                                    if !value.borrow().webhooks.contains(&id) {
+                                                        value.borrow_mut().webhooks.push(id);
                                                     }
                                                 } else {
-                                                    webhooks.borrow_mut().retain(|x| x != &id);
+                                                    value.borrow_mut().webhooks.retain(|x| x != &id);
                                                 }
                                             )
                                         }
@@ -159,14 +130,14 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     </div>
                 }
 
-                if !all_filters.is_empty() {
+                if !props.filters.is_empty() {
                     <div class="col">
                         <label class="col-sm-1 col-form-label" for="filters">{ "Filters" }</label>
                         <div class="col-sm-11">
                         {
-                            for all_filters.clone().iter().map(move |filter| {
+                            for props.filters.clone().iter().map(move |filter| {
                                 let id = filter.id.unwrap_or_default();
-                                let active = filters.borrow().contains(&id);
+                                let active = source.borrow().filters.contains(&id);
 
                                 yew::html! {
                                     <crate::components::Switch
@@ -174,13 +145,13 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                                         label={ filter.name.clone() }
                                         active={ active }
                                         on_toggle={
-                                            yew_callback::callback!(filters,
+                                            yew_callback::callback!(source,
                                                 move |active| if active {
-                                                    if !filters.borrow().contains(&id) {
-                                                        filters.borrow_mut().push(id);
+                                                    if !source.borrow().filters.contains(&id) {
+                                                        source.borrow_mut().filters.push(id);
                                                     }
                                                 } else {
-                                                    filters.borrow_mut().retain(|x| x != &id);
+                                                    source.borrow_mut().filters.retain(|x| x != &id);
                                                 }
                                             )
                                         }
