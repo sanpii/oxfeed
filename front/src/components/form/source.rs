@@ -37,14 +37,10 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         on_cancel.emit(());
     });
 
-    let on_submit = yew_callback::callback!(
-        on_submit = props.on_submit,
-        source,
-        move |_| {
-            use std::ops::Deref as _;
-            on_submit.emit(source.borrow().deref().clone());
-        }
-    );
+    let on_submit = yew_callback::callback!(on_submit = props.on_submit, source, move |_| {
+        use std::ops::Deref as _;
+        on_submit.emit(source.borrow().deref().clone());
+    });
 
     let value = source.clone();
     yew::html! {
