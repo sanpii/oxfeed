@@ -24,13 +24,13 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
     if props.button {
         yew::html! {
-                <button
-                    class="btn btn-secondary logout d-none d-md-block"
-                    title="Logout"
-                    onclick={ logout }
-                >
-                    <super::Svg icon="door-closed" size=24 />
-                </button>
+            <button
+                class="btn btn-secondary logout d-none d-md-block mx-2"
+                title="Logout"
+                onclick={ logout }
+            >
+                <super::Svg icon="door-closed" size=24 />
+            </button>
         }
     } else {
         yew::html! {

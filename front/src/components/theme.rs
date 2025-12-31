@@ -1,8 +1,44 @@
-#[yew::component]
-pub fn Component() -> yew::Html {
-    let context = crate::use_context();
-    let theme = yew::use_memo(context.clone(), |context| context.theme);
+#[derive(Clone, PartialEq, yew::Properties)]
+pub(crate) struct Properties {
+    pub button: bool,
+}
 
+#[yew::component]
+pub(crate) fn Component(props: &Properties) -> yew::Html {
+    let context = crate::use_context();
+    let current_theme = yew::use_memo(context.clone(), |context| context.theme);
+
+    if props.button {
+        yew::html! {
+            <li class="nav-item dropdown d-none d-md-block mx-2">
+                <button class="btn btn-dark dropdown-toggle p-2" data-bs-toggle="dropdown">
+                    <super::Svg icon={ current_theme.icon() } size=16 />
+                </button>
+                <Menu current_theme={ *current_theme } dark=true />
+            </li>
+        }
+    } else {
+        yew::html! {
+            <>
+                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" data-bs-target="theme" href="#">
+                    <super::Svg icon={ current_theme.icon() } size=16 />
+                    { "Theme" }
+                </a>
+                <Menu current_theme={ *current_theme } dark=false />
+            </>
+        }
+    }
+}
+
+#[derive(Clone, PartialEq, yew::Properties)]
+pub(crate) struct MenuProperties {
+    pub current_theme: crate::context::Theme,
+    pub dark: bool,
+}
+
+#[yew::component]
+fn Menu(props: &MenuProperties) -> yew::Html {
+    let context = crate::use_context();
     let on_click = yew_callback::callback!(context, move |value: crate::context::Theme| {
         use gloo::storage::Storage as _;
 
@@ -13,30 +49,21 @@ pub fn Component() -> yew::Html {
     });
 
     yew::html! {
-        <ul class="navbar-nav">
-            <li class="nav-item dropdown">
-                <button class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown">
-                    <super::Svg icon={ theme.icon() } size=16 />
-                </button>
-                <ul class="dropdown-menu dropdown-menu-dark">
-                {
-                    crate::context::Theme::all().into_iter().map(|x| {
-                        let on_click = on_click.clone();
+        <ul class={ yew::classes!("dropdown-menu", if props.dark { "dropdown-menu-dark" } else { "" }) } id="theme">
+            for theme in crate::context::Theme::all() {
+                <li>
+                    <a
+                        class={ yew::classes!("dropdown-item", if props.current_theme == theme { "active" } else { "" }) }
+                        onclick={
+                            let on_click = on_click.clone();
 
-                        yew::html! {
-                            <li>
-                                <button
-                                    class={ yew::classes!("dropdown-item", if *theme == x { "active" } else { "" }) }
-                                    onclick={ move |_| on_click.emit(x) }
-                                >
-                                    <super::Svg icon={ x.icon() } size=16 />{ x }
-                                </button>
-                            </li>
+                            move |_| on_click.emit(theme)
                         }
-                    }).collect::<Vec<yew::Html>>()
-                }
-                </ul>
-            </li>
+                    >
+                        <super::Svg icon={ theme.icon() } size=16 />{ theme }
+                    </a>
+                </li>
+            }
         </ul>
     }
 }

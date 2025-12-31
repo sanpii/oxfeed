@@ -111,9 +111,8 @@ fn change_rss() {
 fn switch(route: Route) -> yew::Html {
     yew::html! {
         <>
-            <nav class="navbar navbar-dark navbar-expand-lg sticky-top bg-dark flex-md-nowrap p-0 shadow">
-                <super::Header />
-            </nav>
+            <super::Header />
+
             <div class="container-fluid">
                 <div class="row">
                     <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse">

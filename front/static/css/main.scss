@@ -217,12 +217,6 @@ li.list-group-item {
     }
 }
 
-@media (max-width: 767.98px) {
-    .sidebar {
-        top: 5rem;
-    }
-}
-
 .sidebar-sticky {
     position: relative;
     top: 0;
@@ -261,16 +255,8 @@ li.list-group-item {
     }
 }
 
-.navbar .navbar-toggler {
-    top: .25rem;
-    right: 5rem;
-}
-
-.nav-item.dropdown {
-    margin-top: 10px;
-}
-
 .form-control-dark {
+    width: auto;
     background-color: var(--bs-gray-900);
     border-color: var(--bs-gray-700);
 

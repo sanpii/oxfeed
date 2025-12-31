@@ -10,16 +10,14 @@ pub(crate) fn Component() -> yew::Html {
     };
 
     yew::html! {
-        <>
+        <nav class="d-flex navbar navbar-dark navbar-expand-lg sticky-top bg-dark flex-md-nowrap p-0 shadow">
             <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">{{ title }}</a>
-            <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <super::search::Bar />
+            <button class="navbar-toggler collapsed mx-2" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <super::search::Bar />
-            <ul class="navbar-nav ms-auto me-3">
-                <li class="nav-item"><super::Theme /></li>
-                <li class="nav-item"><super::Logout button=true /></li>
-            </ul>
-        </>
+            <super::Theme button=true />
+            <super::Logout button=true />
+        </nav>
     }
 }

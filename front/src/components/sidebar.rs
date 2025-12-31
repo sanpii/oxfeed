@@ -191,7 +191,10 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         </yew_router::components::Link<super::app::Route>>
                     </li>
                 }
-                <li class="nav-item d-md-none" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+                <li class="nav-item d-md-none">
+                    <super::Theme button=false />
+                </li>
+                <li class="nav-item d-md-none">
                     <super::Logout button=false />
                 </li>
             </ul>
