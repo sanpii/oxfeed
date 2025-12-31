@@ -146,20 +146,22 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     { yew::virtual_dom::VNode::VRef(title.into()) }
                 </a>
 
-                for tag in &item.tags {
-                    <super::Tag value={ tag.clone() } />
-                }
-
-                if *scene == Scene::Hidden {
-                    if !item.media.is_empty() {
-                        <span class="text-body-secondary">{ "· " }</span>
-                        <span class="medias" title="Medias">
-                            <super::Media inline=true medias={ item.media.clone() } />
-                        </span>
+                <span class="d-none d-sm-inline">
+                    for tag in &item.tags {
+                        <super::Tag value={ tag.clone() } />
                     }
-                }
 
-                <span class="text-body-secondary">{ "· " }{ &item.source }</span>
+                    if *scene == Scene::Hidden {
+                        if !item.media.is_empty() {
+                            <span class="text-body-secondary">{ "· " }</span>
+                            <span class="medias" title="Medias">
+                                <super::Media inline=true medias={ item.media.clone() } />
+                            </span>
+                        }
+                    }
+
+                    <span class="text-body-secondary">{ "· " }{ &item.source }</span>
+                </span>
 
                 <div class="flex-float-end">
                     {
