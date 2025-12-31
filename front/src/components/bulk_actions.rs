@@ -44,7 +44,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     });
 
     yew::html! {
-        <div class="input-group mb-3">
+        <div class={ yew::classes!("input-group", "mb-3", if props.active { "" } else { "d-none d-sm-block" }) }>
             <fieldset disabled={ props.disabled }>
                 <div class="btn-group me-2">
                     <div class="btn btn-outline-secondary">
