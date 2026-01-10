@@ -142,7 +142,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 }
 
                 <img src={ icon } width="16" height="16" />
-                <a href={ item.link.clone() } target="_blank">
+                <a href={ item.link.clone() } title={ item.title.clone() } target="_blank">
                     { yew::virtual_dom::VNode::VRef(title.into()) }
                 </a>
 
