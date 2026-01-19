@@ -76,6 +76,10 @@ li.list-group-item {
         display: none;
     }
 
+    div.expanded a {
+        text-wrap: wrap;
+    }
+
     @media (min-width: 768px) /* md */ {
         &:hover .flex-float-end .actions {
             margin-right: .5rem;

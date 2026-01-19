@@ -131,7 +131,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
     yew::html! {
         <>
-            <div class="d-flex gap-2 align-items-center">
+            <div class={ yew::classes!("d-flex", "gap-2", "align-items-center", if *scene == Scene::Expanded { "expanded" } else { "" }) }>
                 if props.bulk_enable {
                     <input
                         type="checkbox"
