@@ -79,23 +79,25 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         bulk_active.set(enable);
     });
 
-    let on_bulk_action = yew_callback::callback!(context, pager, move |(tag, value)| {
-        let mut new_pager = (*pager).clone();
+    let on_bulk_action =
+        yew_callback::callback!(bulk_active, context, pager, move |(tag, value)| {
+            let mut new_pager = (*pager).clone();
 
-        new_pager.iterator.iter_mut().filter(|x| x.1).for_each(|x| {
-            let item = x.clone();
-            let context = context.clone();
+            new_pager.iterator.iter_mut().filter(|x| x.1).for_each(|x| {
+                let item = x.clone();
+                let context = context.clone();
 
-            yew::platform::spawn_local(async move {
-                crate::api::call!(context, items_tag, &item.0.id, tag, value);
-                context.dispatch(crate::Action::NeedUpdate);
+                yew::platform::spawn_local(async move {
+                    crate::api::call!(context, items_tag, &item.0.id, tag, value);
+                    context.dispatch(crate::Action::NeedUpdate);
+                });
+
+                x.1 = false;
             });
 
-            x.1 = false;
+            bulk_active.set(false);
+            pager.set(new_pager);
         });
-
-        pager.set(new_pager);
-    });
 
     let on_bulk_select = yew_callback::callback!(bulk_active, pager, move |selection| {
         let mut new_pager = (*pager).clone();
