@@ -59,7 +59,10 @@ fn search(
     let mut clause = clause.clone();
 
     let mut sql = if let Some(q) = &query.q {
-        clause.and_where("document @@ websearch_to_tsquery($*)", vec![q]);
+        clause.and_where(
+            "document @@ websearch_to_tsquery(s.language::regconfig, $*)",
+            vec![q],
+        );
         include_str!("../../sql/fts_items.sql").to_string()
     } else {
         include_str!("../../sql/search_items.sql").to_string()
@@ -81,7 +84,11 @@ fn search(
     clause.and_where("token = $*", vec![&token]);
 
     writeln!(sql, "where {clause}").ok();
-    writeln!(sql, "group by i.item_id, s.title, s.tags, s.icon").ok();
+    writeln!(
+        sql,
+        "group by i.item_id, s.title, s.tags, s.icon, s.language"
+    )
+    .ok();
 
     if query.q.is_some() {
         writeln!(sql, ", f.document\norder by ts_rank_cd(f.document, websearch_to_tsquery($1)) desc, i.published desc").ok();

@@ -18,6 +18,7 @@ create table if not exists source (
     url text not null,
     icon text,
     title text not null,
+    language text not null,
     tags text[] not null,
     last_error text,
     active bool not null,
@@ -26,6 +27,22 @@ create table if not exists source (
 
     unique(url, user_id)
 );
+
+create or replace function on_update_source()
+    returns trigger
+    language plpgsql
+as $$
+begin
+    if new.language != old.language
+    then
+        refresh materialized view concurrently fts.item;
+    end if;
+    return new;
+end;
+$$;
+
+create or replace trigger source_update after update on source
+    execute function on_update_source();
 
 create index if not exists source_user_id on source(user_id);
 
@@ -119,11 +136,13 @@ create trigger notify_new_item
 
 create schema if not exists fts;
 
+drop materialized view if exists fts.item;
 create materialized view if not exists fts.item as
     select item.item_id,
-        setweight(to_tsvector(coalesce(item.title, '')), 'A')
-        || setweight(to_tsvector(coalesce(item.content, '')), 'B') as document
-        from item;
+        setweight(to_tsvector(source.language::regconfig, coalesce(item.title, '')), 'A')
+        || setweight(to_tsvector(source.language::regconfig, coalesce(item.content, '')), 'B') as document
+        from item
+        join source using(source_id);
 
 create unique index if not exists fts_item_item_id on fts.item(item_id);
 create index if not exists fts_item_document on fts.item using gin(document);

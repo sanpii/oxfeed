@@ -32,6 +32,18 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         });
     }
 
+    let languages = yew::use_state(Vec::new);
+    {
+        let context = context.clone();
+        let languages = languages.clone();
+
+        yew::use_effect_with((), |_| {
+            yew::platform::spawn_local(async move {
+                languages.set(crate::api::call!(context, languages));
+            });
+        });
+    }
+
     let webhooks = yew::use_state(Vec::new);
     {
         let context = context.clone();
@@ -114,6 +126,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         {on_cancel}
                         {on_submit}
                         filters={ (*filters).clone() }
+                        languages={ (*languages).clone() }
                         webhooks={ (*webhooks).clone() }
                     />
                 </li>
@@ -137,6 +150,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     <li class="list-group-item">
                         <crate::components::Source
                             filters={ (*filters).clone() }
+                            languages={ (*languages).clone() }
                             webhooks={ (*webhooks).clone() }
                             value={ item.clone() }
                         />

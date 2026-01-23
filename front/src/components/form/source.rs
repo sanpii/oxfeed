@@ -1,7 +1,10 @@
+use yew::TargetCast as _;
+
 #[derive(Clone, PartialEq, yew::Properties)]
 pub(crate) struct Properties {
     pub source: oxfeed::source::Entity,
     pub filters: Vec<oxfeed::filter::Entity>,
+    pub languages: Vec<String>,
     pub webhooks: Vec<oxfeed::webhook::Entity>,
     pub on_cancel: yew::Callback<()>,
     pub on_submit: yew::Callback<oxfeed::source::Entity>,
@@ -12,8 +15,6 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let source = yew::use_mut_ref(move || props.source.clone());
 
     let edit_title = yew_callback::callback!(source, move |e: yew::InputEvent| {
-        use yew::TargetCast as _;
-
         let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
         input.report_validity();
 
@@ -21,8 +22,6 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     });
 
     let edit_url = yew_callback::callback!(source, move |e: yew::InputEvent| {
-        use yew::TargetCast as _;
-
         let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
         input.report_validity();
 
@@ -40,6 +39,12 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let on_submit = yew_callback::callback!(on_submit = props.on_submit, source, move |_| {
         use std::ops::Deref as _;
         on_submit.emit(source.borrow().deref().clone());
+    });
+
+    let select_language = yew_callback::callback!(source, move |e: yew::Event| {
+        let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
+
+        source.borrow_mut().language = input.value();
     });
 
     let value = source.clone();
@@ -78,6 +83,17 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         values={ source.borrow().tags.clone() }
                         on_change={ yew_callback::callback!(source, move |value| source.borrow_mut().tags = value) }
                     />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label class="col-sm-1 col-form-label" for="language">{ "Language" }</label>
+                <div class="col-sm-11">
+                    <select class="form-select" name="language" onchange={ select_language }>
+                        for language in &props.languages {
+                            <option value={ language.clone() } selected={ language == &source.borrow().language }>{ language }</option>
+                        }
+                    </select>
                 </div>
             </div>
 

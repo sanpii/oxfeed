@@ -10,6 +10,7 @@ pub struct Entity {
     pub id: Option<uuid::Uuid>,
     pub tags: Vec<String>,
     pub title: String,
+    pub language: String,
     pub icon: Option<String>,
     pub url: String,
     pub user_id: uuid::Uuid,
@@ -27,6 +28,7 @@ impl Default for Entity {
             id: None,
             tags: Vec::new(),
             title: String::new(),
+            language: "simple".to_string(),
             icon: None,
             url: String::new(),
             user_id: uuid::Uuid::default(),
@@ -51,7 +53,7 @@ impl Model {
 
         let query = format!(
             r#"
-select source_id, last_error, title, url, user_id, active, icon, filters, webhooks,
+select source_id, last_error, title, url, user_id, active, icon, filters, language, webhooks,
         array(select unnest(tags) order by 1) tags
     from source
     join "user" using (user_id)

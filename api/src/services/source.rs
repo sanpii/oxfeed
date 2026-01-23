@@ -45,8 +45,6 @@ async fn create(
     mut data: Json<crate::form::Source>,
     identity: crate::Identity,
 ) -> oxfeed::Result<actix_web::HttpResponse> {
-    use std::convert::TryInto;
-
     let token = identity.token(&elephantry)?;
 
     let user = elephantry
@@ -55,7 +53,7 @@ async fn create(
         .ok_or(oxfeed::Error::Auth)?;
 
     data.user_id = Some(user.id);
-    let source = elephantry.insert_one::<Model>(&data.into_inner().try_into()?)?;
+    let source = elephantry.insert_one::<Model>(&data.into_inner().into_entity().await?)?;
     let response = actix_web::HttpResponse::Ok().json(source);
 
     Ok(response)
@@ -107,8 +105,6 @@ async fn update(
     path: Path<uuid::Uuid>,
     identity: crate::Identity,
 ) -> oxfeed::Result<actix_web::HttpResponse> {
-    use std::convert::TryInto;
-
     let token = identity.token(&elephantry)?;
 
     let user = elephantry
@@ -120,7 +116,7 @@ async fn update(
     let source_id = Some(path.into_inner());
     let pk = elephantry::pk!(source_id);
     let source = elephantry
-        .update_one::<Model>(&pk, &data.into_inner().try_into()?)?
+        .update_one::<Model>(&pk, &data.into_inner().into_entity().await?)?
         .ok_or(oxfeed::Error::NotFound)?;
 
     Ok(actix_web::HttpResponse::Ok().json(source))

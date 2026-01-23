@@ -38,6 +38,10 @@ include!("_token.rs");
 include!("_webhooks.rs");
 
 impl Api {
+    pub async fn languages() -> oxfeed::Result<Vec<String>> {
+        Self::fetch(Method::GET, "/languages", ()).await
+    }
+
     pub async fn counts() -> oxfeed::Result<oxfeed::Counts> {
         Self::fetch(Method::GET, "/counts", ()).await
     }

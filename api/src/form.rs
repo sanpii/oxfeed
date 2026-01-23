@@ -35,6 +35,7 @@ pub(crate) struct Source {
     pub user_id: Option<uuid::Uuid>,
     url: String,
     title: Option<String>,
+    language: Option<String>,
     active: bool,
     #[serde(default)]
     filters: Vec<uuid::Uuid>,
@@ -44,24 +45,30 @@ pub(crate) struct Source {
     webhooks: Vec<uuid::Uuid>,
 }
 
-impl std::convert::TryInto<oxfeed::source::Entity> for Source {
-    type Error = oxfeed::Error;
-
-    fn try_into(self) -> oxfeed::Result<oxfeed::source::Entity> {
+impl Source {
+    pub async fn into_entity(self) -> oxfeed::Result<oxfeed::source::Entity> {
         let user_id = self.user_id.ok_or(oxfeed::Error::Auth)?;
+        let feed = self.feed().await?;
 
-        let title = self
-            .title
-            .clone()
-            .or_else(|| self.title())
-            .unwrap_or_else(|| "<no title>".to_string());
+        let title = match self.title {
+            Some(ref title) if !title.is_empty() => title.clone(),
+            _ => self
+                .title(&feed)
+                .await
+                .unwrap_or_else(|| "<no title>".to_string()),
+        };
+
+        let icon = self.icon(&feed).await;
+
+        let language = self.language.unwrap_or_else(|| "simple".to_string());
 
         let entity = oxfeed::source::Entity {
             last_error: None,
             id: self.id,
             tags: self.tags,
             title,
-            icon: None,
+            language,
+            icon,
             url: self.url.clone(),
             user_id,
             active: self.active,
@@ -71,23 +78,13 @@ impl std::convert::TryInto<oxfeed::source::Entity> for Source {
 
         Ok(entity)
     }
-}
 
-impl Source {
-    fn title(&self) -> Option<String> {
-        let Ok(contents) = Self::fetch(&self.url) else {
-            return None;
-        };
-
-        let Ok(feed) = feed_rs::parser::parse(contents.as_bytes()) else {
-            return None;
-        };
-
-        let mut title = feed.title.map(|x| x.content);
+    async fn title(&self, feed: &feed_rs::model::Feed) -> Option<String> {
+        let mut title = feed.title.as_ref().map(|x| x.content.clone());
 
         if title.is_none() {
-            for link in feed.links {
-                let Ok(contents) = Self::fetch(&link.href) else {
+            for link in &feed.links {
+                let Ok(contents) = Self::fetch(&link.href).await else {
                     continue;
                 };
 
@@ -105,8 +102,78 @@ impl Source {
         title
     }
 
-    fn fetch(url: &str) -> Result<String, reqwest::Error> {
-        reqwest::blocking::get(url)?.text()
+    async fn fetch(url: &str) -> Result<String, reqwest::Error> {
+        let response = reqwest::Client::new()
+            .get(url)
+            .timeout(std::time::Duration::from_mins(5))
+            .send()
+            .await?;
+
+        response.text().await
+    }
+
+    async fn feed(&self) -> oxfeed::Result<feed_rs::model::Feed> {
+        let contents = Self::fetch(&self.url).await?;
+        let feed = feed_rs::parser::parse(contents.as_bytes())?;
+
+        Ok(feed)
+    }
+
+    async fn icon(&self, feed: &feed_rs::model::Feed) -> Option<String> {
+        if let Some(icon) = feed.icon.as_ref().map(|x| x.uri.clone()) {
+            return Some(icon);
+        }
+
+        if let Some(link) = feed.links.first()
+            && let Some(icon) = Self::favicon(&link.href).await
+        {
+            return Some(icon);
+        }
+
+        if let Some(link) = feed.entries.first().and_then(|x| x.links.first())
+            && let Some(icon) = Self::favicon(&link.href).await
+        {
+            return Some(icon);
+        }
+
+        self.default_favicon().await
+    }
+
+    async fn favicon(link: &str) -> Option<String> {
+        let selector = scraper::Selector::parse("link[rel=\"icon\"]").unwrap();
+
+        let response = reqwest::get(link).await.ok()?;
+        let contents = response.text().await.ok()?;
+
+        let html = scraper::Html::parse_document(&contents);
+        let icon = html.select(&selector).next()?;
+        let href = match icon.value().attr("href") {
+            Some(href) => href.to_string(),
+            None => return None,
+        };
+
+        if href.starts_with("http") {
+            Some(href)
+        } else {
+            let Ok(mut url) = url::Url::parse(link) else {
+                return None;
+            };
+            url.set_path("");
+
+            Some(format!("{url}{}", href.trim_start_matches('/')))
+        }
+    }
+
+    async fn default_favicon(&self) -> Option<String> {
+        let url = url::Url::parse(&self.url).ok()?;
+        let favicon = format!("{}/favicon.ico", url.origin().ascii_serialization());
+        let request = reqwest::get(&favicon).await.ok()?;
+
+        if request.status().is_success() {
+            Some(favicon.clone())
+        } else {
+            None
+        }
     }
 }
 

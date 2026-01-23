@@ -13,7 +13,10 @@ pub(crate) mod user;
 pub(crate) mod webhook;
 
 pub(crate) fn scope() -> actix_web::Scope {
-    actix_web::web::scope("").service(index).service(counts)
+    actix_web::web::scope("")
+        .service(index)
+        .service(counts)
+        .service(languages)
 }
 
 #[actix_web::get("/")]
@@ -35,6 +38,20 @@ async fn counts(
     let sql = include_str!("../../sql/counts.sql");
     let counts = elephantry.query_one::<oxfeed::Counts>(sql, &[&token])?;
     let response = actix_web::HttpResponse::Ok().json(counts);
+
+    Ok(response)
+}
+
+#[actix_web::get("/languages")]
+async fn languages(
+    elephantry: actix_web::web::Data<elephantry::Pool>,
+    identity: crate::Identity,
+) -> oxfeed::Result<actix_web::HttpResponse> {
+    identity.token(&elephantry)?;
+
+    let sql = include_str!("../../sql/languages.sql");
+    let languages = elephantry.query::<String>(sql, &[])?;
+    let response = actix_web::HttpResponse::Ok().json(languages);
 
     Ok(response)
 }

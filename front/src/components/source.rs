@@ -9,6 +9,7 @@ enum Scene {
 pub(crate) struct Properties {
     pub value: oxfeed::source::Entity,
     pub filters: Vec<oxfeed::filter::Entity>,
+    pub languages: Vec<String>,
     pub webhooks: Vec<oxfeed::webhook::Entity>,
 }
 
@@ -78,6 +79,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 {on_submit}
                 filters={ props.filters.clone() }
                 webhooks={ props.webhooks.clone() }
+                languages={ props.languages.clone() }
             />
         },
         Scene::View => {

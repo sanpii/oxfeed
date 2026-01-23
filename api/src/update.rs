@@ -131,7 +131,6 @@ impl Task {
             .into_vec();
 
         let feed = feed_rs::parser::parse(contents.as_bytes())?;
-        Self::update_source(elephantry, source, &feed).await?;
 
         for entry in feed.entries {
             let link = match entry.links.first() {
@@ -203,33 +202,6 @@ impl Task {
         Ok(last_item < last_modified)
     }
 
-    async fn update_source(
-        elephantry: &elephantry::Connection,
-        source: &Source,
-        feed: &feed_rs::model::Feed,
-    ) -> oxfeed::Result {
-        let icon = Self::icon(feed, &source.url).await;
-        let title = feed
-            .title
-            .as_ref()
-            .map(|x| x.content.clone())
-            .unwrap_or_default();
-
-        let mut values = elephantry::values!(icon);
-
-        if source.title.is_empty() {
-            values.insert("title".to_string(), &title);
-        }
-
-        if let Err(err) = elephantry
-            .update_by_pk::<SourceModel>(&elephantry::pk! { source_id => source.id }, &values)
-        {
-            log::error!("{err}");
-        }
-
-        Ok(())
-    }
-
     fn is_filtered(filters: &[Filter], link: &str) -> bool {
         for filter in filters {
             let Ok(regex) = regex::Regex::new(&filter.regex) else {
@@ -268,63 +240,6 @@ impl Task {
         }
 
         Ok(())
-    }
-
-    async fn icon(feed: &feed_rs::model::Feed, link: &str) -> Option<String> {
-        if let Some(icon) = feed.icon.as_ref().map(|x| x.uri.clone()) {
-            return Some(icon);
-        }
-
-        if let Some(link) = feed.links.first()
-            && let Some(icon) = Self::favicon(&link.href).await
-        {
-            return Some(icon);
-        }
-
-        if let Some(link) = feed.entries.first().and_then(|x| x.links.first())
-            && let Some(icon) = Self::favicon(&link.href).await
-        {
-            return Some(icon);
-        }
-
-        Self::default_favicon(link).await
-    }
-
-    async fn favicon(link: &str) -> Option<String> {
-        let selector = scraper::Selector::parse("link[rel=\"icon\"]").unwrap();
-
-        let response = reqwest::get(link).await.ok()?;
-        let contents = response.text().await.ok()?;
-
-        let html = scraper::Html::parse_document(&contents);
-        let icon = html.select(&selector).next()?;
-        let href = match icon.value().attr("href") {
-            Some(href) => href.to_string(),
-            None => return None,
-        };
-
-        if href.starts_with("http") {
-            Some(href)
-        } else {
-            let Ok(mut url) = url::Url::parse(link) else {
-                return None;
-            };
-            url.set_path("");
-
-            Some(format!("{url}{}", href.trim_start_matches('/')))
-        }
-    }
-
-    async fn default_favicon(link: &str) -> Option<String> {
-        let url = url::Url::parse(link).ok()?;
-        let favicon = format!("{}/favicon.ico", url.origin().ascii_serialization());
-        let request = reqwest::get(&favicon).await.ok()?;
-
-        if request.status().is_success() {
-            Some(favicon.clone())
-        } else {
-            None
-        }
     }
 
     async fn call_webhooks(
