@@ -4,8 +4,9 @@ use actix_web::web::{Data, Query};
 struct Request {
     active: Option<bool>,
     q: Option<String>,
-    tag: Option<String>,
     source: Option<String>,
+    tag: Option<String>,
+    title: Option<String>,
     #[serde(flatten)]
     pagination: elephantry_extras::Pagination,
 }
@@ -72,12 +73,16 @@ fn search(
         clause.and_where("s.active = $*", vec![active]);
     }
 
+    if let Some(source) = &query.source {
+        clause.and_where("(s.title ~* $* or s.url ~* $*)", vec![source, source]);
+    }
+
     if let Some(tag) = &query.tag {
         clause.and_where("$* = any(tags)", vec![tag]);
     }
 
-    if let Some(source) = &query.source {
-        clause.and_where("(s.title ~* $* or s.url ~* $*)", vec![source, source]);
+    if let Some(title) = &query.title {
+        clause.and_where("i.title ~* $*", vec![title]);
     }
 
     let token = identity.token(elephantry)?;
@@ -86,7 +91,7 @@ fn search(
     writeln!(sql, "where {clause}").ok();
     writeln!(
         sql,
-        "group by i.item_id, s.title, s.tags, s.icon, s.language"
+        "group by i.item_id, i.title, s.title, s.tags, s.icon, s.language"
     )
     .ok();
 

@@ -4,6 +4,7 @@ pub(crate) struct Filter {
     q: String,
     source: String,
     tag: String,
+    title: String,
 }
 
 impl Filter {
@@ -19,12 +20,17 @@ impl Filter {
             q: location.q(),
             source: location.param("source"),
             tag: location.param("tag"),
+            title: location.param("title"),
         }
     }
 
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        self.active.is_none() && self.q.is_empty() && self.tag.is_empty() && self.source.is_empty()
+        self.active.is_none()
+            && self.q.is_empty()
+            && self.source.is_empty()
+            && self.tag.is_empty()
+            && self.title.is_empty()
     }
 
     #[must_use]
@@ -47,6 +53,10 @@ impl Filter {
             params.push(format!("tag={}", urlencoding::encode(&self.tag)));
         }
 
+        if !self.title.is_empty() {
+            params.push(format!("title={}", urlencoding::encode(&self.title)));
+        }
+
         params.join("&")
     }
 }
@@ -57,9 +67,10 @@ impl From<String> for Filter {
         let mut q = query.clone();
         let mut source = String::new();
         let mut tag = String::new();
+        let mut title = String::new();
 
         let regex =
-            regex::Regex::new(r#"(:?active=(?P<active>[^ ]+) )?(:?source=(?P<source>[^ ]+) )?(tag=(?P<tag>[^ ]+) )?(?P<q>.*)"#)
+            regex::Regex::new(r#"(:?active=(?P<active>[^ ]+) )?(:?source=(?P<source>[^ ]+) )?(tag=(?P<tag>[^ ]+) )?(title=(?P<title>[^ ]+) )?(?P<q>.*)"#)
                 .unwrap();
 
         if let Some(captures) = regex.captures(&query) {
@@ -77,6 +88,10 @@ impl From<String> for Filter {
                 .name("tag")
                 .map(|x| x.as_str().to_string())
                 .unwrap_or_default();
+            title = captures
+                .name("title")
+                .map(|x| x.as_str().to_string())
+                .unwrap_or_default();
         }
 
         Self {
@@ -84,6 +99,7 @@ impl From<String> for Filter {
             q,
             source,
             tag,
+            title,
         }
     }
 }
@@ -100,6 +116,10 @@ impl std::fmt::Display for Filter {
 
         if !self.tag.is_empty() {
             write!(f, "tag={} ", self.tag)?;
+        }
+
+        if !self.title.is_empty() {
+            write!(f, "title={} ", self.title)?;
         }
 
         if !self.q.is_empty() {
