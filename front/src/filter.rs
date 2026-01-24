@@ -63,15 +63,18 @@ impl Filter {
 
 impl From<String> for Filter {
     fn from(query: String) -> Self {
+        static REGEX: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
+
         let mut active = None;
         let mut q = query.clone();
         let mut source = String::new();
         let mut tag = String::new();
         let mut title = String::new();
 
-        let regex =
+        let regex = REGEX.get_or_init(|| {
             regex::Regex::new(r#"(:?active=(?P<active>[^ ]+) )?(:?source=(?P<source>[^ ]+) )?(tag=(?P<tag>[^ ]+) )?(title=(?P<title>[^ ]+) )?(?P<q>.*)"#)
-                .unwrap();
+                .unwrap()
+        });
 
         if let Some(captures) = regex.captures(&query) {
             active = captures
