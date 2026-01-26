@@ -76,6 +76,12 @@ li.list-group-item {
         display: none;
     }
 
+    div a {
+        white-space: nowrap;
+        overflow-x: hidden;
+        text-overflow: ellipsis;
+    }
+
     div.expanded a {
         text-wrap: wrap;
     }
@@ -364,12 +370,6 @@ li.list-group-item {
     .swipe-element {
         scroll-snap-align: start;
         min-width: 100%;
-        white-space: nowrap;
-
-        a {
-            overflow-x: hidden;
-            text-overflow: ellipsis;
-        }
     }
 
     .action {
