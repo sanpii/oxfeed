@@ -150,9 +150,11 @@ impl Task {
                 continue;
             }
 
-            let title = entry
-                .title
-                .map_or_else(|| "&lt;no title&gt;".to_string(), |x| x.content);
+            let mut title = entry.title.map(|x| x.content).unwrap_or_default();
+
+            if title.is_empty() {
+                title = "Untitled".to_string();
+            }
 
             log::info!("Adding '{title}'");
 
