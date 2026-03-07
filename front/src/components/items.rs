@@ -144,6 +144,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 yew::platform::spawn_local(async move {
                     let response = crate::api::call!(context, webhooks_execute, &id, &item);
                     webhook_response.set(Some(response));
+                    context.dispatch(crate::Action::NeedUpdate);
                 });
 
                 x.1 = false;

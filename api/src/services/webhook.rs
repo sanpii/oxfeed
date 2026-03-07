@@ -89,6 +89,13 @@ async fn execute(
         Err(err) => return Err(err),
     };
 
+    if response.status.is_success() && webhook.mark_read && !item.read {
+        let pk = elephantry::pk! { item_id => item.id };
+        let data = elephantry::values! { read => true };
+
+        elephantry.update_by_pk::<oxfeed::item::Model>(&pk, &data)?;
+    }
+
     let response = actix_web::HttpResponseBuilder::new(actix_web::http::StatusCode::OK)
         .append_header(actix_web::http::header::ContentType(mime::TEXT_PLAIN))
         .json(response);
