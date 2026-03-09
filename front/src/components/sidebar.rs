@@ -164,6 +164,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
         yew::platform::spawn_local(async move {
             crate::api::call!(context, items_read);
+            context.dispatch(crate::Action::NeedUpdate);
         });
     });
 
