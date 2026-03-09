@@ -89,7 +89,7 @@ li.list-group-item {
     @media (min-width: 768px) /* md */ {
         &:hover .flex-float-end .actions {
             margin-right: .5rem;
-            display: block;
+            display: block ruby;
         }
     }
 
@@ -382,5 +382,17 @@ li.list-group-item {
         svg {
             position: sticky;
         }
+    }
+}
+
+@media (min-width: 576px) /* sm */ {
+    .d-sm-ruby {
+        display: block ruby !important;
+    }
+}
+
+@media (min-width: 768px) /* md */ {
+    .d-md-ruby {
+        display: block ruby !important;
     }
 }

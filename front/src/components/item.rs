@@ -146,7 +146,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     { yew::virtual_dom::VNode::VRef(title.into()) }
                 </a>
 
-                <span class="d-none d-sm-inline">
+                <span class="d-none d-sm-ruby">
                     for tag in &item.tags {
                         <super::Tag value={ tag.clone() } />
                     }
@@ -160,7 +160,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         }
                     }
 
-                    <span class="text-body-secondary">{ "· " }{ &item.source }</span>
+                    <span class="text-body-secondary align-middle">{ "· " }{ &item.source }</span>
                 </span>
 
                 <div class="flex-float-end">
@@ -189,7 +189,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         </div>
                     }
 
-                    <span class={ yew::classes!(published_class, "d-none", "d-md-inline") }>{ &published_ago.to_string() }</span>
+                    <span class={ yew::classes!(published_class, "d-none", "d-md-ruby") }>{ &published_ago.to_string() }</span>
                     <span onclick={ toggle_content }>
                         <super::Svg icon={ caret } size=24 />
                     </span>
