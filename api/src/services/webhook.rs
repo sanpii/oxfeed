@@ -85,11 +85,13 @@ async fn execute(
             status: reqwest::StatusCode::OK,
             body,
             mark_read: false,
+            title: item.title,
         },
         Err(oxfeed::Error::Webhook(status, body)) => oxfeed::webhook::Response {
             status,
             body,
             mark_read: false,
+            title: item.title,
         },
         Err(err) => return Err(err),
     };

@@ -50,6 +50,7 @@ pub struct Response {
     pub status: reqwest::StatusCode,
     pub body: String,
     pub mark_read: bool,
+    pub title: String,
 }
 
 mod serde_status {

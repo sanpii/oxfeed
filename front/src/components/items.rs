@@ -131,20 +131,22 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         (*timeout).take().unwrap().cancel();
     });
 
-    let webhook_response = yew::use_state(|| None);
+    let webhook_responses = yew::use_state(Vec::new);
     let on_bulk_webhook =
-        yew_callback::callback!(context, pager, webhook_response, move |id: uuid::Uuid| {
+        yew_callback::callback!(context, pager, webhook_responses, move |id: uuid::Uuid| {
             let mut new_pager = (*pager).clone();
 
             new_pager.iterator.iter_mut().filter(|x| x.1).for_each(|x| {
                 let context = context.clone();
                 let item = x.0.clone();
-                let webhook_response = webhook_response.clone();
+                let webhook_responses = webhook_responses.clone();
 
                 yew::platform::spawn_local(async move {
                     let response = crate::api::call!(context, webhooks_execute, &id, &item);
                     if !response.mark_read {
-                        webhook_response.set(Some(response));
+                        let mut responses = (*webhook_responses).clone();
+                        responses.push(response);
+                        webhook_responses.set(responses);
                     }
                     context.dispatch(crate::Action::NeedUpdate);
                 });
@@ -155,8 +157,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             pager.set(new_pager);
         });
 
-    let on_close = yew_callback::callback!(webhook_response, move |_| {
-        webhook_response.set(None);
+    let on_close = yew_callback::callback!(webhook_responses, move |_| {
+        webhook_responses.set(Vec::new());
     });
 
     if pager.iterator.is_empty() {
@@ -186,23 +188,10 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 on_webhook={ on_bulk_webhook }
             />
 
-            if let Some(ref response) = *webhook_response {
-                <div class="modal d-block" tabindex="-1">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                { "Status code: " }{ &response.status }
-                            </div>
-                            <div class="modal-body">
-                                <pre><code>{ &response.body }</code></pre>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" onclick={ on_close }>{ "Close" }</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
+            <WebhookResponses
+                responses={ (*webhook_responses).clone() }
+                on_close={ on_close }
+            />
 
             <ul class="list-group" ontouchstart={ on_touch_start } ontouchend={ on_touch_end }>
                 {
@@ -281,5 +270,43 @@ fn near(current: usize, items: &[(oxfeed::item::Item, bool)]) -> usize {
         pos
     } else {
         0
+    }
+}
+
+#[derive(Clone, PartialEq, yew::Properties)]
+pub(crate) struct WebhookResponseProperties {
+    pub responses: Vec<oxfeed::webhook::Response>,
+    pub on_close: yew::Callback<()>,
+}
+
+#[yew::component]
+pub(crate) fn WebhookResponses(props: &WebhookResponseProperties) -> yew::Html {
+    let responses = yew::use_memo(props.clone(), |props| props.responses.clone());
+    let on_close = yew::use_memo(props.clone(), |props| props.on_close.clone());
+
+    if responses.is_empty() {
+        return yew::Html::default();
+    }
+
+    yew::html! {
+        <div class="modal d-block" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        for response in &*responses {
+                            <details class={ if response.status.is_success () { "alert alert-sucess" } else { "alert alert-danger" } }>
+                                <summary>
+                                    { &response.title }
+                                </summary>
+                                <pre class="alert alert-secondary mt-2 mb-1"><code>{ &response.body }</code></pre>
+                            </details>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick={ move |_| on_close.emit(()) }>{ "Close" }</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     }
 }
