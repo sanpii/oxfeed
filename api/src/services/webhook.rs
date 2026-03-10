@@ -80,12 +80,17 @@ async fn execute(
         return Err(oxfeed::Error::BadRequest);
     };
 
-    let response = match crate::execute_webhook(&webhook, &item).await {
+    let mut response = match crate::execute_webhook(&webhook, &item).await {
         Ok(body) => oxfeed::webhook::Response {
             status: reqwest::StatusCode::OK,
             body,
+            mark_read: false,
         },
-        Err(oxfeed::Error::Webhook(status, body)) => oxfeed::webhook::Response { status, body },
+        Err(oxfeed::Error::Webhook(status, body)) => oxfeed::webhook::Response {
+            status,
+            body,
+            mark_read: false,
+        },
         Err(err) => return Err(err),
     };
 
@@ -94,6 +99,7 @@ async fn execute(
         let data = elephantry::values! { read => true };
 
         elephantry.update_by_pk::<oxfeed::item::Model>(&pk, &data)?;
+        response.mark_read = true;
     }
 
     let response = actix_web::HttpResponseBuilder::new(actix_web::http::StatusCode::OK)

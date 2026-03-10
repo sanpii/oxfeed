@@ -49,6 +49,7 @@ pub struct Response {
     #[serde(with = "serde_status")]
     pub status: reqwest::StatusCode,
     pub body: String,
+    pub mark_read: bool,
 }
 
 mod serde_status {
