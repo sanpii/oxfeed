@@ -43,5 +43,5 @@ version = "5.0"
 features = ["date", "uuid"]
 
 [workspace.dependencies.elephantry-extras]
-version = "0.9"
+version = "0.10"
 features = ["serde"]
