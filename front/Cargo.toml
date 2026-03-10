@@ -51,7 +51,7 @@ version = "0.3"
 features = ["Document", "HtmlDocument", "Performance", "Selection", "Touch", "TouchEvent", "TouchList", "VisibilityState"]
 
 [dependencies.yew]
-version = "=0.22.0"
+version = "=0.22.1"
 features = ["csr"]
 
 [build-dependencies.envir]
