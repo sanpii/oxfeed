@@ -36,7 +36,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     );
 
     yew::html! {
-        <form class="mb-3">
+        <form class="mb-3 w-100">
             <div class="row mb-3">
                 <label class="col-sm-1 col-form-label" for="title">{ "Name" }</label>
                 <div class="col-sm-11">

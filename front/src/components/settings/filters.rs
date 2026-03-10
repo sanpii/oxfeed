@@ -91,11 +91,13 @@ pub(crate) fn Component() -> yew::Html {
                 }
 
                 for filter in filters.iter() {
-                    <crate::components::Filter
-                        value={ filter.clone() }
-                        on_delete={ on_delete.clone() }
-                        on_save={ on_save.clone() }
-                    />
+                    <li class="list-group-item d-flex align-items-center">
+                        <crate::components::Filter
+                            value={ filter.clone() }
+                            on_delete={ on_delete.clone() }
+                            on_save={ on_save.clone() }
+                        />
+                    </li>
                 }
             </ul>
         </>
