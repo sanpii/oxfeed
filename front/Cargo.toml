@@ -7,7 +7,6 @@ license = "MIT"
 
 [dependencies]
 futures = "0.3"
-gloo.workspace = true
 hmac.workspace = true
 jwt.workspace = true
 regex.workspace = true
@@ -28,6 +27,10 @@ features = ["serde", "yew-pager"]
 [dependencies.chrono-humanize]
 version = "0.2"
 features = ["wasmbind"]
+
+[dependencies.gloo]
+workspace = true
+features = ["futures"]
 
 [dependencies.log]
 workspace = true
