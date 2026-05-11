@@ -7,8 +7,7 @@ license = "MIT"
 
 [dependencies]
 futures = "0.3"
-hmac.workspace = true
-jwt.workspace = true
+jsonwebtoken.workspace = true
 regex.workspace = true
 serde.workspace = true
 serde_json.workspace = true

@@ -4,16 +4,15 @@ impl Api {
     }
 
     pub async fn auth_login(email: &str, password: &str, remember_me: &bool) -> oxfeed::Result {
-        use hmac::Mac;
-        use jwt::SignWithKey;
-
-        let key: hmac::Hmac<sha2::Sha256> =
-            hmac::Hmac::new_from_slice(env!("SECRET").as_bytes()).unwrap();
+        let headers = jsonwebtoken::Header::new(jsonwebtoken::Algorithm::HS256);
+        let key = jsonwebtoken::EncodingKey::from_secret(
+            env!("SECRET").as_bytes()
+        );
         let mut claims = std::collections::BTreeMap::new();
         claims.insert("email", email);
         claims.insert("password", password);
 
-        let token = claims.sign_with_key(&key).unwrap();
+        let token = jsonwebtoken::encode(&headers, &claims, &key)?;
 
         let data: String = Self::fetch(Method::POST, "/auth/login", token).await?;
 

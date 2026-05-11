@@ -25,20 +25,24 @@ async fn login(
     elephantry: actix_web::web::Data<elephantry::Pool>,
     token: actix_web::web::Json<String>,
 ) -> oxfeed::Result<actix_web::HttpResponse> {
-    use hmac::Mac;
-    use jwt::VerifyWithKey;
-
     let secret = envir::get("SECRET")?;
-    let key: hmac::Hmac<sha2::Sha256> = hmac::Hmac::new_from_slice(secret.as_bytes()).unwrap();
-    let claims: std::collections::BTreeMap<String, String> = token.verify_with_key(&key)?;
+    let key = jsonwebtoken::DecodingKey::from_secret(secret.as_bytes());
+    let mut validation = jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::HS256);
+    validation.set_required_spec_claims::<&str>(&[]);
 
-    if !claims.contains_key("email") || !claims.contains_key("password") {
+    let data = jsonwebtoken::decode::<std::collections::BTreeMap<String, String>>(
+        token.as_bytes(),
+        &key,
+        &validation,
+    )?;
+
+    if !data.claims.contains_key("email") || !data.claims.contains_key("password") {
         return Err(oxfeed::Error::BadRequest);
     }
 
     let sql = include_str!("../../sql/login.sql");
     let token = elephantry
-        .query::<uuid::Uuid>(sql, &[&claims["email"], &claims["password"]])?
+        .query::<uuid::Uuid>(sql, &[&data.claims["email"], &data.claims["password"]])?
         .try_get(0)
         .ok_or(oxfeed::Error::InvalidLogin)?;
 

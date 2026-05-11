@@ -14,8 +14,6 @@ actix-web = "4.0"
 base64 = "0.22"
 feed-rs = "2.0"
 gloo = "0.12"
-hmac = "0.12"
-jwt = "0.16"
 log = "0.4"
 opml = "1.0"
 reqwest = "0.13"
@@ -45,3 +43,8 @@ features = ["date", "uuid"]
 [workspace.dependencies.elephantry-extras]
 version = "0.10"
 features = ["serde"]
+
+[workspace.dependencies.jsonwebtoken]
+version = "10.4"
+default-features = false
+features = ["rust_crypto"]

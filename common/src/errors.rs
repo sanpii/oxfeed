@@ -33,7 +33,7 @@ pub enum Error {
     Json(#[from] serde_json::Error),
 
     #[error("{0}")]
-    Jwt(#[from] jwt::Error),
+    Jwt(#[from] jsonwebtoken::errors::Error),
 
     #[error("{0}")]
     Io(#[from] std::io::Error),
