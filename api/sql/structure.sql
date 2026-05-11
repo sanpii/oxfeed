@@ -1,10 +1,9 @@
 begin;
 
-create extension if not exists "uuid-ossp";
 create extension if not exists pgcrypto;
 
 create table if not exists "user" (
-    user_id uuid primary key default uuid_generate_v4(),
+    user_id uuid primary key default uuidv4(),
     email text not null unique,
     password text not null,
     token uuid
@@ -13,7 +12,7 @@ create table if not exists "user" (
 create index if not exists user_token on "user"(token);
 
 create table if not exists source (
-    source_id uuid primary key default uuid_generate_v4(),
+    source_id uuid primary key default uuidv4(),
     user_id uuid references "user"(user_id) not null,
     url text not null,
     icon text,
@@ -47,7 +46,7 @@ create or replace trigger source_update after update on source
 create index if not exists source_user_id on source(user_id);
 
 create table if not exists webhook (
-    webhook_id uuid primary key default uuid_generate_v4(),
+    webhook_id uuid primary key default uuidv4(),
     user_id uuid references "user"(user_id) not null,
     name text not null,
     url text not null,
@@ -60,7 +59,7 @@ create table if not exists webhook (
 create index if not exists webhook_user_id on webhook(user_id);
 
 create table if not exists filter (
-    filter_id uuid primary key default uuid_generate_v4(),
+    filter_id uuid primary key default uuidv4(),
     user_id uuid references "user"(user_id) not null,
     name text not null,
     regex text not null,
@@ -71,7 +70,7 @@ create table if not exists filter (
 create index if not exists filter_user_id on filter(user_id);
 
 create table if not exists item (
-    item_id uuid primary key default uuid_generate_v4(),
+    item_id uuid primary key default uuidv4(),
     source_id uuid references source(source_id) not null,
     link text not null,
     title text not null,
@@ -88,7 +87,7 @@ create index if not exists item_favorite on item(favorite);
 create index if not exists item_source_id on item(source_id);
 
 create table if not exists media (
-    media_id uuid primary key default uuid_generate_v4(),
+    media_id uuid primary key default uuidv4(),
     item_id uuid references item(item_id) on delete cascade,
     url text not null,
     content_type text,
