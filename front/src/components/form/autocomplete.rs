@@ -72,10 +72,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
                     active.set(new_value);
                 }
-                "Backspace" => {
-                    if value.is_empty() {
-                        on_delete.emit(());
-                    }
+                "Backspace" if value.is_empty() => {
+                    on_delete.emit(());
                 }
                 "Enter" => {
                     if let Some(active) = *active {
