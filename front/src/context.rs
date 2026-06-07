@@ -19,7 +19,7 @@ impl Default for Context {
             fetching: false,
             need_update: 0,
             sse_error: false,
-            route: crate::Location::new().path(),
+            route: crate::Location::default().path(),
             theme: Theme::default(),
         }
     }
@@ -47,10 +47,6 @@ impl yew::Reducible for Context {
             }
             NeedUpdate => context.need_update = context.need_update.overflowing_add(1).0,
             SseError => context.sse_error = true,
-            Route(route) => {
-                crate::location::set_route(&route);
-                context.route = route;
-            }
             Theme(theme) => context.theme = theme,
         }
 

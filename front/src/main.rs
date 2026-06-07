@@ -22,6 +22,12 @@ pub(crate) fn use_context() -> yew::UseReducerHandle<Context> {
     yew::use_context().unwrap()
 }
 
+#[yew::hook]
+pub(crate) fn use_location() -> std::rc::Rc<crate::Location> {
+    let location = yew_router::hooks::use_location();
+    yew::use_memo(location, crate::Location::new)
+}
+
 #[derive(Clone, Eq, PartialEq, serde::Deserialize)]
 pub(crate) struct Pager<T> {
     result_count: usize,

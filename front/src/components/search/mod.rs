@@ -9,9 +9,8 @@ pub(crate) struct Properties {
 
 #[yew::component]
 pub(crate) fn Component(props: &Properties) -> yew::Html {
-    let context = crate::use_context();
-    let route = yew::use_memo(context.clone(), |context| context.route.clone());
-    let filter = yew::use_memo(route.clone(), |_| crate::Filter::new());
+    let location = crate::use_location();
+    let filter = yew::use_memo(location, |x| crate::Filter::new(x));
 
     match props.kind.as_str() {
         "sources" => yew::html! {

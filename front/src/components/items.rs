@@ -11,7 +11,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let filter = yew::use_memo(props.clone(), |props| props.filter.clone());
     let kind = yew::use_memo(props.clone(), |props| props.kind.clone());
     let need_update = yew::use_memo(context.clone(), |context| context.need_update);
-    let pagination = yew::use_state(|| elephantry_extras::Pagination::from(crate::Location::new()));
+    let location = crate::use_location();
+    let pagination = yew::use_state(|| elephantry_extras::Pagination::from(location.as_ref()));
     let pager = yew::use_state(crate::Pager::default);
     let bulk_active = yew::use_state(|| false);
 

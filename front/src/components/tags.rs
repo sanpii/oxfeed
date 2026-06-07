@@ -1,7 +1,8 @@
 #[yew::component]
 pub(crate) fn Component() -> yew::Html {
     let context = crate::use_context();
-    let pagination = yew::use_state(|| elephantry_extras::Pagination::from(crate::Location::new()));
+    let location = crate::use_location();
+    let pagination = yew::use_state(|| elephantry_extras::Pagination::from(location.as_ref()));
     let tags = yew::use_state(Vec::new);
 
     {

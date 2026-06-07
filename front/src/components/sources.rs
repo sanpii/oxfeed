@@ -15,7 +15,8 @@ pub(crate) struct Properties {
 pub(crate) fn Component(props: &Properties) -> yew::Html {
     let context = crate::use_context();
     let scene = yew::use_state(Scene::default);
-    let pagination = yew::use_state(|| elephantry_extras::Pagination::from(crate::Location::new()));
+    let location = crate::use_location();
+    let pagination = yew::use_state(|| elephantry_extras::Pagination::from(location.as_ref()));
     let filter = yew::use_memo(props.clone(), |props| props.filter.clone());
     let need_update = yew::use_memo(context.clone(), |context| context.need_update);
     let pager = yew::use_state(|| None);

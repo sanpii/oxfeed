@@ -1,17 +1,16 @@
 #[yew::component]
 pub(crate) fn Component() -> yew::Html {
-    let context = crate::use_context();
+    let location = crate::use_location();
     let route = yew_router::hooks::use_route::<crate::components::app::Route>().unwrap_or_default();
-    let location = yew_router::prelude::use_location();
-    let filter = yew::use_memo(location.clone(), |_| crate::Filter::new());
+    let filter = yew::use_memo(location.clone(), |x| crate::Filter::new(x));
 
-    let on_input = yew_callback::callback!(move |e: yew::InputEvent| {
+    let on_input = yew_callback::callback!(location, move |e: yew::InputEvent| {
         use yew::TargetCast as _;
+        use yew_router::history::History as _;
 
         let input = e.target_unchecked_into::<web_sys::HtmlInputElement>();
         let filter: crate::Filter = input.value().into();
 
-        let location = crate::Location::new();
         let mut route = location.path();
 
         if route.starts_with("/search") {
@@ -22,7 +21,8 @@ pub(crate) fn Component() -> yew::Html {
             route = format!("/search{route}?{}", filter.to_url_param());
         }
 
-        context.dispatch(crate::Action::Route(route));
+        let history = yew_router::history::BrowserHistory::new();
+        history.push(&route);
     });
 
     if matches!(route, crate::components::app::Route::Settings) {

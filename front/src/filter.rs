@@ -1,4 +1,4 @@
-#[derive(Clone, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub(crate) struct Filter {
     active: Option<bool>,
     q: String,
@@ -9,12 +9,12 @@ pub(crate) struct Filter {
 
 impl Filter {
     #[must_use]
-    pub fn new() -> Self {
-        Self::from(&crate::Location::new())
+    pub fn new(location: &crate::Location) -> Self {
+        Self::from(location)
     }
 
     #[must_use]
-    pub fn from(location: &crate::Location) -> Self {
+    fn from(location: &crate::Location) -> Self {
         Self {
             active: location.active(),
             q: location.q(),

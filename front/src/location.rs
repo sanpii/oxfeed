@@ -1,27 +1,33 @@
-use gloo::history::History;
 use std::collections::HashMap;
 
+#[derive(Clone, PartialEq)]
 pub(crate) struct Location {
-    history: gloo::history::BrowserHistory,
+    location: yew_router::history::Location,
 }
 
 impl Default for Location {
     fn default() -> Self {
+        use yew_router::history::History as _;
+
+        let history = yew_router::history::BrowserHistory::new();
+
         Self {
-            history: gloo::history::BrowserHistory::new(),
+            location: history.location(),
         }
     }
 }
 
 impl Location {
     #[must_use]
-    pub fn new() -> Self {
-        Self::default()
+    pub fn new(location: &Option<yew_router::history::Location>) -> Self {
+        Self {
+            location: location.clone().unwrap(),
+        }
     }
 
     #[must_use]
     pub fn path(&self) -> String {
-        self.history.location().path().to_string()
+        self.location.path().to_string()
     }
 
     #[must_use]
@@ -42,7 +48,7 @@ impl Location {
     #[must_use]
     pub fn query(&self) -> HashMap<String, String> {
         let mut map = HashMap::new();
-        let query = self.history.location().query_str().to_string();
+        let query = self.location.query_str().to_string();
 
         for args in query.trim_start_matches('?').split('&') {
             let mut tokens = args.split('=');
@@ -55,8 +61,8 @@ impl Location {
     }
 }
 
-impl From<Location> for elephantry_extras::Pagination {
-    fn from(location: Location) -> Self {
+impl From<&Location> for elephantry_extras::Pagination {
+    fn from(location: &Location) -> Self {
         let query = location.query();
 
         Self {
@@ -71,9 +77,4 @@ impl From<Location> for elephantry_extras::Pagination {
 
 pub(crate) fn base_url() -> String {
     "/".to_string()
-}
-
-pub(crate) fn set_route(route: &str) {
-    let history = gloo::history::BrowserHistory::new();
-    history.push(route);
 }

@@ -9,7 +9,6 @@ pub(crate) enum Action {
     Theme(crate::context::Theme),
     SseError,
     NeedUpdate,
-    Route(String),
 }
 
 impl From<crate::Alert> for Action {
