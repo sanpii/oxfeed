@@ -37,7 +37,7 @@ version = "5.0"
 features = ["date", "uuid"]
 
 [workspace.dependencies.elephantry-extras]
-version = "0.10"
+version = "0.11"
 features = ["serde"]
 
 [workspace.dependencies.jsonwebtoken]
