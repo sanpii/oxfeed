@@ -37,3 +37,9 @@ lint:elephantry:
           - sudo -u postgres psql --command "create database root with owner root;";
           - export PGHOST=localhost PGPASSWORD=1234
     script: cargo dylint --git https://github.com/elephantry/lints --all --package oxfeed-api
+
+lint:shear:
+    stage: lint
+    before_script:
+        - cargo install cargo-shear
+    script: cargo shear --deny-warnings
