@@ -48,9 +48,8 @@ fn source_try_from(
     outline: &opml::Outline,
     user: &oxfeed::user::Entity,
 ) -> Option<oxfeed::source::Entity> {
-    let url = match &outline.xml_url {
-        Some(url) => url.clone(),
-        None => return None,
+    let Some(url) = &outline.xml_url else {
+        return None;
     };
 
     let mut tags = Vec::new();
@@ -62,7 +61,7 @@ fn source_try_from(
     let entity = oxfeed::source::Entity {
         tags,
         title: outline.text.clone(),
-        url,
+        url: url.clone(),
         user_id: user.id,
 
         ..Default::default()
