@@ -4,7 +4,7 @@ pub struct Item {
     #[cfg_attr(feature = "elephantry", elephantry(column = "item_id"))]
     pub id: uuid::Uuid,
     pub link: String,
-    pub published: chrono::DateTime<chrono::offset::Utc>,
+    pub published: jiff::Zoned,
     pub title: String,
     pub source: String,
     pub icon: Option<String>,
@@ -17,7 +17,9 @@ pub struct Item {
 
 impl Item {
     pub fn in_future(&self) -> bool {
-        self.published.signed_duration_since(chrono::Utc::now()) > chrono::TimeDelta::zero()
+        self.published
+            .duration_since(&jiff::Zoned::now())
+            .is_positive()
     }
 }
 
@@ -50,7 +52,7 @@ pub struct Entity {
     pub content: Option<String>,
     pub read: bool,
     pub favorite: bool,
-    pub published: Option<chrono::DateTime<chrono::offset::Utc>>,
+    pub published: Option<jiff::Zoned>,
 }
 
 #[cfg(feature = "elephantry")]

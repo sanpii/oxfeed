@@ -167,7 +167,10 @@ impl Task {
                 id: None,
                 content,
                 title,
-                published: entry.published,
+                published: entry
+                    .published
+                    .map(|x| x.to_rfc2822())
+                    .map(|x| jiff::fmt::rfc2822::parse(&x).unwrap()),
                 read: false,
                 source_id: source.id.unwrap(),
                 link,
@@ -195,11 +198,10 @@ impl Task {
             None => return Ok(true),
         };
 
-        let last_modified = chrono::DateTime::parse_from_rfc2822(last_modified)?;
+        let last_modified = jiff::fmt::rfc2822::parse(last_modified)?;
 
         let query = "select published from item join source using(source_id) where source_id = $* order by 1 desc limit 1;";
-        let last_item =
-            elephantry.query_one::<chrono::DateTime<chrono::FixedOffset>>(query, &[&source.id])?;
+        let last_item = elephantry.query_one::<jiff::Zoned>(query, &[&source.id])?;
 
         Ok(last_item < last_modified)
     }

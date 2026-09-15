@@ -23,9 +23,9 @@ yew-router = "0.20"
 workspace = true
 features = ["serde", "yew-pager"]
 
-[dependencies.chrono-humanize]
-version = "0.2"
-features = ["wasmbind"]
+[dependencies.jiff]
+workspace = true
+features = ["js"]
 
 [dependencies.gloo]
 workspace = true
