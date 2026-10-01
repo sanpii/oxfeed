@@ -1,5 +1,3 @@
-#![warn(warnings)]
-
 mod action;
 mod alert;
 mod api;
