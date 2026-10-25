@@ -36,43 +36,39 @@ fn expanded(props: &Properties) -> yew::Html {
         let media = &props.medias[0];
 
         yew::html! {
-            <a class="btn btn-outline-secondary medias" href={ media.url.to_string() } target="_blank">
+            <a class="btn-outline theme-accent" href={ media.url.to_string() } target="_blank">
                 <super::Svg icon="play-btn" size=24 />
                 { media.file_name().unwrap() }
             </a>
         }
     } else {
         yew::html! {
-            <button class="btn btn-outline-secondary medias">
-                <super::Popover body={ popover_text(&props.medias) }>
-                    <super::Svg icon="collection-play" size=24 />
-                    { format!("{} medias", props.medias.len()) }
-                </super::Popover>
-            </button>
+            <super::Popover body={ popover_text(&props.medias) } class="btn-outline theme-accent">
+                <super::Svg icon="collection-play" size=24 />
+                { format!("{} medias", props.medias.len()) }
+            </super::Popover>
         }
     }
 }
 
-fn popover_text(medias: &[oxfeed::media::Entity]) -> yew::Html {
+fn popover_text(medias: &[oxfeed::media::Entity]) -> String {
     let mut sorted_medias = medias.to_vec();
     sorted_medias.sort();
 
-    yew::html! {
-        <ul class="list-group">
-        {
-            sorted_medias
-                .iter()
-                .map(|x| {
-                    let file_name = x.file_name().unwrap();
+    let mut text = "<ul class=\"list-group\">".to_string();
 
-                    yew::html_nested! {
-                        <li class="list-group-item">
-                            <super::Svg size=24 icon={ x.content_type.clone().unwrap_or_default() } content_type=true />
-                            <a href={ x.url.clone() } target="_blank" title={ file_name.clone() }>{ file_name }</a>
-                        </li>
-                    }
-                }).collect::<yew::Html>()
-        }
-        </ul>
+    for media in sorted_medias {
+        let file_name = media.file_name().unwrap();
+
+        text.push_str(&format!(
+            r#"<li class="list-group-item">
+                    <a href="{}" target="_blank" title="{file_name}">{file_name}</a>
+                </li>"#,
+            media.url
+        ));
     }
+
+    text.push_str("</ul>");
+
+    text
 }

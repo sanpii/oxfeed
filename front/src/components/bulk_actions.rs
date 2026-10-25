@@ -44,35 +44,38 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     });
 
     yew::html! {
-        <div class={ yew::classes!("input-group", "mb-3", if props.active { "" } else { "d-none d-sm-block" }) }>
+        <div class={ yew::classes!("input-group", "mb-5", if props.active { "" } else { "d-none sm:d-block" }) }>
             <fieldset disabled={ props.disabled }>
                 <div class="btn-group me-2">
-                    <div class="btn btn-outline-secondary">
-                        <input type="checkbox" class="form-check-input" checked={ props.active } onclick={ on_toggle } title="Enable bulk actions" />
+                    <div class="btn-outline theme-secondary">
+                        <input type="checkbox" class="check theme-reset" checked={ props.active } onclick={ on_toggle } title="Enable bulk actions" />
                     </div>
 
-                    <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#" onclick={ move |_| on_selectall.emit(()) }>{ "All" }</a></li>
-                        <li><a class="dropdown-item" href="#" onclick={ move |_| on_unselectall.emit(()) }>{ "None" }</a></li>
-                    </ul>
+                    <div class="btn-group">
+                        <button type="button" class="btn-outline theme-secondary" data-bs-toggle="menu">
+                            <super::Svg icon="caret-down-fill" size=12 />
+                        </button>
+                        <div class="menu">
+                            <a class="menu-item" href="#" onclick={ move |_| on_selectall.emit(()) }>{ "All" }</a>
+                            <a class="menu-item" href="#" onclick={ move |_| on_unselectall.emit(()) }>{ "None" }</a>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="btn-group me-2">
-                    <button type="button" class="btn btn-outline-primary" onclick={ on_read } title="Mark as read">
+                    <button type="button" class="btn-outline theme-primary" onclick={ on_read } title="Mark as read">
                         <super::Svg icon="eye" size=24 />
                     </button>
-                    <button type="button" class="btn btn-outline-primary" onclick={ on_unread } title="Mark as unread">
+                    <button type="button" class="btn-outline theme-primary" onclick={ on_unread } title="Mark as unread">
                         <super::Svg icon="eye-slash" size=24 />
                     </button>
                 </div>
 
                 <div class="btn-group me-2">
-                    <button type="button" class="btn btn-outline-warning" onclick={ on_favorite } title="Add to favorites">
+                    <button type="button" class="btn-outline theme-warning" onclick={ on_favorite } title="Add to favorites">
                         <super::Svg icon="star-fill" size=24 />
                     </button>
-                    <button type="button" class="btn btn-outline-warning" onclick={ on_unfavorite } title="Remove from favorites">
+                    <button type="button" class="btn-outline theme-warning" onclick={ on_unfavorite } title="Remove from favorites">
                         <super::Svg icon="star" size=24 />
                     </button>
                 </div>
@@ -116,26 +119,24 @@ fn Webhooks(props: &WebhooksProperties) -> yew::Html {
 
     yew::html! {
         <div class="btn-group">
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" title="Execute a webhook">
+            <button type="button" class="btn-outline theme-secondary" data-bs-toggle="menu" title="Execute a webhook">
                 if *wait {
                     <super::Svg icon="hourglass-split" size=24 />
                 } else {
                     <super::Svg icon="plug" size=24 />
                 }
             </button>
-            <ul class="dropdown-menu">
+            <div class="menu">
             {
                 for (*webhooks).clone().into_iter().map(|webhook| {
                     let on_webhook = on_webhook.clone();
 
                     yew::html! {
-                        <li>
-                            <a class="dropdown-item" href="#" onclick={ move |_| on_webhook.emit(webhook.id.unwrap()) }>{ &webhook.name }</a>
-                        </li>
+                        <a class="menu-item" href="#" onclick={ move |_| on_webhook.emit(webhook.id.unwrap()) }>{ &webhook.name }</a>
                     }
                 })
             }
-            </ul>
+            </div>
         </div>
     }
 }
