@@ -85,7 +85,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         Scene::View => {
             yew::html! {
                 <>
-                    <div class="d-inline-flex">
+                    <div class="d-inline-flex align-items-center">
                         <super::Switch
                             id={ format!("active-{}", source.id.unwrap_or_default()) }
                             active={ source.active }
@@ -120,7 +120,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                                 };
 
                                 yew::html! {
-                                    <super::Popover {body} class="btn-warning">
+                                    <super::Popover {body} class="theme-warning">
                                         <super::Svg icon="funnel" size=16 />
                                     </super::Popover>
                                 }
@@ -143,21 +143,21 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                                 };
 
                                 yew::html! {
-                                    <super::Popover {body} class="btn-warning">
+                                    <super::Popover {body} class="theme-warning">
                                         <super::Svg icon="plug" size=16 />
                                     </super::Popover>
                                 }
                             }
                         }
                         <button
-                            class="btn btn-primary"
+                            class="btn-solid theme-primary"
                             title="Edit"
                             onclick={ on_edit }
                         >
                             <super::Svg icon="pencil-square" size=16 />
                         </button>
                         <button
-                            class="btn btn-danger"
+                            class="btn-solid theme-danger"
                             title="Delete"
                             onclick={ on_delete }
                         >

@@ -20,15 +20,17 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     );
 
     yew::html! {
-        <div class="form-check form-switch">
-            <input
-                id={ props.id.clone() }
-                type="checkbox"
-                class="form-check-input"
-                checked={ props.active }
-                {onclick}
-            />
-            <label class="form-check-label" for={ props.id.clone() }>{ &props.label }</label>
+        <div class="form-field">
+            <div class="switch">
+                <input
+                    id={ props.id.clone() }
+                    type="checkbox"
+                    checked={ props.active }
+                    {onclick}
+                    switch=true
+                />
+            </div>
+            <label for={ props.id.clone() }>{ &props.label }</label>
         </div>
     }
 }

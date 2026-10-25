@@ -50,7 +50,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             </div>
 
             <a
-                class="btn btn-primary"
+                class="btn-solid theme-primary"
                 title="Save"
                 onclick={ on_save }
             >

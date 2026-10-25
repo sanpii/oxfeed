@@ -50,7 +50,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 />
             </div>
             <a
-                class="btn btn-lg btn-primary w-100"
+                class="btn-solid btn-lg theme-primary w-100"
                 type="submit"
                 onclick={ on_submit }
             >{ "Register" }</a>

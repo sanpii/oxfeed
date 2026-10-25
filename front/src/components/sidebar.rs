@@ -169,36 +169,44 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     });
 
     yew::html! {
-        <>
-            <button
-                class="btn btn-primary"
-                onclick={ read_all }
-            >{ "Mark all as read" }</button>
-            <ul class="nav flex-column">
-                for link in links.iter() {
-                    <li class="nav-item" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
-                        <yew_router::components::Link<super::app::Route>
-                            to={ link.route.clone() }
-                            classes={ if link.route == *current_route { "nav-link active" } else { "nav-link" } }
-                        >
-                            <super::Svg icon={ link.icon } size=16 class={ if link.has_error { "text-danger" } else { "" } } />
-                            { link.label }
+        <nav class="navbar md:navbar-expand sidebar">
+            <div class="container-fluid">
+                <dialog class="drawer drawer-start" id="sidebarMenu" style="height: 100% !important">
+                    <div class="drawer-body">
+                        <ul class="nav shadow h-100 flex-column md:col-3 lg:col-2 px-5">
+                            <li class="nav-item">
+                                <button
+                                    class="btn-solid theme-primary"
+                                    onclick={ read_all }
+                                >{ "Mark all as read" }</button>
+                            </li>
+                            for link in links.iter() {
+                                <li class="nav-item">
+                                    <yew_router::components::Link<super::app::Route>
+                                        to={ link.route.clone() }
+                                        classes={ if link.route == *current_route { "nav-link active" } else { "nav-link" } }
+                                    >
+                                        <super::Svg icon={ link.icon } size=16 class={ if link.has_error { "text-danger" } else { "" } } />
+                                        <span class="label">{ link.label }</span>
 
-                            if link.count > 0 {
-                                <span
-                                    class={ if link.route == *current_route { "badge bg-primary" } else { "badge bg-secondary" } }
-                                >{ link.count }</span>
+                                        if link.count > 0 {
+                                            <span
+                                                class={ if link.route == *current_route { "badge theme-primary" } else { "badge theme-secondary" } }
+                                            >{ link.count }</span>
+                                        }
+                                    </yew_router::components::Link<super::app::Route>>
+                                </li>
                             }
-                        </yew_router::components::Link<super::app::Route>>
-                    </li>
-                }
-                <li class="nav-item d-md-none">
-                    <super::Theme button=false />
-                </li>
-                <li class="nav-item d-md-none">
-                    <super::Logout button=false />
-                </li>
-            </ul>
-        </>
+                            <li class="nav-item md:d-none">
+                                <super::Theme button=false />
+                            </li>
+                            <li class="nav-item md:d-none">
+                                <super::Logout button=false />
+                            </li>
+                        </ul>
+                    </div>
+                </dialog>
+            </div>
+        </nav>
     }
 }

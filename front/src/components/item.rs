@@ -59,9 +59,9 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
     let published_ago = published_ago(&item.published);
     let published_class = if (*item).in_future() {
-        "text-body-tertiary"
+        "fg-3"
     } else {
-        "text-body-secondary"
+        "fg-2"
     };
 
     let caret = match *scene {
@@ -135,7 +135,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                 if props.bulk_enable {
                     <input
                         type="checkbox"
-                        class="form-check-input"
+                        class="check"
                         checked={ *select }
                         onclick={ on_toggle }
                     />
@@ -146,21 +146,21 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     { yew::virtual_dom::VNode::VRef(title.into()) }
                 </a>
 
-                <span class="d-none d-sm-ruby">
+                <span class="d-none sm:d-ruby">
                     for tag in &item.tags {
                         <super::Tag value={ tag.clone() } />
                     }
 
                     if *scene == Scene::Hidden {
                         if !item.media.is_empty() {
-                            <span class="text-body-secondary">{ "· " }</span>
+                            <span class="fg-2">{ "· " }</span>
                             <span class="medias" title="Medias">
                                 <super::Media inline=true medias={ item.media.clone() } />
                             </span>
                         }
                     }
 
-                    <span class="text-body-secondary align-middle">{ "· " }{ &item.source }</span>
+                    <span class="fg-2 align-middle">{ "· " }{ &item.source }</span>
                 </span>
 
                 <div class="flex-float-end">
@@ -189,7 +189,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         </div>
                     }
 
-                    <span class={ yew::classes!(published_class, "d-none", "d-md-ruby") }>{ &published_ago.to_string() }</span>
+                    <span class={ yew::classes!(published_class, "d-none", "md:d-ruby") }>{ &published_ago.to_string() }</span>
                     <span onclick={ toggle_content }>
                         <super::Svg icon={ caret } size=24 />
                     </span>

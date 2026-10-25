@@ -15,7 +15,7 @@ pub(crate) fn Component() -> yew::Html {
     yew::html! {
         <>
             <div class="card">
-                <div class="card-header">
+                <div class="card-header flex-row align-items-center">
                     { "Webhooks" }
                     <span class="help">
                         <crate::components::Popover
@@ -31,7 +31,7 @@ pub(crate) fn Component() -> yew::Html {
                 </div>
             </div>
             <div class="card">
-                <div class="card-header">
+                <div class="card-header flex-row align-items-center">
                     { "Filters" }
                     <span class="help">
                         <crate::components::Popover

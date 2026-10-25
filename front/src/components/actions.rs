@@ -62,11 +62,11 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     } else {
         yew::html! {
             <div class="actions">
-                <button class="btn btn-outline-primary" onclick={ on_read }>
+                <button class="btn-outline theme-primary" onclick={ on_read }>
                     <super::Svg icon={ read_icon.icon } size=24 />
                     { read_icon.label }
                 </button>
-                <button class="btn btn-outline-warning" onclick={ on_favorite }>
+                <button class="btn-outline theme-warning" onclick={ on_favorite }>
                     <super::Svg icon={ favorite_icon.icon } size=24 />
                     { favorite_icon.label }
                 </button>

@@ -51,8 +51,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     yew::html! {
         <form>
             <div class="row mb-3">
-                <label class="col-sm-1 col-form-label" for="title">{ "Title" }</label>
-                <div class="col-sm-11">
+                <label class="sm:col-1 col-form-label" for="title">{ "Title" }</label>
+                <div class="sm:col-11">
                     <input
                         class="form-control"
                         name="title"
@@ -64,8 +64,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             </div>
 
             <div class="row mb-3">
-                <label class="col-sm-1 col-form-label" for="url">{ "Feed URL" }</label>
-                <div class="col-sm-11">
+                <label class="sm:col-1 col-form-label" for="url">{ "Feed URL" }</label>
+                <div class="sm:col-11">
                     <input
                         class="form-control"
                         name="url"
@@ -77,8 +77,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             </div>
 
             <div class="row mb-3">
-                <label class="col-sm-1 col-form-label" for="tags">{ "Tags" }</label>
-                <div class="col-sm-11">
+                <label class="sm:col-1 col-form-label" for="tags">{ "Tags" }</label>
+                <div class="sm:col-11">
                     <super::Tags
                         values={ source.borrow().tags.clone() }
                         on_change={ yew_callback::callback!(source, move |value| source.borrow_mut().tags = value) }
@@ -87,9 +87,9 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             </div>
 
             <div class="row mb-3">
-                <label class="col-sm-1 col-form-label" for="language">{ "Language" }</label>
-                <div class="col-sm-11">
-                    <select class="form-select" name="language" onchange={ select_language }>
+                <label class="sm:col-1 col-form-label" for="language">{ "Language" }</label>
+                <div class="sm:col-11">
+                    <select class="form-control" name="language" onchange={ select_language }>
                         for language in &props.languages {
                             <option value={ language.clone() } selected={ language == &source.borrow().language }>{ language }</option>
                         }
@@ -98,7 +98,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             </div>
 
             <div class="row mb-3">
-                <div class="col-sm-11 offset-sm-1">
+                <div class="sm:col11 offset-sm-1">
                     <crate::components::Switch
                         id="active"
                         active={ source.borrow().active }
@@ -111,8 +111,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             <div class="row mb-3">
                 if !props.webhooks.is_empty() {
                     <div class="col">
-                        <label class="col-sm-1 col-form-label" for="webhooks">{ "Webhooks" }</label>
-                        <div class="col-sm-11">
+                        <label class="sm:col-1 col-form-label" for="webhooks">{ "Webhooks" }</label>
+                        <div class="sm:col-11">
                         {
                             for props.webhooks.clone().iter().map(move |webhook| {
                                 let id = webhook.id.unwrap_or_default();
@@ -144,8 +144,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
                 if !props.filters.is_empty() {
                     <div class="col">
-                        <label class="col-sm-1 col-form-label" for="filters">{ "Filters" }</label>
-                        <div class="col-sm-11">
+                        <label class="sm:col-1 col-form-label" for="filters">{ "Filters" }</label>
+                        <div class="sm:col-11">
                         {
                             for props.filters.clone().iter().map(move |filter| {
                                 let id = filter.id.unwrap_or_default();
@@ -177,7 +177,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             </div>
 
             <a
-                class="btn btn-primary"
+                class="btn-solid theme-primary"
                 title="Save"
                 onclick={ on_submit }
             >
@@ -186,7 +186,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             </a>
 
             <a
-                class="btn btn-secondary"
+                class="btn-solid theme-secondary"
                 title="Cancel"
                 onclick={ on_cancel }
             >
