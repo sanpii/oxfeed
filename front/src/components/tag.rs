@@ -34,7 +34,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     on_click={ on_delete }
                 />
             } else if props.editable {
-                <span class="position-absolute top-1 start-99" style="font-size: 1rem;">
+                <span class="position-absolute top-0 start-100" style="font-size: 1rem;">
                     <crate::components::Svg
                         icon="pencil"
                         size=16

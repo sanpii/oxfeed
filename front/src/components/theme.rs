@@ -10,8 +10,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
     if props.button {
         yew::html! {
-            <li class="nav-item dropdown d-none d-md-block mx-2">
-                <button class="btn btn-dark dropdown-toggle p-2" data-bs-toggle="dropdown">
+            <li class="nav-item d-none md:d-block mx-2">
+                <button class="nav-link btn-solid theme-dark p-2" data-bs-toggle="menu">
                     <super::Svg icon={ current_theme.icon() } size=16 />
                 </button>
                 <Menu current_theme={ *current_theme } dark=true />
@@ -20,7 +20,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     } else {
         yew::html! {
             <>
-                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" data-bs-target="theme" href="#">
+                <a class="nav-link" data-bs-toggle="menu" data-bs-target="theme" href="#">
                     <super::Svg icon={ current_theme.icon() } size=16 />
                     { "Theme" }
                 </a>
@@ -49,21 +49,19 @@ fn Menu(props: &MenuProperties) -> yew::Html {
     });
 
     yew::html! {
-        <ul class={ yew::classes!("dropdown-menu", if props.dark { "dropdown-menu-dark" } else { "" }) } id="theme">
+        <div class={ yew::classes!("menu", if props.dark { "menu-dark" } else { "" }) } id="theme">
             for theme in crate::context::Theme::all() {
-                <li>
-                    <a
-                        class={ yew::classes!("dropdown-item", if props.current_theme == theme { "active" } else { "" }) }
-                        onclick={
-                            let on_click = on_click.clone();
+                <a
+                    class={ yew::classes!("menu-item", if props.current_theme == theme { "active" } else { "" }) }
+                    onclick={
+                        let on_click = on_click.clone();
 
-                            move |_| on_click.emit(theme)
-                        }
-                    >
-                        <super::Svg icon={ theme.icon() } size=16 />{ theme }
-                    </a>
-                </li>
+                        move |_| on_click.emit(theme)
+                    }
+                >
+                    <super::Svg icon={ theme.icon() } size=16 />{ theme }
+                </a>
             }
-        </ul>
+        </div>
     }
 }

@@ -38,8 +38,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     yew::html! {
         <form class="mb-3 w-100">
             <div class="row mb-3">
-                <label class="col-sm-1 col-form-label" for="title">{ "Name" }</label>
-                <div class="col-sm-11">
+                <label class="sm:col1 col-form-label" for="title">{ "Name" }</label>
+                <div class="sm:col11">
                     <input
                         class="form-control"
                         name="name"
@@ -51,8 +51,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             </div>
 
             <div class="row mb-3">
-                <label class="col-sm-1 col-form-label" for="url">{ "URL" }</label>
-                <div class="col-sm-11">
+                <label class="sm:col1 col-form-label" for="url">{ "URL" }</label>
+                <div class="sm:col11">
                     <input
                         class="form-control"
                         name="url"
@@ -64,7 +64,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             </div>
 
             <div class="row mb-3">
-                <div class="col-sm-11 offset-sm-1">
+                <div class="sm:col11 offset-sm-1">
                     <crate::components::Switch
                         id="mark_read"
                         label="Mark item as read after webhook call"
@@ -75,7 +75,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             </div>
 
             <a
-                class="btn btn-primary"
+                class="btn-solid theme-primary"
                 title="Save"
                 onclick={ on_submit }
             >
@@ -84,7 +84,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             </a>
 
             <a
-                class="btn btn-secondary"
+                class="btn-solid theme-secondary"
                 title="Cancel"
                 onclick={ move |_| on_cancel.emit(()) }
             >

@@ -52,7 +52,7 @@ pub(crate) fn Component() -> yew::Html {
             <hr />
 
             <a
-                class="btn btn-danger"
+                class="btn-solid theme-danger"
                 title="Delete"
                 onclick={ on_delete }
             >

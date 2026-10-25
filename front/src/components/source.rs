@@ -85,7 +85,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         Scene::View => {
             yew::html! {
                 <>
-                    <div class="d-inline-flex">
+                    <div class="d-inline-flex align-items-center">
                         <super::Switch
                             id={ format!("active-{}", source.id.unwrap_or_default()) }
                             active={ source.active }
@@ -107,20 +107,16 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                             if source.filters.is_empty() {
                                 yew::Html::default()
                             } else {
-                                let body = yew::html! {
-                                    <ul>
-                                        for filter_id in &source.filters {
-                                            if let Some(w) = props.filters.iter().find(|x| x.id == Some(*filter_id)) {
-                                                <li>{ w.name.clone() }</li>
-                                            } else {
-                                                <></>
-                                            }
-                                        }
-                                    </ul>
-                                };
+                                let mut body = "<ul>".to_string();
+                                for filter_id in &source.filters {
+                                    if let Some(f) = props.filters.iter().find(|x| x.id == Some(*filter_id)) {
+                                        body.push_str(&format!("<li>{}</li>", f.name));
+                                    }
+                                }
+                                body.push_str("</ul>");
 
                                 yew::html! {
-                                    <super::Popover {body} class="btn-warning">
+                                    <super::Popover {body} class="theme-warning">
                                         <super::Svg icon="funnel" size=16 />
                                     </super::Popover>
                                 }
@@ -130,34 +126,30 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                             if source.webhooks.is_empty() {
                                 yew::Html::default()
                             } else {
-                                let body = yew::html! {
-                                    <ul>
-                                        for webhook_id in &source.webhooks {
-                                            if let Some(w) = props.webhooks.iter().find(|x| x.id == Some(*webhook_id)) {
-                                                <li>{ w.name.clone() }</li>
-                                            } else {
-                                                <></>
-                                            }
-                                        }
-                                    </ul>
-                                };
+                                let mut body = "<ul>".to_string();
+                                for webhook_id in &source.webhooks {
+                                    if let Some(w) = props.webhooks.iter().find(|x| x.id == Some(*webhook_id)) {
+                                        body.push_str(&format!("<li>{}</li>", w.name));
+                                    }
+                                }
+                                body.push_str("</ul>");
 
                                 yew::html! {
-                                    <super::Popover {body} class="btn-warning">
+                                    <super::Popover {body} class="theme-warning">
                                         <super::Svg icon="plug" size=16 />
                                     </super::Popover>
                                 }
                             }
                         }
                         <button
-                            class="btn btn-primary"
+                            class="btn-solid theme-primary"
                             title="Edit"
                             onclick={ on_edit }
                         >
                             <super::Svg icon="pencil-square" size=16 />
                         </button>
                         <button
-                            class="btn btn-danger"
+                            class="btn-solid theme-danger"
                             title="Delete"
                             onclick={ on_delete }
                         >

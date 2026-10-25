@@ -5,17 +5,15 @@ mod webhooks;
 
 #[yew::component]
 pub(crate) fn Component() -> yew::Html {
-    let text = yew::html! {
-        <>
-            { "A webhook is an URL called when a new item is fetched." }<br />
-            { "This URL is called via POST method and the new item will be pass as json body." }
-        </>
-    };
+    let text = "
+A webhook is an URL called when a new item is fetched.<br />
+This URL is called via POST method and the new item will be pass as json body.
+";
 
     yew::html! {
         <>
             <div class="card">
-                <div class="card-header">
+                <div class="card-header flex-row align-items-center">
                     { "Webhooks" }
                     <span class="help">
                         <crate::components::Popover
@@ -31,7 +29,7 @@ pub(crate) fn Component() -> yew::Html {
                 </div>
             </div>
             <div class="card">
-                <div class="card-header">
+                <div class="card-header flex-row align-items-center">
                     { "Filters" }
                     <span class="help">
                         <crate::components::Popover

@@ -78,14 +78,14 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
 
                     <div class="btn-group float-end">
                         <button
-                            class="btn btn-primary"
+                            class="btn-solid theme-primary"
                             title="Edit"
                             onclick={ yew_callback::callback!(move |_| scene.set(Scene::Edit)) }
                         >
                             <super::Svg icon="pencil-square" size=16 />
                         </button>
                         <button
-                            class="btn btn-danger"
+                            class="btn-solid theme-danger"
                             title="Delete"
                             onclick={ on_delete.clone() }
                         >

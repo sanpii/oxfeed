@@ -113,10 +113,10 @@ fn Tag(props: &TagProperties) -> yew::Html {
                             required=true
                             oninput={ edit_tag }
                         />
-                        <button class="btn btn-primary" type="button">
+                        <button class="btn-solid theme-primary" type="button">
                             <super::Svg icon="check" size=24 on_click = { on_save } />
                         </button>
-                        <button class="btn btn-danger" type="button">
+                        <button class="btn-solid theme-danger" type="button">
                             <super::Svg icon="x" size=24 on_click = { on_cancel } />
                         </button>
                     </div>

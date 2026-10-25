@@ -46,13 +46,13 @@ pub(crate) fn Component() -> yew::Html {
             <div class="input-group mb-3">
                 <input type="file" class="form-control" onchange={ on_change } />
                 <button
-                    class="btn btn-outline-primary"
+                    class="btn-outline theme-primary"
                     type="button"
                     onclick={ import }
                 >{ "Import" }</button>
             </div>
             <div class="input-group">
-                <a href={ export_url } target="_blank" class="btn btn-outline-primary">{ "Export" }</a>
+                <a href={ export_url } target="_blank" class="btn-outline theme-primary">{ "Export" }</a>
             </div>
         </>
     }

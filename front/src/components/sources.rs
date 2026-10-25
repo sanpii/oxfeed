@@ -111,7 +111,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let add = match *scene {
         Scene::View => yew::html! {
             <a
-                class="btn btn-primary"
+                class="btn-solid theme-primary"
                 title="Add"
                 onclick={ on_add }
             >

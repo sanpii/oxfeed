@@ -64,7 +64,9 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
         password,
         remember_me,
         on_submit = props.on_submit,
-        move |_| {
+        move |e: yew::MouseEvent| {
+            e.prevent_default();
+
             let info = Info {
                 email: (*email).clone(),
                 password: (*password).clone(),
@@ -82,6 +84,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     yew::html! {
         <>
             <div class="form-floating">
+                <label for="email">{ "Email" }</label>
                 <input
                     type="email"
                     name="email"
@@ -91,10 +94,10 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     autofocus=true
                     oninput={ edit_email }
                 />
-                <label for="email" class="form-label sr-only">{ "Email" }</label>
             </div>
             <div class="input-group">
                 <div class="form-floating">
+                    <label for="password">{ "Password" }</label>
                     <input
                         type={ input_type.to_string() }
                         name="password"
@@ -103,26 +106,25 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         required=true
                         oninput={ edit_password }
                     />
-                    <label for="password" class="form-label sr-only">{ "Password" }</label>
                 </div>
                 <span class="input-group-text" onclick={ on_click }>
                     <crate::components::Svg icon={ input_type.icon() } size=16 />
                 </span>
             </div>
-            <div class="checkbox">
-                <label class="form-label">
-                    <input
-                        type="checkbox"
-                        checked={ *remember_me }
-                        onclick={ toggle_remember_me }
-                    />{ " Remember me" }
-                </label>
+            <div class="form-field">
+                <input
+                    name="remember_me"
+                    type="checkbox"
+                    class="check"
+                    checked={ *remember_me }
+                    onclick={ toggle_remember_me }
+                />
+                <label for="remember_me">{ "Remember me" }</label>
             </div>
-            <a
-                class="btn btn-lg btn-primary w-100"
-                type="submit"
+            <button
+                class="btn-solid btn-lg theme-primary w-100"
                 onclick={ on_submit }
-            >{ "Sign in" }</a>
+            >{ "Sign in" }</button>
         </>
     }
 }

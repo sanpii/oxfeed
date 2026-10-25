@@ -73,7 +73,7 @@ pub(crate) fn Component() -> yew::Html {
         <>
         if matches!(*scene, Scene::View) {
             <a
-                class="btn btn-primary"
+                class="btn-solid theme-primary"
                 title="Add"
                 onclick={ on_add }
             >

@@ -10,10 +10,10 @@ pub(crate) fn Component() -> yew::Html {
     };
 
     yew::html! {
-        <nav class="d-flex navbar navbar-dark navbar-expand-lg sticky-top bg-dark flex-md-nowrap p-0 shadow">
-            <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">{{ title }}</a>
+        <nav class="d-flex navbar lg:navbar-expand sticky-top md:flex-nowrap p-0 shadow" data-bs-theme="dark">
+            <a class="navbar-brand md:col-3 lg:col-2 ms-3 me-0 px-3" href="#">{{ title }}</a>
             <super::search::Bar />
-            <button class="navbar-toggler collapsed mx-2" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="btn-icon navbar-toggler mx-2" type="button" data-bs-toggle="drawer" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <super::Theme button=true />
