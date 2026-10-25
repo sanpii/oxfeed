@@ -214,7 +214,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                         };
 
                         yew::html! {
-                            <li class="list-group-item">
+                            <li class="list-group-item list-group-item-action">
                                 <super::Swipe {action_end} {action_start}>
                                     <crate::components::Item
                                         value={ item.0.clone() }
@@ -295,16 +295,16 @@ pub(crate) fn WebhookResponses(props: &WebhookResponseProperties) -> yew::Html {
                 <div class="modal-content">
                     <div class="modal-body">
                         for response in &*responses {
-                            <details class={ if response.status.is_success () { "alert alert-sucess" } else { "alert alert-danger" } }>
+                            <details class={ if response.status.is_success () { "alert theme-success" } else { "alert theme-danger" } }>
                                 <summary>
                                     { &response.title }
                                 </summary>
-                                <pre class="alert alert-secondary mt-2 mb-1"><code>{ &response.body }</code></pre>
+                                <pre class="alert theme-secondary mt-2 mb-1"><code>{ &response.body }</code></pre>
                             </details>
                         }
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" onclick={ move |_| on_close.emit(()) }>{ "Close" }</button>
+                        <button type="button" class="btn-solid theme-secondary" onclick={ move |_| on_close.emit(()) }>{ "Close" }</button>
                     </div>
                 </div>
             </div>

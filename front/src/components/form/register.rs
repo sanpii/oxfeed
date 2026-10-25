@@ -28,6 +28,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     yew::html! {
         <>
             <div class="form-floating">
+                <label for="email">{ "Email" }</label>
                 <input
                     type="email"
                     name="email"
@@ -36,10 +37,9 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     required=true
                     oninput={ edit_email }
                 />
-                <label for="email" class="form-label sr-only">{ "Email" }</label>
             </div>
             <div class="form-floating">
-                <label for="password" class="form-label sr-only">{ "Password" }</label>
+                <label for="password">{ "Password" }</label>
                 <input
                     type="password"
                     name="password"
@@ -49,11 +49,10 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                     oninput={ edit_password }
                 />
             </div>
-            <a
-                class="btn btn-lg btn-primary w-100"
-                type="submit"
+            <button
+                class="btn-solid btn-lg theme-primary w-100"
                 onclick={ on_submit }
-            >{ "Register" }</a>
+            >{ "Register" }</button>
         </>
     }
 }

@@ -25,7 +25,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     if props.button {
         yew::html! {
             <button
-                class="btn btn-secondary logout d-none d-md-block mx-2"
+                class="btn-solid theme-secondary logout d-none md:d-block mx-2"
                 title="Logout"
                 onclick={ logout }
             >
