@@ -57,12 +57,8 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
     let scene = yew::use_state(Scene::default);
     let select = yew::use_memo(props.clone(), |props| props.select);
 
-    let published_ago = published_ago(&item.published);
-    let published_class = if (*item).in_future() {
-        "fg-3"
-    } else {
-        "fg-2"
-    };
+    let published_ago = crate::Humantime::try_from(&item.published).unwrap();
+    let published_class = if (*item).in_future() { "fg-3" } else { "fg-2" };
 
     let caret = match *scene {
         Scene::Expanded => "chevron-up",
@@ -225,13 +221,4 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
             </div>
         </>
     }
-}
-
-fn published_ago(date: &jiff::Zoned) -> String {
-    let now = jiff::Zoned::now();
-    let span = date.until(&now).unwrap();
-    let printer = jiff::fmt::friendly::SpanPrinter::new()
-        .designator(jiff::fmt::friendly::Designator::HumanTime);
-
-    printer.span_to_string(&span)
 }

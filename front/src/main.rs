@@ -4,6 +4,7 @@ mod api;
 mod cha;
 mod context;
 mod filter;
+mod humantime;
 mod location;
 
 pub(crate) mod components;
@@ -13,6 +14,7 @@ pub(crate) use alert::Alert;
 pub(crate) use api::Api;
 pub(crate) use context::Context;
 pub(crate) use filter::*;
+pub(crate) use humantime::Humantime;
 pub(crate) use location::Location;
 
 #[yew::hook]
