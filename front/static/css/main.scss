@@ -201,6 +201,16 @@ li.list-group-item {
     .nav-item {
         .nav-link.active {
             color: var(--bs-primary-fg);
+
+            &:before {
+                left: 8px;
+                content: "";
+                background-color: var(--bs-primary-base);
+                border-radius: .375rem;
+                width: .25rem;
+                height: 1.75rem;
+                position: absolute;
+            }
         }
 
         .nav-link.active .badge {
