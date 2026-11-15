@@ -179,6 +179,7 @@ pub(crate) fn Component(props: &Properties) -> yew::Html {
                                     class="btn-solid theme-primary"
                                     onclick={ read_all }
                                 >{ "Mark all as read" }</button>
+                                <button type="button" class="btn-close md:d-none" data-bs-dismiss="drawer" aria-label="Close"></button>
                             </li>
                             for link in links.iter() {
                                 <li class="nav-item">
