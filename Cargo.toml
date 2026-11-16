@@ -33,11 +33,11 @@ version = "1.0"
 default-features = false
 
 [workspace.dependencies.elephantry]
-version = "5.0"
+version = "6.0"
 features = ["date", "uuid"]
 
 [workspace.dependencies.elephantry-extras]
-version = "0.12"
+version = "0.13"
 features = ["serde"]
 
 [workspace.dependencies.jsonwebtoken]
