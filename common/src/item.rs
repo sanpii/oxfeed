@@ -4,7 +4,7 @@ pub struct Item {
     #[cfg_attr(feature = "elephantry", elephantry(column = "item_id"))]
     pub id: uuid::Uuid,
     pub link: String,
-    pub published: jiff::Zoned,
+    pub published: jiff::ZonedDateTime,
     pub title: String,
     pub source: String,
     pub icon: Option<String>,
@@ -18,7 +18,7 @@ pub struct Item {
 impl Item {
     pub fn in_future(&self) -> bool {
         self.published
-            .duration_since(&jiff::Zoned::now())
+            .duration_since(&jiff::ZonedDateTime::now())
             .is_positive()
     }
 }
@@ -52,7 +52,7 @@ pub struct Entity {
     pub content: Option<String>,
     pub read: bool,
     pub favorite: bool,
-    pub published: Option<jiff::Zoned>,
+    pub published: Option<jiff::ZonedDateTime>,
 }
 
 #[cfg(feature = "elephantry")]

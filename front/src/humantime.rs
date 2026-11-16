@@ -110,11 +110,11 @@ impl Humantime {
     }
 }
 
-impl TryFrom<&jiff::Zoned> for Humantime {
+impl TryFrom<&jiff::ZonedDateTime> for Humantime {
     type Error = jiff::Error;
 
-    fn try_from(value: &jiff::Zoned) -> Result<Self, Self::Error> {
-        let now = jiff::Zoned::now();
+    fn try_from(value: &jiff::ZonedDateTime) -> Result<Self, Self::Error> {
+        let now = jiff::ZonedDateTime::now();
         let span = value.since(&now)?;
         let humantime = Self(span);
 

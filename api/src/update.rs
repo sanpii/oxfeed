@@ -201,7 +201,7 @@ impl Task {
         let last_modified = jiff::fmt::rfc2822::parse(last_modified)?;
 
         let query = "select published from item join source using(source_id) where source_id = $* order by 1 desc limit 1;";
-        let last_item = elephantry.query_one::<jiff::Zoned>(query, &[&source.id])?;
+        let last_item = elephantry.query_one::<jiff::ZonedDateTime>(query, &[&source.id])?;
 
         Ok(last_item < last_modified)
     }
