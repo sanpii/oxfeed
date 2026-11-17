@@ -31,6 +31,11 @@ features = ["js"]
 workspace = true
 features = ["futures"]
 
+# https://github.com/Keats/jsonwebtoken/issues/488
+[dependencies.getrandom]
+version = "0.4"
+features = ["wasm_js"]
+
 [dependencies.log]
 workspace = true
 features = ["serde"]
@@ -59,3 +64,6 @@ features = ["csr"]
 [build-dependencies.envir]
 workspace = true
 features = ["dotenv"]
+
+[package.metadata.cargo-shear]
+ignored = ["getrandom"]

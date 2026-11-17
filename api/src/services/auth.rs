@@ -26,7 +26,7 @@ async fn login(
     token: actix_web::web::Json<String>,
 ) -> oxfeed::Result<actix_web::HttpResponse> {
     let secret = envir::get("SECRET")?;
-    let key = jsonwebtoken::DecodingKey::from_secret(secret.as_bytes());
+    let key = jsonwebtoken::DecodingKey::from_secret(secret.as_bytes())?;
     let mut validation = jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::HS256);
     validation.set_required_spec_claims::<&str>(&[]);
 

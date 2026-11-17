@@ -7,7 +7,7 @@ impl Api {
         let headers = jsonwebtoken::Header::new(jsonwebtoken::Algorithm::HS256);
         let key = jsonwebtoken::EncodingKey::from_secret(
             env!("SECRET").as_bytes()
-        );
+        )?;
         let mut claims = std::collections::BTreeMap::new();
         claims.insert("email", email);
         claims.insert("password", password);
