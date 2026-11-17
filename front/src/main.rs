@@ -79,7 +79,13 @@ impl<T> From<Pager<T>> for elephantry_extras::Pager {
 }
 
 fn main() {
-    wasm_logger::init(wasm_logger::Config::new(log::Level::Debug));
+    let level = if cfg!(debug_assertions) {
+        log::Level::Debug
+    } else {
+        log::Level::Error
+    };
+
+    wasm_logger::init(wasm_logger::Config::new(level));
 
     yew::Renderer::<components::App>::new().render();
 }
