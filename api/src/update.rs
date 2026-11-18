@@ -167,10 +167,7 @@ impl Task {
                 id: None,
                 content,
                 title,
-                published: entry
-                    .published
-                    .map(|x| x.to_rfc2822())
-                    .map(|x| jiff::fmt::rfc2822::parse(&x).unwrap()),
+                published: entry.published,
                 read: false,
                 source_id: source.id.unwrap(),
                 link,
