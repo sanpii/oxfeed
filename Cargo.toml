@@ -10,7 +10,6 @@ resolver = "3"
 rust-version = "1.91"
 
 [workspace.dependencies]
-actix-web = "4.0"
 base64 = "0.23"
 feed-rs = { git = "https://github.com/feed-rs/feed-rs.git", branch = "3.1.0-dev" }
 gloo = "0.13"
@@ -23,6 +22,11 @@ serde_json = "1.0"
 sha2 = "0.11"
 url = "2.2"
 uuid = "1.0"
+
+[workspace.dependencies.actix-web]
+version = "4.0"
+default-features = false
+features = ["macros"]
 
 [workspace.dependencies.jiff]
 version = "1.0"
